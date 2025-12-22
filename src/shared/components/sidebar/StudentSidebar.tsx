@@ -12,6 +12,7 @@ export const StudentSidebar: React.FC = () => {
     const getActiveItem = () => {
         if (location.pathname === ROUTES.STUDENT.LIST) return 'students';
         if (location.pathname === ROUTES.STUDENT.DASHBOARD) return 'overview';
+        if (location.pathname === ROUTES.STUDENT.TUITION) return 'tuition';
         return 'overview';
     };
     
@@ -25,12 +26,10 @@ export const StudentSidebar: React.FC = () => {
     const menuItems: SidebarMenuItem[] = [
         { id: 'overview', icon: <BarChart2 size={20} />, label: 'Tổng quan' },
         { id: 'students', icon: <Users size={20} />, label: 'Danh sách học sinh', badge: '485' },
-        { id: 'new-students', icon: <UserPlus size={20} />, label: 'Học sinh mới', badge: '24' },
-        { id: 'attendance', icon: <CheckCircle size={20} />, label: 'Điểm danh' },
         { id: 'tuition', icon: <DollarSign size={20} />, label: 'Quản lý học phí' },
-        { id: 'schedule', icon: <Calendar size={20} />, label: 'Lịch học' },
-        { id: 'grades', icon: <Award size={20} />, label: 'Kết quả học tập' },
-        { id: 'reports', icon: <FileText size={20} />, label: 'Báo cáo & Thống kê' },
+        // { id: 'schedule', icon: <Calendar size={20} />, label: 'Lịch học' },
+        // { id: 'grades', icon: <Award size={20} />, label: 'Kết quả học tập' },
+        // { id: 'reports', icon: <FileText size={20} />, label: 'Báo cáo & Thống kê' },
     ];
 
     const footerContent = (
@@ -60,6 +59,8 @@ export const StudentSidebar: React.FC = () => {
             navigate(ROUTES.STUDENT.DASHBOARD);
         } else if (itemId === 'students') {
             navigate(ROUTES.STUDENT.LIST);
+        } else if (itemId === 'tuition') {
+            navigate(ROUTES.STUDENT.TUITION);
         }
     };
 

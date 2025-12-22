@@ -13,6 +13,9 @@ export const ROUTES = {
     DASHBOARD: '/admin/dashboard',
     LIST: '/admin/list',
     DETAIL: '/admin/detail/:id',
+    PERMISSIONS: '/admin/permissions',
+    LOGS: '/admin/logs',
+    NOTIFICATIONS: '/admin/notifications',
   },
   EDUCATION: {
     DASHBOARD: '/education/dashboard',
@@ -21,6 +24,7 @@ export const ROUTES = {
     DASHBOARD: '/student/dashboard',
     LIST: '/student/list',
     DETAIL: '/student/detail/:id',
+    TUITION: '/student/tuition',
   },
   PUBLIC: {
     DASHBOARD: '/public/dashboard',

@@ -10,7 +10,10 @@ export const AdminSidebar: React.FC = () => {
     
     // Determine active item based on current route
     const getActiveItem = () => {
-        if (location.pathname.includes('/admin/list')) return 'admins';
+        if (location.pathname.includes('/admin/list') || location.pathname.includes('/admin/detail')) return 'admins';
+        if (location.pathname.includes('/admin/permissions')) return 'roles';
+        if (location.pathname.includes('/admin/logs')) return 'logs';
+        if (location.pathname.includes('/admin/notifications')) return 'notifications';
         return 'overview';
     };
     
@@ -25,10 +28,9 @@ export const AdminSidebar: React.FC = () => {
         { id: 'admins', icon: <Shield size={20} />, label: 'Danh sách Admin', badge: '12' },
         // { id: 'users', icon: <Users size={20} />, label: 'Quản lý Users', badge: '245' },
         { id: 'roles', icon: <Key size={20} />, label: 'Phân quyền' },
-        { id: 'permissions', icon: <Settings size={20} />, label: 'Cấu hình quyền' },
         { id: 'logs', icon: <FileText size={20} />, label: 'Nhật ký hệ thống' },
         { id: 'notifications', icon: <Bell size={20} />, label: 'Thông báo', badge: '3' },
-        { id: 'database', icon: <Database size={20} />, label: 'Backup & Restore' },
+        // { id: 'database', icon: <Database size={20} />, label: 'Backup & Restore' },
     ];
 
     const handleItemClick = (itemId: string) => {
@@ -42,11 +44,17 @@ export const AdminSidebar: React.FC = () => {
             case 'admins':
                 navigate(ROUTES.ADMIN.LIST);
                 break;
-            case 'users':
             case 'roles':
-            case 'permissions':
+                navigate(ROUTES.ADMIN.PERMISSIONS);
+                break;
             case 'logs':
+                navigate(ROUTES.ADMIN.LOGS);
+                break;
             case 'notifications':
+                navigate(ROUTES.ADMIN.NOTIFICATIONS);
+                break;
+            case 'users':
+            case 'permissions':
             case 'database':
                 // TODO: Implement these routes
                 console.log(`Navigate to ${itemId}`);

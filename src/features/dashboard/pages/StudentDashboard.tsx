@@ -1,166 +1,313 @@
-import React from 'react';
-import { Users, UserPlus, DollarSign, Calendar, CheckCircle } from 'lucide-react';
-import { Card } from '@/shared/components/ui';
-import { StudentSidebar } from '@/shared/components/sidebar';
+import React, { useState } from 'react';
+import { QuickStat, ChartCard, type LineData } from '@/features/dashboard/components';
+import { 
+    Users, 
+    UserPlus, 
+    UserMinus, 
+    CheckCircle,
+    DollarSign,
+    Calendar
+} from 'lucide-react';
+
+type TimePeriod = 'week' | 'month' | 'year';
 
 export const StudentDashboard: React.FC = () => {
+    const [timePeriod, setTimePeriod] = useState<TimePeriod>('month');
+
+    // Get labels based on time period
+    const getLabels = (): string[] => {
+        if (timePeriod === 'week') {
+            return ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        } else if (timePeriod === 'month') {
+            return ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+        } else {
+            return ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+        }
+    };
+
+    // Student enrollment data (new students + dropout students)
+    const getEnrollmentData = (): LineData[] => {
+        if (timePeriod === 'week') {
+            return [
+                {
+                    label: 'Học sinh mới',
+                    color: '#10b981',
+                    data: [3, 5, 2, 4, 6, 1, 0],
+                },
+                {
+                    label: 'Nghỉ học',
+                    color: '#ef4444',
+                    data: [0, 1, 0, 2, 1, 0, 0],
+                },
+            ];
+        } else if (timePeriod === 'month') {
+            return [
+                {
+                    label: 'Học sinh mới',
+                    color: '#10b981',
+                    data: [12, 15, 20, 18],
+                },
+                {
+                    label: 'Nghỉ học',
+                    color: '#ef4444',
+                    data: [3, 5, 2, 4],
+                },
+            ];
+        } else {
+            return [
+                {
+                    label: 'Học sinh mới',
+                    color: '#10b981',
+                    data: [45, 38, 52, 48, 55, 42, 50, 60, 58, 47, 40, 35],
+                },
+                {
+                    label: 'Nghỉ học',
+                    color: '#ef4444',
+                    data: [8, 6, 10, 7, 9, 5, 8, 12, 6, 7, 5, 4],
+                },
+            ];
+        }
+    };
+
+    // Attendance data (present, late, absent)
+    const getAttendanceData = (): LineData[] => {
+        if (timePeriod === 'week') {
+            return [
+                {
+                    label: 'Đi đủ',
+                    color: '#10b981',
+                    data: [420, 425, 418, 430, 422, 415, 0],
+                },
+                {
+                    label: 'Đi muộn',
+                    color: '#f59e0b',
+                    data: [45, 40, 48, 38, 42, 50, 0],
+                },
+                {
+                    label: 'Vắng',
+                    color: '#ef4444',
+                    data: [20, 20, 19, 17, 21, 20, 0],
+                },
+            ];
+        } else if (timePeriod === 'month') {
+            return [
+                {
+                    label: 'Đi đủ',
+                    color: '#10b981',
+                    data: [410, 420, 425, 430],
+                },
+                {
+                    label: 'Đi muộn',
+                    color: '#f59e0b',
+                    data: [50, 45, 42, 40],
+                },
+                {
+                    label: 'Vắng',
+                    color: '#ef4444',
+                    data: [25, 20, 18, 15],
+                },
+            ];
+        } else {
+            return [
+                {
+                    label: 'Đi đủ',
+                    color: '#10b981',
+                    data: [380, 390, 400, 410, 415, 420, 425, 430, 435, 440, 438, 442],
+                },
+                {
+                    label: 'Đi muộn',
+                    color: '#f59e0b',
+                    data: [60, 58, 55, 52, 50, 48, 45, 42, 40, 38, 40, 38],
+                },
+                {
+                    label: 'Vắng',
+                    color: '#ef4444',
+                    data: [45, 37, 30, 23, 20, 17, 15, 13, 10, 7, 7, 5],
+                },
+            ];
+        }
+    };
+
+    // Tuition data (paid, unpaid)
+    const getTuitionData = (): LineData[] => {
+        if (timePeriod === 'week') {
+            return [
+                {
+                    label: 'Đã đóng đủ',
+                    color: '#10b981',
+                    data: [400, 410, 418, 425, 430, 432, 432],
+                },
+                {
+                    label: 'Chưa đóng',
+                    color: '#ef4444',
+                    data: [85, 75, 67, 60, 55, 53, 53],
+                },
+            ];
+        } else if (timePeriod === 'month') {
+            return [
+                {
+                    label: 'Đã đóng đủ',
+                    color: '#10b981',
+                    data: [350, 380, 410, 432],
+                },
+                {
+                    label: 'Chưa đóng',
+                    color: '#ef4444',
+                    data: [135, 105, 75, 53],
+                },
+            ];
+        } else {
+            return [
+                {
+                    label: 'Đã đóng đủ',
+                    color: '#10b981',
+                    data: [420, 425, 430, 435, 440, 442, 445, 448, 450, 452, 455, 460],
+                },
+                {
+                    label: 'Chưa đóng',
+                    color: '#ef4444',
+                    data: [65, 60, 55, 50, 45, 43, 40, 37, 35, 33, 30, 25],
+                },
+            ];
+        }
+    };
+
+    const labels = getLabels();
+    const enrollmentData = getEnrollmentData();
+    const attendanceData = getAttendanceData();
+    const tuitionData = getTuitionData();
+
+    // Calculate totals for stats
+    const totalNewStudents = enrollmentData[0].data.reduce((sum, val) => sum + val, 0);
+    const totalDropouts = enrollmentData[1].data.reduce((sum, val) => sum + val, 0);
+    const currentAttendance = attendanceData[0].data[attendanceData[0].data.length - (timePeriod === 'week' ? 2 : 1)];
+    const totalAttendance = attendanceData.reduce((sum, line) => 
+        sum + line.data[line.data.length - (timePeriod === 'week' ? 2 : 1)], 0
+    );
+    const attendanceRate = ((currentAttendance / totalAttendance) * 100).toFixed(1);
+
     return (
-        <div className="flex gap-6 -mx-4 -my-8">
-            {/* Sidebar */}
-            <StudentSidebar />
+        <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-xl font-bold text-gray-900">Dashboard Học sinh</h1>
+                    <p className="text-xs text-gray-600 mt-1">Tổng quan thống kê và biểu đồ</p>
+                </div>
+                
+                {/* Time Period Selector */}
+                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                    <button
+                        onClick={() => setTimePeriod('week')}
+                        className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                            timePeriod === 'week'
+                                ? 'bg-white text-gray-900 shadow'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        Tuần
+                    </button>
+                    <button
+                        onClick={() => setTimePeriod('month')}
+                        className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                            timePeriod === 'month'
+                                ? 'bg-white text-gray-900 shadow'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        Tháng
+                    </button>
+                    <button
+                        onClick={() => setTimePeriod('year')}
+                        className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                            timePeriod === 'year'
+                                ? 'bg-white text-gray-900 shadow'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        Năm
+                    </button>
+                </div>
+            </div>
+
             
-            {/* Main Content */}
-            <div className="flex-1 p-8 space-y-6">
-            {/* Page Title */}
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Quản lý Học sinh</h1>
-                <p className="text-gray-600 mt-1">Quản lý thông tin, điểm danh và học phí</p>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card title="Tổng học sinh">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-blue-100 rounded-full p-3">
-                            <Users className="text-blue-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">485</p>
-                            <p className="text-sm text-gray-600">Đang theo học</p>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card title="Học sinh mới">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-green-100 rounded-full p-3">
-                            <UserPlus className="text-green-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">24</p>
-                            <p className="text-sm text-gray-600">Tháng này</p>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card title="Học phí">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-orange-100 rounded-full p-3">
-                            <DollarSign className="text-orange-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">89%</p>
-                            <p className="text-sm text-gray-600">Đã đóng đủ</p>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card title="Điểm danh">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-purple-100 rounded-full p-3">
-                            <CheckCircle className="text-purple-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">92%</p>
-                            <p className="text-sm text-gray-600">TB có mặt</p>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-
-            {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Students */}
-                <Card title="Học sinh mới nhất">
-                    <div className="space-y-3">
-                        {[
-                            { name: 'Nguyễn Văn A', class: '10A1', date: 'Hôm nay', status: 'active' },
-                            { name: 'Trần Thị B', class: '10A2', date: 'Hôm qua', status: 'active' },
-                            { name: 'Lê Văn C', class: '11A1', date: '2 ngày trước', status: 'pending' },
-                            { name: 'Phạm Thị D', class: '11A2', date: '3 ngày trước', status: 'active' },
-                        ].map((student, index) => (
-                            <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                                <div>
-                                    <p className="font-medium text-gray-900">{student.name}</p>
-                                    <p className="text-sm text-gray-600">{student.class} • {student.date}</p>
-                                </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                    student.status === 'active' 
-                                        ? 'bg-green-100 text-green-800' 
-                                        : 'bg-yellow-100 text-yellow-800'
-                                }`}>
-                                    {student.status === 'active' ? 'Đã xác nhận' : 'Chờ duyệt'}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-
-                {/* Payment Status */}
-                <Card title="Trạng thái học phí">
-                    <div className="space-y-3">
-                        {[
-                            { class: '10A1', paid: 32, total: 35, percent: 91 },
-                            { class: '10A2', paid: 28, total: 32, percent: 88 },
-                            { class: '11A1', paid: 35, total: 38, percent: 92 },
-                            { class: '11A2', paid: 27, total: 30, percent: 90 },
-                        ].map((item, index) => (
-                            <div key={index} className="py-3 border-b border-gray-100 last:border-0">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="font-medium text-gray-900">{item.class}</span>
-                                    <span className="text-sm text-gray-600">{item.paid}/{item.total} HS</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div 
-                                        className="bg-green-500 h-2 rounded-full transition-all"
-                                        style={{ width: `${item.percent}%` }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-            </div>
-
-            {/* Attendance Overview */}
-            <Card title="Điểm danh hôm nay">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[
-                        { class: '10A1', present: 33, total: 35 },
-                        { class: '10A2', present: 30, total: 32 },
-                        { class: '11A1', present: 36, total: 38 },
-                        { class: '11A2', present: 28, total: 30 },
-                    ].map((attendance, index) => (
-                        <div key={index} className="p-4 border-2 border-gray-200 rounded-lg">
-                            <p className="text-lg font-bold text-gray-900 mb-1">{attendance.class}</p>
-                            <p className="text-2xl font-bold text-green-600">{attendance.present}/{attendance.total}</p>
-                            <p className="text-xs text-gray-600 mt-1">Có mặt</p>
-                        </div>
-                    ))}
+            <div className="flex items-stretch gap-4">
+                {/* Charts Row 1 - Student Enrollment */}
+                <div className='flex-1'>
+                    <ChartCard
+                        title="Thống kê Học sinh"
+                        subtitle={`Học sinh mới và nghỉ học theo ${timePeriod === 'week' ? 'tuần' : timePeriod === 'month' ? 'tháng' : 'năm'}`}
+                        icon={Users}
+                        iconBg="bg-blue-100"
+                        iconColor="text-blue-600"
+                        labels={labels}
+                        lines={enrollmentData}
+                        height={200}
+                    />
                 </div>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card title="Thao tác nhanh">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <UserPlus className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Thêm học sinh</p>
-                    </button>
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <Calendar className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Điểm danh</p>
-                    </button>
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <DollarSign className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Thu học phí</p>
-                    </button>
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <Users className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Xem danh sách</p>
-                    </button>
+                {/* Quick Stats */}
+                <div className="flex-1 grid grid-cols-2 gap-4">
+                    <QuickStat
+                        title="Tổng học sinh"
+                        value={485}
+                        percent="+5.2%"
+                        isIncrease={true}
+                        icon={Users}
+                        iconBg="bg-blue-100"
+                        iconColor="text-blue-600"
+                    />
+                    <QuickStat
+                        title="Học sinh mới"
+                        value={totalNewStudents}
+                        percent="+12.5%"
+                        isIncrease={true}
+                        icon={UserPlus}
+                        iconBg="bg-green-100"
+                        iconColor="text-green-600"
+                    />
+                    <QuickStat
+                        title="Nghỉ học"
+                        value={totalDropouts}
+                        percent="-2.1%"
+                        isIncrease={false}
+                        icon={UserMinus}
+                        iconBg="bg-red-100"
+                        iconColor="text-red-600"
+                    />
+                    <QuickStat
+                        title="Tỷ lệ điểm danh"
+                        value={`${attendanceRate}%`}
+                        percent="+1.8%"
+                        isIncrease={true}
+                        icon={CheckCircle}
+                        iconBg="bg-purple-100"
+                        iconColor="text-purple-600"
+                    />
                 </div>
-            </Card>
+            </div>
+
+            {/* Charts Row 2 - Attendance and Tuition */}
+            <div className="grid grid-cols-2 gap-4">
+                <ChartCard
+                    title="Thống kê Điểm danh"
+                    subtitle={`Theo ${timePeriod === 'week' ? 'tuần' : timePeriod === 'month' ? 'tháng' : 'năm'}`}
+                    icon={Calendar}
+                    iconBg="bg-purple-100"
+                    iconColor="text-purple-600"
+                    labels={labels}
+                    lines={attendanceData}
+                    height={200}
+                />
+                <ChartCard
+                    title="Thống kê Học phí"
+                    subtitle={`Theo ${timePeriod === 'week' ? 'tuần' : timePeriod === 'month' ? 'tháng' : 'năm'}`}
+                    icon={DollarSign}
+                    iconBg="bg-yellow-100"
+                    iconColor="text-yellow-600"
+                    labels={labels}
+                    lines={tuitionData}
+                    height={200}
+                />
             </div>
         </div>
     );

@@ -4,7 +4,7 @@ import { ModuleDropdown, SubjectDropdown, UserDropdown } from '@/shared/componen
 
 export const MainLayout: React.FC = () => {
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-gray-50 flex flex-col">
             {/* Header */}
             <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,19 +35,19 @@ export const MainLayout: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 w-full">
-                <div className="max-w-7xl w-full mx-auto py-8 h-full">
+                <div className="w-full mx-auto py-8 h-full">
                     <Outlet />
                 </div>
             </main>
 
             {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 mt-auto">
+            {/* <footer className="bg-white border-t border-gray-200 mt-auto">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <p className="text-center text-gray-600 text-sm">
                         © 2025 Admin Frontend. All rights reserved.
                     </p>
                 </div>
-            </footer>
+            </footer> */}
         </div>
     );
 };

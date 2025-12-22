@@ -1,138 +1,313 @@
-import React from 'react';
-import { Shield, Users as UsersIcon, Settings, LogOut } from 'lucide-react';
-import { Card } from '@/shared/components/ui';
-import { AdminManagementLayout } from '@/shared/layouts/AdminManagementLayout';
+import React, { useState } from 'react';
+import { QuickStat, ChartCard, type LineData } from '@/features/dashboard/components';
+import { 
+    Users, 
+    UserPlus, 
+    Lock,
+    Activity,
+    FileText,
+    Bell
+} from 'lucide-react';
+
+type TimePeriod = 'week' | 'month' | 'year';
 
 export const AdminDashboard: React.FC = () => {
+    const [timePeriod, setTimePeriod] = useState<TimePeriod>('month');
+
+    // Get labels based on time period
+    const getLabels = (): string[] => {
+        if (timePeriod === 'week') {
+            return ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        } else if (timePeriod === 'month') {
+            return ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+        } else {
+            return ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+        }
+    };
+
+    // Admin activity data (new admins + suspended admins)
+    const getAdminActivityData = (): LineData[] => {
+        if (timePeriod === 'week') {
+            return [
+                {
+                    label: 'Admin mới',
+                    color: '#10b981',
+                    data: [1, 0, 2, 1, 0, 1, 0],
+                },
+                {
+                    label: 'Bị khóa',
+                    color: '#ef4444',
+                    data: [0, 0, 1, 0, 0, 0, 0],
+                },
+            ];
+        } else if (timePeriod === 'month') {
+            return [
+                {
+                    label: 'Admin mới',
+                    color: '#10b981',
+                    data: [3, 2, 4, 3],
+                },
+                {
+                    label: 'Bị khóa',
+                    color: '#ef4444',
+                    data: [0, 1, 0, 1],
+                },
+            ];
+        } else {
+            return [
+                {
+                    label: 'Admin mới',
+                    color: '#10b981',
+                    data: [8, 6, 10, 7, 9, 5, 8, 12, 6, 7, 10, 8],
+                },
+                {
+                    label: 'Bị khóa',
+                    color: '#ef4444',
+                    data: [1, 0, 2, 1, 0, 1, 0, 2, 1, 0, 1, 1],
+                },
+            ];
+        }
+    };
+
+    // System logs data
+    const getSystemLogsData = (): LineData[] => {
+        if (timePeriod === 'week') {
+            return [
+                {
+                    label: 'Info',
+                    color: '#3b82f6',
+                    data: [250, 280, 260, 290, 270, 300, 0],
+                },
+                {
+                    label: 'Warning',
+                    color: '#f59e0b',
+                    data: [45, 50, 48, 52, 47, 55, 0],
+                },
+                {
+                    label: 'Error',
+                    color: '#ef4444',
+                    data: [12, 8, 15, 10, 13, 9, 0],
+                },
+            ];
+        } else if (timePeriod === 'month') {
+            return [
+                {
+                    label: 'Info',
+                    color: '#3b82f6',
+                    data: [1200, 1300, 1250, 1350],
+                },
+                {
+                    label: 'Warning',
+                    color: '#f59e0b',
+                    data: [200, 220, 210, 230],
+                },
+                {
+                    label: 'Error',
+                    color: '#ef4444',
+                    data: [45, 38, 42, 40],
+                },
+            ];
+        } else {
+            return [
+                {
+                    label: 'Info',
+                    color: '#3b82f6',
+                    data: [4800, 5000, 4900, 5200, 5100, 5300, 5400, 5500, 5600, 5700, 5800, 5900],
+                },
+                {
+                    label: 'Warning',
+                    color: '#f59e0b',
+                    data: [850, 900, 880, 920, 900, 950, 940, 980, 960, 1000, 990, 1020],
+                },
+                {
+                    label: 'Error',
+                    color: '#ef4444',
+                    data: [180, 160, 175, 155, 170, 150, 165, 145, 160, 140, 155, 135],
+                },
+            ];
+        }
+    };
+
+    // Notifications data
+    const getNotificationsData = (): LineData[] => {
+        if (timePeriod === 'week') {
+            return [
+                {
+                    label: 'Đã gửi',
+                    color: '#10b981',
+                    data: [45, 50, 48, 52, 47, 55, 50],
+                },
+                {
+                    label: 'Đang chờ',
+                    color: '#f59e0b',
+                    data: [12, 8, 10, 7, 9, 5, 8],
+                },
+            ];
+        } else if (timePeriod === 'month') {
+            return [
+                {
+                    label: 'Đã gửi',
+                    color: '#10b981',
+                    data: [180, 200, 195, 210],
+                },
+                {
+                    label: 'Đang chờ',
+                    color: '#f59e0b',
+                    data: [35, 30, 32, 28],
+                },
+            ];
+        } else {
+            return [
+                {
+                    label: 'Đã gửi',
+                    color: '#10b981',
+                    data: [750, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980],
+                },
+                {
+                    label: 'Đang chờ',
+                    color: '#f59e0b',
+                    data: [120, 110, 105, 100, 95, 90, 85, 80, 75, 70, 65, 60],
+                },
+            ];
+        }
+    };
+
+    const labels = getLabels();
+    const adminActivityData = getAdminActivityData();
+    const systemLogsData = getSystemLogsData();
+    const notificationsData = getNotificationsData();
+
+    // Calculate totals for stats
+    const totalNewAdmins = adminActivityData[0].data.reduce((sum, val) => sum + val, 0);
+    const totalSuspended = adminActivityData[1].data.reduce((sum, val) => sum + val, 0);
+    const totalLogs = systemLogsData.reduce((sum, line) => 
+        sum + line.data.reduce((s, v) => s + v, 0), 0
+    );
+    const totalNotificationsSent = notificationsData[0].data.reduce((sum, val) => sum + val, 0);
+
     return (
-        <AdminManagementLayout>
+        <div className="space-y-4">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Quản lý Admin</h1>
-                <p className="text-gray-600 mt-1">Phân quyền và quản lý người quản trị</p>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card title="Tổng Admin">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-blue-100 rounded-full p-3">
-                            <Shield className="text-blue-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">12</p>
-                            <p className="text-sm text-gray-600">Admin đang hoạt động</p>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card title="Super Admin">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-purple-100 rounded-full p-3">
-                            <Shield className="text-purple-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">3</p>
-                            <p className="text-sm text-gray-600">Quyền cao nhất</p>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card title="Người dùng">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-green-100 rounded-full p-3">
-                            <UsersIcon className="text-green-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">245</p>
-                            <p className="text-sm text-gray-600">Tổng người dùng</p>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card title="Vai trò">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-orange-100 rounded-full p-3">
-                            <Settings className="text-orange-600" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">8</p>
-                            <p className="text-sm text-gray-600">Loại vai trò</p>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-
-            {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Admin List */}
-                <Card title="Danh sách Admin gần đây">
-                    <div className="space-y-3">
-                        {[
-                            { name: 'Nguyễn Văn A', role: 'Super Admin', status: 'active' },
-                            { name: 'Trần Thị B', role: 'Admin', status: 'active' },
-                            { name: 'Lê Văn C', role: 'Moderator', status: 'inactive' },
-                            { name: 'Phạm Thị D', role: 'Admin', status: 'active' },
-                        ].map((admin, index) => (
-                            <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                                <div>
-                                    <p className="font-medium text-gray-900">{admin.name}</p>
-                                    <p className="text-sm text-gray-600">{admin.role}</p>
-                                </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                    admin.status === 'active' 
-                                        ? 'bg-green-100 text-green-800' 
-                                        : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                    {admin.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-
-                {/* Recent Activities */}
-                <Card title="Hoạt động gần đây">
-                    <div className="space-y-3">
-                        {[
-                            { action: 'Thêm admin mới', user: 'Admin A', time: '5 phút trước' },
-                            { action: 'Cập nhật quyền', user: 'Admin B', time: '15 phút trước' },
-                            { action: 'Xóa người dùng', user: 'Admin C', time: '1 giờ trước' },
-                            { action: 'Phân quyền mới', user: 'Admin D', time: '2 giờ trước' },
-                        ].map((activity, index) => (
-                            <div key={index} className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
-                                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                                <div className="flex-1">
-                                    <p className="font-medium text-gray-900">{activity.action}</p>
-                                    <p className="text-sm text-gray-600">{activity.user} • {activity.time}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-            </div>
-
-            {/* Quick Actions */}
-            <Card title="Thao tác nhanh">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <Shield className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Thêm Admin</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-xl font-bold text-gray-900">Dashboard Admin</h1>
+                    <p className="text-xs text-gray-600 mt-1">Tổng quan hệ thống và quản trị</p>
+                </div>
+                
+                {/* Time Period Selector */}
+                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                    <button
+                        onClick={() => setTimePeriod('week')}
+                        className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                            timePeriod === 'week'
+                                ? 'bg-white text-gray-900 shadow'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        Tuần
                     </button>
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <Settings className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Phân quyền</p>
+                    <button
+                        onClick={() => setTimePeriod('month')}
+                        className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                            timePeriod === 'month'
+                                ? 'bg-white text-gray-900 shadow'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        Tháng
                     </button>
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <UsersIcon className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Quản lý User</p>
-                    </button>
-                    <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-black hover:shadow-lg transition-all group">
-                        <LogOut className="mx-auto mb-2 text-gray-600 group-hover:text-black transition-colors" size={32} />
-                        <p className="text-sm font-medium text-gray-900">Nhật ký</p>
+                    <button
+                        onClick={() => setTimePeriod('year')}
+                        className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                            timePeriod === 'year'
+                                ? 'bg-white text-gray-900 shadow'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        Năm
                     </button>
                 </div>
-            </Card>
-        </AdminManagementLayout>
+            </div>
+
+            {/* First Row - Admin Activity Chart + Quick Stats */}
+            <div className="flex items-stretch gap-4">
+                {/* Charts Row 1 - Admin Activity */}
+                <div className='flex-1'>
+                    <ChartCard
+                        title="Thống kê Admin"
+                        subtitle={`Admin mới và bị khóa theo ${timePeriod === 'week' ? 'tuần' : timePeriod === 'month' ? 'tháng' : 'năm'}`}
+                        icon={Users}
+                        iconBg="bg-blue-100"
+                        iconColor="text-blue-600"
+                        labels={labels}
+                        lines={adminActivityData}
+                        height={200}
+                    />
+                </div>
+                {/* Quick Stats */}
+                <div className="flex-1 grid grid-cols-2 gap-4">
+                    <QuickStat
+                        title="Tổng Admin"
+                        value={48}
+                        percent="+3.1%"
+                        isIncrease={true}
+                        icon={Users}
+                        iconBg="bg-blue-100"
+                        iconColor="text-blue-600"
+                    />
+                    <QuickStat
+                        title="Admin mới"
+                        value={totalNewAdmins}
+                        percent="+8.2%"
+                        isIncrease={true}
+                        icon={UserPlus}
+                        iconBg="bg-green-100"
+                        iconColor="text-green-600"
+                    />
+                    <QuickStat
+                        title="Bị khóa"
+                        value={totalSuspended}
+                        percent="-1.5%"
+                        isIncrease={false}
+                        icon={Lock}
+                        iconBg="bg-red-100"
+                        iconColor="text-red-600"
+                    />
+                    <QuickStat
+                        title="Hoạt động"
+                        value={45}
+                        percent="+2.3%"
+                        isIncrease={true}
+                        icon={Activity}
+                        iconBg="bg-purple-100"
+                        iconColor="text-purple-600"
+                    />
+                </div>
+            </div>
+
+            {/* Charts Row 2 - System Logs and Notifications */}
+            <div className="grid grid-cols-2 gap-4">
+                <ChartCard
+                    title="Nhật ký hệ thống"
+                    subtitle={`Theo ${timePeriod === 'week' ? 'tuần' : timePeriod === 'month' ? 'tháng' : 'năm'}`}
+                    icon={FileText}
+                    iconBg="bg-indigo-100"
+                    iconColor="text-indigo-600"
+                    labels={labels}
+                    lines={systemLogsData}
+                    height={200}
+                />
+                <ChartCard
+                    title="Thông báo"
+                    subtitle={`Theo ${timePeriod === 'week' ? 'tuần' : timePeriod === 'month' ? 'tháng' : 'năm'}`}
+                    icon={Bell}
+                    iconBg="bg-yellow-100"
+                    iconColor="text-yellow-600"
+                    labels={labels}
+                    lines={notificationsData}
+                    height={200}
+                />
+            </div>
+        </div>
     );
 };

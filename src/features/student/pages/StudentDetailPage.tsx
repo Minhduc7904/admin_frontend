@@ -359,10 +359,10 @@ export const StudentDetailPage: React.FC = () => {
     };
 
     return (
-        <StudentManagementLayout>
+        <>
             <StudentDetailHeader />
             <StudentDetailTabs activeTab={activeTab} onTabChange={setActiveTab} />
             {renderTabContent()}
-        </StudentManagementLayout>
+        </>
     );
 };

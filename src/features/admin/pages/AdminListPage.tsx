@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { AdminManagementLayout } from '@/shared/layouts/AdminManagementLayout';
 import {
     AdminPageHeader,
     AdminFilters,
@@ -117,7 +116,7 @@ export const AdminListPage: React.FC = () => {
 
 
     return (
-        <AdminManagementLayout>
+        <>
             <AdminPageHeader onAddClick={handleAddAdmin} />
 
             <AdminFilters
@@ -142,6 +141,6 @@ export const AdminListPage: React.FC = () => {
                 onToggleLock={handleToggleLock}
                 onDelete={handleDelete}
             />
-        </AdminManagementLayout>
+        </>
     );
 };

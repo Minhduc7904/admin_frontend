@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AdminManagementLayout } from '@/shared/layouts/AdminManagementLayout';
 import {
     AdminDetailHeader,
     AdminDetailTabs,
@@ -166,8 +165,8 @@ export const AdminDetailPage: React.FC = () => {
         console.log('Edit admin info');
     };
 
-    const handleEditPermission = (permissionId: string) => {
-        console.log('Edit permission:', permissionId);
+    const handlePermissionToggle = (moduleId: string, permissionId: string, enabled: boolean) => {
+        console.log('Toggle permission:', { moduleId, permissionId, enabled });
     };
 
     const handleDownloadFile = (fileId: string) => {
@@ -179,7 +178,7 @@ export const AdminDetailPage: React.FC = () => {
             case 'info':
                 return <AdminInfoTab admin={admin} onEdit={handleEdit} />;
             case 'permissions':
-                return <AdminPermissionsTab permissions={permissions} onEdit={handleEditPermission} />;
+                return <AdminPermissionsTab onPermissionToggle={handlePermissionToggle} />;
             case 'activity':
                 return <AdminActivityTab activities={activities} />;
             case 'files':
@@ -190,10 +189,10 @@ export const AdminDetailPage: React.FC = () => {
     };
 
     return (
-        <AdminManagementLayout>
+        <>
             <AdminDetailHeader />
             <AdminDetailTabs activeTab={activeTab} onTabChange={setActiveTab} />
             {renderTabContent()}
-        </AdminManagementLayout>
+        </>
     );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Dropdown, SearchInput, type DropdownOption } from '@/shared/components/ui';
 
 interface AdminFiltersProps {
     searchQuery: string;
@@ -18,43 +18,45 @@ export const AdminFilters: React.FC<AdminFiltersProps> = ({
     selectedStatus,
     onStatusChange,
 }) => {
+    // Role options
+    const roleOptions: DropdownOption[] = [
+        { value: 'all', label: 'Tất cả vai trò' },
+        { value: 'super-admin', label: 'Super Admin' },
+        { value: 'admin', label: 'Admin' },
+        { value: 'moderator', label: 'Moderator' },
+    ];
+
+    // Status options
+    const statusOptions: DropdownOption[] = [
+        { value: 'all', label: 'Tất cả trạng thái' },
+        { value: 'active', label: 'Hoạt động' },
+        { value: 'inactive', label: 'Không hoạt động' },
+        { value: 'suspended', label: 'Bị khóa' },
+    ];
+
     return (
         <div className="flex gap-3">
             {/* Search */}
-            <div className="flex-1 relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm theo tên, email..."
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent outline-none text-sm"
-                />
-            </div>
+            <SearchInput
+                value={searchQuery}
+                onChange={onSearchChange}
+                placeholder="Tìm kiếm theo tên, email..."
+                className="flex-1"
+            />
 
             {/* Role Filter */}
-            <select
+            <Dropdown
+                options={roleOptions}
                 value={selectedRole}
-                onChange={(e) => onRoleChange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent outline-none text-sm"
-            >
-                <option value="all">Tất cả vai trò</option>
-                <option value="super-admin">Super Admin</option>
-                <option value="admin">Admin</option>
-                <option value="moderator">Moderator</option>
-            </select>
+                onChange={onRoleChange}
+            />
 
             {/* Status Filter */}
-            <select
+            <Dropdown
+                options={statusOptions}
                 value={selectedStatus}
-                onChange={(e) => onStatusChange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent outline-none text-sm"
-            >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
-                <option value="suspended">Bị khóa</option>
-            </select>
+                onChange={onStatusChange}
+            />
         </div>
     );
 };

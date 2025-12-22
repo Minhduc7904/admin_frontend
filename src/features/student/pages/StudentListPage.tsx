@@ -5,7 +5,7 @@ import {
     StudentFilters,
     StudentStats,
     StudentTable,
-} from '@/features/student/components';
+} from '@/features/student/components/studentList';
 
 interface Student {
     id: string;
@@ -145,7 +145,7 @@ export const StudentListPage: React.FC = () => {
     };
 
     return (
-        <StudentManagementLayout>
+        <>
             <StudentPageHeader onAddClick={handleAddStudent} />
 
             <StudentFilters
@@ -170,6 +170,6 @@ export const StudentListPage: React.FC = () => {
                 onToggleLock={handleToggleLock}
                 onDelete={handleDelete}
             />
-        </StudentManagementLayout>
+        </>
     );
 };
