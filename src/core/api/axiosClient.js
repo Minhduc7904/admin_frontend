@@ -50,8 +50,7 @@ axiosClient.interceptors.response.use(
     // Log response in development
     if (import.meta.env.DEV) {
       console.group(
-        `✅ API Response: ${response.config.method?.toUpperCase()} ${
-          response.config.url
+        `✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url
         }`
       );
       console.log("Status:", response.status);
@@ -67,8 +66,7 @@ axiosClient.interceptors.response.use(
     // Log error in development
     if (import.meta.env.DEV) {
       console.group(
-        `❌ API Error: ${error.config?.method?.toUpperCase()} ${
-          error.config?.url
+        `❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url
         }`
       );
       console.error("Status:", error.response?.status);
@@ -76,6 +74,8 @@ axiosClient.interceptors.response.use(
       console.error("Full Error:", error.response?.data);
       console.groupEnd();
     }
+
+    console.log('Original Request:', originalRequest._retry);
 
     // Handle 401 Unauthorized
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -91,6 +91,7 @@ axiosClient.interceptors.response.use(
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refreshToken,
         });
+        console.log('Refresh response:', response);
 
         const { accessToken } = response.data;
         localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);

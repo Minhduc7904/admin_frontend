@@ -10,8 +10,8 @@ export const authApi = {
     return axiosClient.post(API_ENDPOINTS.AUTH.REGISTER, userData);
   },
 
-  logout: () => {
-    return axiosClient.post(API_ENDPOINTS.AUTH.LOGOUT);
+  logout: ({ refreshToken }) => {
+    return axiosClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
   },
 
   refreshToken: (refreshToken) => {

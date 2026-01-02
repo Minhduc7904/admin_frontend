@@ -1,3 +1,10 @@
 export { default as axiosClient } from './axiosClient';
 export * from './authApi';
 export { profileApi } from './profileApi';
+export { permissionApi } from './permissionApi';
+export { roleApi } from './roleApi';
+export { auditLogApi } from './auditLogApi';
+export { mediaApi } from './mediaApi';
+export { mediaUsageApi } from './mediaUsageApi';
+export { mediaFolderApi } from './mediaFolderApi';
+export { adminApi } from './adminApi';

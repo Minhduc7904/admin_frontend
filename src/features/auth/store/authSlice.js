@@ -31,7 +31,7 @@ export const logoutAsync = createAsyncThunk(
       async () => {
         const { refreshToken } = getState().auth;
         if (refreshToken) {
-          await authApi.logout({ refreshToken });
+          return await authApi.logout({ refreshToken });
         }
       },
       thunkAPI,
@@ -103,6 +103,14 @@ const authSlice = createSlice({
 
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      })
+      .addCase(logoutAsync.rejected, (state, action) => {
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.isAuthenticated = false;
+        state.error = action.payload;
       });
   },
 });

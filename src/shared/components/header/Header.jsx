@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Menu, Bell, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
 import { logoutAsync } from '../../../features/auth/store/authSlice';
-import { clearProfile } from '../../../features/profile/store/profileSlice';
+import { 
+    clearProfile,
+    getAvatarUsagesAsync,
+    getAvatarDownloadUrlAsync,
+    selectAvatarUsages,
+    selectAvatarDownloadUrl
+} from '../../../features/profile/store/profileSlice';
 import { ROUTES } from '../../../core/constants';
 
 export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
@@ -12,6 +18,25 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { profile } = useAppSelector((state) => state.profile);
+    const avatarUsages = useAppSelector(selectAvatarUsages);
+    const avatarDownloadUrl = useAppSelector(selectAvatarDownloadUrl);
+
+    // Fetch avatar when profile changes
+    useEffect(() => {
+        if (profile?.userId) {
+            dispatch(getAvatarUsagesAsync(profile.userId));
+        }
+    }, [dispatch, profile?.userId]);
+
+    // Load download URL when avatar usages change
+    useEffect(() => {
+        if (avatarUsages?.data && avatarUsages.data.length > 0) {
+            const firstAvatar = avatarUsages.data[0];
+            if (firstAvatar?.mediaId) {
+                dispatch(getAvatarDownloadUrlAsync(firstAvatar.mediaId));
+            }
+        }
+    }, [dispatch, avatarUsages]);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -31,15 +56,9 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
         navigate(ROUTES.LOGIN);
     };
 
-    const getRoleName = (roleId) => {
-        switch (roleId) {
-            case 1:
-                return 'Admin';
-            case 2:
-                return 'Tutor';
-            default:
-                return 'User';
-        }
+    const getRoleName = (roles) => {
+        if (!roles || roles.length === 0) return '';
+        return roles.map((role) => role.roleName).join(', ');
     };
 
     return (
@@ -76,10 +95,10 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
                             className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-sm transition-colors"
                         >
                             {/* Avatar */}
-                            <div className="w-8 h-8 bg-gray-200 rounded-sm flex items-center justify-center text-foreground-light overflow-hidden">
-                                {profile?.avatarUrl ? (
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white overflow-hidden">
+                                {avatarDownloadUrl ? (
                                     <img
-                                        src={profile.avatarUrl}
+                                        src={avatarDownloadUrl}
                                         alt={profile?.fullName || 'Avatar'}
                                         className="w-full h-full object-cover"
                                     />
@@ -94,7 +113,7 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
                                     {profile?.fullName || 'User'}
                                 </p>
                                 <p className="text-xs text-foreground-light">
-                                    {getRoleName(profile?.roleId)}
+                                    {getRoleName(profile?.roles)}
                                 </p>
                             </div>
 
@@ -123,10 +142,9 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
                                     <button
                                         onClick={() => {
                                             setShowUserMenu(false);
-                                            const profileRoute = profile?.roleId === 1 ? ROUTES.ADMIN_PROFILE : ROUTES.TUTOR_PROFILE;
-                                            navigate(profileRoute);
+                                            navigate(ROUTES.PROFILE_INFO);
                                         }}
-                                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-gray-50 transition-colors"
+                                        className="bg-primary w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-gray-50 transition-colors"
                                     >
                                         <User size={16} className="text-foreground-light" />
                                         Thông tin cá nhân
@@ -137,7 +155,7 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
                                             setShowUserMenu(false);
                                             // Navigate to settings page
                                         }}
-                                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-gray-50 transition-colors"
+                                        className="bg-primary w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-gray-50 transition-colors"
                                     >
                                         <Settings size={16} className="text-foreground-light" />
                                         Cài đặt
@@ -148,7 +166,7 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
                                 <div className="border-t border-border py-1">
                                     <button
                                         onClick={handleLogout}
-                                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-error hover:bg-error-bg transition-colors"
+                                        className="bg-primary w-full flex items-center gap-3 px-4 py-2 text-sm text-error hover:bg-error-bg transition-colors"
                                     >
                                         <LogOut size={16} />
                                         Đăng xuất

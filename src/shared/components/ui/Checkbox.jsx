@@ -1,8 +1,8 @@
 import { Check } from 'lucide-react';
 
-export const Checkbox = ({ 
-  checked = false, 
-  onChange, 
+export const Checkbox = ({
+  checked = false,
+  onChange,
   label,
   id,
   className = ''
@@ -12,8 +12,8 @@ export const Checkbox = ({
       <div
         className={`
           w-4 h-4 rounded-sm border flex items-center justify-center transition-colors
-          ${checked 
-            ? 'bg-foreground border-foreground' 
+          ${checked
+            ? 'bg-foreground border-foreground'
             : 'bg-white border-border hover:border-foreground-light'
           }
         `}

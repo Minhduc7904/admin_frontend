@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../core/constants';
 
-const NotFound = () => {
+export const NotFound = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="text-center">
@@ -11,7 +11,7 @@ const NotFound = () => {
           Xin lỗi, trang bạn đang tìm kiếm không tồn tại.
         </p>
         <Link
-          to={ROUTES.DASHBOARD}
+          to={ROUTES.HOME}
           className="inline-block px-6 py-3 bg-info text-white font-medium rounded-lg hover:bg-info-dark transition-colors"
         >
           Về trang chủ
@@ -21,4 +21,3 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;

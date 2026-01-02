@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { profileApi } from "../../../core/api";
+import { profileApi, mediaApi, mediaUsageApi } from "../../../core/api";
 import { STORAGE_KEYS } from "../../../core/constants";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 
@@ -7,6 +7,10 @@ const initialState = {
   profile: JSON.parse(localStorage.getItem(STORAGE_KEYS.USER)) || null,
   loading: false,
   error: null,
+  avatarUsages: [],
+  loadingAvatar: false,
+  avatarDownloadUrl: null,
+  loadingAvatarDownloadUrl: false,
 };
 
 // Async thunks
@@ -31,6 +35,28 @@ export const updateProfileAsync = createAsyncThunk(
   }
 );
 
+export const getAvatarUsagesAsync = createAsyncThunk(
+  "profile/getAvatarUsages",
+  async (userId, thunkAPI) => {
+    return handleAsyncThunk(
+      () => mediaUsageApi.getByEntity("AVATAR", userId),
+      thunkAPI, {
+      showSuccess: false,
+    });
+  }
+);
+
+export const getAvatarDownloadUrlAsync = createAsyncThunk(
+  "profile/getAvatarDownloadUrl",
+  async (mediaId, thunkAPI) => {
+    return handleAsyncThunk(
+      () => mediaApi.getDownloadUrl(mediaId, 3600),
+      thunkAPI, {
+      showSuccess: false,
+    });
+  }
+);
+
 const profileSlice = createSlice({
   name: "profile",
   initialState,
@@ -43,6 +69,12 @@ const profileSlice = createSlice({
     setProfile: (state, action) => {
       state.profile = action.payload;
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(action.payload));
+    },
+    setAvatarDownloadUrl: (state, action) => {
+      state.avatarDownloadUrl = action.payload;
+    },
+    setLoadingAvatarDownloadUrl: (state, action) => {
+      state.loadingAvatarDownloadUrl = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -86,6 +118,32 @@ const profileSlice = createSlice({
       .addCase(updateProfileAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(getAvatarUsagesAsync.pending, (state) => {
+        state.loadingAvatar = true;
+        state.error = null;
+      })
+      .addCase(getAvatarUsagesAsync.fulfilled, (state, action) => {
+        state.loadingAvatar = false;
+        state.avatarUsages = action.payload.data;
+        state.error = null;
+      })
+      .addCase(getAvatarUsagesAsync.rejected, (state, action) => {
+        state.loadingAvatar = false;
+        state.error = action.payload;
+      })
+      .addCase(getAvatarDownloadUrlAsync.pending, (state) => {
+        state.loadingAvatarDownloadUrl = true;
+        state.error = null;
+      })
+      .addCase(getAvatarDownloadUrlAsync.fulfilled, (state, action) => {
+        state.loadingAvatarDownloadUrl = false;
+        state.avatarDownloadUrl = action.payload.data.downloadUrl;
+        state.error = null;
+      })
+      .addCase(getAvatarDownloadUrlAsync.rejected, (state, action) => {
+        state.loadingAvatarDownloadUrl = false;
+        state.error = action.payload;
       });
   },
 });
@@ -95,6 +153,10 @@ export const { clearProfile, setProfile } = profileSlice.actions;
 // Selectors
 export const selectProfile = (state) => state.profile.profile;
 export const selectProfileLoading = (state) => state.profile.loading;
+export const selectAvatarUsages = (state) => state.profile.avatarUsages;
+export const selectAvatarLoading = (state) => state.profile.loadingAvatar;
+export const selectAvatarDownloadUrl = (state) => state.profile.avatarDownloadUrl;
+export const selectAvatarDownloadUrlLoading = (state) => state.profile.loadingAvatarDownloadUrl;
 export const selectProfileError = (state) => state.profile.error;
 
 export default profileSlice.reducer;

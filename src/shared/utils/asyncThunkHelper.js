@@ -22,22 +22,28 @@ export const handleAsyncThunk = async (asyncFn, thunkAPI, messages = {}) => {
 
   try {
     const response = await asyncFn();
-    // console.log("Async function response:", response);
     if (showSuccess) {
+      // Evaluate successMessage if it's a function
+      const message = typeof successMessage === 'function'
+        ? successMessage(response)
+        : successMessage;
+
       dispatch(addNotification({
         type: 'success',
         title: successTitle,
-        message: successMessage
+        message: message,
+        autoHide: true
       }));
     }
-    
+
     return response.data ? response.data : response;
   } catch (error) {
     const errorMessage = error.message || 'Có lỗi xảy ra';
     dispatch(addNotification({
       type: 'error',
       title: errorTitle,
-      message: errorMessage
+      message: errorMessage,
+      autoHide: false
     }));
     return rejectWithValue(errorMessage);
   }

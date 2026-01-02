@@ -7,6 +7,7 @@ import { AuthInput, AuthButton, AuthLink } from '../components';
 import { Checkbox } from '../../../shared/components/ui';
 import { ButtonLoading } from '../../../shared/components/loading';
 import { ROUTES } from '../../../core/constants';
+import { PasswordInput } from '../../../shared/components/ui';
 
 export const LoginPage = () => {
     const [username, setUsername] = useState('');
@@ -15,15 +16,20 @@ export const LoginPage = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { loading } = useAppSelector((state) => state.auth);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const toggleShowPassword = () => {
+        setShowPassword((prev) => !prev);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const result = await dispatch(loginAsync({ username, password }));
-        
+
         const isSuccess = result.payload.success;
         if (isSuccess) {
-            navigate(ROUTES.DASHBOARD);
+            navigate(ROUTES.LOADING_REDIRECT);
         }
     };
 
@@ -42,14 +48,17 @@ export const LoginPage = () => {
                 />
 
                 {/* Password Input */}
-                <AuthInput
+                <PasswordInput
                     label="Mật khẩu"
+                    name="password"
                     id="password"
-                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Nhập mật khẩu"
                     required
+                    showPassword={showPassword}
+                    onToggleVisibility={toggleShowPassword}
+                    helperText="Mật khẩu tối thiểu 6 ký tự"
                 />
 
                 {/* Remember & Forgot */}

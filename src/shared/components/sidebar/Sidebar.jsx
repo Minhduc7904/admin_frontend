@@ -54,6 +54,7 @@ export const Sidebar = ({ menuItems }) => {
                                     <AnimatePresence>
                                         {isOpen && (
                                             <motion.span
+                                                key={item.href}
                                                 initial={{ opacity: 0, width: 0 }}
                                                 animate={{ opacity: 1, width: 'auto' }}
                                                 exit={{ opacity: 0, width: 0 }}

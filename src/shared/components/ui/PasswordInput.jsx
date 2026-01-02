@@ -45,7 +45,7 @@ export const PasswordInput = ({
           <button
             type="button"
             onClick={onToggleVisibility}
-            className="absolute right-2 top-2 p-1 text-foreground-light hover:text-foreground"
+            className="absolute right-2 bg-primary top-2 p-1 text-foreground-light hover:text-foreground"
           >
             {showPassword ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

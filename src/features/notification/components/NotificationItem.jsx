@@ -77,9 +77,8 @@ export const NotificationItem = ({ notification, index }) => {
 
   return (
     <div
-      className={`transform transition-all duration-300 ease-in-out mb-2 ${
-        isVisible && !isRemoving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-      }`}
+      className={`transform transition-all duration-300 ease-in-out mb-2 ${isVisible && !isRemoving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        }`}
       style={{
         transitionDelay: isRemoving ? '0ms' : `${index * 50}ms`,
       }}
@@ -106,7 +105,7 @@ export const NotificationItem = ({ notification, index }) => {
             {/* Close button with progress circle */}
             <div className="flex-shrink-0 relative">
               <button
-                className="relative inline-flex items-center justify-center h-6 w-6 text-foreground-lighter hover:text-foreground transition-colors"
+                className={`relative inline-flex ${getColorClasses()} items-center justify-center h-6 w-6 text-foreground-lighter hover:text-foreground transition-colors`}
                 onClick={handleRemove}
               >
                 <X size={14} className="relative z-10" />
@@ -115,7 +114,7 @@ export const NotificationItem = ({ notification, index }) => {
                 {notification.autoHide && (
                   <svg className="absolute inset-0 h-6 w-6 -rotate-90" viewBox="0 0 36 36">
                     <circle
-                      className="text-gray-200"
+                      className="text-white"
                       stroke="currentColor"
                       strokeWidth="2"
                       fill="transparent"

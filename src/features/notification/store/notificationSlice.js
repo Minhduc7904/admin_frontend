@@ -10,12 +10,13 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     addNotification: (state, action) => {
-      const { type, title, message } = action.payload;
+      const { type, title, message, autoHide } = action.payload;
       state.notifications.push({
         id: state.nextId++,
         type,
         title,
         message,
+        autoHide: autoHide !== undefined ? autoHide : true,
         timestamp: Date.now(),
       });
     },
