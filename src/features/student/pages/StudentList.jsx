@@ -4,44 +4,46 @@ import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { Button, StatsCard, StatsGrid, RightPanel } from '../../../shared/components';
 import {
-    getAllAdminsAsync,
+    getAllStudentsAsync,
     setFilters,
-    selectAdmins,
-    selectAdminLoadingGet,
-    selectAdminPagination,
-} from '../store/adminSlice';
+    selectStudents,
+    selectStudentLoadingGet,
+    selectStudentPagination,
+} from '../store/studentSlice';
 import { useSearch } from '../../../shared/hooks';
-import { AdminFilters, AdminTable, AddAdmin } from '../components';
+import { StudentFilters, StudentTable, AddStudent } from '../components';
 import { Pagination } from '../../../shared/components/ui/Pagination';
 import { ROUTES } from '../../../core/constants';
 import {
     toggleUserActivationAsync
 } from '../../user/store/userSlice';
 
-export const AdminList = () => {
+export const StudentList = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const admins = useSelector(selectAdmins);
-    const loadingGet = useSelector(selectAdminLoadingGet);
-    const pagination = useSelector(selectAdminPagination);
-    const filters = useSelector((state) => state.admin.filters);
+    const students = useSelector(selectStudents);
+    const loadingGet = useSelector(selectStudentLoadingGet);
+    const pagination = useSelector(selectStudentPagination);
+    const filters = useSelector((state) => state.student.filters);
 
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [selectedGrade, setSelectedGrade] = useState('');
     const [selectedIsActive, setSelectedIsActive] = useState('');
-
-    const [openAddAdminRightPanel, setOpenAddAdminRightPanel] = useState(false);
+    const [openAddStudentRightPanel, setOpenAddStudentRightPanel] = useState(false);
 
     useEffect(() => {
-        loadAdmins();
-    }, [currentPage, itemsPerPage, debouncedSearch, selectedIsActive]);
+        loadStudents();
+    }, [currentPage, itemsPerPage, debouncedSearch, selectedGrade, selectedIsActive]);
 
-    const loadAdmins = () => {
+    const loadStudents = () => {
+
         const params = {
             page: currentPage,
             limit: itemsPerPage,
             search: debouncedSearch || undefined,
+            grade: selectedGrade || undefined,
         };
 
         if (selectedIsActive === 'true') {
@@ -50,13 +52,19 @@ export const AdminList = () => {
             params.isActive = false;
         }
 
-        dispatch(getAllAdminsAsync(params));
+        dispatch(getAllStudentsAsync(params));
     };
 
     const handleSearchChangeWrapper = (value) => {
         handleSearchChange(value);
         setCurrentPage(1); // Reset to first page on search
         dispatch(setFilters({ search: value }));
+    };
+
+    const handleGradeChange = (value) => {
+        setSelectedGrade(value);
+        setCurrentPage(1); // Reset to first page on filter change
+        dispatch(setFilters({ grade: value }));
     };
 
     const handleIsActiveChange = (value) => {
@@ -74,44 +82,43 @@ export const AdminList = () => {
         setCurrentPage(1); // Reset to first page when changing items per page
     };
 
-    const handleView = (admin) => {
-        navigate(ROUTES.ADMIN_DETAIL(admin.adminId));
+    const handleView = (student) => {
+        navigate(ROUTES.STUDENT_DETAIL(student.studentId));
     };
-
-    const handleOpenAddAdmin = () => {
-        setOpenAddAdminRightPanel(true);
+    const handleOpenAddStudent = () => {
+        setOpenAddStudentRightPanel(true);
+    }
+    const handleToggleActivation = async (student) => {
+        await dispatch(toggleUserActivationAsync(student.userId)).unwrap();
+        loadStudents();
     }
 
-    const handleCloseAddAdmin = () => {
-        setOpenAddAdminRightPanel(false);
+    const handleCloseAddStudent = async () => {
+        setOpenAddStudentRightPanel(false);
     }
-
-    const handleToggleActivation = async (admin) => {
-        await dispatch(toggleUserActivationAsync(admin.userId)).unwrap();
-        loadAdmins();
-    }
-
     return (
         <>
             {/* Header */}
             <div className="mb-2">
                 <div className="flex items-center justify-between mb-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Quản lý Admin</h1>
+                        <h1 className="text-2xl font-bold text-foreground">Quản lý học sinh</h1>
                         <p className="text-foreground-light text-sm mt-1">
-                            Quản lý danh sách quản trị viên trong hệ thống.
+                            Quản lý danh sách học sinh trong hệ thống.
                         </p>
                     </div>
-                    <Button onClick={handleOpenAddAdmin}>
+                    <Button onClick={handleOpenAddStudent}>
                         <Plus size={16} />
-                        Thêm quản trị viên mới
+                        Thêm học sinh mới
                     </Button>
                 </div>
 
                 {/* Filter and Search */}
-                <AdminFilters
+                <StudentFilters
                     search={search}
                     onSearchChange={handleSearchChangeWrapper}
+                    grade={selectedGrade}
+                    onGradeChange={handleGradeChange}
                     isActive={selectedIsActive}
                     onIsActiveChange={handleIsActiveChange}
                 />
@@ -120,19 +127,19 @@ export const AdminList = () => {
             {/* Stats Grid */}
             <StatsGrid cols={3} className="mb-4">
                 <StatsCard
-                    label="Tổng quản trị viên"
+                    label="Tổng học sinh"
                     value={pagination.total}
                     loading={loadingGet}
                 />
                 <StatsCard
                     label="Đang hiển thị"
-                    value={admins.length}
+                    value={students.length}
                     variant="primary"
                     loading={loadingGet}
                 />
                 <StatsCard
                     label="Đang hoạt động"
-                    value={admins.filter(admin => admin.isActive).length}
+                    value={students.filter(student => student.isActive).length}
                     variant="success"
                     loading={loadingGet}
                 />
@@ -140,16 +147,23 @@ export const AdminList = () => {
 
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
-                <AdminTable
-                    admins={admins}
+                <StudentTable
+                    students={students}
                     onView={handleView}
-                    // onDelete={handleDelete}
                     loading={loadingGet}
                     onToggleActivation={handleToggleActivation}
                 />
 
                 {/* Pagination */}
                 <div className="p-4 border-t border-border">
+
+                    <RightPanel
+                        isOpen={openAddStudentRightPanel}
+                        onClose={handleCloseAddStudent}
+                        title="Thêm học sinh mới"
+                    >
+                        <AddStudent onClose={handleCloseAddStudent} />
+                    </RightPanel>
                     <Pagination
                         currentPage={currentPage}
                         totalPages={pagination.totalPages}
@@ -162,15 +176,6 @@ export const AdminList = () => {
                     />
                 </div>
             </div>
-
-            <RightPanel
-                isOpen={openAddAdminRightPanel}
-                onClose={handleCloseAddAdmin}
-                title="Thêm quản trị viên mới"
-            >
-                <AddAdmin onClose={handleCloseAddAdmin} />
-            </RightPanel>
-
         </>
     );
 }

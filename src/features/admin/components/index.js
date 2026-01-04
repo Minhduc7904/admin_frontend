@@ -5,3 +5,4 @@ export { AdminDetailBreadcrumb } from './AdminDetailBreadcrumb';
 export { AdminProfileOverview } from './AdminProfileOverview';
 export { AdminInfoTab } from './AdminInfoTab';
 export { AdminProfileLayout } from '../layouts/AdminProfileLayout';
+export { AddAdmin } from './AddAdmin';

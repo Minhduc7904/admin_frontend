@@ -1,7 +1,7 @@
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, UserX, UserCheck } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
 
-export const AdminTable = ({ admins, onView, onDelete, loading }) => {
+export const AdminTable = ({ admins, onView, onToggleActivation, loading }) => {
     const columns = [
         {
             key: 'adminId',
@@ -41,11 +41,19 @@ export const AdminTable = ({ admins, onView, onDelete, loading }) => {
         {
             key: 'email',
             label: 'Email',
-            render: (admin) => (
-                <div className="text-sm text-foreground-light">
-                    {admin.email}
-                </div>
-            )
+            render: (admin) => {
+                if (admin.email) return (
+                    <div className={`${admin.isEmailVerified ? 'text-green-600 ' : 'text-yellow-600'} font-medium flex flex-col text-sm`}>
+                        {admin.email}
+                        {!admin.isEmailVerified && (
+                            <span className="inline-flex items-center text-xs text-yellow-700">
+                                Chưa xác minh
+                            </span>
+                        )}
+                    </div>
+                );
+                return <span className="italic text-foreground-lighter">Chưa cập nhật</span>;
+            }
         },
         {
             key: 'isActive',
@@ -75,10 +83,12 @@ export const AdminTable = ({ admins, onView, onDelete, loading }) => {
                             onClick: () => onView(admin),
                         },
                         {
-                            label: 'Xóa quản trị viên',
-                            icon: <Trash2 size={14} />,
-                            variant: 'danger',
-                            onClick: () => onDelete(admin),
+                            label: admin.isActive ? 'Vô hiệu hóa tài khoản' : 'Kích hoạt tài khoản',
+                            icon: admin.isActive
+                                ? <UserX size={14} />
+                                : <UserCheck size={14} />,
+                            variant: admin.isActive ? 'danger' : 'success',
+                            onClick: () => onToggleActivation(admin),
                         },
                     ]}
                 />

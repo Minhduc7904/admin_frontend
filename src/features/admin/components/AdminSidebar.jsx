@@ -9,7 +9,8 @@ import {
   School,
   ScrollText,
   File,
-  ShieldCheck
+  ShieldCheck,
+  
 } from 'lucide-react';
 import { ROUTES } from '../../../core/constants';
 import { Sidebar } from '../../../shared/components/sidebar';
@@ -53,29 +54,17 @@ export const AdminSidebar = () => {
       icon: ShieldCheck,
     },
     {
+      key: 'student',
+      name: 'Quản lý học sinh',
+      href: ROUTES.STUDENTS,
+      icon: Users,
+    },
+    {
       key: 'classrooms',
       name: 'Quản lý lớp học',
       href: ROUTES.ADMIN_CLASSROOMS,
       icon: School
     },
-    {
-      key: 'tutors',
-      name: 'Quản lý gia sư',
-      href: '/admin/tutors',
-      icon: UserCheck
-    },
-    {
-      key: 'students',
-      name: 'Quản lý học sinh',
-      href: '/admin/students',
-      icon: Users
-    },
-    {
-      key: 'reports',
-      name: 'Quản lý báo cáo',
-      href: '/admin/reports',
-      icon: FileText
-    }
   ];
 
   return <Sidebar menuItems={menuItems} />;

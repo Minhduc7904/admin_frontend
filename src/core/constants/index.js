@@ -36,6 +36,10 @@ export const ROUTES = {
   ADMIN_ROLES: (id = ':id') => `/admins/${id}/roles`,
   ADMIN_MEDIA: (id = ':id') => `/admins/${id}/media`,
   ADMIN_AUDIT_LOGS: (id = ':id') => `/admins/${id}/audit-logs`,
+  STUDENTS: '/students',
+  STUDENT_DETAIL: (id = ':id') => `/students/${id}`,
+  STUDENT_ROLES: (id = ':id') => `/students/${id}/roles`,
+  STUDENT_MEDIA: (id = ':id') => `/students/${id}/media`,
 };
 
 // API Endpoints
@@ -54,6 +58,7 @@ export const API_ENDPOINTS = {
   USERS: {
     LIST: "/users",
     DETAIL: (id) => `/users/${id}`,
+    TOGGLE_ACTIVATION: (id) => `/users/${id}/toggle-activation`,
     CREATE: "/users",
     UPDATE: (id) => `/users/${id}`,
     DELETE: (id) => `/users/${id}`,
@@ -64,6 +69,13 @@ export const API_ENDPOINTS = {
     CREATE: "/admins",
     UPDATE: (id) => `/admins/${id}`,
     DELETE: (id) => `/admins/${id}`,
+  },
+  STUDENTS: {
+    LIST: "/students",
+    DETAIL: (id) => `/students/${id}`,
+    CREATE: "/students",
+    UPDATE: (id) => `/students/${id}`,
+    DELETE: (id) => `/students/${id}`,
   },
   PERMISSIONS: {
     LIST: "/permissions",

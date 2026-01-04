@@ -8,6 +8,8 @@ import auditLogReducer from '../../features/adminAuditLog/store/auditLogSlice';
 import mediaReducer from '../../features/media/store/mediaSlice';
 import mediaUsageReducer from '../../features/mediaUsage/store/mediaUsageSlice';
 import adminReducer from '../../features/admin/store/adminSlice';
+import { userReducer } from '../../features/user/store/userSlice';
+import studentReducer from '../../features/student/store/studentSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,5 +22,7 @@ export const store = configureStore({
     media: mediaReducer,
     mediaUsage: mediaUsageReducer,
     admin: adminReducer,
+    user: userReducer,
+    student: studentReducer,
   },
 });

@@ -46,6 +46,16 @@ export const getAdminByIdAsync = createAsyncThunk(
     }
 );
 
+export const createAdminAsync = createAsyncThunk(
+    "admin/create",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => adminApi.create(data), thunkAPI, {
+            successTitle: "Tạo quản trị viên thành công",
+            errorTitle: "Lỗi tạo quản trị viên",
+        });
+    }
+);
+
 export const adminSlice = createSlice({
     name: "admin",
     initialState,
@@ -93,6 +103,20 @@ export const adminSlice = createSlice({
             })
             .addCase(getAdminByIdAsync.rejected, (state, action) => {
                 state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Create admin
+            .addCase(createAdminAsync.pending, (state) => {
+                state.loadingCreate = true;
+                state.error = null;
+            })
+            .addCase(createAdminAsync.fulfilled, (state, action) => {
+                state.loadingCreate = false;
+                console.log('Created admin:', action.payload.data);
+                state.admins.unshift(action.payload.data);
+            })
+            .addCase(createAdminAsync.rejected, (state, action) => {
+                state.loadingCreate = false;
                 state.error = action.payload;
             });
     },

@@ -1,6 +1,6 @@
 import { SearchInput, Dropdown } from '../../../shared/components/ui';
 
-export const AdminFilters = ({ search, onSearchChange, role, onRoleChange, roles, loadingRoles }) => {
+export const AdminFilters = ({ search, onSearchChange, isActive, onIsActiveChange, role, onRoleChange, roles, loadingRoles }) => {
     // const roleOptions = [
     //     { value: '', label: 'Tất cả vai trò' },
     //     ...roles.map(r => ({ value: r.roleId, label: r.roleName }))
@@ -14,6 +14,18 @@ export const AdminFilters = ({ search, onSearchChange, role, onRoleChange, roles
                         value={search}
                         onChange={onSearchChange}
                         placeholder="Tìm kiếm quản trị viên (username, email)..."
+                    />
+                </div>
+                <div className="w-48">
+                    <Dropdown
+                        value={isActive}
+                        onChange={onIsActiveChange}
+                        options={[
+                            { value: '', label: 'Tất cả trạng thái' },
+                            { value: 'true', label: 'Đang hoạt động' },
+                            { value: 'false', label: 'Đã vô hiệu hóa' },
+                        ]}
+                        placeholder="Chọn trạng thái"
                     />
                 </div>
                 {/* <div className="w-64">

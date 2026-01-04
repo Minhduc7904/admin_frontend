@@ -22,7 +22,7 @@ export const Input = ({
           htmlFor={inputId}
           className="block text-sm font-medium text-foreground mb-1"
         >
-          {label}
+          {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
       <input
@@ -34,15 +34,13 @@ export const Input = ({
         disabled={disabled}
         placeholder={placeholder}
         required={required}
-        className={`w-full px-3 py-2 text-sm border rounded-sm focus:outline-none ${
-          error
-            ? 'border-red-500 focus:border-red-500'
-            : 'border-border focus:border-foreground'
-        } ${
-          disabled
+        className={`w-full px-3 py-2 text-sm border rounded-sm focus:outline-none ${error
+          ? 'border-red-500 focus:border-red-500'
+          : 'border-border focus:border-foreground'
+          } ${disabled
             ? 'bg-gray-50 text-foreground-light cursor-not-allowed'
             : 'bg-primary'
-        } ${className}`}
+          } ${className}`}
         {...props}
       />
       {error && (

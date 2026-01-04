@@ -1,9 +1,9 @@
 import { useParams } from 'react-router-dom';
 import { useAppSelector } from '../../../core/store/hooks';
 import { selectCurrentAdmin, selectAdminLoadingGet } from '../store/adminSlice';
-import { UserRolePage } from '../../role/pages';
+import { MediaPage } from '../../media/pages';
 
-export const AdminRole = () => {
+export const AdminMedia = () => {
     const { id } = useParams();
     const adminId = Number(id);
     
@@ -21,7 +21,7 @@ export const AdminRole = () => {
     }
 
     return (
-        <UserRolePage 
+        <MediaPage 
             userId={admin?.userId} 
             userType="admin"
             loading={adminLoading}

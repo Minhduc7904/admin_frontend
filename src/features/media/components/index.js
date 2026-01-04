@@ -5,3 +5,4 @@ export { MediaPreview } from './MediaPreview';
 export { MediaInfo } from './MediaInfo';
 export { MediaUploadModal } from './MediaUploadModal';
 export * from './previews';
+export { BucketSidebar } from './BucketSidebar';

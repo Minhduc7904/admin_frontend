@@ -19,4 +19,8 @@ export const adminApi = {
     getById: (id) => {
         return axiosClient.get(API_ENDPOINTS.ADMINS.DETAIL(id));
     },
+
+    create: (data) => {
+        return axiosClient.post(API_ENDPOINTS.ADMINS.CREATE, data);
+    }
 };

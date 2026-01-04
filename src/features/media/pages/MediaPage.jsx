@@ -1,60 +1,39 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RefreshCw, LoaderCircle, Upload, FolderOpen } from 'lucide-react';
-import { Button, StatsCard, StatsGrid, RightPanel } from '../../../shared/components/ui';
-import { MediaTable, MediaFilters, MediaDetail, MediaUploadModal } from '../components';
+import { RefreshCw, LoaderCircle, Upload } from 'lucide-react';
+import { Button, StatsCard, StatsGrid, RightPanel } from '../../../shared/components';
+import { MediaTable, MediaFilters, MediaDetail, MediaUploadModal, BucketSidebar } from '../components';
 import { useSearch, useInfiniteScroll } from '../../../shared/hooks';
-import { useParams } from 'react-router-dom';
 import {
     getAllMediaAsync,
     getBucketsAsync,
     getMediaByIdAsync,
     uploadMediaAsync,
-    softDeleteMediaAsync,
     hardDeleteMediaAsync,
     selectMedia,
-    selectBuckets,
     selectMediaPagination,
     selectMediaLoadingGet,
-    selectMediaLoadingBuckets,
     selectMediaLoadingUpload,
     selectMediaLoadingSoftDelete,
     setFilters,
     selectMediaFilters,
 } from '../store/mediaSlice';
-import {
-    selectCurrentAdmin,
-    selectAdminLoadingGet
-} from '../../admin/store/adminSlice';
 
-export const MediaList = () => {
+/**
+ * MediaPage - Shared component for managing media
+ * Can be used for global media list or filtered by userId
+ * 
+ * @param {number} userId - Optional user ID to filter media by uploader
+ * @param {string} userType - Type of user ('admin' or 'student') for display text
+ * @param {boolean} loading - Loading state from parent
+ */
+export const MediaPage = ({ userId = null, userType = null, loading: parentLoading = false }) => {
     const dispatch = useDispatch();
 
-    const { id } = useParams();
-    const admin = useSelector(selectCurrentAdmin);
-    const loadingAdminGet = useSelector(selectAdminLoadingGet);
-    const invalidId = isNaN(id) || id <= 0;
-    const [userId, setUserId] = useState(null);
-    const [loadingAdminDone, setLoadingAdminDone] = useState(false);
-    
-    useEffect(() => {
-        if (id && !invalidId && admin?.userId) {
-            setUserId(Number(admin.userId));
-            setLoadingAdminDone(true);
-        } else if (invalidId || !id) {
-            setUserId(null);
-            setLoadingAdminDone(true);
-        } else {
-            setUserId(null);
-        }
-    }, [id, invalidId, admin?.userId]);
-
     const media = useSelector(selectMedia);
-    const buckets = useSelector(selectBuckets);
     const pagination = useSelector(selectMediaPagination);
     const filters = useSelector(selectMediaFilters);
     const loadingGet = useSelector(selectMediaLoadingGet);
-    const loadingBuckets = useSelector(selectMediaLoadingBuckets);
     const loadingUpload = useSelector(selectMediaLoadingUpload);
     const loadingDelete = useSelector(selectMediaLoadingSoftDelete);
 
@@ -72,15 +51,15 @@ export const MediaList = () => {
 
     // Load buckets
     useEffect(() => {
-        if (!loadingAdminDone) return;
+        if (parentLoading) return;
         dispatch(getBucketsAsync());
-    }, [dispatch, loadingAdminDone]);
+    }, [dispatch, parentLoading]);
 
     // Load initial data
     useEffect(() => {
-        if (!loadingAdminDone) return; 
+        if (parentLoading) return;
         loadMedia(1, true);
-    }, [debouncedSearch, selectedBucket, type, status, sortBy, sortOrder, userId, loadingAdminDone]);
+    }, [debouncedSearch, selectedBucket, type, status, sortBy, sortOrder, userId, parentLoading]);
 
     // Update allMedia when new data comes in
     useEffect(() => {
@@ -92,14 +71,12 @@ export const MediaList = () => {
     }, [media, currentPage]);
 
     const loadMedia = useCallback((page = 1, reset = false) => {
-        if (!loadingAdminDone) return;
+        if (parentLoading) return;
         if (reset) {
             setAllMedia([]);
             setCurrentPage(1);
         }
-        // console.log('Loading media with params:', {
-        //     debouncedSearch, selectedBucket, type, status, sortBy, sortOrder, userId, loadingAdminDone
-        // } );
+        
         const params = {
             page,
             limit: 20,
@@ -113,15 +90,15 @@ export const MediaList = () => {
         };
 
         dispatch(getAllMediaAsync(params));
-    }, [debouncedSearch, selectedBucket, type, status, sortBy, sortOrder, userId, loadingAdminDone]);
+    }, [debouncedSearch, selectedBucket, type, status, sortBy, sortOrder, userId, parentLoading, dispatch]);
 
     const loadMore = useCallback(() => {
-        if (pagination.hasNext && !loadingGet && loadingAdminDone) {
+        if (pagination.hasNext && !loadingGet && !parentLoading) {
             const nextPage = currentPage + 1;
             setCurrentPage(nextPage);
             loadMedia(nextPage, false);
         }
-    }, [pagination.hasNext, loadingGet, currentPage, loadMedia, loadingAdminDone]);
+    }, [pagination.hasNext, loadingGet, currentPage, loadMedia, parentLoading]);
 
     // Infinite scroll
     const lastElementRef = useInfiniteScroll(loadMore, pagination.hasNext, loadingGet);
@@ -159,7 +136,6 @@ export const MediaList = () => {
     const handleViewDetail = async (mediaItem) => {
         setSelectedMedia(mediaItem.mediaId);
         setIsDetailPanelOpen(true);
-        // Load full media details
         await dispatch(getMediaByIdAsync(mediaItem.mediaId));
     };
 
@@ -196,53 +172,23 @@ export const MediaList = () => {
     const videoCount = allMedia.length > 0 ? allMedia.filter(m => m.type === 'VIDEO').length : 0;
     const documentCount = allMedia.length > 0 ? allMedia.filter(m => m.type === 'DOCUMENT').length : 0;
 
+    const userTypeText = userType === 'student' ? 'học sinh' : userType === 'admin' ? 'quản trị viên' : null;
+    const pageTitle = userId && userTypeText ? `Media của ${userTypeText}` : 'Quản lý Media';
+    const pageDescription = userId && userTypeText 
+        ? `Danh sách media được tải lên bởi ${userTypeText}`
+        : 'Quản lý các file media trong hệ thống';
+
+    // Don't show upload button when viewing user-specific media
+    const showUploadButton = !userId;
+
     return (
         <div className="flex h-full gap-6">
             {/* Left Sidebar - Buckets */}
-            <div className="w-64 flex-shrink-0">
-                <div className="bg-white border border-border rounded-sm overflow-hidden sticky top-4">
-                    <div className="p-4 border-b border-border">
-                        <div className="flex items-center gap-2">
-                            <FolderOpen size={18} className="text-foreground-light" />
-                            <h3 className="font-semibold text-foreground">Buckets</h3>
-                        </div>
-                    </div>
-                    <nav className="p-2">
-                        <button
-                            onClick={() => handleBucketChange('')}
-                            className={`w-full text-left px-4 py-3 rounded-sm transition-colors ${selectedBucket === ''
-                                ? 'bg-gray-100 text-foreground font-medium'
-                                : 'text-foreground-light hover:bg-gray-50 hover:text-foreground'
-                                }`}
-                        >
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm">Tất cả buckets</span>
-                            </div>
-                        </button>
-                        {(loadingBuckets || !loadingAdminDone) ? (
-                            <div className="p-4 text-center text-sm text-foreground-light">
-                                Đang tải...
-                            </div>
-                        ) : (
-                            buckets.length > 0 && buckets.map((bucket) => (
-                                <button
-                                    key={bucket.name}
-                                    onClick={() => handleBucketChange(bucket.name)}
-                                    className={`w-full text-left px-4 py-3 rounded-sm transition-colors ${selectedBucket === bucket.name
-                                        ? 'bg-gray-100 text-foreground font-medium'
-                                        : 'text-foreground-light hover:bg-gray-50 hover:text-foreground'
-                                        }`}
-                                >
-                                    <div className="text-sm">{bucket.label}</div>
-                                    <div className="text-xs text-foreground-light mt-0.5">
-                                        {bucket.description}
-                                    </div>
-                                </button>
-                            ))
-                        )}
-                    </nav>
-                </div>
-            </div>
+            <BucketSidebar
+                selectedBucket={selectedBucket}
+                onBucketChange={handleBucketChange}
+                loadingAdminDone={!parentLoading}
+            />
 
             {/* Right Content */}
             <div className="flex-1 min-w-0">
@@ -250,20 +196,26 @@ export const MediaList = () => {
                 <div className="mb-2">
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-foreground">Quản lý Media</h1>
+                            <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
                             <p className="text-foreground-light text-sm mt-1">
-                                Quản lý các file media trong hệ thống
+                                {pageDescription}
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            <Button onClick={handleRefresh} disabled={loadingGet} variant="outline">
+                            <Button 
+                                onClick={handleRefresh}
+                                disabled={loadingGet}
+                                variant={userId ? "primary" : "outline"}
+                            >
                                 <RefreshCw size={16} className={loadingGet ? 'animate-spin' : ''} />
                                 Làm mới
                             </Button>
-                            <Button variant="primary" onClick={() => setIsUploadModalOpen(true)}>
-                                <Upload size={16} />
-                                Tải lên
-                            </Button>
+                            {showUploadButton && (
+                                <Button variant="primary" onClick={() => setIsUploadModalOpen(true)}>
+                                    <Upload size={16} />
+                                    Tải lên
+                                </Button>
+                            )}
                         </div>
                     </div>
 
@@ -287,25 +239,25 @@ export const MediaList = () => {
                     <StatsCard
                         label="Tổng media"
                         value={pagination.total}
-                        loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
+                        loading={(loadingGet && currentPage === 1) || parentLoading}
                     />
                     <StatsCard
                         label="Hình ảnh"
                         value={imageCount}
                         variant="info"
-                        loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
+                        loading={(loadingGet && currentPage === 1) || parentLoading}
                     />
                     <StatsCard
                         label="Video"
                         value={videoCount}
                         variant="success"
-                        loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
+                        loading={(loadingGet && currentPage === 1) || parentLoading}
                     />
                     <StatsCard
                         label="Tài liệu"
                         value={documentCount}
                         variant="warning"
-                        loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
+                        loading={(loadingGet && currentPage === 1) || parentLoading}
                     />
                 </StatsGrid>
 
@@ -319,7 +271,7 @@ export const MediaList = () => {
                     />
 
                     {/* Loading more indicator */}
-                    {(loadingGet && currentPage > 1) || !loadingAdminDone && (
+                    {((loadingGet && currentPage > 1) || parentLoading) && (
                         <div className="flex items-center justify-center py-4 border-t border-border">
                             <LoaderCircle className="animate-spin text-info mr-2" size={20} />
                             <span className="text-sm text-foreground-light">Đang tải thêm...</span>
@@ -353,12 +305,14 @@ export const MediaList = () => {
             </RightPanel>
 
             {/* Upload Modal */}
-            <MediaUploadModal
-                isOpen={isUploadModalOpen}
-                onClose={() => setIsUploadModalOpen(false)}
-                onUpload={handleUpload}
-                loading={loadingUpload}
-            />
+            {showUploadButton && (
+                <MediaUploadModal
+                    isOpen={isUploadModalOpen}
+                    onClose={() => setIsUploadModalOpen(false)}
+                    onUpload={handleUpload}
+                    loading={loadingUpload}
+                />
+            )}
         </div>
     );
 };

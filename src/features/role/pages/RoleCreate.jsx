@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Tabs } from '../../../shared/components/ui';
+import { Button, Tabs, PageHeader } from '../../../shared/components';
 import { RoleFormFields, RolePermissionSelector } from '../components';
 import {
     createRoleAsync,
@@ -109,25 +109,15 @@ export const RoleCreate = () => {
     // 3. Render
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="p-2 rounded-sm hover:bg-primary/40"
-                >
-                    <ArrowLeft size={20} />
-                </button>
-
-                <div>
-                    <h1 className="text-2xl font-semibold text-foreground">
-                        Tạo vai trò mới
-                    </h1>
-                    <p className="text-sm text-foreground-light mt-1">
-                        Thêm vai trò mới vào hệ thống
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                breadcrumb={[
+                    { label: 'Bảng điều khiển', to: '/dashboard' },
+                    { label: 'Vai trò', to: ROUTES.ROLES },
+                    { label: 'Tạo vai trò' },
+                ]}
+                badge="Quản lý vai trò"
+                description="Tạo vai trò mới và gán các quyền hạn tương ứng trong hệ thống."
+            />
             <Tabs tabs={tabs} />
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Tabs + content */}

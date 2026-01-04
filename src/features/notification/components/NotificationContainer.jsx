@@ -10,7 +10,7 @@ export const NotificationContainer = () => {
 
   return (
     <div
-      className="fixed top-4 right-4 z-50 space-y-2 pointer-events-none"
+      className="fixed top-4 right-4 z-[1000] space-y-2 pointer-events-none"
       style={{ maxHeight: 'calc(100vh - 2rem)' }}
     >
       <div className="flex flex-col-reverse max-h-full overflow-hidden">

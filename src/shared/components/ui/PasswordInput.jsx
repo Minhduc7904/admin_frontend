@@ -22,7 +22,7 @@ export const PasswordInput = ({
           htmlFor={inputId}
           className="block text-sm font-medium text-foreground mb-1"
         >
-          {label}
+          {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
       <div className="relative">

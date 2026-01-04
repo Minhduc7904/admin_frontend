@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Tabs } from '../../../shared/components/ui';
+import { Button, Tabs, PageHeader } from '../../../shared/components';
 import { RoleFormFields, RolePermissionSelector } from '../components';
 import {
     getRoleByIdAsync,
@@ -162,25 +162,15 @@ export const RoleEdit = () => {
     // 3. Render
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="p-2 rounded-sm hover:bg-primary/40"
-                >
-                    <ArrowLeft size={20} />
-                </button>
-
-                <div>
-                    <h1 className="text-2xl font-semibold text-foreground">
-                        Chỉnh sửa vai trò
-                    </h1>
-                    <p className="text-sm text-foreground-light mt-1">
-                        Cập nhật thông tin vai trò {currentRole?.roleName}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                breadcrumb={[
+                    { label: 'Dashboard', to: ROUTES.DASHBOARD },
+                    { label: 'Vai trò', to: ROUTES.ROLES },
+                    { label: 'Chỉnh sửa' },
+                ]}
+                badge="Role Management"
+                description={`Cập nhật thông tin vai trò ${currentRole?.roleName || ''}`}
+            />
             <Tabs tabs={tabs} />
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Tabs + content */}
