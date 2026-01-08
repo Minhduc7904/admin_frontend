@@ -26,8 +26,9 @@ import {
  * @param {number} userId - Optional user ID to filter media by uploader
  * @param {string} userType - Type of user ('admin' or 'student') for display text
  * @param {boolean} loading - Loading state from parent
+ * @param {boolean} requireUserId - If true, wait for userId before loading data
  */
-export const MediaPage = ({ userId = null, userType = null, loading: parentLoading = false }) => {
+export const MediaPage = ({ userId = null, userType = null, loading: parentLoading = false, requireUserId = false }) => {
     const dispatch = useDispatch();
 
     const media = useSelector(selectMedia);
@@ -58,8 +59,10 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
     // Load initial data
     useEffect(() => {
         if (parentLoading) return;
+        // If requireUserId is true, wait until userId is available
+        if (requireUserId && !userId) return;
         loadMedia(1, true);
-    }, [debouncedSearch, selectedBucket, type, status, sortBy, sortOrder, userId, parentLoading]);
+    }, [debouncedSearch, selectedBucket, type, status, sortBy, sortOrder, userId, parentLoading, requireUserId]);
 
     // Update allMedia when new data comes in
     useEffect(() => {

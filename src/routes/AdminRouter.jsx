@@ -3,10 +3,13 @@ import { RoleList, RoleCreate, RoleEdit } from '../features/role/pages';
 import { PermissionList } from '../features/permission/pages';
 import { AuditLogList } from '../features/adminAuditLog/pages';
 import { MediaPage } from '../features/media/pages';
+import { MediaFolderPage } from '../features/mediaFolder/pages';
 import { AdminList } from '../features/admin/pages/AdminList';
 import { AdminDetail } from '../features/admin/pages/AdminDetail';
 import { AdminRole } from '../features/admin/pages/AdminRole';
 import { AdminMedia } from '../features/admin/pages/AdminMedia';
+import { ChapterPage } from '../features/chapter/pages';
+import { SubjectPage } from '../features/subject/pages/SubjectPage';
 import { StudentList, StudentDetail, StudentRole, StudentMedia } from '../features/student/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
@@ -29,8 +32,11 @@ export const adminRouter = [
             { path: ROUTES.PERMISSIONS, element: <PermissionList /> },
             { path: ROUTES.AUDIT_LOGS, element: <AuditLogList /> },
             { path: ROUTES.MEDIA, element: <MediaPage /> },
+            { path: ROUTES.MEDIA_FOLDERS, element: <MediaFolderPage /> },
             { path: ROUTES.ADMINS, element: <AdminList /> },
             { path: ROUTES.STUDENTS, element: <StudentList /> },
+            { path: ROUTES.CHAPTERS, element: <ChapterPage /> },
+            { path: ROUTES.SUBJECTS, element: <SubjectPage /> },
 
             // 🔥 Admin profile group
             {

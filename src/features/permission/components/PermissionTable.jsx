@@ -111,6 +111,10 @@ export const PermissionTable = ({ permissions, onEdit, onDelete, loading }) => {
             data={permissions}
             loading={loading}
             emptyMessage="Không có quyền nào"
+            emptyIcon="shield_check"
+            emptySubMessage="Chưa có quyền nào được tạo trong hệ thống"
+            emptyActionLabel="Tải lại"
+            onEmptyAction={() => window.location.reload()}
         />
     );
 };

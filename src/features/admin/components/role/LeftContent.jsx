@@ -1,6 +1,6 @@
 import { ChevronDown, KeyRound } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SkeletonCard } from '../../../../shared/components/loading';
+import { SkeletonCard, EmptyState } from '../../../../shared/components';
 
 
 const Header = ({ aggregatedPermissions }) => {
@@ -20,6 +20,7 @@ const Header = ({ aggregatedPermissions }) => {
     )
 }
 
+
 const Content = ({ loadingRoles, groupedPermissions, expandedGroups, toggleGroup }) => {
     if (loadingRoles) {
         return <SkeletonCard count={1} />;
@@ -27,13 +28,12 @@ const Content = ({ loadingRoles, groupedPermissions, expandedGroups, toggleGroup
 
     if (groupedPermissions.length === 0) {
         return (
-            <div className="border border-dashed border-border rounded-sm p-8 text-center text-foreground-light">
-                <KeyRound className="w-10 h-10 mx-auto mb-3 text-border" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">Chưa có quyền nào</h3>
-                <p className="text-sm">
-                    Khi quản trị viên được gán role, toàn bộ quyền sẽ được tổng hợp và hiển thị tại đây.
-                </p>
-            </div>
+            <EmptyState
+                icon="shield_check"
+                title="Chưa có quyền nào"
+                description="Khi người dùng được gán role, toàn bộ quyền sẽ được tổng hợp và hiển thị tại đây."
+                size="sm"
+            />
         );
     }
 
@@ -54,7 +54,10 @@ const Content = ({ loadingRoles, groupedPermissions, expandedGroups, toggleGroup
                             aria-expanded={isOpen}
                         >
                             <div className="flex items-center gap-3">
-                                <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                                <motion.div
+                                    animate={{ rotate: isOpen ? 180 : 0 }}
+                                    transition={{ duration: 0.2 }}
+                                >
                                     <ChevronDown className="w-4 h-4 text-foreground-light" />
                                 </motion.div>
                                 <div className="flex flex-col text-left">
@@ -77,8 +80,10 @@ const Content = ({ loadingRoles, groupedPermissions, expandedGroups, toggleGroup
                                 >
                                     <div className="space-y-3 px-3 pb-3">
                                         {permissions.map((permission) => {
-                                            const rolePreview = permission.roles.slice(0, 3);
-                                            const extraCount = permission.roles.length - rolePreview.length;
+                                            const extraCount =
+                                                permission.roles.length > 3
+                                                    ? permission.roles.length - 3
+                                                    : 0;
 
                                             return (
                                                 <div
@@ -98,21 +103,12 @@ const Content = ({ loadingRoles, groupedPermissions, expandedGroups, toggleGroup
                                                             {permission.group || 'Không nhóm'}
                                                         </span>
                                                     </div>
-                                                    <div className="flex flex-wrap items-center gap-1">
-                                                        {/* {rolePreview.map((roleName) => (
-                                                                        <span
-                                                                            key={`${permission.permissionId}-${roleName}`}
-                                                                            className="px-2 py-0.5 text-[11px] rounded-sm bg-primary/10 text-foreground"
-                                                                        >
-                                                                            {roleName}
-                                                                        </span>
-                                                                    ))} */}
-                                                        {extraCount > 0 && (
-                                                            <span className="px-2 py-0.5 text-[11px] rounded-sm bg-primary/10 text-foreground-light">
-                                                                +{extraCount} role khác
-                                                            </span>
-                                                        )}
-                                                    </div>
+
+                                                    {extraCount > 0 && (
+                                                        <span className="text-[11px] px-2 py-0.5 rounded-sm bg-primary/10 text-foreground-light w-fit">
+                                                            +{extraCount} role khác
+                                                        </span>
+                                                    )}
                                                 </div>
                                             );
                                         })}
@@ -125,7 +121,8 @@ const Content = ({ loadingRoles, groupedPermissions, expandedGroups, toggleGroup
             })}
         </div>
     );
-}
+};
+
 
 export const LeftContent = ({
     loadingRoles,

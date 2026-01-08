@@ -96,6 +96,9 @@ export const RoleTable = ({ roles, onEdit, onDelete, loading }) => {
             loading={loading}
             emptyMessage="Không có vai trò nào"
             emptySubMessage="Hãy tạo vai trò mới để bắt đầu"
+            emptyIcon="clipboard_list"
+            emptyActionLabel="Tải lại"
+            onEmptyAction={() => window.location.reload()}
         />
     );
 };

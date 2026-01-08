@@ -101,6 +101,10 @@ export const AdminTable = ({ admins, onView, onToggleActivation, loading }) => {
             data={admins}
             loading={loading}
             emptyMessage="Không có quản trị viên nào"
+            emptyIcon='users'
+            emptyActionLabel='Tạo quản trị viên mới'
+            onEmptyAction={() => onView(null)}
+            emptySubMessage="Chưa có quản trị viên nào được tạo trong hệ thống"
         />
     );
 }

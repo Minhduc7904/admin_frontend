@@ -157,6 +157,10 @@ export const AuditLogTable = ({
             }
             lastRowRef={lastElementRef}
             onRowClick={(row) => onViewDetail?.(row)}
+            emptyIcon="clipboard_list"
+            emptySubMessage="Chưa có hoạt động nào được ghi lại trong hệ thống"
+            emptyActionLabel="Tải lại"
+            onEmptyAction={() => window.location.reload()}
         />
     )
 }
