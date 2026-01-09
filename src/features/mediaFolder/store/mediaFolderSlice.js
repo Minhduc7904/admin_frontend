@@ -166,7 +166,7 @@ const mediaFolderSlice = createSlice({
             })
             .addCase(getRootMediaFoldersAsync.fulfilled, (state, action) => {
                 state.loadingRoots = false;
-                state.rootFolders = action.payload.data;
+                state.rootFolders = action.payload.data.data;
                 state.error = null;
             })
             .addCase(getRootMediaFoldersAsync.rejected, (state, action) => {
@@ -194,7 +194,7 @@ const mediaFolderSlice = createSlice({
             })
             .addCase(getMediaFolderChildrenAsync.fulfilled, (state, action) => {
                 state.loadingChildren = false;
-                state.childFolders = action.payload.data;
+                state.childFolders = action.payload.data.data;
                 state.error = null;
             })
             .addCase(getMediaFolderChildrenAsync.rejected, (state, action) => {

@@ -31,6 +31,7 @@ export const ROUTES = {
   PERMISSIONS_EDIT: (id) => `/permissions/${id}/edit`,
   AUDIT_LOGS: '/audit-logs',
   MEDIA: '/media',
+  MEDIA_FOLDERS: '/media-folders',
   ADMINS: '/admins',
   ADMIN_DETAIL: (id = ':id') => `/admins/${id}`,
   ADMIN_ROLES: (id = ':id') => `/admins/${id}/roles`,
@@ -40,6 +41,10 @@ export const ROUTES = {
   STUDENT_DETAIL: (id = ':id') => `/students/${id}`,
   STUDENT_ROLES: (id = ':id') => `/students/${id}/roles`,
   STUDENT_MEDIA: (id = ':id') => `/students/${id}/media`,
+  SUBJECTS: '/subjects',
+  SUBJECT_DETAIL: (id = ':id') => `/subjects/${id}`,
+  CHAPTERS: '/chapters',
+  CHAPTER_DETAIL: (id = ':id') => `/chapters/${id}`,
 };
 
 // API Endpoints
@@ -76,6 +81,20 @@ export const API_ENDPOINTS = {
     CREATE: "/students",
     UPDATE: (id) => `/students/${id}`,
     DELETE: (id) => `/students/${id}`,
+  },
+  SUBJECTS: {
+    LIST: "/subjects",
+    DETAIL: (id) => `/subjects/${id}`,
+    CREATE: "/subjects",
+    UPDATE: (id) => `/subjects/${id}`,
+    DELETE: (id) => `/subjects/${id}`,
+  },
+  CHAPTERS: {
+    LIST: "/chapters",
+    DETAIL: (id) => `/chapters/${id}`,
+    CREATE: "/chapters",
+    UPDATE: (id) => `/chapters/${id}`,
+    DELETE: (id) => `/chapters/${id}`,
   },
   PERMISSIONS: {
     LIST: "/permissions",

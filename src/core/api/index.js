@@ -15,3 +15,5 @@ export { courseClassApi } from './courseClassApi';
 export { classSessionApi } from './classSessionApi';
 export { classStudentApi } from './classStudentApi';
 export { courseEnrollmentApi } from './courseEnrollmentApi';
+export { subjectApi } from './subjectApi';
+export { chapterApi } from './chapterApi';

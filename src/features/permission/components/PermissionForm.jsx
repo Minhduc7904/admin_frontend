@@ -26,10 +26,10 @@ export const PermissionForm = ({
             <div className="flex-1 px-6 py-4 space-y-6">
                 {/* Code */}
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                        Mã quyền <span className="text-red-500">*</span>
-                    </label>
+                    
                     <Input
+                        label="Mã quyền"
+                        required
                         name="code"
                         value={formData.code}
                         onChange={onChange}
@@ -44,10 +44,9 @@ export const PermissionForm = ({
 
                 {/* Name */}
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                        Tên quyền <span className="text-red-500">*</span>
-                    </label>
                     <Input
+                        label="Tên quyền"
+                        required
                         name="name"
                         value={formData.name}
                         onChange={onChange}
@@ -67,6 +66,8 @@ export const PermissionForm = ({
                         onChange={onChange}
                         placeholder="Mô tả chi tiết về quyền này..."
                         rows={4}
+                        maxLength={500}
+                        
                     />
                 </div>
 

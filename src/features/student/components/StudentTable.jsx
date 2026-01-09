@@ -123,6 +123,10 @@ export const StudentTable = ({ students, onView, onToggleActivation, loading }) 
             data={students}
             loading={loading}
             emptyMessage="Không có học sinh nào"
+            emptySubMessage="Chưa có học sinh nào được thêm vào hệ thống"
+            emptyIcon="users"
+            emptyActionLabel="Tải lại"
+            onEmptyAction={() => window.location.reload()}
         />
     );
 }

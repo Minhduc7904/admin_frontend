@@ -152,6 +152,10 @@ export const MediaTable = ({
             rowClassName="transition-colors"
             lastRowRef={lastElementRef}
             onRowClick={(row) => onViewDetail?.(row)}
+            emptyIcon="file"
+            emptySubMessage="Chưa có tệp media nào được tải lên hệ thống"
+            emptyActionLabel="Tải lại"
+            onEmptyAction={() => window.location.reload()}
         />
     )
 }

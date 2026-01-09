@@ -6,10 +6,10 @@ import { MediaPage } from '../../media/pages';
 export const AdminMedia = () => {
     const { id } = useParams();
     const adminId = Number(id);
-    
+
     const admin = useAppSelector(selectCurrentAdmin);
     const adminLoading = useAppSelector(selectAdminLoadingGet);
-    
+
     const invalidId = isNaN(adminId) || adminId <= 0;
 
     if (invalidId) {
@@ -21,10 +21,11 @@ export const AdminMedia = () => {
     }
 
     return (
-        <MediaPage 
-            userId={admin?.userId} 
+        <MediaPage
+            userId={admin?.userId}
             userType="admin"
             loading={adminLoading}
+            requireUserId={true}
         />
     );
 };

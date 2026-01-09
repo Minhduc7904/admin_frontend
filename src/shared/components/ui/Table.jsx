@@ -1,4 +1,5 @@
 import { SkeletonTable } from '../loading/Loading';
+import { EmptyTable } from '../empty';
 
 export const Table = ({
     columns = [],
@@ -6,6 +7,9 @@ export const Table = ({
     loading = false,
     emptyMessage = 'Không có dữ liệu',
     emptySubMessage,
+    emptyIcon = 'database',
+    emptyActionLabel,
+    onEmptyAction,
     rowClassName,
     onRowClick,
     lastRowRef,
@@ -16,10 +20,14 @@ export const Table = ({
 
     if (!data || data.length === 0) {
         return (
-            <div className="text-center py-12 text-foreground-light">
-                <p className="text-lg">{emptyMessage}</p>
-                {emptySubMessage && <p className="text-sm mt-1">{emptySubMessage}</p>}
-            </div>
+            <EmptyTable
+                title={emptyMessage}
+                description={emptySubMessage}
+                icon={emptyIcon}
+                actionLabel={emptyActionLabel}
+                onAction={onEmptyAction}
+                columns={columns.length}
+            />
         );
     }
 

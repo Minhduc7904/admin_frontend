@@ -25,6 +25,7 @@ export const StudentMedia = () => {
             userId={student?.userId} 
             userType="student"
             loading={studentLoading}
+            requireUserId={true}
         />
     );
 };

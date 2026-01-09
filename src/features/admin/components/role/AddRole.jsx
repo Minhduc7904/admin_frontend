@@ -1,142 +1,117 @@
-// 1. Imports
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-    getAllRolesAsync,
-    selectRoles,
-    selectRoleLoadingGet,
-    assignRoleToUserAsync,
-    getUserRolesAsync,
-} from "../../../role/store/roleSlice";
-import { Button, Dropdown, DateTimePicker } from "../../../../shared/components";
+import { useEffect, useMemo, useState } from 'react';
+import { Button, Dropdown, DateTimePicker, EmptyState, InlineLoading } from '../../../../shared/components';
 
-// 2. Component
-export const AddRole = ({ userId, userRoleIds = [], onClose }) => {
-    const dispatch = useDispatch();
+export const AddRole = ({
+    userId,
+    userRoleIds = [],
+    roles = [],
+    loadingRoles,
+    onAssign,
+    onCancel,
+    loading,
+}) => {
+    const [selectedRoleId, setSelectedRoleId] = useState('');
+    const [expiresAt, setExpiresAt] = useState(null);
 
-    // Store
-    const roles = useSelector(selectRoles);
-    const loadingGet = useSelector(selectRoleLoadingGet);
-
-    // Local state
-    const [selectedRoleId, setSelectedRoleId] = useState(null);
-    const [expiresAt, setExpiresAt] = useState(null); // ISO string | null
-    const [submitting, setSubmitting] = useState(false);
-
-    // Load roles
-    useEffect(() => {
-        if (roles.length === 0) dispatch(getAllRolesAsync({ limit: 100 }));
-    }, [dispatch, roles.length]);
-
-    // 🔑 Chỉ lấy role CHƯA được gán
+    // Chỉ lấy role CHƯA được gán
     const availableRoles = useMemo(() => {
-        return roles.filter(
-            (role) => !userRoleIds.includes(role.roleId)
-        );
+        return roles.filter(r => !userRoleIds.includes(r.roleId));
     }, [roles, userRoleIds]);
 
-    const dropdownOptions = useMemo(() => {
-        return availableRoles.map((role) => ({
-            label: role.roleName,
+    const roleOptions = useMemo(() => {
+        return availableRoles.map(role => ({
             value: role.roleId,
+            label: role.roleName,
             description: role.description,
         }));
     }, [availableRoles]);
 
-    // Handlers
-    const handleAssign = async () => {
+    const handleSubmit = (e) => {
+        e.preventDefault();
         if (!selectedRoleId) return;
 
-        try {
-            setSubmitting(true);
-
-            await dispatch(
-                assignRoleToUserAsync({
-                    userId,
-                    roleId: selectedRoleId,
-                    expiresAt: expiresAt || undefined, // 👈 picker đã trả ISO
-                })
-            ).unwrap();
-
-            await dispatch(getUserRolesAsync(userId)).unwrap();
-            onClose?.();
-        } catch (err) {
-            console.error("Assign role failed", err);
-        } finally {
-            setSubmitting(false);
-        }
+        onAssign({
+            roleId: selectedRoleId,
+            expiresAt: expiresAt || undefined,
+        });
     };
 
-    // 3. Render
     return (
-        <div className="flex flex-col h-full">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+            {/* Content */}
+            <div className="flex-1 px-6 py-4 space-y-6">
 
-            {/* Body */}
-            <div className="flex-1 p-4 space-y-4">
-                {loadingGet && (
-                    <p className="text-sm text-foreground-light">
-                        Đang tải danh sách vai trò...
-                    </p>
+                {/* Loading */}
+                {loadingRoles && (
+                    <InlineLoading message="Đang tải danh sách vai trò..." />
                 )}
 
-                {!loadingGet && availableRoles.length === 0 && (
-                    <div className="text-sm text-foreground-light bg-primary/30 p-3 rounded-sm border border-border">
-                        Người dùng đã được gán tất cả vai trò hiện có.
-                    </div>
+                {/* Empty */}
+                {!loadingRoles && availableRoles.length === 0 && (
+                    <EmptyState
+                        icon="shield_check"
+                        title="Không còn vai trò để gán"
+                        description="Người dùng này đã được gán tất cả các vai trò hiện có."
+                        size="sm"
+                    />
                 )}
 
-                {!loadingGet && availableRoles.length > 0 && (
+                {/* Form */}
+                {!loadingRoles && availableRoles.length > 0 && (
                     <>
                         {/* Role */}
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">
-                                Vai trò
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Vai trò <span className="text-red-500">*</span>
                             </label>
                             <Dropdown
-                                options={dropdownOptions}
                                 value={selectedRoleId}
                                 onChange={setSelectedRoleId}
-                                placeholder="Chọn vai trò"
+                                options={roleOptions}
+                                placeholder="Chọn vai trò..."
                             />
+                            <p className="text-xs text-foreground-light mt-1">
+                                Chọn vai trò bạn muốn gán cho người dùng
+                            </p>
                         </div>
 
                         {/* Expiration */}
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">
-                                Ngày hết hạn{" "}
-                                <span className="text-foreground-light">(tuỳ chọn)</span>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Ngày hết hạn <span className="text-foreground-light">(tuỳ chọn)</span>
                             </label>
                             <DateTimePicker
-                                mode="date"                // ✅ CHỈ NGÀY
+                                mode="date"
                                 value={expiresAt}
                                 onChange={setExpiresAt}
                                 placeholder="Không giới hạn thời gian"
                             />
                             <p className="text-xs text-foreground-light mt-1">
-                                Để trống nếu vai trò không có thời hạn.
+                                Để trống nếu vai trò không có thời hạn sử dụng
                             </p>
                         </div>
                     </>
                 )}
             </div>
 
-            {/* Footer */}
-            <div className="border-t border-border p-4 flex justify-end gap-3">
+            {/* Actions – GIỐNG PermissionForm */}
+            <div className="border-t border-border px-6 py-4 flex gap-3 justify-end">
                 <Button
+                    type="button"
                     variant="outline"
-                    onClick={onClose}
-                    disabled={submitting}
+                    onClick={onCancel}
+                    disabled={loading}
                 >
                     Hủy
                 </Button>
                 <Button
-                    onClick={handleAssign}
-                    disabled={!selectedRoleId || submitting}
-                    loading={submitting}
+                    type="submit"
+                    loading={loading}
+                    disabled={loading || !selectedRoleId || availableRoles.length === 0}
                 >
                     Gán vai trò
                 </Button>
             </div>
-        </div>
+        </form>
     );
 };

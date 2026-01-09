@@ -7,9 +7,12 @@ import permissionReducer from '../../features/permission/store/permissionSlice';
 import auditLogReducer from '../../features/adminAuditLog/store/auditLogSlice';
 import mediaReducer from '../../features/media/store/mediaSlice';
 import mediaUsageReducer from '../../features/mediaUsage/store/mediaUsageSlice';
+import mediaFolderReducer from '../../features/mediaFolder/store/mediaFolderSlice';
 import adminReducer from '../../features/admin/store/adminSlice';
 import { userReducer } from '../../features/user/store/userSlice';
 import studentReducer from '../../features/student/store/studentSlice';
+import subjectReducer from '../../features/subject/store/subjectSlice';
+import chapterReducer from '../../features/chapter/store/chapterSlice';
 
 export const store = configureStore({
   reducer: {
@@ -21,8 +24,11 @@ export const store = configureStore({
     auditLog: auditLogReducer,
     media: mediaReducer,
     mediaUsage: mediaUsageReducer,
+    mediaFolder: mediaFolderReducer,
     admin: adminReducer,
     user: userReducer,
     student: studentReducer,
+    subject: subjectReducer,
+    chapter: chapterReducer,
   },
 });
