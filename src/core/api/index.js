@@ -10,3 +10,8 @@ export { mediaFolderApi } from './mediaFolderApi';
 export { adminApi } from './adminApi';
 export { userApi } from './userApi';
 export { studentApi } from './studentApi';
+export { courseApi } from './courseApi';
+export { courseClassApi } from './courseClassApi';
+export { classSessionApi } from './classSessionApi';
+export { classStudentApi } from './classStudentApi';
+export { courseEnrollmentApi } from './courseEnrollmentApi';

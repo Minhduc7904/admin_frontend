@@ -128,6 +128,40 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/media-usages/${id}`,
     DELETE_BY_ENTITY: (entityType, entityId) => `/media-usages/by-entity/${entityType}/${entityId}`,
   },
+  COURSES: {
+    LIST: "/courses",
+    DETAIL: (id) => `/courses/${id}`,
+    CREATE: "/courses",
+    UPDATE: (id) => `/courses/${id}`,
+    DELETE: (id) => `/courses/${id}`,
+  },
+  COURSE_CLASSES: {
+    LIST: "/course-classes",
+    DETAIL: (id) => `/course-classes/${id}`,
+    CREATE: "/course-classes",
+    UPDATE: (id) => `/course-classes/${id}`,
+    DELETE: (id) => `/course-classes/${id}`,
+  },
+  COURSE_ENROLLMENTS: {
+    LIST: "/course-enrollments",
+    DETAIL: (id) => `/course-enrollments/${id}`,
+    CREATE: "/course-enrollments",
+    UPDATE: (id) => `/course-enrollments/${id}`,
+    DELETE: (id) => `/course-enrollments/${id}`,
+  },
+  CLASS_SESSIONS: {
+    LIST: "/class-sessions",
+    DETAIL: (id) => `/class-sessions/${id}`,
+    CREATE: "/class-sessions",
+    UPDATE: (id) => `/class-sessions/${id}`,
+    DELETE: (id) => `/class-sessions/${id}`,
+  },
+  CLASS_STUDENTS: {
+    LIST: "/class-students",
+    DETAIL: (id) => `/class-students/${id}`,
+    CREATE: "/class-students",
+    DELETE: (id) => `/class-students/${id}`,
+  },
 };
 
 // HTTP Status Codes
@@ -140,3 +174,5 @@ export const HTTP_STATUS = {
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
 };
+
+export * from "./visibility"
