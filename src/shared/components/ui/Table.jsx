@@ -13,6 +13,9 @@ export const Table = ({
     rowClassName,
     onRowClick,
     lastRowRef,
+    draggable = false,
+    onDragStart,
+    onDragEnd,
 }) => {
     if (loading) {
         return <SkeletonTable rows={5} columns={columns.length} />;
@@ -68,6 +71,17 @@ export const Table = ({
                                 className={`hover:bg-gray-50 group ${rowClass || ''} ${onRowClick ? 'cursor-pointer' : ''
                                     }`}
                                 onClick={() => onRowClick?.(row, rowIndex)}
+                                draggable={draggable}
+                                onDragStart={(e) => {
+                                    if (draggable && onDragStart) {
+                                        onDragStart(row, e);
+                                    }
+                                }}
+                                onDragEnd={(e) => {
+                                    if (draggable && onDragEnd) {
+                                        onDragEnd(row, e);
+                                    }
+                                }}
                             >
                                 {columns.map((column, colIndex) => {
                                     const cellClass =

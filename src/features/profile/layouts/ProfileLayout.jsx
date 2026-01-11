@@ -74,8 +74,8 @@ export const ProfileLayout = ({ children }) => {
                                             key={tab.id}
                                             to={tab.path}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-sm transition-colors ${isActive
-                                                    ? 'bg-gray-100 text-foreground font-medium'
-                                                    : 'text-foreground-light hover:bg-gray-50 hover:text-foreground'
+                                                ? 'bg-gray-100 text-foreground font-medium'
+                                                : 'text-foreground-light hover:bg-gray-50 hover:text-foreground'
                                                 }`}
                                         >
                                             <Icon size={20} />

@@ -17,6 +17,7 @@ export const Tabs = ({ tabs }) => {
                 px-4 py-2 text-sm font-medium
                 border-b-2
                 transition-colors
+                ${tab.className || ''}
                 ${tab.isActive
                                     ? 'border-info text-info'
                                     : 'border-transparent text-foreground-light hover:text-foreground'

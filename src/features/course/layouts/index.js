@@ -1,0 +1,1 @@
+export { CourseDetailLayout } from './CourseDetailLayout';

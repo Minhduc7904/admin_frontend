@@ -19,9 +19,8 @@ const TreePrefix = ({ level, isLast }) => {
             {/* Vertical line */}
             <div className="relative w-4 flex justify-center">
                 <span
-                    className={`absolute top-0 bottom-0 w-px bg-border ${
-                        isLast ? 'hidden' : 'block'
-                    }`}
+                    className={`absolute top-0 bottom-0 w-px bg-border ${isLast ? 'hidden' : 'block'
+                        }`}
                 />
             </div>
 
@@ -87,9 +86,9 @@ export const FolderTree = ({
 
     if (!folders || folders.length === 0) {
         return level === 0 ? (
-            <div className="text-center py-8 text-sm text-foreground-light">
-                <Folder className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                Chưa có thư mục nào
+            <div className="text-center py-4 text-sm text-foreground-light">
+                <Folder className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                Chưa có thư mục
             </div>
         ) : null;
     }
@@ -107,55 +106,70 @@ export const FolderTree = ({
                         {/* Row */}
                         <div
                             className={`
-                                group flex items-center gap-1 px-2 py-1.5 rounded-sm cursor-pointer
-                                transition-colors
+                                group flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer
+                                transition-colors text-sm
                                 ${isSelected
-                                    ? 'bg-info/5 border-l-2 border-info'
-                                    : 'hover:bg-gray-50'
+                                    ? 'bg-info/10 text-info font-medium'
+                                    : 'hover:bg-gray-50 text-foreground'
                                 }
                             `}
                             style={{ paddingLeft: indent + 8 }}
                             onClick={() => onFolderSelect(folder.folderId, false)}
+                            onDragOver={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.dataTransfer.dropEffect = 'move';
+                                e.currentTarget.classList.add('bg-info/20', 'border-2', 'border-dashed', 'border-info');
+                            }}
+                            onDragLeave={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.currentTarget.classList.remove('bg-info/20', 'border-2', 'border-dashed', 'border-info');
+                            }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.currentTarget.classList.remove('bg-info/20', 'border-2', 'border-dashed', 'border-info');
+
+                                const mediaId = e.dataTransfer.getData('mediaId');
+                                const mediaName = e.dataTransfer.getData('mediaName');
+                                const currentFolderId = e.dataTransfer.getData('currentFolderId');
+
+                                if (mediaId && folder.onDropMedia) {
+                                    folder.onDropMedia({
+                                        mediaId: parseInt(mediaId),
+                                        mediaName,
+                                        currentFolderId: currentFolderId === 'null' ? null : parseInt(currentFolderId),
+                                        targetFolderId: folder.folderId,
+                                        targetFolderName: folder.name
+                                    });
+                                }
+                            }}
                         >
                             {/* Toggle */}
                             <button
                                 onClick={(e) => handleToggle(folder, e)}
-                                className="p-1 rounded hover:bg-gray-200"
+                                className="p-0.5 hover:bg-gray-200 rounded"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
-                                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                                    <Loader2 size={16} className="animate-spin" />
                                 ) : isExpanded ? (
-                                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                                    <ChevronDown size={16} />
                                 ) : (
-                                    <ChevronRight className="w-4 h-4 text-gray-500" />
+                                    <ChevronRight size={16} />
                                 )}
                             </button>
 
                             {/* Icon */}
-                            <Icon
-                                className={`w-4 h-4 ${
-                                    isSelected ? 'text-info' : 'text-gray-500'
-                                }`}
-                            />
+                            <Icon size={16} className={isSelected ? 'text-info' : 'text-gray-500'} />
 
                             {/* Name */}
-                            <div className="flex-1 min-w-0 ml-1">
-                                <p className={`text-sm truncate ${
-                                    isSelected ? 'font-semibold text-foreground' : ''
-                                }`}>
-                                    {folder.name}
-                                </p>
-                                {folder.description && (
-                                    <p className="text-xs text-foreground-light truncate">
-                                        {folder.description}
-                                    </p>
-                                )}
-                            </div>
+                            <span className="flex-1 truncate">{folder.name}</span>
 
-                            {/* Count */}
-                            {folder.mediaCount > 0 && (
-                                <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                            {/* Media Count */}
+                            {folder.mediaCount !== undefined && (
+                                <span className="text-xs text-foreground-light">
                                     {folder.mediaCount}
                                 </span>
                             )}

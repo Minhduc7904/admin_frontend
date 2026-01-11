@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Camera, Loader } from 'lucide-react';
-import { uploadMediaAsync } from '../../media/store/mediaSlice';
 import {
     attachMediaAsync,
     detachMediaByEntityAsync
@@ -16,6 +15,7 @@ import {
     selectAvatarDownloadUrlLoading
 } from '../store/profileSlice';
 import { addNotification } from '../../notification/store/notificationSlice';
+import { MediaPickerModal } from '../../../shared/components/ui';
 
 export const ProfileAvatar = ({ size = 'large' }) => {
     const dispatch = useDispatch();
@@ -23,10 +23,11 @@ export const ProfileAvatar = ({ size = 'large' }) => {
     const avatarUsages = useSelector(selectAvatarUsages);
     const loadingAvatar = useSelector(selectAvatarLoading);
     const avatarDownloadUrl = useSelector(selectAvatarDownloadUrl);
-    const loadingDownloadUrl = useSelector(selectAvatarDownloadUrlLoading);
+    const loadingDownloadUrlLoading = useSelector(selectAvatarDownloadUrlLoading);
 
     const [uploading, setUploading] = useState(false);
     const [hovering, setHovering] = useState(false);
+    const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
 
     // Size configurations
     const sizeClasses = {
@@ -68,43 +69,14 @@ export const ProfileAvatar = ({ size = 'large' }) => {
         return profile?.username || 'User';
     };
 
-    const handleFileSelect = async (event) => {
-        const file = event.target.files?.[0];
-        if (!file || !profile?.userId) return;
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            dispatch(addNotification({
-                type: 'error',
-                title: 'Lỗi định dạng file',
-                message: 'Vui lòng chọn file ảnh'
-            }));
-            return;
-        }
-
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            dispatch(addNotification({
-                type: 'error',
-                title: 'Lỗi kích thước file',
-                message: 'Kích thước file không được vượt quá 5MB'
-            }));
-            return;
-        }
+    const handleMediaSelect = async (mediaId) => {
+        if (!profile?.userId) return;
 
         setUploading(true);
+        setIsMediaPickerOpen(false);
 
         try {
-            // Step 1: Upload media file
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('description', `Profile avatar for ${profile.username}`);
-            formData.append('alt', `${profile.username} avatar`);
-
-            const uploadResult = await dispatch(uploadMediaAsync(formData)).unwrap();
-            const mediaId = uploadResult.data.mediaId;
-
-            // Step 2: Detach old avatar (if exists)
+            // Step 1: Detach old avatar (if exists)
             if (avatarUsages.data.length > 0) {
                 await dispatch(detachMediaByEntityAsync({
                     entityType: 'AVATAR',
@@ -112,7 +84,7 @@ export const ProfileAvatar = ({ size = 'large' }) => {
                 })).unwrap();
             }
 
-            // Step 3: Attach new avatar
+            // Step 2: Attach new avatar
             await dispatch(attachMediaAsync({
                 mediaId,
                 entityType: 'AVATAR',
@@ -121,8 +93,14 @@ export const ProfileAvatar = ({ size = 'large' }) => {
                 visibility: 'PUBLIC',
             })).unwrap();
 
-            // Refresh avatar
+            // Step 3: Refresh avatar
             dispatch(getAvatarUsagesAsync(profile.userId));
+
+            dispatch(addNotification({
+                type: 'success',
+                title: 'Cập nhật avatar thành công',
+                message: 'Ảnh đại diện của bạn đã được cập nhật'
+            }));
 
         } catch (error) {
             console.error('Failed to update avatar:', error);
@@ -136,8 +114,8 @@ export const ProfileAvatar = ({ size = 'large' }) => {
         }
     };
 
-    const handleUploadClick = () => {
-        document.getElementById('avatar-upload-input').click();
+    const handleAvatarClick = () => {
+        setIsMediaPickerOpen(true);
     };
 
     if (loadingAvatar && !avatarDownloadUrl) {
@@ -154,7 +132,7 @@ export const ProfileAvatar = ({ size = 'large' }) => {
                 className={`${sizeClasses[size]} rounded-full bg-white p-1 shadow-lg cursor-pointer relative`}
                 onMouseEnter={() => setHovering(true)}
                 onMouseLeave={() => setHovering(false)}
-                onClick={handleUploadClick}
+                onClick={handleAvatarClick}
             >
                 {avatarDownloadUrl ? (
                     <img
@@ -186,14 +164,14 @@ export const ProfileAvatar = ({ size = 'large' }) => {
             {/* Status indicator */}
             <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
 
-            {/* Hidden file input */}
-            <input
-                id="avatar-upload-input"
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-                disabled={uploading}
+            {/* Media Picker Modal */}
+            <MediaPickerModal
+                isOpen={isMediaPickerOpen}
+                onClose={() => setIsMediaPickerOpen(false)}
+                onSave={handleMediaSelect}
+                selectedMediaId={avatarUsages.data?.[0]?.mediaId || null}
+                title="Chọn ảnh đại diện"
+                type="IMAGE"
             />
         </div>
     );

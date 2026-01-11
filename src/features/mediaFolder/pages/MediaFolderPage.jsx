@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Plus, RefreshCw, Upload, LoaderCircle } from 'lucide-react';
-import { Button, StatsCard, StatsGrid, RightPanel } from '../../../shared/components/ui';
+import { Plus, RefreshCw, Upload, LoaderCircle, Folder } from 'lucide-react';
+import { Button, StatsCard, StatsGrid, RightPanel, Modal } from '../../../shared/components/ui';
 import { FolderTree, FolderForm, FolderDeleteModal } from '../components';
-import { MediaTable, MediaFilters, MediaDetail, MediaUploadModal } from '../../media/components';
+import { MediaFilters, MediaDetail, MediaUploadModal } from '../../media/components';
+import { MediaTable } from '../components/MediaTable';
 import { useSearch, useInfiniteScroll } from '../../../shared/hooks';
 import {
     getRootMediaFoldersAsync,
@@ -20,11 +21,13 @@ import {
     getAllMediaAsync,
     getMediaByIdAsync,
     uploadMediaAsync,
+    updateMediaAsync,
     hardDeleteMediaAsync,
     selectMedia,
     selectMediaPagination,
     selectMediaLoadingGet,
     selectMediaLoadingUpload,
+    selectMediaLoadingUpdate,
     selectMediaLoadingSoftDelete,
     setFilters as setMediaFilters,
     selectMediaFilters,
@@ -46,6 +49,7 @@ export const MediaFolderPage = () => {
     const filters = useSelector(selectMediaFilters);
     const loadingGet = useSelector(selectMediaLoadingGet);
     const loadingUpload = useSelector(selectMediaLoadingUpload);
+    const loadingUpdateMedia = useSelector(selectMediaLoadingUpdate);
     const loadingDelete = useSelector(selectMediaLoadingSoftDelete);
 
     // Local state - Folders
@@ -76,6 +80,8 @@ export const MediaFolderPage = () => {
     const [isMediaUploadModalOpen, setIsMediaUploadModalOpen] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState(null);
     const [allMedia, setAllMedia] = useState([]);
+    const [isMoveMediaModalOpen, setIsMoveMediaModalOpen] = useState(false);
+    const [moveMediaData, setMoveMediaData] = useState(null);
 
     // Load root folders
     useEffect(() => {
@@ -224,10 +230,11 @@ export const MediaFolderPage = () => {
             setIsFolderCreatePanelOpen(false);
 
             if (dataToSubmit.parentId) {
-                // 1️⃣ Clear cache children
+                // 1️⃣ Add created folder to parent's children
                 setChildrenMap(prev => {
                     const newMap = { ...prev };
-                    delete newMap[dataToSubmit.parentId];
+                    const parentChildren = newMap[dataToSubmit.parentId] || [];
+                    newMap[dataToSubmit.parentId] = [...parentChildren, created.data];
                     return newMap;
                 });
 
@@ -344,6 +351,33 @@ export const MediaFolderPage = () => {
             await dispatch(hardDeleteMediaAsync(mediaId)).unwrap();
             handleCloseDetail();
             loadMedia(1, true);
+
+            // Update mediaCount of the folder
+            if (selectedFolderId) {
+                // Update in rootFolders
+                const rootFolderIndex = rootFolders.findIndex(f => f.folderId === selectedFolderId);
+                if (rootFolderIndex !== -1) {
+                    dispatch(getRootMediaFoldersAsync());
+                } else {
+                    // Update in childrenMap
+                    setChildrenMap(prev => {
+                        const newMap = { ...prev };
+                        for (const [parentId, children] of Object.entries(newMap)) {
+                            const folderIndex = children.findIndex(f => f.folderId === selectedFolderId);
+                            if (folderIndex !== -1) {
+                                const updatedChildren = [...children];
+                                updatedChildren[folderIndex] = {
+                                    ...updatedChildren[folderIndex],
+                                    mediaCount: Math.max(0, (updatedChildren[folderIndex].mediaCount || 0) - 1)
+                                };
+                                newMap[parentId] = updatedChildren;
+                                break;
+                            }
+                        }
+                        return newMap;
+                    });
+                }
+            }
         } catch (error) {
             console.error('Error deleting media:', error);
         }
@@ -364,8 +398,98 @@ export const MediaFolderPage = () => {
             await dispatch(uploadMediaAsync(formData)).unwrap();
             setIsMediaUploadModalOpen(false);
             loadMedia(1, true);
+
+            // Update mediaCount of the folder
+            if (selectedFolderId) {
+                // Update in rootFolders
+                const rootFolderIndex = rootFolders.findIndex(f => f.folderId === selectedFolderId);
+                if (rootFolderIndex !== -1) {
+                    dispatch(getRootMediaFoldersAsync());
+                } else {
+                    // Update in childrenMap
+                    setChildrenMap(prev => {
+                        const newMap = { ...prev };
+                        for (const [parentId, children] of Object.entries(newMap)) {
+                            const folderIndex = children.findIndex(f => f.folderId === selectedFolderId);
+                            if (folderIndex !== -1) {
+                                const updatedChildren = [...children];
+                                updatedChildren[folderIndex] = {
+                                    ...updatedChildren[folderIndex],
+                                    mediaCount: (updatedChildren[folderIndex].mediaCount || 0) + 1
+                                };
+                                newMap[parentId] = updatedChildren;
+                                break;
+                            }
+                        }
+                        return newMap;
+                    });
+                }
+            }
         } catch (error) {
             console.error('Error uploading media:', error);
+        }
+    };
+
+    const handleDropMediaToFolder = (dropData) => {
+        // Prevent dropping to same folder
+        if (dropData.currentFolderId === dropData.targetFolderId) {
+            return;
+        }
+
+        setMoveMediaData(dropData);
+        setIsMoveMediaModalOpen(true);
+    };
+
+    const handleConfirmMoveMedia = async () => {
+        if (!moveMediaData) return;
+
+        try {
+            await dispatch(updateMediaAsync({
+                id: moveMediaData.mediaId,
+                data: { folderId: moveMediaData.targetFolderId }
+            })).unwrap();
+
+            setIsMoveMediaModalOpen(false);
+            setMoveMediaData(null);
+            loadMedia(1, true);
+
+            // Update mediaCount: decrease from old folder, increase in new folder
+            const updateFolderCount = (folderId, delta) => {
+                if (!folderId) return;
+
+                const rootIndex = rootFolders.findIndex(f => f.folderId === folderId);
+                if (rootIndex !== -1) {
+                    dispatch(getRootMediaFoldersAsync());
+                } else {
+                    setChildrenMap(prev => {
+                        const newMap = { ...prev };
+                        for (const [parentId, children] of Object.entries(newMap)) {
+                            const folderIndex = children.findIndex(f => f.folderId === folderId);
+                            if (folderIndex !== -1) {
+                                const updatedChildren = [...children];
+                                updatedChildren[folderIndex] = {
+                                    ...updatedChildren[folderIndex],
+                                    mediaCount: Math.max(0, (updatedChildren[folderIndex].mediaCount || 0) + delta)
+                                };
+                                newMap[parentId] = updatedChildren;
+                                break;
+                            }
+                        }
+                        return newMap;
+                    });
+                }
+            };
+
+            // Decrease old folder count
+            if (moveMediaData.currentFolderId) {
+                updateFolderCount(moveMediaData.currentFolderId, -1);
+            }
+
+            // Increase new folder count
+            updateFolderCount(moveMediaData.targetFolderId, 1);
+
+        } catch (error) {
+            console.error('Error moving media:', error);
         }
     };
 
@@ -373,9 +497,59 @@ export const MediaFolderPage = () => {
     const videoCount = allMedia.filter(m => m.type === 'VIDEO').length;
     const documentCount = allMedia.filter(m => m.type === 'DOCUMENT').length;
 
+    // Find selected folder info
     const selectedFolderInfo = selectedFolderId
-        ? (childrenMap[selectedFolderId]?.find(f => f.folderId === selectedFolderId) || rootFolders.find(f => f.folderId === selectedFolderId))
+        ? (() => {
+            // First check in root folders
+            const rootFolder = rootFolders.find(f => f.folderId === selectedFolderId);
+            if (rootFolder) return rootFolder;
+
+            // Then check in all children maps
+            for (const children of Object.values(childrenMap)) {
+                const childFolder = children.find(f => f.folderId === selectedFolderId);
+                if (childFolder) return childFolder;
+            }
+
+            return null;
+        })()
         : null;
+
+    // Build folder breadcrumb path
+    const getFolderPath = (folderId) => {
+        if (!folderId) return 'Tất cả Media';
+
+        const path = [];
+        let currentFolder = selectedFolderInfo;
+
+        // Build path from current folder to root
+        while (currentFolder) {
+            path.unshift(currentFolder.name);
+
+            if (!currentFolder.parentId) break;
+
+            // Find parent folder
+            const parentInRoot = rootFolders.find(f => f.folderId === currentFolder.parentId);
+            if (parentInRoot) {
+                currentFolder = parentInRoot;
+            } else {
+                // Search in childrenMap
+                let found = false;
+                for (const children of Object.values(childrenMap)) {
+                    const parentInChildren = children.find(f => f.folderId === currentFolder.parentId);
+                    if (parentInChildren) {
+                        currentFolder = parentInChildren;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) break;
+            }
+        }
+
+        return path.length > 0 ? path.join(' / ') : 'Tất cả Media';
+    };
+
+    const folderPath = getFolderPath(selectedFolderId);
 
     return (
         <div className="flex h-full gap-6">
@@ -399,16 +573,39 @@ export const MediaFolderPage = () => {
                     </div>
 
                     {/* Folder Tree */}
-                    <div className="flex-1 overflow-y-auto p-2">
+                    <div className="flex-1 overflow-y-auto p-3">
+                        {/* All Media Button */}
+                        <div className="mb-3">
+                            <button
+                                onClick={() => setSelectedFolderId(null)}
+                                className={`
+                                    w-full flex items-center gap-2 px-3 py-2 rounded text-sm
+                                    transition-colors
+                                    ${selectedFolderId === null
+                                        ? 'bg-info/10 text-info font-medium'
+                                        : 'hover:bg-gray-50 text-foreground'
+                                    }
+                                `}
+                            >
+                                <Folder size={16} />
+                                <span>Tất cả Media</span>
+                            </button>
+                        </div>
+
                         <FolderTree
-                            folders={rootFolders}
+                            folders={rootFolders.map(f => ({ ...f, onDropMedia: handleDropMediaToFolder }))}
                             selectedFolderId={selectedFolderId}
                             onFolderSelect={handleFolderSelect}
                             onFolderCreate={handleFolderCreate}
                             onFolderEdit={handleFolderEdit}
                             onFolderDelete={handleFolderDelete}
                             expandedNodes={expandedNodes}
-                            childrenMap={childrenMap}
+                            childrenMap={Object.fromEntries(
+                                Object.entries(childrenMap).map(([key, folders]) => [
+                                    key,
+                                    folders.map(f => ({ ...f, onDropMedia: handleDropMediaToFolder }))
+                                ])
+                            )}
                             setChildrenMap={setChildrenMap}
                             loading={loadingFolders}
                             level={0}
@@ -424,7 +621,7 @@ export const MediaFolderPage = () => {
                     <div className="flex items-center justify-between mb-4">
                         <div>
                             <h1 className="text-2xl font-bold text-foreground">
-                                {selectedFolderInfo ? selectedFolderInfo.name : 'Tất cả Media'}
+                                {folderPath}
                             </h1>
                             <p className="text-foreground-light text-sm mt-1">
                                 {selectedFolderInfo
@@ -583,6 +780,40 @@ export const MediaFolderPage = () => {
                 onUpload={handleUpload}
                 loading={loadingUpload}
             />
+
+            {/* Move Media Confirmation Modal */}
+            <Modal
+                isOpen={isMoveMediaModalOpen}
+                onClose={() => {
+                    setIsMoveMediaModalOpen(false);
+                    setMoveMediaData(null);
+                }}
+                title="Xác nhận di chuyển media"
+            >
+                <div className="p-6">
+                    <p className="text-foreground mb-4">
+                        Bạn có chắc chắn muốn di chuyển media <strong>{moveMediaData?.mediaName}</strong> sang thư mục <strong>{moveMediaData?.targetFolderName}</strong>?
+                    </p>
+                    <div className="flex justify-end gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setIsMoveMediaModalOpen(false);
+                                setMoveMediaData(null);
+                            }}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={handleConfirmMoveMedia}
+                            loading={loadingUpdateMedia}
+                            disabled={loadingUpdateMedia}
+                        >
+                            Xác nhận
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
 
     );

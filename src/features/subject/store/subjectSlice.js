@@ -37,6 +37,16 @@ export const getAllSubjectsAsync = createAsyncThunk(
     }
 );
 
+export const searchSubjectsAsync = createAsyncThunk(
+    "subject/search",
+    async (query, thunkAPI) => {
+        return handleAsyncThunk(() => subjectApi.getAll(query), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm môn học",
+        });
+    }
+);
+
 export const getSubjectByIdAsync = createAsyncThunk(
     "subject/getById",
     async (id, thunkAPI) => {
@@ -184,6 +194,20 @@ const subjectSlice = createSlice({
             })
             .addCase(deleteSubjectAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
+                state.error = action.payload;
+            })
+            // Search subjects
+            .addCase(searchSubjectsAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(searchSubjectsAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                // Store search results but don't update pagination
+                // This is for dropdown usage only
+            })
+            .addCase(searchSubjectsAsync.rejected, (state, action) => {
+                state.loadingGet = false;
                 state.error = action.payload;
             });
     },

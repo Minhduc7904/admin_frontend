@@ -82,10 +82,10 @@ export const ChapterPage = () => {
         if (expandedNodes.has(chapterId)) {
             // Collapse node - also collapse all descendants
             const newExpanded = new Set(expandedNodes);
-            
+
             // Remove the node itself
             newExpanded.delete(chapterId);
-            
+
             // Recursively remove all descendants
             const removeDescendants = (parentId) => {
                 const children = childrenMap[parentId] || [];
@@ -94,7 +94,7 @@ export const ChapterPage = () => {
                     removeDescendants(child.chapterId);
                 });
             };
-            
+
             removeDescendants(chapterId);
             setExpandedNodes(newExpanded);
         } else {
@@ -145,7 +145,7 @@ export const ChapterPage = () => {
         try {
             await dispatch(deleteChapterAsync(selectedChapter.chapterId)).unwrap();
             setIsDeleteModalOpen(false);
-            
+
             // Clear parent's children cache if this was a child chapter
             if (selectedChapter.parentChapterId) {
                 setChildrenMap(prev => {
@@ -154,7 +154,7 @@ export const ChapterPage = () => {
                     return newMap;
                 });
             }
-            
+
             loadRootChapters();
         } catch (error) {
             console.error('Error deleting chapter:', error);
@@ -199,7 +199,7 @@ export const ChapterPage = () => {
 
             await dispatch(createChapterAsync(dataToSubmit)).unwrap();
             setIsCreatePanelOpen(false);
-            
+
             // If creating a child chapter, clear parent's children cache to force reload
             if (dataToSubmit.parentChapterId) {
                 setChildrenMap(prev => {
@@ -208,7 +208,7 @@ export const ChapterPage = () => {
                     return newMap;
                 });
             }
-            
+
             loadRootChapters();
         } catch (error) {
             console.error('Error creating chapter:', error);
@@ -235,7 +235,7 @@ export const ChapterPage = () => {
                 data: dataToSubmit
             })).unwrap();
             setIsEditPanelOpen(false);
-            
+
             // Clear parent's children cache if parentChapterId changed or exists
             if (dataToSubmit.parentChapterId || selectedChapter.parentChapterId) {
                 setChildrenMap(prev => {
@@ -245,7 +245,7 @@ export const ChapterPage = () => {
                     return newMap;
                 });
             }
-            
+
             loadRootChapters();
         } catch (error) {
             console.error('Error updating chapter:', error);

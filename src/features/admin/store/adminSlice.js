@@ -36,6 +36,16 @@ export const getAllAdminsAsync = createAsyncThunk(
     }
 );
 
+export const searchAdminsAsync = createAsyncThunk(
+    "admin/search",
+    async (query, thunkAPI) => {
+        return handleAsyncThunk(() => adminApi.getAll(query), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm quản trị viên",
+        });
+    }
+);
+
 export const getAdminByIdAsync = createAsyncThunk(
     "admin/getById",
     async (id, thunkAPI) => {
@@ -117,6 +127,20 @@ export const adminSlice = createSlice({
             })
             .addCase(createAdminAsync.rejected, (state, action) => {
                 state.loadingCreate = false;
+                state.error = action.payload;
+            })
+            // Search admins
+            .addCase(searchAdminsAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(searchAdminsAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                // Store search results but don't update pagination
+                // This is for dropdown usage only
+            })
+            .addCase(searchAdminsAsync.rejected, (state, action) => {
+                state.loadingGet = false;
                 state.error = action.payload;
             });
     },

@@ -9,6 +9,18 @@ import { AdminDetail } from '../features/admin/pages/AdminDetail';
 import { AdminRole } from '../features/admin/pages/AdminRole';
 import { AdminMedia } from '../features/admin/pages/AdminMedia';
 import { ChapterPage } from '../features/chapter/pages';
+import { CourseList, MyCourseList, CourseDetail, CourseClasses, CourseEnrollment } from '../features/course/pages';
+import { CourseDetailLayout } from '../features/course/layouts';
+import { 
+    ClassList, 
+    MyClassList, 
+    CourseClassDetail, 
+    ClassStudents, 
+    ClassSessions, 
+    ClassSchedule, 
+    ClassAttendance 
+} from '../features/courseClass/pages';
+import { CourseClassDetailLayout } from '../features/courseClass/layouts';
 import { SubjectPage } from '../features/subject/pages/SubjectPage';
 import { StudentList, StudentDetail, StudentRole, StudentMedia } from '../features/student/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
@@ -37,7 +49,60 @@ export const adminRouter = [
             { path: ROUTES.STUDENTS, element: <StudentList /> },
             { path: ROUTES.CHAPTERS, element: <ChapterPage /> },
             { path: ROUTES.SUBJECTS, element: <SubjectPage /> },
-
+            { path: ROUTES.COURSES, element: <CourseList /> },
+            { path: ROUTES.MY_COURSES, element: <MyCourseList /> },
+            { path: ROUTES.CLASSES, element: <ClassList /> },
+            { path: ROUTES.MY_CLASSES, element: <MyClassList /> },
+            // 🔥 Course profile group
+            {
+                path: ROUTES.COURSE_DETAIL(':id'),
+                element: <CourseDetailLayout />,
+                children: [
+                    {
+                        index: true,
+                        element: <CourseDetail />,
+                    },
+                    {
+                        path: 'classes',
+                        element: <CourseClasses />,
+                    },
+                    {
+                        path: 'students',
+                        element: <CourseEnrollment />,
+                    },
+                    {
+                        path: 'lessons',
+                        element: <div className="bg-white border border-border rounded-sm p-6">Bài học (Coming soon)</div>,
+                    },
+                ],
+            },
+            // 🔥 Class profile group
+            {
+                path: ROUTES.CLASS_DETAIL(':id'),
+                element: <CourseClassDetailLayout />,
+                children: [
+                    {
+                        index: true,
+                        element: <CourseClassDetail />,
+                    },
+                    {
+                        path: 'students',
+                        element: <ClassStudents />,
+                    },
+                    {
+                        path: 'sessions',
+                        element: <ClassSessions />,
+                    },
+                    {
+                        path: 'schedule',
+                        element: <ClassSchedule />,
+                    },
+                    {
+                        path: 'attendance',
+                        element: <ClassAttendance />,
+                    },
+                ],
+            },
             // 🔥 Admin profile group
             {
                 path: ROUTES.ADMIN_DETAIL(':id'),

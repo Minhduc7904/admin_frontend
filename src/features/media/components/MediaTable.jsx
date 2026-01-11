@@ -101,6 +101,15 @@ export const MediaTable = ({
             ),
         },
         {
+            key: 'folder',
+            label: 'Thư mục',
+            render: (row) => (
+                <span className="text-sm text-foreground-light">
+                    {row.uploader ? row.uploader.username + " - " : ''}{row.folder ? row.folder.name : 'Chưa có'}
+                </span>
+            ),
+        },
+        {
             key: 'fileSize',
             label: 'Kích thước',
             align: 'right',

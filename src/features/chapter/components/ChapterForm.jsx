@@ -1,42 +1,38 @@
-import { Button, Input, Select } from '../../../shared/components';
+import { Button, Input } from '../../../shared/components';
+import { SubjectSearchSelect } from '../../subject/components/SubjectSearchSelect';
 
 export const ChapterForm = ({
     formData,
     errors,
     onChange,
+    onSubjectSelect,
     onSubmit,
     onCancel,
     loading,
-    subjects,
     mode = 'create',
 }) => {
-    const subjectOptions = subjects.map(subject => ({
-        value: subject.subjectId,
-        label: subject.name
-    }));
-
     return (
         <form onSubmit={onSubmit} className="flex flex-col h-full">
             {/* Content */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
 
                 {/* Subject */}
-                <Select
-                    label="Môn học"
-                    required
-                    name="subjectId"
-                    value={formData.subjectId}
-                    onChange={onChange}
-                    options={subjectOptions}
-                    placeholder="Chọn môn học..."
-                    error={errors.subjectId}
-                    disabled={loading || mode === 'edit'}
-                    helperText={
-                        mode === 'edit'
-                            ? 'Không thể thay đổi môn học khi chỉnh sửa chương'
-                            : ''
-                    }
-                />
+                <div>
+                    <SubjectSearchSelect
+                        label="Môn học"
+                        required
+                        placeholder="Tìm kiếm môn học..."
+                        value={formData.subjectId}
+                        onSelect={onSubjectSelect}
+                        error={errors.subjectId}
+                        disabled={loading || mode === 'edit'}
+                    />
+                    {mode === 'edit' && (
+                        <p className="text-xs text-foreground-light mt-1">
+                            Không thể thay đổi môn học khi chỉnh sửa chương
+                        </p>
+                    )}
+                </div>
 
                 {/* Chapter Name */}
                 <Input

@@ -85,9 +85,27 @@ export const AdminSidebar = () => {
           icon: FileText,
         },
         {
+          key: 'courses',
+          name: 'Quản lý khóa học',
+          href: ROUTES.COURSES,
+          icon: FileText,
+        },
+        {
+          key: 'myCourses',
+          name: 'Khóa học của tôi',
+          href: ROUTES.MY_COURSES,
+          icon: GraduationCap,
+        },
+        {
           key: 'classrooms',
           name: 'Quản lý lớp học',
-          href: ROUTES.ADMIN_CLASSROOMS,
+          href: ROUTES.CLASSES,
+          icon: School,
+        },
+        {
+          key: 'myClasses',
+          name: 'Lớp học của tôi',
+          href: ROUTES.MY_CLASSES,
           icon: School,
         },
       ],

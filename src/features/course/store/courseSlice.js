@@ -83,6 +83,16 @@ export const deleteCourseAsync = createAsyncThunk(
     }
 );
 
+export const searchCoursesAsync = createAsyncThunk(
+    "course/search",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => courseApi.getAll(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm khóa học",
+        });
+    }
+);
+
 export const courseSlice = createSlice({
     name: "course",
     initialState,

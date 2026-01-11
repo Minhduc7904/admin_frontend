@@ -28,10 +28,12 @@ export const mediaFolderApi = {
 
     /**
      * Get root folders (folders without parent)
+     * @param {Object} params - Query parameters
+     * @param {string} params.type - Media type filter for mediaCount
      * @returns {Promise<Array>} Root folder list
      */
-    getRoots: () => {
-        return axiosClient.get(API_ENDPOINTS.MEDIA_FOLDERS.ROOTS);
+    getRoots: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.MEDIA_FOLDERS.ROOTS, { params });
     },
 
     /**
@@ -46,10 +48,12 @@ export const mediaFolderApi = {
     /**
      * Get direct children of a folder
      * @param {number} id - Folder ID
+     * @param {Object} params - Query parameters
+     * @param {string} params.type - Media type filter for mediaCount
      * @returns {Promise<Array>} Child folder list
      */
-    getChildren: (id) => {
-        return axiosClient.get(API_ENDPOINTS.MEDIA_FOLDERS.CHILDREN(id));
+    getChildren: (id, params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.MEDIA_FOLDERS.CHILDREN(id), { params });
     },
 
     /**

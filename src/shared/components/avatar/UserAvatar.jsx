@@ -24,7 +24,7 @@ const extractArray = (response) => {
 };
 
 const extractDownloadUrl = (response) => {
-    console.log('Download URL response:', response);
+  console.log('Download URL response:', response);
   const payload = response?.data ?? response;
   if (!payload) return null;
   const data = payload.data ?? payload;
@@ -74,7 +74,7 @@ export const UserAvatar = ({
 
         if (firstUsage?.mediaId) {
           const downloadResponse = await mediaApi.getDownloadUrl(firstUsage.mediaId, 3600);
-          
+
           const url = extractDownloadUrl(downloadResponse);
           if (isActive) {
             avatarCache.set(userId, url);

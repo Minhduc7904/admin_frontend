@@ -45,6 +45,19 @@ export const ROUTES = {
   SUBJECT_DETAIL: (id = ':id') => `/subjects/${id}`,
   CHAPTERS: '/chapters',
   CHAPTER_DETAIL: (id = ':id') => `/chapters/${id}`,
+  COURSES: '/courses',
+  MY_COURSES: '/my-courses',
+  COURSE_DETAIL: (id = ':id') => `/courses/${id}`,
+  COURSE_CLASSES: (id = ':id') => `/courses/${id}/classes`,
+  COURSE_STUDENTS: (id = ':id') => `/courses/${id}/students`,
+  COURSE_LESSONS: (id = ':id') => `/courses/${id}/lessons`,
+  CLASSES: '/classes',
+  MY_CLASSES: '/my-classes',
+  CLASS_DETAIL: (id = ':id') => `/classes/${id}`,
+  CLASS_STUDENTS: (id = ':id') => `/classes/${id}/students`,
+  CLASS_SESSIONS: (id = ':id') => `/classes/${id}/sessions`,
+  CLASS_SCHEDULE: (id = ':id') => `/classes/${id}/schedule`,
+  CLASS_ATTENDANCE: (id = ':id') => `/classes/${id}/attendance`,
 };
 
 // API Endpoints

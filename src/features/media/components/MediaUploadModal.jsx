@@ -186,8 +186,8 @@ export const MediaUploadModal = ({ isOpen, onClose, onUpload, loading }) => {
                     {!file && (
                         <div
                             className={`border-2 border-dashed rounded-sm p-8 text-center transition-colors ${dragActive
-                                    ? 'border-primary bg-primary-light'
-                                    : 'border-gray-300 hover:border-primary hover:bg-gray-50'
+                                ? 'border-primary bg-primary-light'
+                                : 'border-gray-300 hover:border-primary hover:bg-gray-50'
                                 }`}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
@@ -262,14 +262,14 @@ export const MediaUploadModal = ({ isOpen, onClose, onUpload, loading }) => {
                                                 <div className="flex items-center gap-2 mt-2">
                                                     <span
                                                         className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${fileType === 'IMAGE'
-                                                                ? 'bg-blue-100 text-blue-700'
-                                                                : fileType === 'VIDEO'
-                                                                    ? 'bg-purple-100 text-purple-700'
-                                                                    : fileType === 'AUDIO'
-                                                                        ? 'bg-green-100 text-green-700'
-                                                                        : fileType === 'DOCUMENT'
-                                                                            ? 'bg-orange-100 text-orange-700'
-                                                                            : 'bg-gray-100 text-gray-700'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : fileType === 'VIDEO'
+                                                                ? 'bg-purple-100 text-purple-700'
+                                                                : fileType === 'AUDIO'
+                                                                    ? 'bg-green-100 text-green-700'
+                                                                    : fileType === 'DOCUMENT'
+                                                                        ? 'bg-orange-100 text-orange-700'
+                                                                        : 'bg-gray-100 text-gray-700'
                                                             }`}
                                                     >
                                                         {fileType}

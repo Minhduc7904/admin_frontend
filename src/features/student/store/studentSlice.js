@@ -38,6 +38,16 @@ export const getAllStudentsAsync = createAsyncThunk(
     }
 );
 
+export const searchStudentsAsync = createAsyncThunk(
+    "student/search",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => studentApi.getAll(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm học sinh",
+        });
+    }
+);
+
 export const getStudentByIdAsync = createAsyncThunk(
     "student/getById",
     async (id, thunkAPI) => {
