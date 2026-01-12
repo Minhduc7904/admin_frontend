@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export const RightPanel = ({ isOpen, onClose, title, children, width = 'w-[600px]' }) => {
     // Close on ESC key
@@ -27,19 +28,18 @@ export const RightPanel = ({ isOpen, onClose, title, children, width = 'w-[600px
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <>
             {/* Overlay */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+                className="fixed top-0 inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
                 onClick={onClose}
             />
 
             {/* Panel */}
             <div
-                className={`fixed right-0 top-0 bottom-0 ${width} bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
-                    isOpen ? 'translate-x-0' : 'translate-x-full'
-                }`}
+                className={`fixed right-0 top-0 bottom-0 ${width} bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                    }`}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-border">
@@ -57,6 +57,7 @@ export const RightPanel = ({ isOpen, onClose, title, children, width = 'w-[600px
                     {children}
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 };

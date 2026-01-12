@@ -16,6 +16,9 @@ import chapterReducer from '../../features/chapter/store/chapterSlice';
 import courseReducer from '../../features/course/store/courseSlice';
 import courseClassSlice from '../../features/courseClass/store/courseClassSlice';
 import courseEnrollmentSlice from '../../features/courseEnrollment/store/courseEnrollmentSlice';
+import classStudentSlice from '../../features/classStudent/store/classStudentSlice';
+import classSessionSlice from '../../features/classSesssion/store/classSesssionSlice';
+import attendanceSlice from '../../features/attendance/store/attendanceSlice';
 
 export const store = configureStore({
   reducer: {
@@ -36,5 +39,8 @@ export const store = configureStore({
     course: courseReducer,
     courseClass: courseClassSlice,
     courseEnrollment: courseEnrollmentSlice,
+    classStudent: classStudentSlice,
+    classSession: classSessionSlice,
+    attendance: attendanceSlice,
   },
 });

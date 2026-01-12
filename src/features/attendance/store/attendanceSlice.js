@@ -1,0 +1,252 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { attendanceApi } from "../../../core/api";
+import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
+
+const initialState = {
+    attendances: [],
+    currentAttendance: null,
+    pagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    loadingGet: false,
+    loadingCreate: false,
+    loadingUpdate: false,
+    loadingDelete: false,
+    loadingBulkCreate: false,
+    error: null,
+    filters: {
+        search: "",
+        sessionId: null,
+        studentId: null,
+        classId: null,
+        status: "",
+        sortBy: "markedAt",
+        sortOrder: "desc",
+    },
+};
+
+// ======================
+// Async thunks
+// ======================
+
+export const getAllAttendancesAsync = createAsyncThunk(
+    "attendance/getAll",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.getAll(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách điểm danh",
+        });
+    }
+);
+
+export const getAttendanceByIdAsync = createAsyncThunk(
+    "attendance/getById",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.getById(id), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải thông tin điểm danh",
+        });
+    }
+);
+
+export const createAttendanceAsync = createAsyncThunk(
+    "attendance/create",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.create(data), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Điểm danh thành công",
+            errorTitle: "Lỗi điểm danh",
+        });
+    }
+);
+
+export const createBulkAttendanceBySessionAsync = createAsyncThunk(
+    "attendance/createBulkBySession",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.createBulkBySession(data), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Điểm danh hàng loạt thành công",
+            errorTitle: "Lỗi điểm danh hàng loạt",
+        });
+    }
+);
+
+export const updateAttendanceAsync = createAsyncThunk(
+    "attendance/update",
+    async ({ id, data }, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.update(id, data), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Cập nhật điểm danh thành công",
+            errorTitle: "Lỗi cập nhật điểm danh",
+        });
+    }
+);
+
+export const deleteAttendanceAsync = createAsyncThunk(
+    "attendance/delete",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.delete(id), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Xóa điểm danh thành công",
+            errorTitle: "Lỗi xóa điểm danh",
+        });
+    }
+);
+
+// ======================
+// Slice
+// ======================
+
+export const attendanceSlice = createSlice({
+    name: "attendance",
+    initialState,
+    reducers: {
+        setFilters: (state, action) => {
+            state.filters = { ...state.filters, ...action.payload };
+        },
+        resetFilters: (state) => {
+            state.filters = initialState.filters;
+        },
+        clearCurrentAttendance: (state) => {
+            state.currentAttendance = null;
+        },
+        clearAttendances: (state) => {
+            state.attendances = [];
+        },
+    },
+    extraReducers: (builder) => {
+        builder
+            // Get all
+            .addCase(getAllAttendancesAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(getAllAttendancesAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                state.attendances = action.payload.data;
+                state.pagination = action.payload.meta;
+            })
+            .addCase(getAllAttendancesAsync.rejected, (state, action) => {
+                state.loadingGet = false;
+                state.error = action.payload;
+            })
+
+            // Get by ID
+            .addCase(getAttendanceByIdAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(getAttendanceByIdAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                state.currentAttendance = action.payload.data;
+            })
+            .addCase(getAttendanceByIdAsync.rejected, (state, action) => {
+                state.loadingGet = false;
+                state.error = action.payload;
+            })
+
+            // Create
+            .addCase(createAttendanceAsync.pending, (state) => {
+                state.loadingCreate = true;
+                state.error = null;
+            })
+            .addCase(createAttendanceAsync.fulfilled, (state, action) => {
+                state.loadingCreate = false;
+                state.attendances.push(action.payload.data);
+                state.pagination.total += 1;
+            })
+            .addCase(createAttendanceAsync.rejected, (state, action) => {
+                state.loadingCreate = false;
+                state.error = action.payload;
+            })
+
+            // Create bulk by session
+            .addCase(createBulkAttendanceBySessionAsync.pending, (state) => {
+                state.loadingBulkCreate = true;
+                state.error = null;
+            })
+            .addCase(createBulkAttendanceBySessionAsync.fulfilled, (state, action) => {
+                state.loadingBulkCreate = false;
+                // Add all created attendances to the list
+                if (Array.isArray(action.payload.data)) {
+                    state.attendances = [...state.attendances, ...action.payload.data];
+                    state.pagination.total += action.payload.data.length;
+                }
+            })
+            .addCase(createBulkAttendanceBySessionAsync.rejected, (state, action) => {
+                state.loadingBulkCreate = false;
+                state.error = action.payload;
+            })
+
+            // Update
+            .addCase(updateAttendanceAsync.pending, (state) => {
+                state.loadingUpdate = true;
+                state.error = null;
+            })
+            .addCase(updateAttendanceAsync.fulfilled, (state, action) => {
+                state.loadingUpdate = false;
+                const index = state.attendances.findIndex(
+                    (att) => att.attendanceId === action.payload.data.attendanceId
+                );
+                if (index !== -1) {
+                    state.attendances[index] = action.payload.data;
+                }
+                if (
+                    state.currentAttendance &&
+                    state.currentAttendance.attendanceId === action.payload.data.attendanceId
+                ) {
+                    state.currentAttendance = action.payload.data;
+                }
+            })
+            .addCase(updateAttendanceAsync.rejected, (state, action) => {
+                state.loadingUpdate = false;
+                state.error = action.payload;
+            })
+
+            // Delete
+            .addCase(deleteAttendanceAsync.pending, (state) => {
+                state.loadingDelete = true;
+                state.error = null;
+            })
+            .addCase(deleteAttendanceAsync.fulfilled, (state, action) => {
+                state.loadingDelete = false;
+                state.attendances = state.attendances.filter(
+                    (att) => att.attendanceId !== action.meta.arg
+                );
+                state.pagination.total = Math.max(0, state.pagination.total - 1);
+            })
+            .addCase(deleteAttendanceAsync.rejected, (state, action) => {
+                state.loadingDelete = false;
+                state.error = action.payload;
+            });
+    },
+});
+
+// ======================
+// Selectors
+// ======================
+
+export const {
+    setFilters,
+    resetFilters,
+    clearCurrentAttendance,
+    clearAttendances,
+} = attendanceSlice.actions;
+
+export const selectAttendances = (state) => state.attendance.attendances;
+export const selectCurrentAttendance = (state) => state.attendance.currentAttendance;
+export const selectAttendancePagination = (state) => state.attendance.pagination;
+export const selectAttendanceLoadingGet = (state) => state.attendance.loadingGet;
+export const selectAttendanceLoadingCreate = (state) => state.attendance.loadingCreate;
+export const selectAttendanceLoadingUpdate = (state) => state.attendance.loadingUpdate;
+export const selectAttendanceLoadingDelete = (state) => state.attendance.loadingDelete;
+export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loadingBulkCreate;
+export const selectAttendanceError = (state) => state.attendance.error;
+export const selectAttendanceFilters = (state) => state.attendance.filters;
+
+export default attendanceSlice.reducer;

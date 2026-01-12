@@ -76,8 +76,8 @@ export const updateClassStudentAsync = createAsyncThunk(
 
 export const removeStudentFromClassAsync = createAsyncThunk(
     "classStudent/remove",
-    async (id, thunkAPI) => {
-        return handleAsyncThunk(() => classStudentApi.remove(id), thunkAPI, {
+    async ({ classId, studentId }, thunkAPI) => {
+        return handleAsyncThunk(() => classStudentApi.remove({ classId, studentId }), thunkAPI, {
             showSuccess: true,
             successTitle: "Xóa học sinh khỏi lớp thành công",
             errorTitle: "Lỗi xóa học sinh khỏi lớp",
@@ -180,8 +180,9 @@ export const classStudentSlice = createSlice({
             })
             .addCase(removeStudentFromClassAsync.fulfilled, (state, action) => {
                 state.loadingDelete = false;
+                const { classId, studentId } = action.meta.arg;
                 state.students = state.students.filter(
-                    (st) => st.id !== action.meta.arg
+                    (st) => !(st.classId === classId && st.studentId === studentId)
                 );
             })
             .addCase(removeStudentFromClassAsync.rejected, (state, action) => {

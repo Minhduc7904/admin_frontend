@@ -10,11 +10,11 @@ export const classStudentApi = {
         return axiosClient.get(API_ENDPOINTS.CLASS_STUDENTS.DETAIL(id));
     },
 
-    create: (data) => {
+    add: (data) => {
         return axiosClient.post(API_ENDPOINTS.CLASS_STUDENTS.CREATE, data);
     },
 
-    delete: (id) => {
-        return axiosClient.delete(API_ENDPOINTS.CLASS_STUDENTS.DELETE(id));
+    remove: ({ classId, studentId }) => {
+        return axiosClient.delete(API_ENDPOINTS.CLASS_STUDENTS.DELETE(classId, studentId));
     },
 };

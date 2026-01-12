@@ -192,7 +192,15 @@ export const API_ENDPOINTS = {
     LIST: "/class-students",
     DETAIL: (id) => `/class-students/${id}`,
     CREATE: "/class-students",
-    DELETE: (id) => `/class-students/${id}`,
+    DELETE: (classId, studentId) => `/class-students/${classId}/${studentId}`,
+  },
+  ATTENDANCES: {
+    LIST: "/attendances",
+    DETAIL: (id) => `/attendances/${id}`,
+    CREATE: "/attendances",
+    CREATE_BULK_BY_SESSION: "/attendances/bulk/session",
+    UPDATE: (id) => `/attendances/${id}`,
+    DELETE: (id) => `/attendances/${id}`,
   },
 };
 
