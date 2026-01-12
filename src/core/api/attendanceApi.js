@@ -25,4 +25,15 @@ export const attendanceApi = {
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.ATTENDANCES.DELETE(id));
     },
+
+    getStatisticsBySession: (sessionId) => {
+        return axiosClient.get(API_ENDPOINTS.ATTENDANCES.STATISTICS_BY_SESSION(sessionId));
+    },
+
+    exportBySession: (sessionId, options = {}) => {
+        return axiosClient.get(API_ENDPOINTS.ATTENDANCES.EXPORT_BY_SESSION(sessionId), {
+            params: options,
+            responseType: 'blob',
+        });
+    },
 };

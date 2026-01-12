@@ -48,6 +48,27 @@ export const StudentProfileLayout = () => {
                     navigate(ROUTES.STUDENT_DETAIL(studentId)),
             },
             {
+                label: 'Lớp học',
+                isActive:
+                    location.pathname === ROUTES.STUDENT_CLASSES(studentId),
+                onActivate: () =>
+                    navigate(ROUTES.STUDENT_CLASSES(studentId)),
+            },
+            {
+                label: 'Khóa học',
+                isActive:
+                    location.pathname === ROUTES.STUDENT_COURSES(studentId),
+                onActivate: () =>
+                    navigate(ROUTES.STUDENT_COURSES(studentId)),
+            },
+            {
+                label: 'Điểm danh',
+                isActive:
+                    location.pathname === ROUTES.STUDENT_ATTENDANCE(studentId),
+                onActivate: () =>
+                    navigate(ROUTES.STUDENT_ATTENDANCE(studentId)),
+            },
+            {
                 label: 'Vai trò',
                 isActive:
                     location.pathname === ROUTES.STUDENT_ROLES(studentId),

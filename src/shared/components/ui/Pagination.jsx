@@ -97,7 +97,7 @@ export const Pagination = ({
 
                 <button
                     onClick={() => onPageChange(currentPage + 1)}
-                    disabled={disabled || currentPage === totalPages}
+                    disabled={disabled || currentPage === totalPages || currentPage > totalPages}
                     className="p-2 hover:bg-gray-100 rounded-sm text-foreground-light hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <ChevronRight size={16} />

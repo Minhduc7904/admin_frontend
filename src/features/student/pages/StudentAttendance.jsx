@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Plus, Users, Download } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import {
     Button,
@@ -13,13 +13,13 @@ import {
 
 import {
     AttendanceTable,
-    AttendanceFilters,
-    AttendanceForm,
     AttendanceDeleteModal,
-    BulkAttendanceModal,
-    ExportAttendanceModal,
     AttendanceDetail,
 } from '../../attendance/components';
+
+import { StudentAttendanceFilters } from '../components/StudentAttendanceFilters';
+import { StudentAttendanceTable } from '../components/StudentAttendanceTable';
+import { StudentAttendanceForm } from '../components/StudentAttendanceForm';
 
 import { useSearch } from '../../../shared/hooks';
 
@@ -28,36 +28,29 @@ import {
     createAttendanceAsync,
     updateAttendanceAsync,
     deleteAttendanceAsync,
-    createBulkAttendanceBySessionAsync,
-    getStatisticsBySessionAsync,
-    exportAttendanceBySessionAsync,
     selectAttendances,
     selectAttendancePagination,
     selectAttendanceFilters,
-    selectAttendanceStatistics,
     selectAttendanceLoadingGet,
     selectAttendanceLoadingCreate,
     selectAttendanceLoadingUpdate,
     selectAttendanceLoadingDelete,
-    selectAttendanceLoadingBulkCreate,
-    selectAttendanceLoadingStatistics,
-    selectAttendanceLoadingExport,
     setFilters,
 } from '../../attendance/store/attendanceSlice';
 
 /**
- * ClassAttendance - Điểm danh của một lớp
+ * StudentAttendance - Điểm danh của học sinh
  */
-export const ClassAttendance = () => {
+export const StudentAttendance = () => {
     const dispatch = useDispatch();
     const { id } = useParams();
-    const classId = Number(id);
+    const studentId = Number(id);
 
-    /* ===================== VALIDATE CLASS ID ===================== */
-    if (isNaN(classId) || classId <= 0) {
+    /* ===================== VALIDATE STUDENT ID ===================== */
+    if (isNaN(studentId) || studentId <= 0) {
         return (
             <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID lớp học không hợp lệ. Vui lòng kiểm tra lại URL.
+                ID học sinh không hợp lệ. Vui lòng kiểm tra lại URL.
             </div>
         );
     }
@@ -66,15 +59,11 @@ export const ClassAttendance = () => {
     const attendances = useSelector(selectAttendances);
     const pagination = useSelector(selectAttendancePagination);
     const filters = useSelector(selectAttendanceFilters);
-    const statistics = useSelector(selectAttendanceStatistics);
 
     const loadingGet = useSelector(selectAttendanceLoadingGet);
     const loadingCreate = useSelector(selectAttendanceLoadingCreate);
     const loadingUpdate = useSelector(selectAttendanceLoadingUpdate);
     const loadingDelete = useSelector(selectAttendanceLoadingDelete);
-    const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
-    const loadingStatistics = useSelector(selectAttendanceLoadingStatistics);
-    const loadingExport = useSelector(selectAttendanceLoadingExport);
 
     /* ===================== LOCAL STATE ===================== */
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
@@ -86,8 +75,6 @@ export const ClassAttendance = () => {
     const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
     const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
-    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     const [selectedAttendance, setSelectedAttendance] = useState(null);
 
@@ -98,30 +85,32 @@ export const ClassAttendance = () => {
         notes: '',
     });
 
+    const [formClass, setFormClass] = useState(null);
+
     const [errors, setErrors] = useState({});
 
     const [statusFilter, setStatusFilter] = useState('');
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
+    const [selectedClass, setSelectedClass] = useState(null);
     const [selectedSession, setSelectedSession] = useState(null);
 
     /* ===================== LOAD DATA ===================== */
     useEffect(() => {
         loadAttendances();
-    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession]);
-
-    useEffect(() => {
-        if (selectedSession?.sessionId) {
-            dispatch(getStatisticsBySessionAsync(selectedSession.sessionId));
-        }
-    }, [selectedSession?.sessionId]);
+    }, [studentId, currentPage, itemsPerPage, debouncedSearch, statusFilter, fromDate, toDate, selectedClass, selectedSession]);
 
     const loadAttendances = () => {
         dispatch(
             getAllAttendancesAsync({
-                classId,
+                studentId,
                 page: currentPage,
                 limit: itemsPerPage,
                 search: debouncedSearch || undefined,
                 status: statusFilter || undefined,
+                fromDate: fromDate || undefined,
+                toDate: toDate || undefined,
+                classId: selectedClass?.classId || undefined,
                 sessionId: selectedSession?.sessionId || undefined,
             })
         );
@@ -136,6 +125,21 @@ export const ClassAttendance = () => {
 
     const handleStatusChange = (value) => {
         setStatusFilter(value);
+        setCurrentPage(1);
+    };
+
+    const handleFromDateChange = (value) => {
+        setFromDate(value);
+        setCurrentPage(1);
+    };
+
+    const handleToDateChange = (value) => {
+        setToDate(value);
+        setCurrentPage(1);
+    };
+
+    const handleClassChange = (courseClass) => {
+        setSelectedClass(courseClass);
         setCurrentPage(1);
     };
 
@@ -154,15 +158,28 @@ export const ClassAttendance = () => {
         }
     };
 
+    const handleFormClassChange = (courseClass) => {
+        setFormClass(courseClass);
+        // Reset sessionId when class changes
+        setFormData((prev) => ({ ...prev, sessionId: null }));
+        // Clear errors
+        if (errors.classId) {
+            setErrors((prev) => ({ ...prev, classId: '' }));
+        }
+        if (errors.sessionId) {
+            setErrors((prev) => ({ ...prev, sessionId: '' }));
+        }
+    };
+
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.sessionId) {
-            newErrors.sessionId = 'Vui lòng chọn buổi học';
+        if (!formClass) {
+            newErrors.classId = 'Vui lòng chọn lớp học';
         }
 
-        if (!formData.studentId) {
-            newErrors.studentId = 'Vui lòng chọn học sinh';
+        if (!formData.sessionId) {
+            newErrors.sessionId = 'Vui lòng chọn buổi học';
         }
 
         if (!formData.status) {
@@ -176,11 +193,12 @@ export const ClassAttendance = () => {
     /* ===================== CREATE ===================== */
     const handleOpenCreate = () => {
         setFormData({
-            sessionId: selectedSession?.sessionId || null,
-            studentId: null,
+            sessionId: null,
+            studentId: studentId,
             status: 'PRESENT',
             notes: '',
         });
+        setFormClass(null);
         setErrors({});
         setIsCreatePanelOpen(true);
     };
@@ -196,7 +214,7 @@ export const ClassAttendance = () => {
             await dispatch(
                 createAttendanceAsync({
                     sessionId: formData.sessionId,
-                    studentId: formData.studentId,
+                    studentId: studentId,
                     status: formData.status,
                     notes: formData.notes || undefined,
                 })
@@ -206,28 +224,6 @@ export const ClassAttendance = () => {
             loadAttendances();
         } catch (err) {
             console.error('Create attendance failed:', err);
-        }
-    };
-
-    /* ===================== BULK CREATE ===================== */
-    const handleOpenBulkModal = () => {
-        setIsBulkModalOpen(true);
-    };
-
-    const handleBulkCreate = async (bulkData) => {
-        try {
-            await dispatch(
-                createBulkAttendanceBySessionAsync({
-                    sessionId: bulkData.sessionId,
-                    status: bulkData.status,
-                    notes: bulkData.notes || undefined,
-                })
-            ).unwrap();
-
-            setIsBulkModalOpen(false);
-            loadAttendances();
-        } catch (err) {
-            console.error('Bulk create attendance failed:', err);
         }
     };
 
@@ -246,6 +242,14 @@ export const ClassAttendance = () => {
             status: attendance.status,
             notes: attendance.notes || '',
         });
+        
+        // Set class from session if available
+        if (attendance.session?.courseClass) {
+            setFormClass(attendance.session.courseClass);
+        } else {
+            setFormClass(null);
+        }
+        
         setErrors({});
         setIsEditPanelOpen(true);
     };
@@ -292,23 +296,6 @@ export const ClassAttendance = () => {
         }
     };
 
-    /* ===================== EXPORT ===================== */
-    const handleOpenExportModal = () => {
-        setIsExportModalOpen(true);
-    };
-
-    const handleExport = async (exportData) => {
-        try {
-            await dispatch(exportAttendanceBySessionAsync({
-                sessionId: exportData.sessionId,
-                options: exportData.options,
-            })).unwrap();
-            setIsExportModalOpen(false);
-        } catch (err) {
-            console.error('Export attendance failed:', err);
-        }
-    };
-
     /* ===================== PAGINATION ===================== */
     const handlePageChange = (page) => setCurrentPage(page);
 
@@ -318,11 +305,10 @@ export const ClassAttendance = () => {
     };
 
     /* ===================== STATS ===================== */
-    const presentCount = statistics?.present || 0;
-    const absentCount = statistics?.absent || 0;
-    const lateCount = statistics?.late || 0;
-    const makeupCount = statistics?.makeup || 0;
-    const statisticsTotal = statistics?.total || 0;
+    const presentCount = attendances.filter(a => a.status === 'PRESENT').length;
+    const absentCount = attendances.filter(a => a.status === 'ABSENT').length;
+    const lateCount = attendances.filter(a => a.status === 'LATE').length;
+    const makeupCount = attendances.filter(a => a.status === 'MAKEUP').length;
 
     /* ===================== RENDER ===================== */
     return (
@@ -331,30 +317,12 @@ export const ClassAttendance = () => {
             <div className="mb-2">
                 <div className="flex items-center justify-between mb-4">
                     <div>
-                        <h1 className="text-2xl font-bold">Quản lý điểm danh</h1>
+                        <h1 className="text-2xl font-bold">Lịch sử điểm danh</h1>
                         <p className="text-sm text-foreground-light">
-                            Danh sách điểm danh của lớp
+                            Danh sách điểm danh của học sinh
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Button
-                            onClick={handleOpenExportModal}
-                            variant="outline"
-                            disabled={loadingExport}
-                            loading={loadingExport}
-                        >
-                            <Download size={16} />
-                            Xuất Excel
-                        </Button>
-                        <Button
-                            onClick={handleOpenBulkModal}
-                            variant="outline"
-                            disabled={loadingBulkCreate}
-                            loading={loadingBulkCreate}
-                        >
-                            <Users size={16} />
-                            Điểm danh hàng loạt
-                        </Button>
                         <Button onClick={handleOpenCreate}>
                             <Plus size={16} />
                             Điểm danh
@@ -362,14 +330,19 @@ export const ClassAttendance = () => {
                     </div>
                 </div>
 
-                <AttendanceFilters
+                <StudentAttendanceFilters
                     search={search}
                     onSearchChange={handleSearchChangeWrapper}
                     status={statusFilter}
                     onStatusChange={handleStatusChange}
+                    fromDate={fromDate}
+                    onFromDateChange={handleFromDateChange}
+                    toDate={toDate}
+                    onToDateChange={handleToDateChange}
+                    selectedClass={selectedClass}
+                    onClassChange={handleClassChange}
                     selectedSession={selectedSession}
                     onSessionChange={handleSessionChange}
-                    classId={classId}
                 />
             </div>
 
@@ -377,38 +350,38 @@ export const ClassAttendance = () => {
             <StatsGrid cols={5} className="mb-4">
                 <StatsCard
                     label="Tổng điểm danh"
-                    value={selectedSession ? statisticsTotal : pagination.total}
-                    loading={selectedSession ? loadingStatistics : loadingGet}
+                    value={pagination.total}
+                    loading={loadingGet}
                 />
                 <StatsCard
                     label="Có mặt"
                     value={presentCount}
                     variant="success"
-                    loading={selectedSession ? loadingStatistics : false}
+                    loading={loadingGet}
                 />
                 <StatsCard
                     label="Vắng"
                     value={absentCount}
                     variant="danger"
-                    loading={selectedSession ? loadingStatistics : false}
+                    loading={loadingGet}
                 />
                 <StatsCard
                     label="Muộn"
                     value={lateCount}
                     variant="warning"
-                    loading={selectedSession ? loadingStatistics : false}
+                    loading={loadingGet}
                 />
                 <StatsCard
                     label="Học bù"
                     value={makeupCount}
                     variant="info"
-                    loading={selectedSession ? loadingStatistics : false}
+                    loading={loadingGet}
                 />
             </StatsGrid>
 
             {/* ===== TABLE ===== */}
             <div className="bg-white border border-border rounded-sm">
-                <AttendanceTable
+                <StudentAttendanceTable
                     attendances={attendances}
                     loading={loadingGet}
                     onView={handleView}
@@ -439,33 +412,13 @@ export const ClassAttendance = () => {
                 onConfirm={handleConfirmDelete}
             />
 
-            {/* ===== BULK ATTENDANCE MODAL ===== */}
-            <BulkAttendanceModal
-                isOpen={isBulkModalOpen}
-                onClose={() => setIsBulkModalOpen(false)}
-                onConfirm={handleBulkCreate}
-                loading={loadingBulkCreate}
-                classId={classId}
-                selectedSession={selectedSession}
-            />
-
-            {/* ===== EXPORT ATTENDANCE MODAL ===== */}
-            <ExportAttendanceModal
-                isOpen={isExportModalOpen}
-                onClose={() => setIsExportModalOpen(false)}
-                onConfirm={handleExport}
-                loading={loadingExport}
-                classId={classId}
-                selectedSession={selectedSession}
-            />
-
             {/* ===== CREATE PANEL ===== */}
             <RightPanel
                 isOpen={isCreatePanelOpen}
                 title="Điểm danh mới"
                 onClose={() => setIsCreatePanelOpen(false)}
             >
-                <AttendanceForm
+                <StudentAttendanceForm
                     mode="create"
                     formData={formData}
                     errors={errors}
@@ -473,7 +426,8 @@ export const ClassAttendance = () => {
                     onSubmit={handleSubmitCreate}
                     onCancel={() => setIsCreatePanelOpen(false)}
                     loading={loadingCreate}
-                    classId={classId}
+                    onClassChange={handleFormClassChange}
+                    selectedClass={formClass}
                 />
             </RightPanel>
 
@@ -483,7 +437,7 @@ export const ClassAttendance = () => {
                 title="Cập nhật điểm danh"
                 onClose={() => setIsEditPanelOpen(false)}
             >
-                <AttendanceForm
+                <StudentAttendanceForm
                     mode="edit"
                     formData={formData}
                     errors={errors}
@@ -491,7 +445,8 @@ export const ClassAttendance = () => {
                     onSubmit={handleSubmitEdit}
                     onCancel={() => setIsEditPanelOpen(false)}
                     loading={loadingUpdate}
-                    classId={classId}
+                    onClassChange={handleFormClassChange}
+                    selectedClass={formClass}
                 />
             </RightPanel>
 

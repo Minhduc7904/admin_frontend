@@ -38,6 +38,7 @@ export const AttendanceFilters = ({
                         onSelect={onSessionChange}
                         value={selectedSession}
                         classId={classId}
+                        label=''
                     />
                 </div>
 

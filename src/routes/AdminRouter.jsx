@@ -22,7 +22,7 @@ import {
 } from '../features/courseClass/pages';
 import { CourseClassDetailLayout } from '../features/courseClass/layouts';
 import { SubjectPage } from '../features/subject/pages/SubjectPage';
-import { StudentList, StudentDetail, StudentRole, StudentMedia } from '../features/student/pages';
+import { StudentList, StudentDetail, StudentRole, StudentMedia, StudentClasses, StudentCourses, StudentAttendance } from '../features/student/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
 import { ROUTES } from '../core/constants';
@@ -135,6 +135,18 @@ export const adminRouter = [
                     {
                         index: true,
                         element: <StudentDetail />,
+                    },
+                    {
+                        path: 'classes',
+                        element: <StudentClasses />,
+                    },
+                    {
+                        path: 'courses',
+                        element: <StudentCourses />,
+                    },
+                    {
+                        path: 'attendance',
+                        element: <StudentAttendance />,
                     },
                     {
                         path: 'roles',

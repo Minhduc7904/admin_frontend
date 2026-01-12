@@ -3,4 +3,5 @@ export { AttendanceFilters } from './AttendanceFilters';
 export { AttendanceForm } from './AttendanceForm';
 export { AttendanceDeleteModal } from './AttendanceDeleteModal';
 export { BulkAttendanceModal } from './BulkAttendanceModal';
+export { ExportAttendanceModal } from './ExportAttendanceModal';
 export { AttendanceDetail } from './AttendanceDetail';

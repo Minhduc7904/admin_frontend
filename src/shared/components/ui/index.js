@@ -1,4 +1,5 @@
 export * from './Button'
+export { Badge } from './Badge';
 export { Checkbox } from './Checkbox';
 export { Input } from './Input';
 export { PasswordInput } from './PasswordInput';

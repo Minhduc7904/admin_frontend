@@ -5,6 +5,7 @@ import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 const initialState = {
     attendances: [],
     currentAttendance: null,
+    statistics: null,
     pagination: {
         page: 1,
         limit: 10,
@@ -18,6 +19,8 @@ const initialState = {
     loadingUpdate: false,
     loadingDelete: false,
     loadingBulkCreate: false,
+    loadingStatistics: false,
+    loadingExport: false,
     error: null,
     filters: {
         search: "",
@@ -98,6 +101,53 @@ export const deleteAttendanceAsync = createAsyncThunk(
     }
 );
 
+export const getStatisticsBySessionAsync = createAsyncThunk(
+    "attendance/getStatisticsBySession",
+    async (sessionId, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.getStatisticsBySession(sessionId), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải thống kê điểm danh",
+        });
+    }
+);
+
+export const exportAttendanceBySessionAsync = createAsyncThunk(
+    "attendance/exportBySession",
+    async ({ sessionId, options = {} }, thunkAPI) => {
+        try {
+            const response = await attendanceApi.exportBySession(sessionId, options);
+            
+            // Response.data is the blob
+            const blob = response.data || response;
+            
+            // Extract filename from Content-Disposition header or use default
+            const contentDisposition = response.headers?.['content-disposition'];
+            let filename = `DanhSach_DiemDanh_${sessionId}_${new Date().getTime()}.xlsx`;
+            
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = decodeURIComponent(filenameMatch[1].replace(/['"]/g, ''));
+                }
+            }
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            return { success: true };
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Lỗi xuất Excel');
+        }
+    }
+);
+
 // ======================
 // Slice
 // ======================
@@ -117,6 +167,9 @@ export const attendanceSlice = createSlice({
         },
         clearAttendances: (state) => {
             state.attendances = [];
+        },
+        clearStatistics: (state) => {
+            state.statistics = null;
         },
     },
     extraReducers: (builder) => {
@@ -223,6 +276,33 @@ export const attendanceSlice = createSlice({
             .addCase(deleteAttendanceAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+
+            // Get statistics by session
+            .addCase(getStatisticsBySessionAsync.pending, (state) => {
+                state.loadingStatistics = true;
+                state.error = null;
+            })
+            .addCase(getStatisticsBySessionAsync.fulfilled, (state, action) => {
+                state.loadingStatistics = false;
+                state.statistics = action.payload.data;
+            })
+            .addCase(getStatisticsBySessionAsync.rejected, (state, action) => {
+                state.loadingStatistics = false;
+                state.error = action.payload;
+            })
+
+            // Export by session
+            .addCase(exportAttendanceBySessionAsync.pending, (state) => {
+                state.loadingExport = true;
+                state.error = null;
+            })
+            .addCase(exportAttendanceBySessionAsync.fulfilled, (state) => {
+                state.loadingExport = false;
+            })
+            .addCase(exportAttendanceBySessionAsync.rejected, (state, action) => {
+                state.loadingExport = false;
+                state.error = action.payload;
             });
     },
 });
@@ -236,16 +316,20 @@ export const {
     resetFilters,
     clearCurrentAttendance,
     clearAttendances,
+    clearStatistics,
 } = attendanceSlice.actions;
 
 export const selectAttendances = (state) => state.attendance.attendances;
 export const selectCurrentAttendance = (state) => state.attendance.currentAttendance;
+export const selectAttendanceStatistics = (state) => state.attendance.statistics;
 export const selectAttendancePagination = (state) => state.attendance.pagination;
 export const selectAttendanceLoadingGet = (state) => state.attendance.loadingGet;
 export const selectAttendanceLoadingCreate = (state) => state.attendance.loadingCreate;
 export const selectAttendanceLoadingUpdate = (state) => state.attendance.loadingUpdate;
 export const selectAttendanceLoadingDelete = (state) => state.attendance.loadingDelete;
 export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loadingBulkCreate;
+export const selectAttendanceLoadingStatistics = (state) => state.attendance.loadingStatistics;
+export const selectAttendanceLoadingExport = (state) => state.attendance.loadingExport;
 export const selectAttendanceError = (state) => state.attendance.error;
 export const selectAttendanceFilters = (state) => state.attendance.filters;
 

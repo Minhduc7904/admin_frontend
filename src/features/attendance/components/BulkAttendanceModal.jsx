@@ -73,22 +73,9 @@ export const BulkAttendanceModal = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} maxWidth="lg">
-            <div className="p-6">
-                {/* Icon & Title */}
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
-                        <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-semibold text-foreground">
-                            Điểm danh hàng loạt
-                        </h3>
-                        <p className="text-sm text-foreground-light">
-                            Điểm danh cho tất cả học sinh trong lớp
-                        </p>
-                    </div>
-                </div>
+        <Modal isOpen={isOpen} onClose={handleClose} maxWidth="lg" title="Điểm danh hàng loạt">
+            <div className="">
+                
 
                 <form onSubmit={handleSubmit}>
                     {/* Form Body */}

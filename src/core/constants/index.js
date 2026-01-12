@@ -41,6 +41,9 @@ export const ROUTES = {
   STUDENT_DETAIL: (id = ':id') => `/students/${id}`,
   STUDENT_ROLES: (id = ':id') => `/students/${id}/roles`,
   STUDENT_MEDIA: (id = ':id') => `/students/${id}/media`,
+  STUDENT_CLASSES: (id = ':id') => `/students/${id}/classes`,
+  STUDENT_COURSES: (id = ':id') => `/students/${id}/courses`,
+  STUDENT_ATTENDANCE: (id = ':id') => `/students/${id}/attendance`,
   SUBJECTS: '/subjects',
   SUBJECT_DETAIL: (id = ':id') => `/subjects/${id}`,
   CHAPTERS: '/chapters',
@@ -201,6 +204,8 @@ export const API_ENDPOINTS = {
     CREATE_BULK_BY_SESSION: "/attendances/bulk/session",
     UPDATE: (id) => `/attendances/${id}`,
     DELETE: (id) => `/attendances/${id}`,
+    STATISTICS_BY_SESSION: (sessionId) => `/attendances/statistics/session/${sessionId}`,
+    EXPORT_BY_SESSION: (sessionId) => `/attendances/export/session/${sessionId}`,
   },
 };
 
