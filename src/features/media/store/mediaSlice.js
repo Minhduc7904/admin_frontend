@@ -22,6 +22,7 @@ const initialState = {
     loadingSoftDelete: false,
     loadingHardDelete: false,
     loadingDownloadUrl: false,
+    loadingBatchViewUrl: false,
     error: null,
     filters: {
         search: "",
@@ -35,6 +36,7 @@ const initialState = {
         sortOrder: "desc",
     },
     downloadUrl: null,
+    batchViewUrls: null,
 };
 
 // Async thunks
@@ -89,6 +91,16 @@ export const getMediaDownloadUrlAsync = createAsyncThunk(
     }
 );
 
+export const getBatchMediaViewUrlAsync = createAsyncThunk(
+    "media/getBatchViewUrl",
+    async ({ mediaIds, expiry = 3600 }, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.getBatchViewUrl(mediaIds, expiry), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tạo link xem hàng loạt",
+        });
+    }
+);
+
 export const updateMediaAsync = createAsyncThunk(
     "media/update",
     async ({ id, data }, thunkAPI) => {
@@ -137,6 +149,9 @@ const mediaSlice = createSlice({
         },
         clearDownloadUrl: (state) => {
             state.downloadUrl = null;
+        },
+        clearBatchViewUrls: (state) => {
+            state.batchViewUrls = null;
         },
         clearError: (state) => {
             state.error = null;
@@ -223,6 +238,20 @@ const mediaSlice = createSlice({
                 state.loadingDownloadUrl = false;
                 state.error = action.payload;
             })
+            // Get Batch Media View URL
+            .addCase(getBatchMediaViewUrlAsync.pending, (state) => {
+                state.loadingBatchViewUrl = true;
+                state.error = null;
+            })
+            .addCase(getBatchMediaViewUrlAsync.fulfilled, (state, action) => {
+                state.loadingBatchViewUrl = false;
+                state.batchViewUrls = action.payload.data;
+                state.error = null;
+            })
+            .addCase(getBatchMediaViewUrlAsync.rejected, (state, action) => {
+                state.loadingBatchViewUrl = false;
+                state.error = action.payload;
+            })
             // Update Media
             .addCase(updateMediaAsync.pending, (state) => {
                 state.loadingUpdate = true;
@@ -293,6 +322,7 @@ export const {
     resetFilters,
     clearCurrentMedia,
     clearDownloadUrl,
+    clearBatchViewUrls,
     clearError,
 } = mediaSlice.actions;
 
@@ -309,8 +339,10 @@ export const selectMediaLoadingUpdate = (state) => state.media.loadingUpdate;
 export const selectMediaLoadingSoftDelete = (state) => state.media.loadingSoftDelete;
 export const selectMediaLoadingHardDelete = (state) => state.media.loadingHardDelete;
 export const selectMediaLoadingDownloadUrl = (state) => state.media.loadingDownloadUrl;
+export const selectMediaLoadingBatchViewUrl = (state) => state.media.loadingBatchViewUrl;
 export const selectMediaError = (state) => state.media.error;
 export const selectMediaFilters = (state) => state.media.filters;
 export const selectMediaDownloadUrl = (state) => state.media.downloadUrl;
+export const selectMediaBatchViewUrls = (state) => state.media.batchViewUrls;
 
 export default mediaSlice.reducer;

@@ -75,6 +75,19 @@ export const mediaApi = {
     },
 
     /**
+     * Get view URLs for multiple media files (opens inline in browser)
+     * @param {number[]} mediaIds - Array of media IDs (max 100)
+     * @param {number} expiry - URL expiry in seconds (default: 3600 = 1 hour)
+     * @returns {Promise<Object>} View URLs with expiry info and error handling
+     */
+    getBatchViewUrl: (mediaIds, expiry = 3600) => {
+        return axiosClient.post(API_ENDPOINTS.MEDIA.BATCH_VIEW, 
+            { mediaIds },
+            { params: { expiry } }
+        );
+    },
+
+    /**
      * Update media metadata
      * @param {number} id - Media ID
      * @param {Object} data - Media data to update

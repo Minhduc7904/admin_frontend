@@ -143,6 +143,7 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/media/${id}`,
     DOWNLOAD: (id) => `/media/${id}/download`,
     VIEW: (id) => `/media/${id}/view`,
+    BATCH_VIEW: "/media/batch/view",
     UPDATE: (id) => `/media/${id}`,
     DELETE: (id) => `/media/${id}`,
     HARD_DELETE: (id) => `/media/${id}/permanent`,

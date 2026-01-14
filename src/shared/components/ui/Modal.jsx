@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export const Modal = ({ 
   isOpen, 
@@ -30,7 +31,7 @@ export const Modal = ({
     '2xl': 'max-w-2xl',
   };
 
-  return (
+  const modalContent = (
     <>
       {/* Overlay */}
       <div 
@@ -67,4 +68,7 @@ export const Modal = ({
       </div>
     </>
   );
+
+  // Render modal using Portal to avoid parent styles affecting it
+  return createPortal(modalContent, document.body);
 };

@@ -52,7 +52,7 @@ export const Sidebar = ({ sections }) => {
                             <div className="space-y-1">
                                 {section.items.map((item) => {
                                     const Icon = item.icon;
-                                    const isActive = location.pathname === item.href;
+                                    const isActive = location.pathname.startsWith(item.href);
 
                                     return (
                                         <Link
