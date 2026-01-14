@@ -24,8 +24,8 @@ import { ROUTES } from '../../../core/constants';
  * @param {string} props.title - Page title
  * @param {string} props.subtitle - Page subtitle
  */
-export const CourseList = ({ 
-    teacherId = null, 
+export const CourseList = ({
+    teacherId = null,
     isMyCourses = false,
     title = "Quản lý khóa học",
     subtitle = "Quản lý danh sách khóa học trong hệ thống."
@@ -164,7 +164,7 @@ export const CourseList = ({
             </div>
 
             {/* Stats Grid */}
-            <StatsGrid cols={4} className="mb-4">
+            <StatsGrid cols={3} className="mb-4">
                 <StatsCard
                     label="Tổng khóa học"
                     value={pagination.total}
@@ -215,7 +215,7 @@ export const CourseList = ({
                 onClose={handleCloseAddCourse}
                 title={isMyCourses ? "Tạo khóa học mới" : "Thêm khóa học mới"}
             >
-                <AddCourse 
+                <AddCourse
                     onClose={handleCloseAddCourse}
                     defaultTeacherId={teacherId}
                     canSelectTeacher={!isMyCourses}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     X,
@@ -22,34 +22,28 @@ import { Spinner, InlineLoading } from '../loading/Loading';
 import {
     uploadMediaAsync,
     getAllMediaAsync,
+    getBatchMediaViewUrlAsync,
     selectMedia,
     selectMediaLoadingGet,
     selectMediaLoadingUpload,
+    selectMediaBatchViewUrls,
 } from '../../../features/media/store/mediaSlice';
 import { mediaFolderApi, mediaApi } from '../../../core/api';
 
 /* =====================
    Media Grid Item
 ===================== */
-const MediaGridItem = ({ media, isSelected, onClick }) => {
-    const [imageUrl, setImageUrl] = useState(null);
+const MediaGridItem = ({ media, isSelected, onClick, viewUrl }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // For images, loading state is controlled by viewUrl availability
         if (media.type === 'IMAGE') {
-            // Load image URL
-            mediaApi.getViewUrl(media.mediaId, 3600)
-                .then(res => {
-                    setImageUrl(res.data.data.viewUrl);
-                    setLoading(false);
-                })
-                .catch(() => {
-                    setLoading(false);
-                });
+            setLoading(!viewUrl);
         } else {
             setLoading(false);
         }
-    }, [media.mediaId, media.type]);
+    }, [media.type, viewUrl]);
 
     const getIcon = () => {
         switch (media.type) {
@@ -80,9 +74,9 @@ const MediaGridItem = ({ media, isSelected, onClick }) => {
             <div className="absolute inset-0 flex items-center justify-center">
                 {loading ? (
                     <Spinner size="lg" />
-                ) : media.type === 'IMAGE' && imageUrl ? (
+                ) : media.type === 'IMAGE' && viewUrl ? (
                     <img
-                        src={imageUrl}
+                        src={viewUrl}
                         alt={media.fileName || media.originalName}
                         className="w-full h-full object-cover rounded"
                     />
@@ -250,6 +244,7 @@ export const MediaPickerModal = ({
     const media = useSelector(selectMedia);
     const loadingMedia = useSelector(selectMediaLoadingGet);
     const loadingUpload = useSelector(selectMediaLoadingUpload);
+    const batchViewUrls = useSelector(selectMediaBatchViewUrls);
 
     // Tabs
     const [activeTab, setActiveTab] = useState('library'); // 'library' or 'upload'
@@ -293,6 +288,20 @@ export const MediaPickerModal = ({
         }
     }, [selectedFolderId, isOpen, activeTab]);
 
+    // Load batch view URLs for images when media list changes
+    useEffect(() => {
+        if (isOpen && activeTab === 'library' && media && media.length > 0) {
+            // Only get URLs for IMAGE type media
+            const imageMediaIds = media
+                .filter(m => m.type === 'IMAGE')
+                .map(m => m.mediaId);
+
+            if (imageMediaIds.length > 0) {
+                dispatch(getBatchMediaViewUrlAsync({ mediaIds: imageMediaIds, expiry: 3600 }));
+            }
+        }
+    }, [media, isOpen, activeTab, dispatch]);
+
     const loadRootFolders = async () => {
         setLoadingFolders(true);
         try {
@@ -329,6 +338,19 @@ export const MediaPickerModal = ({
             setSelectedFolderId(folderId);
         }
     };
+
+    // Create a map of mediaId -> viewUrl for easy lookup
+    const viewUrlsMap = useMemo(() => {
+        const map = {};
+        if (batchViewUrls?.results) {
+            batchViewUrls.results.forEach(result => {
+                if (result.viewUrl && !result.error) {
+                    map[result.mediaId] = result.viewUrl;
+                }
+            });
+        }
+        return map;
+    }, [batchViewUrls]);
 
     // Get accepted file types based on media type
     const getAcceptedFileTypes = () => {
@@ -581,6 +603,7 @@ export const MediaPickerModal = ({
                                                     media={item}
                                                     isSelected={internalSelectedMediaId === item.mediaId}
                                                     onClick={() => setInternalSelectedMediaId(item.mediaId)}
+                                                    viewUrl={viewUrlsMap[item.mediaId]}
                                                 />
                                             ))}
                                         </div>
