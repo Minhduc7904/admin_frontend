@@ -28,6 +28,32 @@ const initialState = {
         sortBy: "createdAt",
         sortOrder: "desc",
     },
+    // Students Attendance state (tách biệt)
+    studentsAttendance: [],
+    studentsAttendancePagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    loadingStudentsAttendance: false,
+    loadingExportStudentsAttendance: false,
+    studentsAttendanceError: null,
+    studentsAttendanceFilters: {
+        fromDate: "",
+        toDate: "",
+        status: "",
+        search: "",
+    },
+    exportStudentsAttendanceOptions: {
+        includeSchool: true,
+        includeParentPhone: true,
+        includeStudentPhone: false,
+        includeGrade: true,
+        includeEmail: true,
+    },
 };
 
 // Async thunks
@@ -93,6 +119,54 @@ export const searchCoursesAsync = createAsyncThunk(
     }
 );
 
+// Students Attendance thunks
+export const getStudentsAttendanceAsync = createAsyncThunk(
+    "course/getStudentsAttendance",
+    async ({ courseId, params }, thunkAPI) => {
+        return handleAsyncThunk(() => courseApi.getStudentsAttendance(courseId, params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách điểm danh học sinh",
+        });
+    }
+);
+
+export const exportStudentsAttendanceAsync = createAsyncThunk(
+    "course/exportStudentsAttendance",
+    async ({ courseId, params = {} }, thunkAPI) => {
+        try {
+            const response = await courseApi.exportStudentsAttendance(courseId, params);
+
+            // Response.data is the blob
+            const blob = response.data || response;
+
+            // Extract filename from Content-Disposition header or use default
+            const contentDisposition = response.headers?.['content-disposition'];
+            let filename = `DiemDanh_KhoaHoc_${courseId}_${new Date().getTime()}.xlsx`;
+
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=(['\"]?)([^'\"\n]*\.(xlsx))\1/i);
+                if (filenameMatch && filenameMatch[2]) {
+                    filename = decodeURIComponent(filenameMatch[2]);
+                }
+            }
+
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            return { success: true };
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Lỗi xuất Excel');
+        }
+    }
+);
+
 export const courseSlice = createSlice({
     name: "course",
     initialState,
@@ -105,6 +179,22 @@ export const courseSlice = createSlice({
         },
         resetFilters: (state) => {
             state.filters = initialState.filters;
+        },
+        // Students Attendance reducers
+        setStudentsAttendanceFilters: (state, action) => {
+            state.studentsAttendanceFilters = { ...state.studentsAttendanceFilters, ...action.payload };
+        },
+        resetStudentsAttendanceFilters: (state) => {
+            state.studentsAttendanceFilters = initialState.studentsAttendanceFilters;
+        },
+        clearStudentsAttendance: (state) => {
+            state.studentsAttendance = [];
+        },
+        setExportStudentsAttendanceOptions: (state, action) => {
+            state.exportStudentsAttendanceOptions = { ...state.exportStudentsAttendanceOptions, ...action.payload };
+        },
+        resetExportStudentsAttendanceOptions: (state) => {
+            state.exportStudentsAttendanceOptions = initialState.exportStudentsAttendanceOptions;
         },
     },
     extraReducers: (builder) => {
@@ -192,11 +282,47 @@ export const courseSlice = createSlice({
             .addCase(deleteCourseAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+            // Get students attendance
+            .addCase(getStudentsAttendanceAsync.pending, (state) => {
+                state.loadingStudentsAttendance = true;
+                state.studentsAttendanceError = null;
+            })
+            .addCase(getStudentsAttendanceAsync.fulfilled, (state, action) => {
+                state.loadingStudentsAttendance = false;
+                state.studentsAttendance = action.payload.data;
+                state.studentsAttendancePagination = action.payload.meta;
+                state.studentsAttendanceError = null;
+            })
+            .addCase(getStudentsAttendanceAsync.rejected, (state, action) => {
+                state.loadingStudentsAttendance = false;
+                state.studentsAttendanceError = action.payload;
+            })
+            // Export students attendance
+            .addCase(exportStudentsAttendanceAsync.pending, (state) => {
+                state.loadingExportStudentsAttendance = true;
+                state.studentsAttendanceError = null;
+            })
+            .addCase(exportStudentsAttendanceAsync.fulfilled, (state) => {
+                state.loadingExportStudentsAttendance = false;
+            })
+            .addCase(exportStudentsAttendanceAsync.rejected, (state, action) => {
+                state.loadingExportStudentsAttendance = false;
+                state.studentsAttendanceError = action.payload;
             });
     },
 });
 
-export const { setFilters, clearCurrentCourse, resetFilters } = courseSlice.actions;
+export const { 
+    setFilters, 
+    clearCurrentCourse, 
+    resetFilters,
+    setStudentsAttendanceFilters,
+    resetStudentsAttendanceFilters,
+    clearStudentsAttendance,
+    setExportStudentsAttendanceOptions,
+    resetExportStudentsAttendanceOptions,
+} = courseSlice.actions;
 
 export const selectCourses = (state) => state.course.courses;
 export const selectCurrentCourse = (state) => state.course.currentCourse;
@@ -207,5 +333,14 @@ export const selectCourseLoadingUpdate = (state) => state.course.loadingUpdate;
 export const selectCourseLoadingDelete = (state) => state.course.loadingDelete;
 export const selectCourseError = (state) => state.course.error;
 export const selectCourseFilters = (state) => state.course.filters;
+
+// Students Attendance selectors
+export const selectStudentsAttendance = (state) => state.course.studentsAttendance;
+export const selectStudentsAttendancePagination = (state) => state.course.studentsAttendancePagination;
+export const selectLoadingStudentsAttendance = (state) => state.course.loadingStudentsAttendance;
+export const selectLoadingExportStudentsAttendance = (state) => state.course.loadingExportStudentsAttendance;
+export const selectStudentsAttendanceError = (state) => state.course.studentsAttendanceError;
+export const selectStudentsAttendanceFilters = (state) => state.course.studentsAttendanceFilters;
+export const selectExportStudentsAttendanceOptions = (state) => state.course.exportStudentsAttendanceOptions;
 
 export default courseSlice.reducer;

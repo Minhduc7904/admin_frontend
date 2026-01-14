@@ -36,4 +36,11 @@ export const attendanceApi = {
             responseType: 'blob',
         });
     },
+
+    exportImage: (id, options = {}) => {
+        return axiosClient.get(API_ENDPOINTS.ATTENDANCES.EXPORT_IMAGE(id), {
+            params: options,
+            responseType: 'blob',
+        });
+    },
 };

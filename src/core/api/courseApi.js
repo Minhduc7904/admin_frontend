@@ -20,5 +20,16 @@ export const courseApi = {
 
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.COURSES.DELETE(id));
-    }
+    },
+
+    getStudentsAttendance: (id, params) => {
+        return axiosClient.get(API_ENDPOINTS.COURSES.STUDENTS_ATTENDANCE(id), { params });
+    },
+
+    exportStudentsAttendance: (id, params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.COURSES.STUDENTS_ATTENDANCE_EXPORT(id), {
+            params,
+            responseType: 'blob',
+        });
+    },
 };

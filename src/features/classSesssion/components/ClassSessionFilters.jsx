@@ -1,11 +1,9 @@
 import { SearchInput, Dropdown } from '../../../shared/components/ui';
-
+import { SESSION_STATUS_OPTIONS } from '../../../core/constants';
 /* ===================== STATUS OPTIONS ===================== */
 const STATUS_OPTIONS = [
     { value: '', label: 'Tất cả trạng thái' },
-    { value: 'past', label: 'Đã qua' },
-    { value: 'today', label: 'Hôm nay' },
-    { value: 'upcoming', label: 'Sắp tới' },
+    ...SESSION_STATUS_OPTIONS,
 ];
 
 export const ClassSessionFilters = ({

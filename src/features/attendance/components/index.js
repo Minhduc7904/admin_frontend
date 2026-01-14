@@ -5,3 +5,5 @@ export { AttendanceDeleteModal } from './AttendanceDeleteModal';
 export { BulkAttendanceModal } from './BulkAttendanceModal';
 export { ExportAttendanceModal } from './ExportAttendanceModal';
 export { AttendanceDetail } from './AttendanceDetail';
+export { AttendanceDetailInfo } from './AttendanceDetailInfo';
+export { AttendanceExport } from './AttendanceExport';

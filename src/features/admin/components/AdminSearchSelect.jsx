@@ -50,7 +50,6 @@ export const AdminSearchSelect = ({
 
     // Custom render option để hiển thị thông tin chi tiết hơn
     const renderAdminOption = (admin) => {
-        console.log('Rendering admin option:', admin);
         return (
             <div className="flex flex-col">
                 <span className="font-medium">{admin.fullName || 'N/A'}</span>

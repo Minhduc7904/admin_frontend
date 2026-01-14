@@ -12,7 +12,7 @@ export const Spinner = ({ size = 'md', className = '' }) => {
   };
 
   return (
-    <Loader2 
+    <Loader2
       className={`animate-spin text-foreground-light ${sizeClasses[size]} ${className}`}
     />
   );
@@ -65,9 +65,8 @@ export const SkeletonText = ({ lines = 3, className = '' }) => {
       {Array.from({ length: lines }).map((_, index) => (
         <div
           key={index}
-          className={`h-4 bg-gray-200 rounded-sm animate-pulse ${
-            index === lines - 1 ? 'w-3/4' : 'w-full'
-          }`}
+          className={`h-4 bg-gray-200 rounded-sm animate-pulse ${index === lines - 1 ? 'w-3/4' : 'w-full'
+            }`}
         />
       ))}
     </div>
@@ -164,7 +163,7 @@ export const SkeletonAvatar = ({ size = 'md', shape = 'square' }) => {
 export const LoadingOverlay = ({ message = 'Đang xử lý...' }) => {
   return (
     <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-primary border border-border rounded-sm p-6 text-center shadow-lg">
+      <div className="p-6 text-center ">
         <Spinner size="lg" className="mx-auto mb-3" />
         <p className="text-sm text-foreground-light">{message}</p>
       </div>

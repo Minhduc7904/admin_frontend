@@ -1,13 +1,10 @@
 import { SearchInput, Dropdown } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
-
+import { ATTENDANCE_STATUS_OPTIONS  } from '../../../core/constants/options';
 /* ===================== STATUS OPTIONS ===================== */
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS_WITH_ALL = [
     { value: '', label: 'Tất cả trạng thái' },
-    { value: 'PRESENT', label: 'Có mặt' },
-    { value: 'ABSENT', label: 'Vắng' },
-    { value: 'LATE', label: 'Muộn' },
-    { value: 'MAKEUP', label: 'Học bù' },
+    ...ATTENDANCE_STATUS_OPTIONS,
 ];
 
 export const AttendanceFilters = ({
@@ -47,7 +44,7 @@ export const AttendanceFilters = ({
                     <Dropdown
                         value={status}
                         onChange={onStatusChange}
-                        options={STATUS_OPTIONS}
+                        options={STATUS_OPTIONS_WITH_ALL}
                         placeholder="Chọn trạng thái"
                     />
                 </div>

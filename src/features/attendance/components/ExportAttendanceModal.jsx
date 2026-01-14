@@ -1,7 +1,12 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Download } from 'lucide-react';
 import { Button, Modal, Checkbox } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
+import {
+    selectAttendanceExportExcelOptions,
+    setExportExcelOptions
+} from '../store/attendanceSlice';
 
 export const ExportAttendanceModal = ({
     isOpen,
@@ -11,18 +16,11 @@ export const ExportAttendanceModal = ({
     classId,
     selectedSession: initialSession,
 }) => {
+    const dispatch = useDispatch();
+    const exportOptions = useSelector(selectAttendanceExportExcelOptions);
+
     const [formData, setFormData] = useState({
         sessionId: initialSession?.sessionId || null,
-        // Export options with defaults matching backend
-        includeSchool: true,
-        includeParentPhone: true,
-        includeStudentPhone: false,
-        includeGrade: true,
-        includeEmail: true,
-        includeMarkedAt: true,
-        includeNotes: true,
-        includeMakeupNote: false,
-        includeMarkerName: true,
     });
 
     const [errors, setErrors] = useState({});
@@ -35,7 +33,7 @@ export const ExportAttendanceModal = ({
     };
 
     const handleCheckboxChange = (field) => (checked) => {
-        setFormData((prev) => ({ ...prev, [field]: checked }));
+        dispatch(setExportExcelOptions({ [field]: checked }));
     };
 
     const handleSubmit = (e) => {
@@ -47,27 +45,15 @@ export const ExportAttendanceModal = ({
             return;
         }
 
-        // Prepare export options (exclude sessionId)
-        const { sessionId, ...options } = formData;
-        
         onConfirm({
-            sessionId,
-            options,
+            sessionId: formData.sessionId,
+            options: exportOptions,
         });
     };
 
     const handleClose = () => {
         setFormData({
             sessionId: null,
-            includeSchool: true,
-            includeParentPhone: true,
-            includeStudentPhone: false,
-            includeGrade: true,
-            includeEmail: true,
-            includeMarkedAt: true,
-            includeNotes: true,
-            includeMakeupNote: false,
-            includeMarkerName: true,
         });
         setErrors({});
         onClose();
@@ -113,55 +99,55 @@ export const ExportAttendanceModal = ({
                                     <Checkbox
                                         id="includeSchool"
                                         label="Trường"
-                                        checked={formData.includeSchool}
+                                        checked={exportOptions.includeSchool}
                                         onChange={handleCheckboxChange('includeSchool')}
                                     />
                                     <Checkbox
                                         id="includeParentPhone"
                                         label="SĐT phụ huynh"
-                                        checked={formData.includeParentPhone}
+                                        checked={exportOptions.includeParentPhone}
                                         onChange={handleCheckboxChange('includeParentPhone')}
                                     />
                                     <Checkbox
                                         id="includeStudentPhone"
                                         label="SĐT học sinh"
-                                        checked={formData.includeStudentPhone}
+                                        checked={exportOptions.includeStudentPhone}
                                         onChange={handleCheckboxChange('includeStudentPhone')}
                                     />
                                     <Checkbox
                                         id="includeGrade"
                                         label="Lớp"
-                                        checked={formData.includeGrade}
+                                        checked={exportOptions.includeGrade}
                                         onChange={handleCheckboxChange('includeGrade')}
                                     />
                                     <Checkbox
                                         id="includeEmail"
                                         label="Email"
-                                        checked={formData.includeEmail}
+                                        checked={exportOptions.includeEmail}
                                         onChange={handleCheckboxChange('includeEmail')}
                                     />
                                     <Checkbox
                                         id="includeMarkedAt"
                                         label="Thời gian điểm danh"
-                                        checked={formData.includeMarkedAt}
+                                        checked={exportOptions.includeMarkedAt}
                                         onChange={handleCheckboxChange('includeMarkedAt')}
                                     />
                                     <Checkbox
                                         id="includeNotes"
                                         label="Ghi chú"
-                                        checked={formData.includeNotes}
+                                        checked={exportOptions.includeNotes}
                                         onChange={handleCheckboxChange('includeNotes')}
                                     />
                                     <Checkbox
                                         id="includeMakeupNote"
                                         label="Ghi chú điểm danh bù"
-                                        checked={formData.includeMakeupNote}
+                                        checked={exportOptions.includeMakeupNote}
                                         onChange={handleCheckboxChange('includeMakeupNote')}
                                     />
                                     <Checkbox
                                         id="includeMarkerName"
                                         label="Người điểm danh"
-                                        checked={formData.includeMarkerName}
+                                        checked={exportOptions.includeMarkerName}
                                         onChange={handleCheckboxChange('includeMarkerName')}
                                     />
                                 </div>

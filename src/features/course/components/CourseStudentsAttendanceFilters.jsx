@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Input, Dropdown } from '../../../shared/components/ui';
-import { toISODate, getDateRange } from '../../../shared/utils';
-import { ClassSearchSelect } from '../../courseClass/components';
-import { ClassSessionSearchSelect } from '../../classSesssion/components';
+import { getDateRange } from '../../../shared/utils';
 import { ATTENDANCE_STATUS_OPTIONS, TIME_RANGE_OPTIONS } from '../../../core/constants/options';
 
 /* ===================== STATUS OPTIONS ===================== */
@@ -16,7 +14,7 @@ const TIME_RANGE_OPTIONS_WITH_DEFAULT = [
     ...TIME_RANGE_OPTIONS,
 ];
 
-export const StudentAttendanceFilters = ({
+export const CourseStudentsAttendanceFilters = ({
     search,
     onSearchChange,
     status,
@@ -25,10 +23,6 @@ export const StudentAttendanceFilters = ({
     onFromDateChange,
     toDate,
     onToDateChange,
-    selectedClass,
-    onClassChange,
-    selectedSession,
-    onSessionChange,
 }) => {
     const [timeRange, setTimeRange] = useState('');
 
@@ -45,15 +39,16 @@ export const StudentAttendanceFilters = ({
             onToDateChange('');
         }
     };
+
     return (
         <div className="bg-white border border-border rounded-sm p-4 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Search */}
                 <div>
                     <Input
                         type="text"
                         label="Tìm kiếm"
-                        placeholder="Tên buổi học, lớp, ghi chú..."
+                        placeholder="Tên học sinh, email, SĐT..."
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
                     />
@@ -68,32 +63,9 @@ export const StudentAttendanceFilters = ({
                         onChange={onStatusChange}
                     />
                 </div>
-
-                {/* Class Filter */}
-                <div>
-                    <ClassSearchSelect
-                        label="Lọc theo lớp"
-                        placeholder="Chọn lớp học..."
-                        onSelect={onClassChange}
-                        value={selectedClass}
-                    />
-                </div>
-
-                {/* Session Filter */}
-                <div>
-                    <ClassSessionSearchSelect
-                        label="Lọc theo buổi học"
-                        placeholder="Chọn buổi học..."
-                        onSelect={onSessionChange}
-                        value={selectedSession}
-                        classId={selectedClass?.classId}
-                        disabled={!selectedClass}
-                    />
-                </div>
-
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Time Range Preset */}
                 <div>
                     <Dropdown

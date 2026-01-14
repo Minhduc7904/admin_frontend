@@ -80,6 +80,14 @@ export const CourseDetailLayout = () => {
                         navigate(ROUTES.COURSE_STUDENTS(courseId) + queryString),
                 },
                 {
+                    label: 'Điểm danh',
+                    isActive: location.pathname.startsWith(
+                        ROUTES.COURSE_ATTENDANCE(courseId)
+                    ),
+                    onActivate: () =>
+                        navigate(ROUTES.COURSE_ATTENDANCE(courseId) + queryString),
+                },
+                {
                     label: 'Bài học',
                     isActive: location.pathname.startsWith(
                         ROUTES.COURSE_LESSONS(courseId)

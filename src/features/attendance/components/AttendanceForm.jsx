@@ -1,14 +1,8 @@
 import { Button, Input, Dropdown, Textarea } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
 import { StudentSearchSelect } from '../../student/components/StudentSearchSelect';
+import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
 
-/* ===================== STATUS OPTIONS ===================== */
-const STATUS_OPTIONS = [
-    { value: 'PRESENT', label: 'Có mặt' },
-    { value: 'ABSENT', label: 'Vắng' },
-    { value: 'LATE', label: 'Muộn' },
-    { value: 'MAKEUP', label: 'Học bù' },
-];
 
 export const AttendanceForm = ({
     formData,
@@ -77,7 +71,7 @@ export const AttendanceForm = ({
                     <Dropdown
                         value={formData.status}
                         onChange={handleStatusChange}
-                        options={STATUS_OPTIONS}
+                        options={ATTENDANCE_STATUS_OPTIONS}
                         placeholder="Chọn trạng thái"
                         error={errors.status}
                     />

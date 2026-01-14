@@ -14,19 +14,17 @@ import { updateCourseClassAsync, selectCourseClassLoadingUpdate } from '../store
 export const EditClass = ({
     courseClass,
     onClose,
-    disableInstructorEdit = false
 }) => {
     const dispatch = useDispatch();
     const loadingUpdate = useSelector(selectCourseClassLoadingUpdate);
     const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
-        courseId: '',
         className: '',
         startDate: '',
         endDate: '',
         room: '',
-        instructorId: '',
+        instructorId: null,
     });
 
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -36,18 +34,17 @@ export const EditClass = ({
     useEffect(() => {
         if (courseClass) {
             setFormData({
-                courseId: courseClass.courseId || '',
                 className: courseClass.className || '',
                 startDate: courseClass.startDate ? new Date(courseClass.startDate).toISOString().split('T')[0] : '',
                 endDate: courseClass.endDate ? new Date(courseClass.endDate).toISOString().split('T')[0] : '',
                 room: courseClass.room || '',
-                instructorId: courseClass.instructorId || '',
+                instructorId: courseClass.instructorId || null,
             });
-            
+
             if (courseClass.course) {
                 setSelectedCourse(courseClass.course);
             }
-            
+
             if (courseClass.instructor) {
                 setSelectedInstructor(courseClass.instructor);
             }
@@ -68,10 +65,6 @@ export const EditClass = ({
 
     const validateForm = () => {
         const newErrors = {};
-
-        if (!formData.courseId) {
-            newErrors.courseId = 'Vui lòng chọn khóa học';
-        }
 
         if (!formData.className?.trim()) {
             newErrors.className = 'Vui lòng nhập tên lớp học';
@@ -106,7 +99,6 @@ export const EditClass = ({
 
         try {
             const payload = {
-                courseId: parseInt(formData.courseId),
                 className: formData.className.trim(),
                 startDate: formData.startDate || undefined,
                 endDate: formData.endDate || undefined,
@@ -114,9 +106,9 @@ export const EditClass = ({
                 instructorId: formData.instructorId ? parseInt(formData.instructorId) : undefined,
             };
 
-            await dispatch(updateCourseClassAsync({ 
-                id: courseClass.classId, 
-                data: payload 
+            await dispatch(updateCourseClassAsync({
+                id: courseClass.classId,
+                data: payload
             })).unwrap();
             onClose();
         } catch (error) {
@@ -148,27 +140,6 @@ export const EditClass = ({
                     />
                 </div>
 
-                {/* Khóa học */}
-                <div>
-                    <CourseSearchSelect
-                        label="Khóa học"
-                        placeholder="Tìm kiếm khóa học..."
-                        required={true}
-                        value={formData.courseId}
-                        onSelect={(course) => {
-                            setSelectedCourse(course);
-                            setFormData(prev => ({
-                                ...prev,
-                                courseId: course.courseId
-                            }));
-                            if (errors.courseId) {
-                                setErrors(prev => ({ ...prev, courseId: '' }));
-                            }
-                        }}
-                        error={errors.courseId}
-                    />
-                </div>
-
                 {/* Giáo viên */}
                 <div>
                     <AdminSearchSelect
@@ -183,13 +154,7 @@ export const EditClass = ({
                             }));
                         }}
                         error={errors.instructorId}
-                        disabled={disableInstructorEdit}
                     />
-                    {disableInstructorEdit && (
-                        <p className="text-xs text-foreground-light mt-1">
-                            Không thể thay đổi giáo viên cho lớp học của bạn
-                        </p>
-                    )}
                 </div>
 
                 {/* Thời gian */}

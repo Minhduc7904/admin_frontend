@@ -1,14 +1,8 @@
 import { Button, Dropdown, Textarea } from '../../../shared/components/ui';
 import { ClassSearchSelect } from '../../courseClass/components';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
-
+import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
 /* ===================== STATUS OPTIONS ===================== */
-const STATUS_OPTIONS = [
-    { value: 'PRESENT', label: 'Có mặt' },
-    { value: 'ABSENT', label: 'Vắng' },
-    { value: 'LATE', label: 'Muộn' },
-    { value: 'MAKEUP', label: 'Học bù' },
-];
 
 export const StudentAttendanceForm = ({
     formData,
@@ -66,7 +60,7 @@ export const StudentAttendanceForm = ({
                         disabled={mode === 'edit' || !selectedClass}
                     />
                     <p className="text-xs text-foreground-light mt-1">
-                        {!selectedClass 
+                        {!selectedClass
                             ? 'Vui lòng chọn lớp học trước'
                             : 'Chọn buổi học cần điểm danh'
                         }
@@ -81,7 +75,7 @@ export const StudentAttendanceForm = ({
                     <Dropdown
                         value={formData.status}
                         onChange={handleStatusChange}
-                        options={STATUS_OPTIONS}
+                        options={ATTENDANCE_STATUS_OPTIONS}
                         placeholder="Chọn trạng thái"
                         error={errors.status}
                     />

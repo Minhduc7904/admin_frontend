@@ -53,6 +53,7 @@ export const ROUTES = {
   COURSE_DETAIL: (id = ':id') => `/courses/${id}`,
   COURSE_CLASSES: (id = ':id') => `/courses/${id}/classes`,
   COURSE_STUDENTS: (id = ':id') => `/courses/${id}/students`,
+  COURSE_ATTENDANCE: (id = ':id') => `/courses/${id}/attendance`,
   COURSE_LESSONS: (id = ':id') => `/courses/${id}/lessons`,
   CLASSES: '/classes',
   MY_CLASSES: '/my-classes',
@@ -169,6 +170,8 @@ export const API_ENDPOINTS = {
     CREATE: "/courses",
     UPDATE: (id) => `/courses/${id}`,
     DELETE: (id) => `/courses/${id}`,
+    STUDENTS_ATTENDANCE: (id) => `/courses/${id}/students-attendance`,
+    STUDENTS_ATTENDANCE_EXPORT: (id) => `/courses/${id}/students-attendance/export`,
   },
   COURSE_CLASSES: {
     LIST: "/course-classes",
@@ -206,6 +209,7 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/attendances/${id}`,
     STATISTICS_BY_SESSION: (sessionId) => `/attendances/statistics/session/${sessionId}`,
     EXPORT_BY_SESSION: (sessionId) => `/attendances/export/session/${sessionId}`,
+    EXPORT_IMAGE: (id) => `/attendances/export/image/${id}`,
   },
 };
 
@@ -221,3 +225,4 @@ export const HTTP_STATUS = {
 };
 
 export * from "./visibility"
+export * from "./options"

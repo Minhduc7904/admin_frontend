@@ -19,6 +19,7 @@ export { Table } from './Table'
 export { Tabs } from './Tabs'
 export { Textarea } from './Textarea'
 export { RightPanel } from './RightPanel';
+export { Slider } from './Slider';
 
 // Empty states
 export * from '../empty';

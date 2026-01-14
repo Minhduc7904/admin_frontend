@@ -1,33 +1,18 @@
 import { Search, Filter } from 'lucide-react';
 import { Input, Select } from '../../../shared/components/ui';
+import { MEDIA_TYPE_OPTIONS, MEDIA_STATUS_OPTIONS, MEDIA_SORT_OPTIONS, SORT_ORDER_OPTIONS } from '../../../core/constants/options';
 
 const TYPE_OPTIONS = [
     { value: '', label: 'Tất cả loại' },
-    { value: 'IMAGE', label: 'Hình ảnh' },
-    { value: 'VIDEO', label: 'Video' },
-    { value: 'AUDIO', label: 'Âm thanh' },
-    { value: 'DOCUMENT', label: 'Tài liệu' },
-    { value: 'OTHER', label: 'Khác' },
+    ...MEDIA_TYPE_OPTIONS,
 ];
 
 const STATUS_OPTIONS = [
     { value: '', label: 'Tất cả trạng thái' },
-    { value: 'READY', label: 'Sẵn sàng' },
-    { value: 'UPLOADING', label: 'Đang tải' },
-    { value: 'FAILED', label: 'Thất bại' },
-    { value: 'DELETED', label: 'Đã xóa' },
+    ...MEDIA_STATUS_OPTIONS,
 ];
 
-const SORT_OPTIONS = [
-    { value: 'createdAt', label: 'Ngày tải lên' },
-    { value: 'fileSize', label: 'Kích thước' },
-    { value: 'filename', label: 'Tên file' },
-];
-
-const SORT_ORDER_OPTIONS = [
-    { value: 'desc', label: 'Giảm dần' },
-    { value: 'asc', label: 'Tăng dần' },
-];
+const SORT_OPTIONS = MEDIA_SORT_OPTIONS;
 
 export const MediaFilters = ({
     search,

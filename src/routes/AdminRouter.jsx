@@ -9,7 +9,7 @@ import { AdminDetail } from '../features/admin/pages/AdminDetail';
 import { AdminRole } from '../features/admin/pages/AdminRole';
 import { AdminMedia } from '../features/admin/pages/AdminMedia';
 import { ChapterPage } from '../features/chapter/pages';
-import { CourseList, MyCourseList, CourseDetail, CourseClasses, CourseEnrollment } from '../features/course/pages';
+import { CourseList, MyCourseList, CourseDetail, CourseClasses, CourseEnrollment, CourseStudentsAttendance } from '../features/course/pages';
 import { CourseDetailLayout } from '../features/course/layouts';
 import { 
     ClassList, 
@@ -69,6 +69,10 @@ export const adminRouter = [
                     {
                         path: 'students',
                         element: <CourseEnrollment />,
+                    },
+                    {
+                        path: 'attendance',
+                        element: <CourseStudentsAttendance />,
                     },
                     {
                         path: 'lessons',

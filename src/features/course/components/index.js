@@ -10,3 +10,5 @@ export { EnrollmentFilters } from './EnrollmentFilters';
 export { EnrollmentTable } from './EnrollmentTable';
 export { EnrollmentForm } from './EnrollmentForm';
 export { EnrollmentDeleteModal } from './EnrollmentDeleteModal';
+export { CourseStudentsAttendanceFilters } from './CourseStudentsAttendanceFilters';
+export { CourseStudentsAttendanceTable } from './CourseStudentsAttendanceTable';

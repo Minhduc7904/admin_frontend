@@ -21,6 +21,7 @@ const initialState = {
     loadingBulkCreate: false,
     loadingStatistics: false,
     loadingExport: false,
+    loadingExportImage: false,
     error: null,
     filters: {
         search: "",
@@ -30,6 +31,38 @@ const initialState = {
         status: "",
         sortBy: "markedAt",
         sortOrder: "desc",
+    },
+    exportOptions: {
+        format: 'png',
+        quality: 90,
+        width: 800,
+        includePhoto: true,
+        includeParentPhone: true,
+        includeStudentPhone: false,
+        includeEmail: true,
+        includeNotes: true,
+        includeQRCode: false,
+        includeTeacherName: true,
+        includeMarkerName: true,
+        includeStartTime: true,
+        includeEndTime: true,
+        includeStudentId: true,
+        includeClassName: true,
+        includeCourseName: true,
+        includeMarkedAt: true,
+        includeGradeSchool: true,
+        includeTuition: true,
+    },
+    exportExcelOptions: {
+        includeSchool: true,
+        includeParentPhone: true,
+        includeStudentPhone: false,
+        includeGrade: true,
+        includeEmail: true,
+        includeMarkedAt: true,
+        includeNotes: true,
+        includeMakeupNote: false,
+        includeMarkerName: true,
     },
 };
 
@@ -116,21 +149,21 @@ export const exportAttendanceBySessionAsync = createAsyncThunk(
     async ({ sessionId, options = {} }, thunkAPI) => {
         try {
             const response = await attendanceApi.exportBySession(sessionId, options);
-            
+
             // Response.data is the blob
             const blob = response.data || response;
-            
+
             // Extract filename from Content-Disposition header or use default
             const contentDisposition = response.headers?.['content-disposition'];
             let filename = `DanhSach_DiemDanh_${sessionId}_${new Date().getTime()}.xlsx`;
-            
+
             if (contentDisposition) {
                 const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
                 if (filenameMatch && filenameMatch[1]) {
                     filename = decodeURIComponent(filenameMatch[1].replace(/['"]/g, ''));
                 }
             }
-            
+
             // Create download link
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -140,10 +173,59 @@ export const exportAttendanceBySessionAsync = createAsyncThunk(
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
-            
+
             return { success: true };
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data?.message || 'Lỗi xuất Excel');
+        }
+    }
+);
+
+export const exportAttendanceImageAsync = createAsyncThunk(
+    "attendance/exportImage",
+    async ({ id, options = {} }, thunkAPI) => {
+        try {
+            const response = await attendanceApi.exportImage(id, options);
+
+            // Response.data is the blob
+            const blob = response.data || response;
+
+            // Extract filename from Content-Disposition header or use default
+            const contentDisposition = response.headers?.['content-disposition'];
+            const format = options.format || 'png';
+            let filename = `PhieuDiemDanh_${id}_${new Date().getTime()}.${format}`;
+
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = decodeURIComponent(filenameMatch[1].replace(/['"]/g, ''));
+                }
+            }
+
+            // Check mode: download or view
+            const mode = options.mode || 'download';
+
+            if (mode === 'view') {
+                // Open in new tab for viewing
+                const url = window.URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                // Clean up after a delay
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+            } else {
+                // Download file
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }
+
+            return { success: true, mode };
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Lỗi xuất ảnh');
         }
     }
 );
@@ -170,6 +252,18 @@ export const attendanceSlice = createSlice({
         },
         clearStatistics: (state) => {
             state.statistics = null;
+        },
+        setExportOptions: (state, action) => {
+            state.exportOptions = { ...state.exportOptions, ...action.payload };
+        },
+        resetExportOptions: (state) => {
+            state.exportOptions = initialState.exportOptions;
+        },
+        setExportExcelOptions: (state, action) => {
+            state.exportExcelOptions = { ...state.exportExcelOptions, ...action.payload };
+        },
+        resetExportExcelOptions: (state) => {
+            state.exportExcelOptions = initialState.exportExcelOptions;
         },
     },
     extraReducers: (builder) => {
@@ -303,6 +397,19 @@ export const attendanceSlice = createSlice({
             .addCase(exportAttendanceBySessionAsync.rejected, (state, action) => {
                 state.loadingExport = false;
                 state.error = action.payload;
+            })
+
+            // Export image
+            .addCase(exportAttendanceImageAsync.pending, (state) => {
+                state.loadingExportImage = true;
+                state.error = null;
+            })
+            .addCase(exportAttendanceImageAsync.fulfilled, (state) => {
+                state.loadingExportImage = false;
+            })
+            .addCase(exportAttendanceImageAsync.rejected, (state, action) => {
+                state.loadingExportImage = false;
+                state.error = action.payload;
             });
     },
 });
@@ -317,6 +424,10 @@ export const {
     clearCurrentAttendance,
     clearAttendances,
     clearStatistics,
+    setExportOptions,
+    resetExportOptions,
+    setExportExcelOptions,
+    resetExportExcelOptions,
 } = attendanceSlice.actions;
 
 export const selectAttendances = (state) => state.attendance.attendances;
@@ -330,7 +441,10 @@ export const selectAttendanceLoadingDelete = (state) => state.attendance.loading
 export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loadingBulkCreate;
 export const selectAttendanceLoadingStatistics = (state) => state.attendance.loadingStatistics;
 export const selectAttendanceLoadingExport = (state) => state.attendance.loadingExport;
+export const selectAttendanceLoadingExportImage = (state) => state.attendance.loadingExportImage;
 export const selectAttendanceError = (state) => state.attendance.error;
 export const selectAttendanceFilters = (state) => state.attendance.filters;
+export const selectAttendanceExportOptions = (state) => state.attendance.exportOptions;
+export const selectAttendanceExportExcelOptions = (state) => state.attendance.exportExcelOptions;
 
 export default attendanceSlice.reducer;

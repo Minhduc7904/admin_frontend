@@ -2,14 +2,9 @@ import { useState } from 'react';
 import { Users } from 'lucide-react';
 import { Button, Modal, Dropdown, Textarea } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
-
+import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
 /* ===================== STATUS OPTIONS ===================== */
-const STATUS_OPTIONS = [
-    { value: 'PRESENT', label: 'Có mặt' },
-    { value: 'ABSENT', label: 'Vắng' },
-    { value: 'LATE', label: 'Muộn' },
-    { value: 'MAKEUP', label: 'Học bù' },
-];
+
 
 export const BulkAttendanceModal = ({
     isOpen,
@@ -75,8 +70,6 @@ export const BulkAttendanceModal = ({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} maxWidth="lg" title="Điểm danh hàng loạt">
             <div className="">
-                
-
                 <form onSubmit={handleSubmit}>
                     {/* Form Body */}
                     <div className="space-y-6 mb-6">
@@ -104,7 +97,7 @@ export const BulkAttendanceModal = ({
                             <Dropdown
                                 value={formData.status}
                                 onChange={handleStatusChange}
-                                options={STATUS_OPTIONS}
+                                options={ATTENDANCE_STATUS_OPTIONS}
                                 placeholder="Chọn trạng thái"
                                 error={errors.status}
                             />
