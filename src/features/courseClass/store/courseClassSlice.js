@@ -4,6 +4,7 @@ import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 
 const initialState = {
     classes: [],
+    myClasses: [],
     currentClass: null,
     pagination: {
         page: 1,
@@ -13,7 +14,16 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    myClassesPagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
     loadingGet: false,
+    loadingGetMyClasses: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
@@ -22,6 +32,12 @@ const initialState = {
         search: "",
         courseId: "",
         instructorId: "",
+        sortBy: "createdAt",
+        sortOrder: "desc",
+    },
+    myClassesFilters: {
+        search: "",
+        courseId: "",
         sortBy: "createdAt",
         sortOrder: "desc",
     },
@@ -37,6 +53,16 @@ export const getAllCourseClassesAsync = createAsyncThunk(
         return handleAsyncThunk(() => courseClassApi.getAll(params), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tải danh sách lớp học",
+        });
+    }
+);
+
+export const getMyCourseClassesAsync = createAsyncThunk(
+    "courseClass/getMyClasses",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => courseClassApi.getMyClasses(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách lớp học của tôi",
         });
     }
 );
@@ -101,11 +127,24 @@ export const courseClassSlice = createSlice({
         clearCurrentClass: (state) => {
             state.currentClass = null;
         },
+        setPagination: (state, action) => {
+            state.pagination = { ...state.pagination, ...action.payload };
+        },
+        setMyFilters: (state, action) => {
+            state.myClassesFilters = { ...state.myClassesFilters, ...action.payload };
+        },
+        resetMyFilters: (state) => {
+            state.myClassesFilters = initialState.myClassesFilters;
+        },
+        setMyPagination: (state, action) => {
+            state.myClassesPagination = { ...state.myClassesPagination, ...action.payload };
+        }
     },
     extraReducers: (builder) => {
         builder
             // Get all
             .addCase(getAllCourseClassesAsync.pending, (state) => {
+                state.classes = [];
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -115,12 +154,31 @@ export const courseClassSlice = createSlice({
                 state.pagination = action.payload.meta;
             })
             .addCase(getAllCourseClassesAsync.rejected, (state, action) => {
+                state.classes = [];
                 state.loadingGet = false;
+                state.error = action.payload;
+            })
+
+            // Get my classes
+            .addCase(getMyCourseClassesAsync.pending, (state) => {
+                state.myClasses = [];
+                state.loadingGetMyClasses = true;
+                state.error = null;
+            })
+            .addCase(getMyCourseClassesAsync.fulfilled, (state, action) => {
+                state.loadingGetMyClasses = false;
+                state.myClasses = action.payload.data;
+                state.myClassesPagination = action.payload.meta;
+            })
+            .addCase(getMyCourseClassesAsync.rejected, (state, action) => {
+                state.myClasses = [];
+                state.loadingGetMyClasses = false;
                 state.error = action.payload;
             })
 
             // Get by ID
             .addCase(getCourseClassByIdAsync.pending, (state) => {
+                state.currentClass = null;
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -129,6 +187,7 @@ export const courseClassSlice = createSlice({
                 state.currentClass = action.payload.data;
             })
             .addCase(getCourseClassByIdAsync.rejected, (state, action) => {
+                state.currentClass = null;
                 state.loadingGet = false;
                 state.error = action.payload;
             })
@@ -140,7 +199,6 @@ export const courseClassSlice = createSlice({
             })
             .addCase(createCourseClassAsync.fulfilled, (state, action) => {
                 state.loadingCreate = false;
-                state.classes.unshift(action.payload.data);
             })
             .addCase(createCourseClassAsync.rejected, (state, action) => {
                 state.loadingCreate = false;
@@ -198,6 +256,10 @@ export const {
     setFilters,
     resetFilters,
     clearCurrentClass,
+    setPagination,
+    setMyFilters,
+    resetMyFilters,
+    setMyPagination
 } = courseClassSlice.actions;
 
 export const selectCourseClasses = (state) => state.courseClass.classes;
@@ -209,5 +271,9 @@ export const selectCourseClassLoadingUpdate = (state) => state.courseClass.loadi
 export const selectCourseClassLoadingDelete = (state) => state.courseClass.loadingDelete;
 export const selectCourseClassError = (state) => state.courseClass.error;
 export const selectCourseClassFilters = (state) => state.courseClass.filters;
+export const selectMyCourseClasses = (state) => state.courseClass.myClasses;
+export const selectMyCourseClassPagination = (state) => state.courseClass.myClassesPagination;
+export const selectMyCourseClassLoadingGet = (state) => state.courseClass.loadingGet;
+export const selectMyCourseClassFilters = (state) => state.courseClass.myClassesFilters;
 
 export default courseClassSlice.reducer;

@@ -13,6 +13,7 @@ import { createCourseClassAsync, selectCourseClassLoadingCreate } from '../store
  * @param {number} filterCourseTeacherId - Filter khóa học theo teacherId (cho "My Classes")
  * @param {number} defaultCourseId - ID khóa học mặc định
  * @param {boolean} canSelectCourse - Cho phép chọn khóa học hay không
+ * @param {Function} loadClasses - Callback để reload danh sách lớp học
  */
 export const AddClass = ({
     onClose,
@@ -20,7 +21,8 @@ export const AddClass = ({
     canSelectInstructor = true,
     filterCourseTeacherId = null,
     defaultCourseId = null,
-    canSelectCourse = true
+    canSelectCourse = true,
+    loadClasses
 }) => {
     const dispatch = useDispatch();
     const loadingCreate = useSelector(selectCourseClassLoadingCreate);
@@ -99,6 +101,9 @@ export const AddClass = ({
             };
 
             await dispatch(createCourseClassAsync(payload)).unwrap();
+            if (loadClasses) {
+                await loadClasses();
+            }
             onClose();
         } catch (error) {
             console.error('Error creating class:', error);

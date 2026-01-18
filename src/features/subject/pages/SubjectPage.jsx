@@ -215,27 +215,6 @@ export const SubjectPage = () => {
                 />
             </div>
 
-            {/* Stats */}
-            <StatsGrid cols={3} className="mb-4">
-                <StatsCard
-                    label="Tổng môn học"
-                    value={pagination.total}
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Trang hiện tại"
-                    value={`${currentPage}/${pagination.totalPages || 1}`}
-                    variant="info"
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Hiển thị"
-                    value={`${subjects.length}/${pagination.total}`}
-                    variant="success"
-                    loading={loadingGet}
-                />
-            </StatsGrid>
-
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
                 <SubjectTable

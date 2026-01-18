@@ -1,10 +1,10 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
 import { courseApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 
-
 const initialState = {
     courses: [],
+    myCourses: [],
     currentCourse: null,
     pagination: {
         page: 1,
@@ -14,7 +14,16 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    myCoursesPagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
     loadingGet: false,
+    loadingGetMyCourses: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
@@ -25,6 +34,14 @@ const initialState = {
         visibility: "",
         academicYear: "",
         teacherId: "",
+        sortBy: "createdAt",
+        sortOrder: "desc",
+    },
+    myCoursesFilters: {
+        search: "",
+        grade: "",
+        visibility: "",
+        academicYear: "",
         sortBy: "createdAt",
         sortOrder: "desc",
     },
@@ -66,6 +83,17 @@ export const getAllCoursesAsync = createAsyncThunk(
         });
     }
 );
+
+export const getMyCoursesAsync = createAsyncThunk(
+    "course/getMyCourses",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => courseApi.getMyCourses(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách khóa học của tôi",
+        });
+    }
+);
+
 export const getCourseByIdAsync = createAsyncThunk(
     "course/getById",
     async (id, thunkAPI) => {
@@ -90,7 +118,7 @@ export const createCourseAsync = createAsyncThunk(
 export const updateCourseAsync = createAsyncThunk(
     "course/update",
     async ({ id, data }, thunkAPI) => {
-        return handleAsyncThunk(() => courseApi.update(id, data), thunkAPI, {   
+        return handleAsyncThunk(() => courseApi.update(id, data), thunkAPI, {
             showSuccess: true,
             successTitle: "Cập nhật khóa học thành công",
             errorTitle: "Lỗi cập nhật khóa học",
@@ -180,6 +208,26 @@ export const courseSlice = createSlice({
         resetFilters: (state) => {
             state.filters = initialState.filters;
         },
+        setPagination: (state, action) => {
+            state.pagination = { ...state.pagination, ...action.payload };
+        },
+        resetPagination: (state) => {
+            state.pagination = initialState.pagination;
+        },
+
+        setMyCoursesFilters: (state, action) => {
+            state.myCoursesFilters = { ...state.myCoursesFilters, ...action.payload };
+        },
+        resetMyCoursesFilters: (state) => {
+            state.myCoursesFilters = initialState.myCoursesFilters;
+        },
+        setMyCoursesPagination: (state, action) => {
+            state.myCoursesPagination = { ...state.myCoursesPagination, ...action.payload };
+        },
+        resetMyCoursesPagination: (state) => {
+            state.myCoursesPagination = initialState.myCoursesPagination;
+        },
+
         // Students Attendance reducers
         setStudentsAttendanceFilters: (state, action) => {
             state.studentsAttendanceFilters = { ...state.studentsAttendanceFilters, ...action.payload };
@@ -201,6 +249,7 @@ export const courseSlice = createSlice({
         // Get all courses
         builder
             .addCase(getAllCoursesAsync.pending, (state) => {
+                state.courses = [];
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -211,11 +260,31 @@ export const courseSlice = createSlice({
                 state.error = null;
             })
             .addCase(getAllCoursesAsync.rejected, (state, action) => {
+                state.courses = [];
                 state.loadingGet = false;
+                state.error = action.payload;
+            })
+
+            // Get my courses
+            .addCase(getMyCoursesAsync.pending, (state) => {
+                state.myCourses = [];
+                state.loadingGetMyCourses = true;
+                state.error = null;
+            })
+            .addCase(getMyCoursesAsync.fulfilled, (state, action) => {
+                state.loadingGetMyCourses = false;
+                state.myCourses = action.payload.data;
+                state.myCoursesPagination = action.payload.meta;
+                state.error = null;
+            })
+            .addCase(getMyCoursesAsync.rejected, (state, action) => {
+                state.myCourses = [];
+                state.loadingGetMyCourses = false;
                 state.error = action.payload;
             })
             // Get course by ID
             .addCase(getCourseByIdAsync.pending, (state) => {
+                state.currentCourse = null;
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -225,9 +294,10 @@ export const courseSlice = createSlice({
                 state.error = null;
             })
             .addCase(getCourseByIdAsync.rejected, (state, action) => {
+                state.currentCourse = null;
                 state.loadingGet = false;
                 state.error = action.payload;
-            })  
+            })
             // Create course
             .addCase(createCourseAsync.pending, (state) => {
                 state.loadingCreate = true;
@@ -235,7 +305,6 @@ export const courseSlice = createSlice({
             })
             .addCase(createCourseAsync.fulfilled, (state, action) => {
                 state.loadingCreate = false;
-                state.courses.unshift(action.payload.data);
                 state.error = null;
             })
             .addCase(createCourseAsync.rejected, (state, action) => {
@@ -244,19 +313,19 @@ export const courseSlice = createSlice({
             })
             // Update course
             .addCase(updateCourseAsync.pending, (state) => {
-                state.loadingUpdate = true; 
+                state.loadingUpdate = true;
                 state.error = null;
             })
             .addCase(updateCourseAsync.fulfilled, (state, action) => {
                 state.loadingUpdate = false;
-                const index = state.courses.findIndex(  
+                const index = state.courses.findIndex(
                     (course) => course.id === action.payload.data.id
                 );
                 if (index !== -1) {
                     state.courses[index] = action.payload.data;
                 }
                 if (
-                    state.currentCourse && 
+                    state.currentCourse &&
                     state.currentCourse.id === action.payload.data.id
                 ) {
                     state.currentCourse = action.payload.data;
@@ -285,6 +354,7 @@ export const courseSlice = createSlice({
             })
             // Get students attendance
             .addCase(getStudentsAttendanceAsync.pending, (state) => {
+                state.studentsAttendance = [];
                 state.loadingStudentsAttendance = true;
                 state.studentsAttendanceError = null;
             })
@@ -295,6 +365,7 @@ export const courseSlice = createSlice({
                 state.studentsAttendanceError = null;
             })
             .addCase(getStudentsAttendanceAsync.rejected, (state, action) => {
+                state.studentsAttendance = [];
                 state.loadingStudentsAttendance = false;
                 state.studentsAttendanceError = action.payload;
             })
@@ -313,10 +384,17 @@ export const courseSlice = createSlice({
     },
 });
 
-export const { 
-    setFilters, 
-    clearCurrentCourse, 
+export const {
+    setFilters,
+    clearCurrentCourse,
     resetFilters,
+    setPagination,
+    resetPagination,
+    setMyCoursesFilters,
+    resetMyCoursesFilters,
+    setMyCoursesPagination,
+    resetMyCoursesPagination,
+    // Students Attendance actions
     setStudentsAttendanceFilters,
     resetStudentsAttendanceFilters,
     clearStudentsAttendance,
@@ -333,6 +411,11 @@ export const selectCourseLoadingUpdate = (state) => state.course.loadingUpdate;
 export const selectCourseLoadingDelete = (state) => state.course.loadingDelete;
 export const selectCourseError = (state) => state.course.error;
 export const selectCourseFilters = (state) => state.course.filters;
+
+export const selectMyCourses = (state) => state.course.myCourses;
+export const selectMyCoursesPagination = (state) => state.course.myCoursesPagination;
+export const selectMyCoursesLoadingGet = (state) => state.course.loadingGetMyCourses;
+export const selectMyCoursesFilters = (state) => state.course.myCoursesFilters;
 
 // Students Attendance selectors
 export const selectStudentsAttendance = (state) => state.course.studentsAttendance;

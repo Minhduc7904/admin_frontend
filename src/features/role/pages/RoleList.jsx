@@ -89,27 +89,6 @@ export const RoleList = () => {
                 />
             </div>
 
-            {/* Stats */}
-            <StatsGrid cols={3} className="mb-4">
-                <StatsCard
-                    label="Tổng vai trò"
-                    value={roles.length}
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Có thể gán"
-                    value={roles.filter(r => r.isAssignable).length}
-                    variant="success"
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Đang hiển thị"
-                    value={filteredRoles.length}
-                    variant="primary"
-                    loading={loadingGet}
-                />
-            </StatsGrid>
-
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
                 <RoleTable

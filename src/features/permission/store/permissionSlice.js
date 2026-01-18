@@ -113,6 +113,7 @@ const permissionSlice = createSlice({
         builder
             // Get All Permissions
             .addCase(getAllPermissionsAsync.pending, (state) => {
+                state.permissions = [];
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -123,11 +124,13 @@ const permissionSlice = createSlice({
                 state.error = null;
             })
             .addCase(getAllPermissionsAsync.rejected, (state, action) => {
+                state.permissions = [];
                 state.loadingGet = false;
                 state.error = action.payload;
             })
             // Get Permission By ID
             .addCase(getPermissionByIdAsync.pending, (state) => {
+                state.currentPermission = null;
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -137,11 +140,13 @@ const permissionSlice = createSlice({
                 state.error = null;
             })
             .addCase(getPermissionByIdAsync.rejected, (state, action) => {
+                state.currentPermission = null;
                 state.loadingGet = false;
                 state.error = action.payload;
             })
             // Get Permission Groups
             .addCase(getPermissionGroupsAsync.pending, (state) => {
+                state.groups = [];
                 state.loadingGroups = true;
                 state.error = null;
             })
@@ -151,6 +156,7 @@ const permissionSlice = createSlice({
                 state.error = null;
             })
             .addCase(getPermissionGroupsAsync.rejected, (state, action) => {
+                state.groups = [];
                 state.loadingGroups = false;
                 state.error = action.payload;
             })

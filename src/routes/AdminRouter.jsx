@@ -9,16 +9,16 @@ import { AdminDetail } from '../features/admin/pages/AdminDetail';
 import { AdminRole } from '../features/admin/pages/AdminRole';
 import { AdminMedia } from '../features/admin/pages/AdminMedia';
 import { ChapterPage } from '../features/chapter/pages';
-import { CourseList, MyCourseList, CourseDetail, CourseClasses, CourseEnrollment, CourseStudentsAttendance } from '../features/course/pages';
+import { CourseList, MyCourseListPage, CourseDetail, CourseClasses, CourseEnrollment, CourseStudentsAttendance, CourseLessons } from '../features/course/pages';
 import { CourseDetailLayout } from '../features/course/layouts';
-import { 
-    ClassList, 
-    MyClassList, 
-    CourseClassDetail, 
-    ClassStudents, 
-    ClassSessions, 
-    ClassSchedule, 
-    ClassAttendance 
+import {
+    ClassListPage,
+    MyClassList,
+    CourseClassDetail,
+    ClassStudents,
+    ClassSessions,
+    ClassSchedule,
+    ClassAttendance
 } from '../features/courseClass/pages';
 import { CourseClassDetailLayout } from '../features/courseClass/layouts';
 import { SubjectPage } from '../features/subject/pages/SubjectPage';
@@ -27,6 +27,7 @@ import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
 import { ROUTES } from '../core/constants';
 import { Outlet } from 'react-router-dom';
+import { CourseListPage } from '../features/course/pages/CourseListPage';
 
 export const adminRouter = [
     {
@@ -49,9 +50,9 @@ export const adminRouter = [
             { path: ROUTES.STUDENTS, element: <StudentList /> },
             { path: ROUTES.CHAPTERS, element: <ChapterPage /> },
             { path: ROUTES.SUBJECTS, element: <SubjectPage /> },
-            { path: ROUTES.COURSES, element: <CourseList /> },
-            { path: ROUTES.MY_COURSES, element: <MyCourseList /> },
-            { path: ROUTES.CLASSES, element: <ClassList /> },
+            { path: ROUTES.COURSES, element: <CourseListPage /> },
+            { path: ROUTES.MY_COURSES, element: <MyCourseListPage /> },
+            { path: ROUTES.CLASSES, element: <ClassListPage /> },
             { path: ROUTES.MY_CLASSES, element: <MyClassList /> },
             // 🔥 Course profile group
             {
@@ -76,7 +77,7 @@ export const adminRouter = [
                     },
                     {
                         path: 'lessons',
-                        element: <div className="bg-white border border-border rounded-sm p-6">Bài học (Coming soon)</div>,
+                        element: <CourseLessons />,
                     },
                 ],
             },

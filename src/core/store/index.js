@@ -19,6 +19,9 @@ import courseEnrollmentSlice from '../../features/courseEnrollment/store/courseE
 import classStudentSlice from '../../features/classStudent/store/classStudentSlice';
 import classSessionSlice from '../../features/classSesssion/store/classSesssionSlice';
 import attendanceSlice from '../../features/attendance/store/attendanceSlice';
+import learningItemReducer from '../../features/learningItem/store/learningItemSlice';
+import lessonReducer from '../../features/lesson/store/lessonSlice';
+import lessonLearningItemReducer from '../../features/lessonLearningitem/store/lessonLearningItemSlice';
 
 export const store = configureStore({
   reducer: {
@@ -42,5 +45,8 @@ export const store = configureStore({
     classStudent: classStudentSlice,
     classSession: classSessionSlice,
     attendance: attendanceSlice,
+    learningItem: learningItemReducer,
+    lesson: lessonReducer,
+    lessonLearningItem: lessonLearningItemReducer,
   },
 });

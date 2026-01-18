@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: "refresh_token",
   USER_INFO: "user_info",
   USER: "user",
+  SIDEBAR_OPEN: "sidebar_open",
 };
 
 // Routes
@@ -167,6 +168,7 @@ export const API_ENDPOINTS = {
   },
   COURSES: {
     LIST: "/courses",
+    MY_COURSES: "/courses/admin/my",
     DETAIL: (id) => `/courses/${id}`,
     CREATE: "/courses",
     UPDATE: (id) => `/courses/${id}`,
@@ -176,6 +178,7 @@ export const API_ENDPOINTS = {
   },
   COURSE_CLASSES: {
     LIST: "/course-classes",
+    MY_CLASSES: "/course-classes/admin/my",
     DETAIL: (id) => `/course-classes/${id}`,
     CREATE: "/course-classes",
     UPDATE: (id) => `/course-classes/${id}`,
@@ -211,6 +214,56 @@ export const API_ENDPOINTS = {
     STATISTICS_BY_SESSION: (sessionId) => `/attendances/statistics/session/${sessionId}`,
     EXPORT_BY_SESSION: (sessionId) => `/attendances/export/session/${sessionId}`,
     EXPORT_IMAGE: (id) => `/attendances/export/image/${id}`,
+  },
+  LEARNING_ITEMS: {
+    LIST: "/learning-items",
+    MY_ITEMS: "/learning-items/admin/my",
+    DETAIL: (id) => `/learning-items/${id}`,
+    CREATE: "/learning-items",
+    UPDATE: (id) => `/learning-items/${id}`,
+    DELETE: (id) => `/learning-items/${id}`,
+  },
+  LESSONS: {
+    LIST: "/lessons",
+    DETAIL: (id) => `/lessons/${id}`,
+    CREATE: "/lessons",
+    UPDATE: (id) => `/lessons/${id}`,
+    DELETE: (id) => `/lessons/${id}`,
+  },
+  VIDEO_CONTENTS: {
+    LIST: "/video-contents",
+    DETAIL: (id) => `/video-contents/${id}`,
+    CREATE: "/video-contents",
+    UPDATE: (id) => `/video-contents/${id}`,
+    DELETE: (id) => `/video-contents/${id}`,
+  },
+  YOUTUBE_CONTENTS: {
+    LIST: "/youtube-contents",
+    DETAIL: (id) => `/youtube-contents/${id}`,
+    CREATE: "/youtube-contents",
+    UPDATE: (id) => `/youtube-contents/${id}`,
+    DELETE: (id) => `/youtube-contents/${id}`,
+  },
+  HOMEWORK_CONTENTS: {
+    LIST: "/homework-contents",
+    DETAIL: (id) => `/homework-contents/${id}`,
+    CREATE: "/homework-contents",
+    UPDATE: (id) => `/homework-contents/${id}`,
+    DELETE: (id) => `/homework-contents/${id}`,
+  },
+  HOMEWORK_SUBMITS: {
+    LIST: "/homework-submits",
+    DETAIL: (id) => `/homework-submits/${id}`,
+    CREATE: "/homework-submits",
+    UPDATE: (id) => `/homework-submits/${id}`,
+    GRADE: (id) => `/homework-submits/${id}/grade`,
+    DELETE: (id) => `/homework-submits/${id}`,
+  },
+  LESSON_LEARNING_ITEMS: {
+    LIST: "/lesson-learning-items",
+    DETAIL: (lessonId, learningItemId) => `/lesson-learning-items/${lessonId}/${learningItemId}`,
+    CREATE: "/lesson-learning-items",
+    DELETE: (lessonId, learningItemId) => `/lesson-learning-items/${lessonId}/${learningItemId}`,
   },
 };
 

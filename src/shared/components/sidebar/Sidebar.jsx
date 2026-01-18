@@ -1,11 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { STORAGE_KEYS } from '../../../core/constants';
 
 export const Sidebar = ({ sections }) => {
     const location = useLocation();
-    const [isOpen, setIsOpen] = useState(true);
+    
+    // Get initial state from localStorage, default to true
+    const [isOpen, setIsOpen] = useState(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.SIDEBAR_OPEN);
+        return stored !== null ? stored === 'true' : true;
+    });
+
+    // Save to localStorage whenever isOpen changes
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEYS.SIDEBAR_OPEN, isOpen.toString());
+    }, [isOpen]);
 
     return (
         <div className="sticky top-[73.5px] h-[calc(100vh-73.5px)]">
@@ -32,10 +43,11 @@ export const Sidebar = ({ sections }) => {
                     {sections.map((section, sectionIndex) => (
                         <div key={sectionIndex}>
                             {/* Section label */}
-                            {section.label && isOpen && (
-                                <AnimatePresence>
-                                    {isOpen && (
+                            {section.label && (
+                                <AnimatePresence mode="wait">
+                                    {isOpen ? (
                                         <motion.p
+                                            key="label"
                                             initial={{ opacity: 0, width: 0 }}
                                             animate={{ opacity: 1, width: 'auto' }}
                                             exit={{ opacity: 0, width: 0 }}
@@ -44,6 +56,17 @@ export const Sidebar = ({ sections }) => {
                                         >
                                             {section.label}
                                         </motion.p>
+                                    ) : (
+                                        <motion.div
+                                            key="divider"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="px-3 mb-5 flex justify-center"
+                                        >
+                                            <hr className="border-foreground-light w-full" />
+                                        </motion.div>
                                     )}
                                 </AnimatePresence>
                             )}

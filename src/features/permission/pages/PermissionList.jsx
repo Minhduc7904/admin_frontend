@@ -254,33 +254,6 @@ export const PermissionList = () => {
                 />
             </div>
 
-            {/* Stats */}
-            <StatsGrid cols={4} className="mb-4">
-                <StatsCard
-                    label="Tổng quyền"
-                    value={pagination.total}
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Nhóm quyền"
-                    value={groups.length}
-                    variant="info"
-                    loading={loadingGroups}
-                />
-                <StatsCard
-                    label="System"
-                    value={permissions.filter(p => p.isSystem).length}
-                    variant="warning"
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Custom"
-                    value={permissions.filter(p => !p.isSystem).length}
-                    variant="success"
-                    loading={loadingGet}
-                />
-            </StatsGrid>
-
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
                 <PermissionTable

@@ -5,7 +5,7 @@ import { Input, Button, Dropdown, Textarea } from "../../../shared/components";
 import { AdminSearchSelect } from "../../admin/components/AdminSearchSelect";
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
 
-export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher = true }) => {
+export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher = true, loadCourses }) => {
     const dispatch = useDispatch();
     const loadingCreate = useSelector(selectCourseLoadingCreate);
     const [errors, setErrors] = useState({});
@@ -101,7 +101,7 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
 
         try {
             await dispatch(createCourseAsync(data)).unwrap();
-            await dispatch(getAllCoursesAsync()).unwrap();
+            await loadCourses();
             onClose();
         } catch (error) {
             console.error('Error creating course:', error);

@@ -194,33 +194,6 @@ export const AuditLogList = () => {
                 />
             </div>
 
-            {/* Stats */}
-            <StatsGrid cols={4} className="mb-4">
-                <StatsCard
-                    label="Tổng logs"
-                    value={pagination.total}
-                    loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
-                />
-                <StatsCard
-                    label="Thành công"
-                    value={successCount}
-                    variant="success"
-                    loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
-                />
-                <StatsCard
-                    label="Thất bại"
-                    value={failCount}
-                    variant="error"
-                    loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
-                />
-                <StatsCard
-                    label="Đã rollback"
-                    value={rollbackCount}
-                    variant="warning"
-                    loading={(loadingGet && currentPage === 1) || !loadingAdminDone}
-                />
-            </StatsGrid>
-
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
                 <AuditLogTable

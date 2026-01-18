@@ -1,22 +1,166 @@
-import { useSelector } from 'react-redux';
-import { ClassList } from './ClassList';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
+import {
+    getMyCourseClassesAsync,
+    deleteCourseClassAsync,
+    setMyFilters,
+    setMyPagination,
+    selectMyCourseClasses,
+    selectMyCourseClassLoadingGet,
+    selectMyCourseClassPagination,
+    selectMyCourseClassFilters,
+} from '../store/courseClassSlice';
 import { selectProfile } from '../../profile/store/profileSlice';
 
+import { ClassList } from './ClassList';
+import { useSearch } from '../../../shared/hooks';
+import { ROUTES } from '../../../core/constants';
+
 /**
- * MyClassList - Danh sách lớp học thuộc khóa học của giáo viên hiện tại
- * Sử dụng ClassList component với filter theo teacherId (course.teacherId)
+ * MyClassList
+ * Container component – xử lý logic, data, routing cho My Classes
  */
 export const MyClassList = () => {
-    // Lấy adminId từ user hiện tại
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const profile = useSelector(selectProfile);
-    const adminId = profile?.adminId;
+    const teacherId = profile?.adminId || null;
 
+    /* ===================== REDUX STATE ===================== */
+    const classes = useSelector(selectMyCourseClasses);
+    const loading = useSelector(selectMyCourseClassLoadingGet);
+    const pagination = useSelector(selectMyCourseClassPagination);
+    const filters = useSelector(selectMyCourseClassFilters);
+
+    /* ===================== LOCAL STATE ===================== */
+    const { search, debouncedSearch, handleSearchChange } = useSearch(
+        filters.search,
+        500,
+    );
+
+    const [isActive, setIsActive] = useState('');
+    const [openAddClass, setOpenAddClass] = useState(false);
+
+    // Lấy từ slice thay vì state local
+    const currentPage = pagination.page;
+    const itemsPerPage = pagination.limit;
+
+    /* ===================== EFFECT ===================== */
+    useEffect(() => {
+        loadClasses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        currentPage,
+        itemsPerPage,
+        debouncedSearch,
+        isActive,
+        teacherId,
+    ]);
+
+    /* ===================== DATA ===================== */
+    const loadClasses = () => {
+        dispatch(
+            getMyCourseClassesAsync({
+                page: currentPage,
+                limit: itemsPerPage,
+                search: debouncedSearch || undefined,
+                isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
+                teacherId: teacherId || undefined,
+            }),
+        );
+    };
+
+    /* ===================== HANDLERS ===================== */
+    const handleSearch = (value) => {
+        handleSearchChange(value);
+        dispatch(setMyPagination({ page: 1 }));
+        dispatch(setMyFilters({ search: value }));
+    };
+
+    const handleIsActiveChange = (value) => {
+        setIsActive(value);
+        dispatch(setMyPagination({ page: 1 }));
+    };
+
+    const handlePageChange = (page) => {
+        dispatch(setMyPagination({ page }));
+    };
+
+    const handleItemsPerPageChange = (value) => {
+        dispatch(setMyPagination({ limit: value, page: 1 }));
+    };
+
+    const handleView = (classItem) => {
+        if (!classItem) return;
+        const queryString = '?from=my-classes';
+        navigate(ROUTES.CLASS_DETAIL(classItem.classId) + queryString);
+    };
+
+    const handleEdit = (classItem) => {
+        // navigate(ROUTES.CLASS_EDIT(classItem.classId));
+    };
+
+    const handleDelete = async (classItem) => {
+        if (!window.confirm(`Bạn có chắc muốn xóa lớp học "${classItem.className}"?`)) {
+            return;
+        }
+
+        try {
+            await dispatch(deleteCourseClassAsync(classItem.classId)).unwrap();
+            loadClasses();
+        } catch (error) {
+            console.error('Delete class failed:', error);
+        }
+    };
+
+    /* ===================== ADD CLASS ===================== */
+    const openAdd = () => setOpenAddClass(true);
+    const closeAdd = () => setOpenAddClass(false);
+
+    /* ===================== RENDER ===================== */
     return (
         <ClassList
-            teacherId={adminId}
-            isMyClasses={true}
             title="Lớp học của tôi"
             subtitle="Quản lý các lớp học thuộc khóa học mà bạn phụ trách."
+            isMyClasses={true}
+
+            loadClasses={loadClasses}
+
+            /* data */
+            classes={classes}
+            loading={loading}
+            pagination={pagination}
+
+            /* filters */
+            search={search}
+            isActive={isActive}
+
+            /* pagination */
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+
+            /* ui */
+            openAddClass={openAddClass}
+
+            /* handlers */
+            onSearchChange={handleSearch}
+            onIsActiveChange={handleIsActiveChange}
+            onPageChange={handlePageChange}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onOpenAddClass={openAdd}
+            onCloseAddClass={closeAdd}
+
+            /* add class props */
+            defaultInstructorId={teacherId}
+            canSelectInstructor={false}
+            filterCourseTeacherId={teacherId}
+            defaultCourseId={null}
+            canSelectCourse={true}
         />
     );
 };

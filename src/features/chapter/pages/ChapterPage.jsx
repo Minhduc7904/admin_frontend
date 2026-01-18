@@ -317,27 +317,6 @@ export const ChapterPage = () => {
                 />
             </div>
 
-            {/* Stats */}
-            <StatsGrid cols={3} className="mb-4">
-                <StatsCard
-                    label="Tổng chương gốc"
-                    value={rootChapters.length}
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Môn học"
-                    value={subjects.length}
-                    variant="info"
-                    loading={loadingSubjects}
-                />
-                <StatsCard
-                    label="Đã chọn"
-                    value={selectedSubjectId ? subjects.find(s => s.subjectId === parseInt(selectedSubjectId))?.name : 'Tất cả'}
-                    variant="success"
-                    loading={loadingGet}
-                />
-            </StatsGrid>
-
             {/* Tree List */}
             <div className="bg-white border border-border rounded-sm p-4">
                 <ChapterList

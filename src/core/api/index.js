@@ -18,3 +18,11 @@ export { attendanceApi } from './attendanceApi';
 export { courseEnrollmentApi } from './courseEnrollmentApi';
 export { subjectApi } from './subjectApi';
 export { chapterApi } from './chapterApi';
+export { learningItemApi } from './learningItemApi';
+export { lessonApi } from './lessonApi';
+export { videoContentApi } from './videoContentApi';
+export { youtubeContentApi } from './youtubeContentApi';
+export { homeworkContentApi } from './homeworkContentApi';
+export { homeworkSubmitApi } from './homeworkSubmitApi';
+export { lessonLearningItemApi } from './lessonLearningItemApi';
+

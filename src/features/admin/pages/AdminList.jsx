@@ -117,27 +117,6 @@ export const AdminList = () => {
                 />
             </div>
 
-            {/* Stats Grid */}
-            <StatsGrid cols={3} className="mb-4">
-                <StatsCard
-                    label="Tổng quản trị viên"
-                    value={pagination.total}
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Đang hiển thị"
-                    value={admins.length}
-                    variant="primary"
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Đang hoạt động"
-                    value={admins.filter(admin => admin.isActive).length}
-                    variant="success"
-                    loading={loadingGet}
-                />
-            </StatsGrid>
-
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
                 <AdminTable

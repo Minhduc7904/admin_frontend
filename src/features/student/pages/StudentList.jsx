@@ -124,27 +124,6 @@ export const StudentList = () => {
                 />
             </div>
 
-            {/* Stats Grid */}
-            <StatsGrid cols={3} className="mb-4">
-                <StatsCard
-                    label="Tổng học sinh"
-                    value={pagination.total}
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Đang hiển thị"
-                    value={students.length}
-                    variant="primary"
-                    loading={loadingGet}
-                />
-                <StatsCard
-                    label="Đang hoạt động"
-                    value={students.filter(student => student.isActive).length}
-                    variant="success"
-                    loading={loadingGet}
-                />
-            </StatsGrid>
-
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
                 <StudentTable

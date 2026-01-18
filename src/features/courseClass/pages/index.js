@@ -1,4 +1,5 @@
 export { ClassList } from './ClassList';
+export { ClassListPage } from './ClassListPage';
 export { MyClassList } from './MyClassList';
 export { CourseClassDetail } from './CourseClassDetail';
 export { ClassStudents } from './ClassStudents';
