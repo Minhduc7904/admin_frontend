@@ -90,7 +90,7 @@ export const MediaTable = ({
             render: (row) => (
                 <div className="flex flex-col">
                     <span className="text-sm font-medium text-foreground">
-                        {row.fileName || row.originalName}
+                        {row.originalName || row.fileName}
                     </span>
                     {row.description && (
                         <span className="text-xs text-foreground-light">

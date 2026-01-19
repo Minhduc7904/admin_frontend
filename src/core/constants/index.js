@@ -148,6 +148,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/media/${id}`,
     DELETE: (id) => `/media/${id}`,
     HARD_DELETE: (id) => `/media/${id}/permanent`,
+    BUCKET_STATISTICS: "/media/statistics/buckets",
   },
   MEDIA_FOLDERS: {
     CREATE: "/media-folders",

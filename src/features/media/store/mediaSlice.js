@@ -6,6 +6,7 @@ const initialState = {
     media: [],
     currentMedia: null,
     buckets: [],
+    bucketStatistics: null,
     pagination: {
         page: 1,
         limit: 20,
@@ -17,6 +18,7 @@ const initialState = {
     loadingGet: false,
     loadingGetById: false,
     loadingBuckets: false,
+    loadingBucketStatistics: false,
     loadingUpload: false,
     loadingUpdate: false,
     loadingSoftDelete: false,
@@ -134,6 +136,16 @@ export const hardDeleteMediaAsync = createAsyncThunk(
     }
 );
 
+export const getBucketStatisticsAsync = createAsyncThunk(
+    "media/getBucketStatistics",
+    async (_, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.getBucketStatistics(), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải thống kê bucket",
+        });
+    }
+);
+
 const mediaSlice = createSlice({
     name: "media",
     initialState,
@@ -152,6 +164,9 @@ const mediaSlice = createSlice({
         },
         clearBatchViewUrls: (state) => {
             state.batchViewUrls = null;
+        },
+        clearBucketStatistics: (state) => {
+            state.bucketStatistics = null;
         },
         clearError: (state) => {
             state.error = null;
@@ -313,6 +328,20 @@ const mediaSlice = createSlice({
             .addCase(hardDeleteMediaAsync.rejected, (state, action) => {
                 state.loadingHardDelete = false;
                 state.error = action.payload;
+            })
+            // Get Bucket Statistics
+            .addCase(getBucketStatisticsAsync.pending, (state) => {
+                state.loadingBucketStatistics = true;
+                state.error = null;
+            })
+            .addCase(getBucketStatisticsAsync.fulfilled, (state, action) => {
+                state.loadingBucketStatistics = false;
+                state.bucketStatistics = action.payload.data;
+                state.error = null;
+            })
+            .addCase(getBucketStatisticsAsync.rejected, (state, action) => {
+                state.loadingBucketStatistics = false;
+                state.error = action.payload;
             });
     },
 });
@@ -323,6 +352,7 @@ export const {
     clearCurrentMedia,
     clearDownloadUrl,
     clearBatchViewUrls,
+    clearBucketStatistics,
     clearError,
 } = mediaSlice.actions;
 
@@ -344,5 +374,7 @@ export const selectMediaError = (state) => state.media.error;
 export const selectMediaFilters = (state) => state.media.filters;
 export const selectMediaDownloadUrl = (state) => state.media.downloadUrl;
 export const selectMediaBatchViewUrls = (state) => state.media.batchViewUrls;
+export const selectBucketStatistics = (state) => state.media.bucketStatistics;
+export const selectBucketStatisticsLoading = (state) => state.media.loadingBucketStatistics;
 
 export default mediaSlice.reducer;

@@ -237,33 +237,6 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
                     />
                 </div>
 
-                {/* Stats */}
-                <StatsGrid cols={4} className="mb-4">
-                    <StatsCard
-                        label="Tổng media"
-                        value={pagination.total}
-                        loading={(loadingGet && currentPage === 1) || parentLoading}
-                    />
-                    <StatsCard
-                        label="Hình ảnh"
-                        value={imageCount}
-                        variant="info"
-                        loading={(loadingGet && currentPage === 1) || parentLoading}
-                    />
-                    <StatsCard
-                        label="Video"
-                        value={videoCount}
-                        variant="success"
-                        loading={(loadingGet && currentPage === 1) || parentLoading}
-                    />
-                    <StatsCard
-                        label="Tài liệu"
-                        value={documentCount}
-                        variant="warning"
-                        loading={(loadingGet && currentPage === 1) || parentLoading}
-                    />
-                </StatsGrid>
-
                 {/* Table */}
                 <div className="bg-white border border-border rounded-sm">
                     <MediaTable

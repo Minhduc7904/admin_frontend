@@ -6,6 +6,8 @@ import { selectCurrentCourse, selectCourseLoadingGet } from '../store/courseSlic
 import { getAllLessonsAsync, selectLessonFilters } from '../../lesson/store/lessonSlice';
 import { getAllLessonLearningItemsAsync } from '../../lessonLearningitem/store/lessonLearningItemSlice';
 import { LessonList } from '../components/LessonList';
+import { LessonDetail } from '../components/LessonDetail';
+import { LearningItemDetail } from '../components/LearningItemDetail';
 import { AddLesson } from '../../lesson/components';
 import { AddLearningItem } from '../../learningItem/components';
 import { Button, RightPanel } from '../../../shared/components';
@@ -19,13 +21,23 @@ export const CourseLessons = () => {
     const loading = useSelector(selectCourseLoadingGet);
     const lessonFilters = useSelector(selectLessonFilters);
     
-    const [selectedLessonId, setSelectedLessonId] = useState(null);
+    // Selection state
+    const [selectedItem, setSelectedItem] = useState(null); // { type: 'lesson' | 'learningItem', data: {...} }
+    const [lessonMap, setLessonMap] = useState({}); // Map of lessonId -> lesson data for reference
+    
+    // Modal state
     const [openAddLesson, setOpenAddLesson] = useState(false);
     const [openAddLearningItem, setOpenAddLearningItem] = useState(false);
     const [selectedLessonForLearningItem, setSelectedLessonForLearningItem] = useState(null);
 
-    const handleSelectLesson = (lessonId) => {
-        setSelectedLessonId(lessonId);
+    const handleSelectLesson = (lesson) => {
+        setSelectedItem({ type: 'lesson', data: lesson });
+        setLessonMap(prev => ({ ...prev, [lesson.lessonId]: lesson }));
+    };
+
+    const handleSelectLearningItem = (learningItem, lesson) => {
+        setSelectedItem({ type: 'learningItem', data: learningItem, lessonId: lesson.lessonId });
+        setLessonMap(prev => ({ ...prev, [lesson.lessonId]: lesson }));
     };
 
     const handleAddLesson = () => {
@@ -83,6 +95,10 @@ export const CourseLessons = () => {
         );
     }
 
+    const currentLesson = selectedItem?.type === 'lesson' 
+        ? selectedItem.data 
+        : (selectedItem?.type === 'learningItem' ? lessonMap[selectedItem.lessonId] : null);
+
     return (
         <>
             <div className="bg-white border border-border rounded-sm">
@@ -113,25 +129,35 @@ export const CourseLessons = () => {
                     <div className="col-span-5 border-r border-border">
                         <LessonList
                             courseId={courseId}
-                            selectedLessonId={selectedLessonId}
+                            selectedItem={selectedItem}
                             onSelectLesson={handleSelectLesson}
+                            onSelectLearningItem={handleSelectLearningItem}
                             onAddLearningItem={handleAddLearningItem}
                         />
                     </div>
 
-                    {/* Right Column - Learning Item Details */}
-                    <div className="col-span-7 p-6">
-                        {selectedLessonId ? (
-                            <div className="text-center text-muted-foreground py-12">
-                                <p className="text-lg">Chi tiết bài học</p>
-                                <p className="text-sm mt-2">Coming soon...</p>
-                            </div>
+                    {/* Right Column - Detail View */}
+                    <div className="col-span-7">
+                        {selectedItem?.type === 'lesson' ? (
+                            <LessonDetail
+                                lesson={selectedItem.data}
+                                onAddLearningItem={handleAddLearningItem}
+                                onEdit={() => {}} // TODO: implement edit
+                                onDelete={() => {}} // TODO: implement delete
+                            />
+                        ) : selectedItem?.type === 'learningItem' ? (
+                            <LearningItemDetail
+                                learningItem={selectedItem.data}
+                                lessonTitle={currentLesson?.title}
+                                onEdit={() => {}} // TODO: implement edit
+                                onDelete={() => {}} // TODO: implement delete
+                            />
                         ) : (
-                            <div className="flex items-center justify-center h-full">
-                                <div className="text-center text-muted-foreground">
-                                    <p className="text-lg">Chọn một bài học để xem chi tiết</p>
+                            <div className="flex items-center justify-center h-full text-muted-foreground">
+                                <div className="text-center">
+                                    <p className="text-lg">Chọn một bài học hoặc tài liệu để xem chi tiết</p>
                                     <p className="text-sm mt-2">
-                                        Click vào bài học bên trái để xem thông tin và tài liệu
+                                        Click vào mục bên trái để xem thông tin chi tiết
                                     </p>
                                 </div>
                             </div>

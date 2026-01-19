@@ -15,7 +15,13 @@ import { Input } from '../../../shared/components/ui';
 import { useInfiniteScroll } from '../../../shared/hooks';
 import { Search, Loader2, LoaderCircle } from 'lucide-react';
 
-export const LessonList = ({ courseId, selectedLessonId, onSelectLesson, onAddLearningItem }) => {
+export const LessonList = ({ 
+    courseId, 
+    selectedItem, 
+    onSelectLesson, 
+    onSelectLearningItem,
+    onAddLearningItem 
+}) => {
     const dispatch = useDispatch();
     const lessons = useSelector(selectLessons);
     const loading = useSelector(selectLessonLoadingGet);
@@ -126,9 +132,11 @@ export const LessonList = ({ courseId, selectedLessonId, onSelectLesson, onAddLe
                                     >
                                         <LessonItem
                                             lesson={lesson}
-                                            isSelected={selectedLessonId === lesson.lessonId}
-                                            onSelect={() => onSelectLesson(lesson.lessonId)}
+                                            isSelected={selectedItem?.type === 'lesson' && selectedItem?.data?.lessonId === lesson.lessonId}
+                                            onSelect={() => onSelectLesson(lesson)}
                                             onAddLearningItem={onAddLearningItem}
+                                            selectedItem={selectedItem}
+                                            onSelectLearningItem={onSelectLearningItem}
                                         />
                                     </div>
                                 );

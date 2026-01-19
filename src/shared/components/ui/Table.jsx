@@ -13,9 +13,7 @@ export const Table = ({
     rowClassName,
     onRowClick,
     lastRowRef,
-    draggable = false,
     onDragStart,
-    onDragEnd,
 }) => {
     if (loading) {
         return <SkeletonTable rows={5} columns={columns.length} />;
@@ -67,27 +65,18 @@ export const Table = ({
                         return (
                             <tr
                                 key={row.id || rowIndex}
-                                ref={isLastRow ? lastRowRef : null} // 🔥 GẮN REF Ở ĐÂY
+                                ref={isLastRow ? lastRowRef : null}
                                 className={`hover:bg-gray-50 group ${rowClass || ''} ${onRowClick ? 'cursor-pointer' : ''
                                     }`}
                                 onClick={() => onRowClick?.(row, rowIndex)}
-                                draggable={draggable}
-                                onDragStart={(e) => {
-                                    if (draggable && onDragStart) {
-                                        onDragStart(row, e);
-                                    }
-                                }}
-                                onDragEnd={(e) => {
-                                    if (draggable && onDragEnd) {
-                                        onDragEnd(row, e);
-                                    }
-                                }}
                             >
                                 {columns.map((column, colIndex) => {
                                     const cellClass =
                                         typeof column.className === 'function'
                                             ? column.className(row, rowIndex)
                                             : column.className
+
+                                    const isDragHandle = column.isDragHandle === true;
 
                                     return (
                                         <td
@@ -98,6 +87,18 @@ export const Table = ({
                                                         ? 'text-right'
                                                         : 'text-left'
                                                 } ${cellClass || ''}`}
+                                            draggable={isDragHandle && !!onDragStart}
+                                            onDragStart={(e) => {
+                                                if (isDragHandle && onDragStart) {
+                                                    e.stopPropagation();
+                                                    onDragStart(row, e);
+                                                }
+                                            }}
+                                            onClick={(e) => {
+                                                if (isDragHandle) {
+                                                    e.stopPropagation();
+                                                }
+                                            }}
                                         >
                                             {column.render
                                                 ? column.render(row, rowIndex)

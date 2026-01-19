@@ -5,6 +5,7 @@ import {
     FileText,
     File,
     Eye,
+    GripVertical,
 } from 'lucide-react'
 import { Table } from '../../../shared/components/ui';
 
@@ -78,6 +79,21 @@ export const MediaTable = ({
 }) => {
     const columns = [
         {
+            key: 'dragHandle',
+            label: '',
+            width: 40,
+            align: 'center',
+            isDragHandle: true,
+            render: (row) => (
+                <div 
+                    className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    title="Kéo để di chuyển"
+                >
+                    <GripVertical size={16} />
+                </div>
+            ),
+        },
+        {
             key: 'type',
             label: 'Loại',
             width: 80,
@@ -90,7 +106,7 @@ export const MediaTable = ({
             render: (row) => (
                 <div className="flex flex-col">
                     <span className="text-sm font-medium text-foreground">
-                        {row.fileName || row.originalName}
+                        {row.originalName || row.fileName}
                     </span>
                     {row.description && (
                         <span className="text-xs text-foreground-light">
@@ -149,14 +165,13 @@ export const MediaTable = ({
             data={media}
             loading={loading}
             emptyMessage="Không có media nào"
-            rowClassName="transition-colors hover:cursor-grab active:cursor-grabbing"
+            rowClassName="transition-colors"
             lastRowRef={lastElementRef}
             onRowClick={(row) => onViewDetail?.(row)}
             emptyIcon="file"
             emptySubMessage="Chưa có tệp media nào được tải lên hệ thống"
             emptyActionLabel="Tải lại"
             onEmptyAction={() => window.location.reload()}
-            draggable
             onDragStart={(row, e) => {
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('mediaId', row.mediaId);
@@ -205,13 +220,6 @@ export const MediaTable = ({
                 setTimeout(() => {
                     document.body.removeChild(dragGhost);
                 }, 0);
-
-                // Add visual feedback to original row
-                e.currentTarget.style.opacity = '0.5';
-            }}
-            onDragEnd={(row, e) => {
-                // Reset visual feedback
-                e.currentTarget.style.opacity = '1';
             }}
         />
     )

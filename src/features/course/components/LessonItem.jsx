@@ -17,6 +17,8 @@ export const LessonItem = ({
     onEdit,
     onDelete,
     onAddLearningItem,
+    selectedItem,
+    onSelectLearningItem,
     level = 0,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false)
@@ -109,9 +111,12 @@ export const LessonItem = ({
                 <div className="mt-0.5">
                     <LearningItemList
                         lessonId={lesson.lessonId}
+                        lesson={lesson}
                         level={level + 1}
                         onEdit={onEdit}
                         onDelete={onDelete}
+                        selectedItem={selectedItem}
+                        onSelectLearningItem={onSelectLearningItem}
                     />
                 </div>
             )}

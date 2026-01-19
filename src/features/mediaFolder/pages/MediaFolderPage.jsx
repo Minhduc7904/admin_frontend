@@ -250,8 +250,6 @@ export const MediaFolderPage = () => {
         }
     };
 
-
-
     const handleSubmitEditFolder = async (e) => {
         e.preventDefault();
         if (!validateFolderForm()) return;
@@ -492,11 +490,6 @@ export const MediaFolderPage = () => {
             console.error('Error moving media:', error);
         }
     };
-
-    const imageCount = allMedia.filter(m => m.type === 'IMAGE').length;
-    const videoCount = allMedia.filter(m => m.type === 'VIDEO').length;
-    const documentCount = allMedia.filter(m => m.type === 'DOCUMENT').length;
-
     // Find selected folder info
     const selectedFolderInfo = selectedFolderId
         ? (() => {
@@ -659,33 +652,6 @@ export const MediaFolderPage = () => {
                         onSortOrderChange={handleSortOrderChange}
                     />
                 </div>
-
-                {/* Stats */}
-                <StatsGrid cols={4} className="mb-4">
-                    <StatsCard
-                        label="Tổng media"
-                        value={pagination.total}
-                        loading={loadingGet && currentPage === 1}
-                    />
-                    <StatsCard
-                        label="Hình ảnh"
-                        value={imageCount}
-                        variant="info"
-                        loading={loadingGet && currentPage === 1}
-                    />
-                    <StatsCard
-                        label="Video"
-                        value={videoCount}
-                        variant="success"
-                        loading={loadingGet && currentPage === 1}
-                    />
-                    <StatsCard
-                        label="Tài liệu"
-                        value={documentCount}
-                        variant="warning"
-                        loading={loadingGet && currentPage === 1}
-                    />
-                </StatsGrid>
 
                 {/* Table */}
                 <div className="bg-white border border-border rounded-sm">

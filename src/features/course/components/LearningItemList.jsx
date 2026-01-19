@@ -34,11 +34,13 @@ const LEARNING_ITEM_COLORS = {
 
 export const LearningItemList = ({
     lessonId,
+    lesson,
     level = 1,
-    selectedLearningItemId,
+    selectedItem,
     onSelect,
     onEdit,
     onDelete,
+    onSelectLearningItem,
 }) => {
     const dispatch = useDispatch()
     const learningItems = useSelector(selectLessonLearningItems(lessonId))
@@ -93,7 +95,7 @@ export const LearningItemList = ({
                     'text-gray-600 bg-gray-50'
 
                 const isSelected =
-                    selectedLearningItemId === item.learningItemId
+                    selectedItem?.type === 'learningItem' && selectedItem?.data?.learningItemId === item.learningItemId
 
                 return (
                     <div
@@ -101,15 +103,13 @@ export const LearningItemList = ({
                         className={`
                             group flex items-center gap-2 px-2 py-1.5 rounded
                             cursor-pointer transition-colors text-sm
-                            ${isSelected
+                            ${selectedItem?.type === 'learningItem' && selectedItem?.data?.learningItemId === item.learningItemId
                                 ? 'bg-info/10 text-info font-medium'
                                 : 'hover:bg-gray-50 text-foreground'
                             }
                         `}
                         style={{ paddingLeft: indent + 8 }}
-                        onClick={() =>
-                            onSelect?.(item.learningItemId, item)
-                        }
+                        onClick={() => onSelectLearningItem?.(item, lesson)}
                     >
                         {/* Drag handle (visual only for now) */}
                         <GripVertical

@@ -118,4 +118,12 @@ export const mediaApi = {
     hardDelete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.MEDIA.HARD_DELETE(id));
     },
+
+    /**
+     * Get bucket statistics (file count and total size for all buckets)
+     * @returns {Promise<Object>} Bucket statistics with file count and sizes
+     */
+    getBucketStatistics: () => {
+        return axiosClient.get(API_ENDPOINTS.MEDIA.BUCKET_STATISTICS);
+    },
 };
