@@ -13,7 +13,7 @@ import {
     clearCurrentMedia,
 } from '../store/mediaSlice';
 
-export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete }) => {
+export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete, loading, loadViewUrl, handleDownload }) => {
     const dispatch = useDispatch();
     const media = useSelector(selectCurrentMedia);
     const loading = useSelector(selectMediaLoadingGetById);
@@ -26,22 +26,7 @@ export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete }) => {
         };
     }, [dispatch]);
 
-    const handleDownload = async (mediaId) => {
-        try {
-            const result = await dispatch(getMediaDownloadUrlAsync({ id: mediaId })).unwrap();
-            if (result?.data?.downloadUrl) {
-                // Create temporary link and trigger download
-                const link = document.createElement('a');
-                link.href = result.data.downloadUrl;
-                link.download = result.data.filename || 'download';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        } catch (error) {
-            console.error('Error downloading media:', error);
-        }
-    };
+    
 
     if (loading) {
         return (
@@ -60,7 +45,12 @@ export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete }) => {
             <div className="flex-1 overflow-y-auto p-6">
                 {/* Preview */}
                 <div className="flex justify-center items-center">
-                    <MediaPreview media={media} onDownload={handleDownload} />
+                    <MediaPreview 
+                    media={media}
+                    onDownload={handleDownload} 
+                    loadViewUrl={loadViewUrl}
+                    loading={loading}
+                    />
                 </div>
 
                 {/* Info */}

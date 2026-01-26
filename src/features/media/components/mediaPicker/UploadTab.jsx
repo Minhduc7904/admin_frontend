@@ -10,6 +10,7 @@ export const UploadTab = ({ state, handlers, meta }) => {
         isDragging,
         uploadFile,
         uploadPreview,
+        uploadProgress,
     } = state
 
     const {
@@ -55,7 +56,6 @@ export const UploadTab = ({ state, handlers, meta }) => {
                                 />
                             </div>
                         )}
-                        
 
                         <Button
                             variant="outline"
@@ -108,17 +108,27 @@ export const UploadTab = ({ state, handlers, meta }) => {
                         </p>
                     </div>
                 ) : (
-                    /* Uploading */
-                    <div className="border-2 border-dashed border-border rounded-lg p-12 text-center">
-                        <Spinner size="xl" className="mx-auto mb-4 text-info" />
-                        <p className="text-lg font-medium mb-2">
-                            Đang tải lên...
+                    /* Uploading + Progress */
+                    <div className="border-2 border-dashed border-border rounded-lg p-12 text-center space-y-4">
+                        <Spinner size="xl" className="mx-auto text-info" />
+
+                        <p className="text-lg font-medium">
+                            Đang tải lên... {uploadProgress}%
                         </p>
+
                         {uploadFile && (
                             <p className="text-sm text-foreground-light">
                                 {uploadFile.name}
                             </p>
                         )}
+
+                        {/* Progress bar */}
+                        <div className="w-full h-2 bg-gray-200 rounded overflow-hidden">
+                            <div
+                                className="h-full bg-info transition-all duration-200"
+                                style={{ width: `${uploadProgress}%` }}
+                            />
+                        </div>
                     </div>
                 )}
             </div>

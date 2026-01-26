@@ -48,7 +48,6 @@ export const MediaPickerModal = ({
         folderId: folders.selectedFolderId,
         onUploaded: (media) => {
             selection.setSelectedMediaId(media.mediaId)
-            setActiveTab('library')
             library.reload()
         },
     })
@@ -79,7 +78,7 @@ export const MediaPickerModal = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* ===== Header ===== */}
-                <div className="flex items-center justify-between p-4 border-b border-border">
+                <div className="flex items-center justify-between p-4 border-b border-border mb-2">
                     <h3 className="text-lg font-semibold text-foreground">{title}</h3>
                     <button
                         onClick={onClose}
@@ -97,11 +96,13 @@ export const MediaPickerModal = ({
                                 label: 'Thư viện',
                                 isActive: activeTab === 'library',
                                 onActivate: () => setActiveTab('library'),
+                                className: 'bg-primary'
                             },
                             {
                                 label: 'Tải lên',
                                 isActive: activeTab === 'upload',
                                 onActivate: () => setActiveTab('upload'),
+                                className: 'bg-primary'
                             },
                         ]}
                     />

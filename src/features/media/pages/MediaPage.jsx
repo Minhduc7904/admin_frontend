@@ -17,6 +17,9 @@ import {
     selectMediaLoadingSoftDelete,
     setFilters,
     selectMediaFilters,
+    getMyViewUrlAsync,
+    getMediaDownloadUrlAsync,
+    selectMediaLoadingViewUrl,
 } from '../store/mediaSlice';
 
 /**
@@ -37,7 +40,7 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
     const loadingGet = useSelector(selectMediaLoadingGet);
     const loadingUpload = useSelector(selectMediaLoadingUpload);
     const loadingDelete = useSelector(selectMediaLoadingSoftDelete);
-
+    const loadingViewUrl = useSelector(selectMediaLoadingViewUrl);
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
     const [selectedBucket, setSelectedBucket] = useState('');
     const [type, setType] = useState(filters.type);
@@ -169,6 +172,17 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
         } catch (error) {
             console.error('Error uploading media:', error);
         }
+    };
+
+    const loadViewUrl = async (media) => {
+        if (!media || !media.mediaId) return;
+        // console.log('Loading view URL for media:', media);
+        const response = await dispatch(getMyViewUrlAsync({ id: media.mediaId }));
+        // console.log('View URL response:', response.payload.data.viewUrl);
+        if (response.payload?.data?.viewUrl) {
+            return response.payload.data.viewUrl;
+        }
+        return null
     };
 
     const imageCount = allMedia.length > 0 ? allMedia.filter(m => m.type === 'IMAGE').length : 0;

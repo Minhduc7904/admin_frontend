@@ -1,32 +1,18 @@
 import { useState, useEffect } from 'react';
-import { mediaApi } from '../../../core/api/mediaApi';
+import { getMyViewUrlAsync, selectMediaLoadingViewUrl } from '../store/mediaSlice';
 import { ImagePreview, VideoPreview, AudioPreview, DocumentPreview } from './previews';
+import { useSelector, useDispatch } from 'react-redux';
 
-export const MediaPreview = ({ media, onDownload }) => {
+export const MediaPreview = ({ media, onDownload, loadViewUrl, loading }) => {
     const [viewUrl, setViewUrl] = useState(null);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        // console.log('Media changed:', media);
         if (media && (media.type === 'IMAGE' || media.type === 'VIDEO' || media.type === 'AUDIO' || media.type === 'DOCUMENT' || media.type === 'OTHER')) {
-            loadViewUrl();
+            const url = loadViewUrl?.(media);
+            setViewUrl(url);
         }
     }, [media]);
-
-    const loadViewUrl = async () => {
-        if (!media) return;
-
-        try {
-            setLoading(true);
-            const response = await mediaApi.getViewUrl(media.mediaId);
-            if (response.data?.data?.viewUrl) {
-                setViewUrl(response.data.data.viewUrl);
-            }
-        } catch (error) {
-            console.error('Error loading view URL:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleImageError = (e) => {
         e.target.src = '';
