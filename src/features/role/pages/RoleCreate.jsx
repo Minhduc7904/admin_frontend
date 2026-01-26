@@ -41,7 +41,7 @@ export const RoleCreate = () => {
 
     // Effects
     useEffect(() => {
-        dispatch(getAllPermissionsAsync({ limit: 100 }));
+        dispatch(getAllPermissionsAsync({ limit: 1000 }));
     }, [dispatch]);
 
     // Handlers

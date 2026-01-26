@@ -18,11 +18,11 @@ import {
     selectMediaFolderLoadingDelete,
 } from '../store/mediaFolderSlice';
 import {
-    getAllMediaAsync,
+    getMyMediaAsync,
     getMediaByIdAsync,
     uploadMediaAsync,
     updateMediaAsync,
-    hardDeleteMediaAsync,
+    softDeleteMediaByUserAsync,
     selectMedia,
     selectMediaPagination,
     selectMediaLoadingGet,
@@ -119,7 +119,7 @@ export const MediaFolderPage = () => {
             sortOrder,
         };
 
-        dispatch(getAllMediaAsync(params));
+        dispatch(getMyMediaAsync(params));
     }, [debouncedSearch, selectedFolderId, type, status, sortBy, sortOrder, dispatch]);
 
     const loadMore = useCallback(() => {
@@ -346,7 +346,7 @@ export const MediaFolderPage = () => {
 
     const handleDelete = async (mediaId) => {
         try {
-            await dispatch(hardDeleteMediaAsync(mediaId)).unwrap();
+            await dispatch(softDeleteMediaByUserAsync(mediaId)).unwrap();
             handleCloseDetail();
             loadMedia(1, true);
 

@@ -63,6 +63,9 @@ export const ROUTES = {
   CLASS_SESSIONS: (id = ':id') => `/classes/${id}/sessions`,
   CLASS_SCHEDULE: (id = ':id') => `/classes/${id}/schedule`,
   CLASS_ATTENDANCE: (id = ':id') => `/classes/${id}/attendance`,
+  CLASS_NOTIFICATIONS: (id = ':id') => `/classes/${id}/notifications`,
+  BROADCAST_NOTIFICATIONS: '/notifications/broadcast',
+  NOTIFICATION_LOGS: '/notifications/logs',
 };
 
 // API Endpoints
@@ -139,14 +142,26 @@ export const API_ENDPOINTS = {
     ROLLBACK: (id) => `/admin-audit-log/rollback/${id}`,
   },
   MEDIA: {
-    UPLOAD: "/media/upload",
-    LIST: "/media",
+    UPLOAD: '/media/upload',
+    GET_PRESIGNED_UPLOAD_URL: '/media/upload/presigned',
+    UPLOAD_COMPLETE: '/media/upload/complete',
+    LIST: '/media',
+    MY_LIST: '/media/my',
+    BUCKETS: '/media/buckets',
+
     DETAIL: (id) => `/media/${id}`,
-    DOWNLOAD: (id) => `/media/${id}/download`,
-    VIEW: (id) => `/media/${id}/view`,
-    BATCH_VIEW: "/media/batch/view",
     UPDATE: (id) => `/media/${id}`,
+
+    VIEW: (id) => `/media/${id}/view`,
+    DOWNLOAD: (id) => `/media/${id}/download`,
+
+    MY_VIEW: (id) => `/media/${id}/view/my`,
+    MY_DOWNLOAD: (id) => `/media/${id}/download/my`,
+
+    BATCH_MY_VIEW: '/media/batch/view/my',
+
     DELETE: (id) => `/media/${id}`,
+    SOFT_DELETE_BY_USER: (id) => `/media/${id}/my`,
     HARD_DELETE: (id) => `/media/${id}/permanent`,
     BUCKET_STATISTICS: "/media/statistics/buckets",
   },
@@ -265,6 +280,15 @@ export const API_ENDPOINTS = {
     DETAIL: (lessonId, learningItemId) => `/lesson-learning-items/${lessonId}/${learningItemId}`,
     CREATE: "/lesson-learning-items",
     DELETE: (lessonId, learningItemId) => `/lesson-learning-items/${lessonId}/${learningItemId}`,
+  },
+  NOTIFICATIONS: {
+    MY: "/notifications/my",
+    MY_STATS: "/notifications/my/stats",
+    MARK_ALL_READ: "/notifications/my/mark-all-read",
+    MARK_READ: (id) => `/notifications/${id}/mark-read`,
+    DELETE: (id) => `/notifications/${id}`,
+    BY_USER: (userId) => `/notifications/user/${userId}`,
+    SEND: "/notifications/send",
   },
 };
 

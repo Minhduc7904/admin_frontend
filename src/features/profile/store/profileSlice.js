@@ -1,16 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { profileApi, mediaApi, mediaUsageApi } from "../../../core/api";
-import { STORAGE_KEYS } from "../../../core/constants";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 
 const initialState = {
-  profile: JSON.parse(localStorage.getItem(STORAGE_KEYS.USER)) || null,
+  profile: null,
   loading: false,
   error: null,
   avatarUsages: [],
   loadingAvatar: false,
-  avatarDownloadUrl: null,
-  loadingAvatarDownloadUrl: false,
+  avatarViewUrl: null,
+  loadingAvatarViewUrl: false,
+  permissions: [],
+  roles: [],
 };
 
 // Async thunks
@@ -46,11 +47,11 @@ export const getAvatarUsagesAsync = createAsyncThunk(
   }
 );
 
-export const getAvatarDownloadUrlAsync = createAsyncThunk(
-  "profile/getAvatarDownloadUrl",
+export const getAvatarViewUrlAsync = createAsyncThunk(
+  "profile/getAvatarViewUrl",
   async (mediaId, thunkAPI) => {
     return handleAsyncThunk(
-      () => mediaApi.getDownloadUrl(mediaId, 3600),
+      () => mediaApi.getMyViewUrl(mediaId, 3600),
       thunkAPI, {
       showSuccess: false,
     });
@@ -64,38 +65,46 @@ const profileSlice = createSlice({
     clearProfile: (state) => {
       state.profile = null;
       state.error = null;
-      localStorage.removeItem(STORAGE_KEYS.USER);
     },
     setProfile: (state, action) => {
       state.profile = action.payload;
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(action.payload));
     },
-    setAvatarDownloadUrl: (state, action) => {
-      state.avatarDownloadUrl = action.payload;
+    setAvatarViewUrl: (state, action) => {
+      state.avatarViewUrl = action.payload;
     },
-    setLoadingAvatarDownloadUrl: (state, action) => {
-      state.loadingAvatarDownloadUrl = action.payload;
+    setLoadingAvatarViewUrl: (state, action) => {
+      state.loadingAvatarViewUrl = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
       // Get Profile
       .addCase(getProfileAsync.pending, (state) => {
+        // state.profile = null;
+        state.permissions = [];
         state.loading = true;
         state.error = null;
       })
       .addCase(getProfileAsync.fulfilled, (state, action) => {
         state.loading = false;
         state.profile = action.payload.data;
+        const roles = action.payload.data.roles || [];
+        state.roles = roles;
+        if (roles.length > 0) {
+          const permissionsSet = new Set();
+          roles.forEach((role) => {
+            const rolePermissions = role.permissions || [];
+            rolePermissions.forEach((perm) => permissionsSet.add(perm));
+          });
+          state.permissions = Array.from(permissionsSet);
+        } else {
+          state.permissions = [];
+        }
         state.error = null;
-
-        // Lưu vào localStorage
-        localStorage.setItem(
-          STORAGE_KEYS.USER,
-          JSON.stringify(action.payload.data)
-        );
       })
       .addCase(getProfileAsync.rejected, (state, action) => {
+        state.permissions = [];
+        state.profile = null;
         state.loading = false;
         state.error = action.payload;
       })
@@ -108,12 +117,6 @@ const profileSlice = createSlice({
         state.loading = false;
         state.profile = action.payload.data;
         state.error = null;
-
-        // Cập nhật localStorage
-        localStorage.setItem(
-          STORAGE_KEYS.USER,
-          JSON.stringify(action.payload.data)
-        );
       })
       .addCase(updateProfileAsync.rejected, (state, action) => {
         state.loading = false;
@@ -132,17 +135,17 @@ const profileSlice = createSlice({
         state.loadingAvatar = false;
         state.error = action.payload;
       })
-      .addCase(getAvatarDownloadUrlAsync.pending, (state) => {
-        state.loadingAvatarDownloadUrl = true;
+      .addCase(getAvatarViewUrlAsync.pending, (state) => {
+        state.loadingAvatarViewUrl = true;
         state.error = null;
       })
-      .addCase(getAvatarDownloadUrlAsync.fulfilled, (state, action) => {
-        state.loadingAvatarDownloadUrl = false;
-        state.avatarDownloadUrl = action.payload.data.downloadUrl;
+      .addCase(getAvatarViewUrlAsync.fulfilled, (state, action) => {
+        state.loadingAvatarViewUrl = false;
+        state.avatarViewUrl = action.payload.data.viewUrl;
         state.error = null;
       })
-      .addCase(getAvatarDownloadUrlAsync.rejected, (state, action) => {
-        state.loadingAvatarDownloadUrl = false;
+      .addCase(getAvatarViewUrlAsync.rejected, (state, action) => {
+        state.loadingAvatarViewUrl = false;
         state.error = action.payload;
       });
   },
@@ -155,9 +158,11 @@ export const selectProfile = (state) => state.profile.profile;
 export const selectProfileLoading = (state) => state.profile.loading;
 export const selectAvatarUsages = (state) => state.profile.avatarUsages;
 export const selectAvatarLoading = (state) => state.profile.loadingAvatar;
-export const selectAvatarDownloadUrl = (state) => state.profile.avatarDownloadUrl;
-export const selectAvatarDownloadUrlLoading = (state) => state.profile.loadingAvatarDownloadUrl;
+export const selectAvatarViewUrl = (state) => state.profile.avatarViewUrl;
+export const selectAvatarViewUrlLoading = (state) => state.profile.loadingAvatarViewUrl;
 export const selectProfileError = (state) => state.profile.error;
+export const selectProfilePermissions = (state) => state.profile.permissions;
+export const selectProfileRoles = (state) => state.profile.roles;
 
 export default profileSlice.reducer;
 

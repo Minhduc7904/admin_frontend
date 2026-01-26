@@ -4,6 +4,7 @@ import { NotificationContainer } from './features/notification/components';
 import { ProtectedRoute } from './shared/components';
 import { NotFound } from './shared/pages/NotFound';
 import { ROUTES } from './core/constants';
+import { SocketProvider } from './shared/components/socket/SocketProvider';
 
 const renderRoutes = (routes, { protect = false, parentKey = 'route' } = {}) =>
   routes.map((route, index) => {
@@ -36,15 +37,17 @@ const renderRoutes = (routes, { protect = false, parentKey = 'route' } = {}) =>
 function App() {
   return (
     <BrowserRouter>
-      <NotificationContainer />
-      <Routes>
-        {renderRoutes(authRouter, { parentKey: 'auth' })}
-        {renderRoutes(adminRouter, { protect: true, parentKey: 'admin' })}
-        {renderRoutes(profileRouter, { protect: true, parentKey: 'profile' })}
+      <SocketProvider>
+        <NotificationContainer />
+        <Routes>
+          {renderRoutes(authRouter, { parentKey: 'auth' })}
+          {renderRoutes(adminRouter, { parentKey: 'admin' })}
+          {renderRoutes(profileRouter, { parentKey: 'profile' })}
 
-        <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
-        <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />
-      </Routes>
+          <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
+          <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />
+        </Routes>
+      </SocketProvider>
     </BrowserRouter>
   );
 }

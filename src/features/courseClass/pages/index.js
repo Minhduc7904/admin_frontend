@@ -6,3 +6,4 @@ export { ClassStudents } from './ClassStudents';
 export { ClassSessions } from './ClassSessions';
 export { ClassSchedule } from './ClassSchedule';
 export { ClassAttendance } from './ClassAttendance';
+export { ClassNotifications } from './ClassNotifications';

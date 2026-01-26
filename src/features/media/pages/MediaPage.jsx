@@ -79,7 +79,7 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
             setAllMedia([]);
             setCurrentPage(1);
         }
-        
+
         const params = {
             page,
             limit: 20,
@@ -177,7 +177,7 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
 
     const userTypeText = userType === 'student' ? 'học sinh' : userType === 'admin' ? 'quản trị viên' : null;
     const pageTitle = userId && userTypeText ? `Media của ${userTypeText}` : 'Quản lý Media';
-    const pageDescription = userId && userTypeText 
+    const pageDescription = userId && userTypeText
         ? `Danh sách media được tải lên bởi ${userTypeText}`
         : 'Quản lý các file media trong hệ thống';
 
@@ -205,7 +205,7 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            <Button 
+                            <Button
                                 onClick={handleRefresh}
                                 disabled={loadingGet}
                                 variant={userId ? "primary" : "outline"}

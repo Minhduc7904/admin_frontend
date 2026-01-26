@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Bell, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Menu, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
 import { logoutAsync } from '../../../features/auth/store/authSlice';
-import { 
+import { NotificationBell } from '../../../features/notification/components';
+import {
     clearProfile,
     getAvatarUsagesAsync,
-    getAvatarDownloadUrlAsync,
+    getAvatarViewUrlAsync,
     selectAvatarUsages,
-    selectAvatarDownloadUrl
+    selectAvatarViewUrl
 } from '../../../features/profile/store/profileSlice';
 import { ROUTES } from '../../../core/constants';
 
@@ -19,8 +20,7 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
     const navigate = useNavigate();
     const { profile } = useAppSelector((state) => state.profile);
     const avatarUsages = useAppSelector(selectAvatarUsages);
-    const avatarDownloadUrl = useAppSelector(selectAvatarDownloadUrl);
-
+    const avatarViewUrl = useAppSelector(selectAvatarViewUrl);
     // Fetch avatar when profile changes
     useEffect(() => {
         if (profile?.userId) {
@@ -33,7 +33,7 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
         if (avatarUsages?.data && avatarUsages.data.length > 0) {
             const firstAvatar = avatarUsages.data[0];
             if (firstAvatar?.mediaId) {
-                dispatch(getAvatarDownloadUrlAsync(firstAvatar.mediaId));
+                dispatch(getAvatarViewUrlAsync(firstAvatar.mediaId));
             }
         }
     }, [dispatch, avatarUsages]);
@@ -79,26 +79,19 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
                 {/* Right: Notifications + User menu */}
                 <div className="flex items-center gap-2">
                     {/* Notifications */}
-                    <button
-                        className="p-2 hover:bg-gray-100 rounded-sm text-foreground-light relative"
-                        aria-label="Notifications"
-                    >
-                        <Bell size={18} />
-                        {/* Notification badge */}
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-                    </button>
+                    <NotificationBell />
 
                     {/* User Menu */}
                     <div className="relative" ref={menuRef}>
                         <button
                             onClick={() => setShowUserMenu(!showUserMenu)}
-                            className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-sm transition-colors"
+                            className="bg-primary rounded-lg flex items-center gap-2 px-3 py-2 hover:bg-gray-100 transition-colors"
                         >
                             {/* Avatar */}
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white overflow-hidden">
-                                {avatarDownloadUrl ? (
+                                {avatarViewUrl ? (
                                     <img
-                                        src={avatarDownloadUrl}
+                                        src={avatarViewUrl}
                                         alt={profile?.fullName || 'Avatar'}
                                         className="w-full h-full object-cover"
                                     />

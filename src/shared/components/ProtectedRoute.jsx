@@ -1,22 +1,40 @@
-import { Navigate, useLocation } from 'react-router-dom';
+// src/shared/permissions/ProtectedRoute.js
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ROUTES } from '../../core/constants';
+import { hasPermission } from '../utils/permission';
+import { selectProfileRoles, selectProfilePermissions, selectProfile } from '../../features/profile/store/profileSlice';
 
-export const ProtectedRoute = ({ children }) => {
+export const ProtectedRoute = ({ permission }) => {
   const location = useLocation();
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  const { profile } = useSelector((state) => state.profile);
 
-  // Nếu chưa đăng nhập → redirect về login
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  
+  const userPermissions = useSelector(selectProfilePermissions);
+  const userRoles = useSelector(selectProfileRoles);
+  const profile = useSelector(selectProfile);
+
+  // 1️⃣ Chưa đăng nhập
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
-  // Nếu đã đăng nhập nhưng chưa có profile → redirect về LoadingRedirect để load profile
+  // 2️⃣ Đã login nhưng chưa load profile
   if (!profile) {
-    return <Navigate to={ROUTES.LOADING_REDIRECT} state={{ from: location }} replace />;
+    return (
+      <Navigate
+        to={ROUTES.LOADING_REDIRECT}
+        state={{ from: location }}
+        replace
+      />
+    );
   }
 
-  // Đã có profile → render children (dashboard)
-  return children;
+  // 3️⃣ Có permission requirement nhưng không đủ quyền
+  if (permission && !hasPermission(userPermissions, permission, userRoles)) {
+    return <Navigate to={ROUTES.FORBIDDEN || '/403'} replace />;
+  }
+
+  // 4️⃣ OK → render route con
+  return <Outlet />;
 };

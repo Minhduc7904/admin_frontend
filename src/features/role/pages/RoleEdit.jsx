@@ -56,10 +56,8 @@ export const RoleEdit = () => {
     }, [dispatch, id]);
 
     useEffect(() => {
-        if (permissions.length === 0) {
-            dispatch(getAllPermissionsAsync({ limit: 100 }));
-        }
-    }, [dispatch, permissions.length]);
+        dispatch(getAllPermissionsAsync({ limit: 1000 }));
+    }, [dispatch]);
 
     useEffect(() => {
         if (!currentRole) return;

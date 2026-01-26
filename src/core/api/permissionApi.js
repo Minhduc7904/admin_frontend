@@ -14,6 +14,7 @@ export const permissionApi = {
      * @returns {Promise<Object>} Permissions list with pagination
      */
     getAll: (params = {}) => {
+        // console.log('Fetching permissions with params:', params);
         return axiosClient.get(API_ENDPOINTS.PERMISSIONS.LIST, { params });
     },
 

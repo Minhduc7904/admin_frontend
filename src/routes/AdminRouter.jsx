@@ -18,7 +18,8 @@ import {
     ClassStudents,
     ClassSessions,
     ClassSchedule,
-    ClassAttendance
+    ClassAttendance,
+    ClassNotifications
 } from '../features/courseClass/pages';
 import { CourseClassDetailLayout } from '../features/courseClass/layouts';
 import { SubjectPage } from '../features/subject/pages/SubjectPage';
@@ -28,6 +29,9 @@ import { StudentProfileLayout } from '../features/student/layouts';
 import { ROUTES } from '../core/constants';
 import { Outlet } from 'react-router-dom';
 import { CourseListPage } from '../features/course/pages/CourseListPage';
+import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
+import { ProtectedRoute } from '../shared/components';
+import { PERMISSIONS } from '../core/constants/permission/permission.codes';
 
 export const adminRouter = [
     {
@@ -38,128 +42,373 @@ export const adminRouter = [
             </AdminLayout>
         ),
         children: [
-            { path: ROUTES.DASHBOARD, element: <Dashboard /> },
-            { path: ROUTES.ROLES, element: <RoleList /> },
-            { path: ROUTES.ROLES_CREATE, element: <RoleCreate /> },
-            { path: ROUTES.ROLES_EDIT(':id'), element: <RoleEdit /> },
-            { path: ROUTES.PERMISSIONS, element: <PermissionList /> },
-            { path: ROUTES.AUDIT_LOGS, element: <AuditLogList /> },
-            { path: ROUTES.MEDIA, element: <MediaPage /> },
-            { path: ROUTES.MEDIA_FOLDERS, element: <MediaFolderPage /> },
-            { path: ROUTES.ADMINS, element: <AdminList /> },
-            { path: ROUTES.STUDENTS, element: <StudentList /> },
-            { path: ROUTES.CHAPTERS, element: <ChapterPage /> },
-            { path: ROUTES.SUBJECTS, element: <SubjectPage /> },
-            { path: ROUTES.COURSES, element: <CourseListPage /> },
-            { path: ROUTES.MY_COURSES, element: <MyCourseListPage /> },
-            { path: ROUTES.CLASSES, element: <ClassListPage /> },
-            { path: ROUTES.MY_CLASSES, element: <MyClassList /> },
-            // 🔥 Course profile group
             {
-                path: ROUTES.COURSE_DETAIL(':id'),
-                element: <CourseDetailLayout />,
+                element: <ProtectedRoute />,
                 children: [
                     {
-                        index: true,
-                        element: <CourseDetail />,
+                        path: ROUTES.DASHBOARD,
+                        element: <Dashboard />,
                     },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ROLE_VIEW_ROLE_MANAGEMENT} />,
+                children: [
                     {
-                        path: 'classes',
-                        element: <CourseClasses />,
+                        path: ROUTES.ROLES,
+                        element: <RoleList />,
                     },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ROLE_VIEW_ROLE_CREATION} />,
+                children: [
                     {
-                        path: 'students',
-                        element: <CourseEnrollment />,
+                        path: ROUTES.ROLES_CREATE,
+                        element: <RoleCreate />,
                     },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ROLE_VIEW_ROLE_EDIT} />,
+                children: [
                     {
-                        path: 'attendance',
-                        element: <CourseStudentsAttendance />,
+                        path: ROUTES.ROLES_EDIT(':id'),
+                        element: <RoleEdit />,
                     },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.PERMISSION_VIEW_PERMISSION_MANAGEMENT} />,
+                children: [
                     {
-                        path: 'lessons',
-                        element: <CourseLessons />,
+                        path: ROUTES.PERMISSIONS,
+                        element: <PermissionList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.AUDIT_LOG_VIEW_AUDIT_LOGS_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.AUDIT_LOGS,
+                        element: <AuditLogList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.MEDIA_VIEW_MEDIA_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.MEDIA,
+                        element: <MediaPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.MEDIA_VIEW_MY_MEDIA_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.MEDIA_FOLDERS,
+                        element: <MediaFolderPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.ADMINS,
+                        element: <AdminList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.STUDENTS,
+                        element: <StudentList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.CHAPTER_VIEW_CHAPTER_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.CHAPTERS,
+                        element: <ChapterPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.SUBJECT_VIEW_SUBJECT_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.SUBJECTS,
+                        element: <SubjectPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.COURSES,
+                        element: <CourseListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_MY_COURSE_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.MY_COURSES,
+                        element: <MyCourseListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_CLASS_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.CLASSES,
+                        element: <ClassListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_MY_CLASSES_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.MY_CLASSES,
+                        element: <MyClassList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.NOTIFICATION_SEND} />,
+                children: [
+                    {
+                        path: ROUTES.BROADCAST_NOTIFICATIONS,
+                        element: <BroadcastNotificationsPage />,
+                    },
+                ],
+            },
+            // 🔥 Course profile group
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_DETAIL_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.COURSE_DETAIL(':id'),
+                        element: <CourseDetailLayout />,
+                        children: [
+                            {
+                                index: true,
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_DETAIL_MANAGEMENT}>
+                                        <CourseDetail />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'classes',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_CLASS_MANAGEMENT}>
+                                        <CourseClasses />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'students',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.COURSE_ENROLLMENT_VIEW_COURSE_ENROLLMENT_MANAGEMENT}>
+                                        <CourseEnrollment />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'attendance',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.ATTENDANCE_VIEW_COURSE_ATTENDANCE_MANAGEMENT}>
+                                        <CourseStudentsAttendance />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'lessons',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.LESSON_VIEW_COURSE_LESSON_MANAGEMENT}>
+                                        <CourseLessons />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                        ],
                     },
                 ],
             },
             // 🔥 Class profile group
             {
-                path: ROUTES.CLASS_DETAIL(':id'),
-                element: <CourseClassDetailLayout />,
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_CLASS_DETAIL_MANAGEMENT} />,
                 children: [
                     {
-                        index: true,
-                        element: <CourseClassDetail />,
-                    },
-                    {
-                        path: 'students',
-                        element: <ClassStudents />,
-                    },
-                    {
-                        path: 'sessions',
-                        element: <ClassSessions />,
-                    },
-                    {
-                        path: 'schedule',
-                        element: <ClassSchedule />,
-                    },
-                    {
-                        path: 'attendance',
-                        element: <ClassAttendance />,
+                        path: ROUTES.CLASS_DETAIL(':id'),
+                        element: <CourseClassDetailLayout />,
+                        children: [
+                            {
+                                index: true,
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_CLASS_DETAIL_MANAGEMENT}>
+                                        <CourseClassDetail />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'students',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.CLASS_STUDENT_VIEW_CLASS_STUDENT_MANAGEMENT}>
+                                        <ClassStudents />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'sessions',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.CLASS_SESSION_VIEW_CLASS_SESSION_MANAGEMENT}>
+                                        <ClassSessions />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            // {
+                            //     path: 'schedule',
+                            //     element: (
+                            //         <ProtectedRoute permission={PERMISSIONS.CLASS_SESSION.GET_ALL}>
+                            //             <ClassSchedule />
+                            //         </ProtectedRoute>
+                            //     ),
+                            // },
+                            {
+                                path: 'attendance',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.ATTENDANCE_VIEW_CLASS_ATTENDANCE_MANAGEMENT}>
+                                        <ClassAttendance />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'notifications',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.NOTIFICATION_VIEW_CLASS_NOTIFICATION_MANAGEMENT}>
+                                        <ClassNotifications />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                        ],
                     },
                 ],
             },
             // 🔥 Admin profile group
             {
-                path: ROUTES.ADMIN_DETAIL(':id'),
-                element: <AdminProfileLayout />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_DETAIL_MANAGEMENT} />,
                 children: [
                     {
-                        index: true,
-                        element: <AdminDetail />,
-                    },
-                    {
-                        path: 'roles',
-                        element: <AdminRole />,
-                    },
-                    {
-                        path: 'media',
-                        element: <AdminMedia />,
-                    },
-                    {
-                        path: 'audit-logs',
-                        element: <AuditLogList />,
+                        path: ROUTES.ADMIN_DETAIL(':id'),
+                        element: <AdminProfileLayout />,
+                        children: [
+                            {
+                                index: true,
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_DETAIL_MANAGEMENT}>
+                                        <AdminDetail />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'roles',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_ROLE_MANAGEMENT}>
+                                        <AdminRole />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'media',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_MEDIA_MANAGEMENT}>
+                                        <AdminMedia />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'audit-logs',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_AUDIT_LOG_MANAGEMENT}>
+                                        <AuditLogList />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                        ],
                     },
                 ],
             },
 
             // 🔥 Student profile group
             {
-                path: ROUTES.STUDENT_DETAIL(':id'),
-                element: <StudentProfileLayout />,
+                element: <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_DETAIL_MANAGEMENT} />,
                 children: [
                     {
-                        index: true,
-                        element: <StudentDetail />,
-                    },
-                    {
-                        path: 'classes',
-                        element: <StudentClasses />,
-                    },
-                    {
-                        path: 'courses',
-                        element: <StudentCourses />,
-                    },
-                    {
-                        path: 'attendance',
-                        element: <StudentAttendance />,
-                    },
-                    {
-                        path: 'roles',
-                        element: <StudentRole />,
-                    },
-                    {
-                        path: 'media',
-                        element: <StudentMedia />,
+                        path: ROUTES.STUDENT_DETAIL(':id'),
+                        element: <StudentProfileLayout />,
+                        children: [
+                            {
+                                index: true,
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_DETAIL_MANAGEMENT}>
+                                        <StudentDetail />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'classes',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_CLASSES_MANAGEMENT}>
+                                        <StudentClasses />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'courses',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_COURSES_MANAGEMENT}>
+                                        <StudentCourses />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'attendance',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_ATTENDANCE_MANAGEMENT}>
+                                        <StudentAttendance />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'roles',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_ROLE_MANAGEMENT}>
+                                        <StudentRole />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                            {
+                                path: 'media',
+                                element: (
+                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_MEDIA_MANAGEMENT}>
+                                        <StudentMedia />
+                                    </ProtectedRoute>
+                                ),
+                            },
+                        ],
                     },
                 ],
             },

@@ -17,6 +17,8 @@ const initialState = {
     },
     loadingGet: false,
     loadingGetById: false,
+    loadingGetPresignedUrl: false,
+    loadingCompleteUpload: false,
     loadingBuckets: false,
     loadingBucketStatistics: false,
     loadingUpload: false,
@@ -24,6 +26,7 @@ const initialState = {
     loadingSoftDelete: false,
     loadingHardDelete: false,
     loadingDownloadUrl: false,
+    loadingViewUrl: false,
     loadingBatchViewUrl: false,
     error: null,
     filters: {
@@ -53,12 +56,42 @@ export const uploadMediaAsync = createAsyncThunk(
     }
 );
 
+export const getPresignedUploadUrlAsync = createAsyncThunk(
+    "media/getPresignedUploadUrl",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.getPresignedUploadUrl(data), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi lấy URL tải lên",
+        });
+    }
+);
+
+export const postUploadCompleteAsync = createAsyncThunk(
+    "media/postUploadComplete",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.postUploadComplete(data), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi hoàn tất tải lên",
+        });
+    }
+);
+
 export const getAllMediaAsync = createAsyncThunk(
     "media/getAll",
     async (params, thunkAPI) => {
         return handleAsyncThunk(() => mediaApi.getAll(params), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tải danh sách media",
+        });
+    }
+);
+
+export const getMyMediaAsync = createAsyncThunk(
+    "media/getMy",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.getMy(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách media của tôi",
         });
     }
 );
@@ -93,12 +126,42 @@ export const getMediaDownloadUrlAsync = createAsyncThunk(
     }
 );
 
-export const getBatchMediaViewUrlAsync = createAsyncThunk(
-    "media/getBatchViewUrl",
+export const getMyMediaDownloadUrlAsync = createAsyncThunk(
+    "media/getMyDownloadUrl",
+    async ({ id, expiry = 3600 }, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.getMyDownloadUrl(id, expiry), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tạo link tải xuống của tôi",
+        });
+    }
+);
+
+export const getBatchMyMediaViewUrlAsync = createAsyncThunk(
+    "media/getBatchMyViewUrl",
     async ({ mediaIds, expiry = 3600 }, thunkAPI) => {
-        return handleAsyncThunk(() => mediaApi.getBatchViewUrl(mediaIds, expiry), thunkAPI, {
+        return handleAsyncThunk(() => mediaApi.getBatchMyViewUrl(mediaIds, expiry), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tạo link xem hàng loạt",
+        });
+    }
+);
+
+export const getViewUrlAsync = createAsyncThunk(
+    "media/getViewUrl",
+    async ({ id, expiry = 3600, context = {} }, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.getViewUrl(id, expiry, context), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tạo link xem",
+        });
+    }
+);
+
+export const getMyViewUrlAsync = createAsyncThunk(
+    "media/getMyViewUrl",
+    async ({ id, expiry = 3600 }, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.getMyViewUrl(id, expiry), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tạo link xem của tôi",
         });
     }
 );
@@ -118,6 +181,17 @@ export const softDeleteMediaAsync = createAsyncThunk(
     "media/softDelete",
     async (id, thunkAPI) => {
         return handleAsyncThunk(() => mediaApi.softDelete(id), thunkAPI, {
+            successTitle: "Xóa media thành công",
+            successMessage: "Media đã được chuyển vào thùng rác",
+            errorTitle: "Xóa media thất bại",
+        });
+    }
+);
+
+export const softDeleteMediaByUserAsync = createAsyncThunk(
+    "media/softDeleteByUser",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => mediaApi.softDeleteByUser(id), thunkAPI, {
             successTitle: "Xóa media thành công",
             successMessage: "Media đã được chuyển vào thùng rác",
             errorTitle: "Xóa media thất bại",
@@ -188,8 +262,36 @@ const mediaSlice = createSlice({
                 state.loadingUpload = false;
                 state.error = action.payload;
             })
+            // Get Presigned Upload URL
+            .addCase(getPresignedUploadUrlAsync.pending, (state) => {
+                state.loadingGetPresignedUrl = true;
+                state.error = null;
+            })
+            .addCase(getPresignedUploadUrlAsync.fulfilled, (state, action) => {
+                state.loadingGetPresignedUrl = false;
+                state.error = null;
+            })
+            .addCase(getPresignedUploadUrlAsync.rejected, (state, action) => {
+                state.loadingGetPresignedUrl = false;
+                state.error = action.payload;
+            })
+            // Post Upload Complete
+            .addCase(postUploadCompleteAsync.pending, (state) => {
+                state.loadingCompleteUpload = true;
+                state.error = null;
+            })
+            .addCase(postUploadCompleteAsync.fulfilled, (state, action) => {
+                state.loadingCompleteUpload = false;
+                state.media.unshift(action.payload.data);
+                state.error = null;
+            })
+            .addCase(postUploadCompleteAsync.rejected, (state, action) => {
+                state.loadingCompleteUpload = false;
+                state.error = action.payload;
+            })
             // Get All Media
             .addCase(getAllMediaAsync.pending, (state) => {
+                state.media = [];
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -208,6 +310,32 @@ const mediaSlice = createSlice({
                 state.error = null;
             })
             .addCase(getAllMediaAsync.rejected, (state, action) => {
+                state.media = [];
+                state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // get My Media
+            .addCase(getMyMediaAsync.pending, (state) => {
+                state.media = [];
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(getMyMediaAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                // New structure: { success, message, data: MediaResponseDto[], meta: PaginationMetaDto }
+                state.media = action.payload.data;
+                state.pagination = {
+                    page: action.payload.meta.page,
+                    limit: action.payload.meta.limit,
+                    total: action.payload.meta.total,
+                    totalPages: action.payload.meta.totalPages,
+                    hasPrevious: action.payload.meta.hasPrevious,
+                    hasNext: action.payload.meta.hasNext,
+                };
+                state.error = null;
+            })
+            .addCase(getMyMediaAsync.rejected, (state, action) => {
+                state.media = [];
                 state.loadingGet = false;
                 state.error = action.payload;
             })
@@ -253,20 +381,62 @@ const mediaSlice = createSlice({
                 state.loadingDownloadUrl = false;
                 state.error = action.payload;
             })
-            // Get Batch Media View URL
-            .addCase(getBatchMediaViewUrlAsync.pending, (state) => {
+            // Get My Media Download URL
+            .addCase(getMyMediaDownloadUrlAsync.pending, (state) => {
+                state.loadingDownloadUrl = true;
+                state.error = null;
+            })
+            .addCase(getMyMediaDownloadUrlAsync.fulfilled, (state, action) => {
+                state.loadingDownloadUrl = false;
+                state.error = null;
+            })
+            .addCase(getMyMediaDownloadUrlAsync.rejected, (state, action) => {
+                state.loadingDownloadUrl = false;
+                state.error = action.payload;
+            })
+            // Get Batch My Media View URL
+            .addCase(getBatchMyMediaViewUrlAsync.pending, (state) => {
                 state.loadingBatchViewUrl = true;
                 state.error = null;
             })
-            .addCase(getBatchMediaViewUrlAsync.fulfilled, (state, action) => {
+            .addCase(getBatchMyMediaViewUrlAsync.fulfilled, (state, action) => {
                 state.loadingBatchViewUrl = false;
                 state.batchViewUrls = action.payload.data;
                 state.error = null;
             })
-            .addCase(getBatchMediaViewUrlAsync.rejected, (state, action) => {
+            .addCase(getBatchMyMediaViewUrlAsync.rejected, (state, action) => {
                 state.loadingBatchViewUrl = false;
                 state.error = action.payload;
             })
+
+            // Get View URL
+            .addCase(getViewUrlAsync.pending, (state) => {
+                state.loadingViewUrl = true;
+                state.error = null;
+            })
+            .addCase(getViewUrlAsync.fulfilled, (state, action) => {
+                state.loadingViewUrl = false;
+                state.error = null;
+            })
+            .addCase(getViewUrlAsync.rejected, (state, action) => {
+                state.loadingViewUrl = false;
+                state.error = action.payload;
+            })
+
+            // Get My View URL
+            .addCase(getMyViewUrlAsync.pending, (state) => {
+                state.loadingViewUrl = true;
+                state.error = null;
+            })
+            .addCase(getMyViewUrlAsync.fulfilled, (state, action) => {
+                state.loadingViewUrl = false;
+                state.error = null;
+            })
+            .addCase(getMyViewUrlAsync.rejected, (state, action) => {
+                state.loadingViewUrl = false;
+                state.error = action.payload;
+            })
+
             // Update Media
             .addCase(updateMediaAsync.pending, (state) => {
                 state.loadingUpdate = true;
@@ -306,6 +476,26 @@ const mediaSlice = createSlice({
                 state.error = null;
             })
             .addCase(softDeleteMediaAsync.rejected, (state, action) => {
+                state.loadingSoftDelete = false;
+                state.error = action.payload;
+            })
+            // Soft Delete Media By User
+            .addCase(softDeleteMediaByUserAsync.pending, (state) => {
+                state.loadingSoftDelete = true;
+                state.error = null;
+            })
+            .addCase(softDeleteMediaByUserAsync.fulfilled, (state, action) => {
+                state.loadingSoftDelete = false;
+                // Update media status to DELETED instead of removing from list
+                const index = state.media.findIndex(
+                    (m) => m.mediaId === action.meta.arg
+                );
+                if (index !== -1) {
+                    state.media[index].status = 'DELETED';
+                }
+                state.error = null;
+            })
+            .addCase(softDeleteMediaByUserAsync.rejected, (state, action) => {
                 state.loadingSoftDelete = false;
                 state.error = action.payload;
             })
@@ -365,6 +555,8 @@ export const selectMediaLoadingGet = (state) => state.media.loadingGet;
 export const selectMediaLoadingGetById = (state) => state.media.loadingGetById;
 export const selectMediaLoadingBuckets = (state) => state.media.loadingBuckets;
 export const selectMediaLoadingUpload = (state) => state.media.loadingUpload;
+export const selectMediaLoadingGetPresignedUrl = (state) => state.media.loadingGetPresignedUrl;
+export const selectMediaLoadingCompleteUpload = (state) => state.media.loadingCompleteUpload;
 export const selectMediaLoadingUpdate = (state) => state.media.loadingUpdate;
 export const selectMediaLoadingSoftDelete = (state) => state.media.loadingSoftDelete;
 export const selectMediaLoadingHardDelete = (state) => state.media.loadingHardDelete;
@@ -376,5 +568,6 @@ export const selectMediaDownloadUrl = (state) => state.media.downloadUrl;
 export const selectMediaBatchViewUrls = (state) => state.media.batchViewUrls;
 export const selectBucketStatistics = (state) => state.media.bucketStatistics;
 export const selectBucketStatisticsLoading = (state) => state.media.loadingBucketStatistics;
+export const selectMediaLoadingViewUrl = (state) => state.media.loadingViewUrl;
 
 export default mediaSlice.reducer;

@@ -8,22 +8,22 @@ import {
 import {
     selectProfile,
     getAvatarUsagesAsync,
-    getAvatarDownloadUrlAsync,
+    getAvatarViewUrlAsync,
     selectAvatarUsages,
     selectAvatarLoading,
-    selectAvatarDownloadUrl,
-    selectAvatarDownloadUrlLoading
+    selectAvatarViewUrl,
+    selectAvatarViewUrlLoading
 } from '../store/profileSlice';
 import { addNotification } from '../../notification/store/notificationSlice';
-import { MediaPickerModal } from '../../../shared/components/ui';
+import { MediaPickerModal } from '../../media/components';
 
 export const ProfileAvatar = ({ size = 'large' }) => {
     const dispatch = useDispatch();
     const profile = useSelector(selectProfile);
     const avatarUsages = useSelector(selectAvatarUsages);
     const loadingAvatar = useSelector(selectAvatarLoading);
-    const avatarDownloadUrl = useSelector(selectAvatarDownloadUrl);
-    const loadingDownloadUrlLoading = useSelector(selectAvatarDownloadUrlLoading);
+    const avatarViewUrl = useSelector(selectAvatarViewUrl);
+    const loadingViewUrlLoading = useSelector(selectAvatarViewUrlLoading);
 
     const [uploading, setUploading] = useState(false);
     const [hovering, setHovering] = useState(false);
@@ -48,7 +48,7 @@ export const ProfileAvatar = ({ size = 'large' }) => {
         if (avatarUsages.data && avatarUsages.data.length > 0) {
             const firstAvatar = avatarUsages.data[0];
             if (firstAvatar?.mediaId) {
-                dispatch(getAvatarDownloadUrlAsync(firstAvatar.mediaId));
+                dispatch(getAvatarViewUrlAsync(firstAvatar.mediaId));
             }
         }
     }, [dispatch, avatarUsages]);
@@ -118,7 +118,7 @@ export const ProfileAvatar = ({ size = 'large' }) => {
         setIsMediaPickerOpen(true);
     };
 
-    if (loadingAvatar && !avatarDownloadUrl) {
+    if (loadingAvatar && !avatarViewUrl) {
         return (
             <div className={`${sizeClasses[size]} rounded-full bg-gray-200 flex items-center justify-center`}>
                 <Loader className="animate-spin text-gray-400" size={size === 'large' ? 32 : 24} />
@@ -134,9 +134,9 @@ export const ProfileAvatar = ({ size = 'large' }) => {
                 onMouseLeave={() => setHovering(false)}
                 onClick={handleAvatarClick}
             >
-                {avatarDownloadUrl ? (
+                {avatarViewUrl ? (
                     <img
-                        src={avatarDownloadUrl}
+                        src={avatarViewUrl}
                         alt={getFullName()}
                         className="w-full h-full rounded-full object-cover"
                     />

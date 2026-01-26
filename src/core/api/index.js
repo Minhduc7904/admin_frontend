@@ -25,4 +25,4 @@ export { youtubeContentApi } from './youtubeContentApi';
 export { homeworkContentApi } from './homeworkContentApi';
 export { homeworkSubmitApi } from './homeworkSubmitApi';
 export { lessonLearningItemApi } from './lessonLearningItemApi';
-
+export { notificationApi } from './notificationApi';

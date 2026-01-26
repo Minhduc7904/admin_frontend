@@ -95,6 +95,14 @@ export const CourseClassDetailLayout = () => {
                     ),
                     onActivate: () =>
                         navigate(ROUTES.CLASS_ATTENDANCE(classId) + queryString),
+                },
+                {
+                    label: 'Thông báo',
+                    isActive: location.pathname.startsWith(
+                        ROUTES.CLASS_NOTIFICATIONS(classId)
+                    ),
+                    onActivate: () =>
+                        navigate(ROUTES.CLASS_NOTIFICATIONS(classId) + queryString),
                 }
             ];
         },

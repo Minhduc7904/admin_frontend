@@ -6,3 +6,4 @@ export { MediaInfo } from './MediaInfo';
 export { MediaUploadModal } from './MediaUploadModal';
 export * from './previews';
 export { BucketSidebar } from './BucketSidebar';
+export * from './mediaPicker/MediaPickerModal'
