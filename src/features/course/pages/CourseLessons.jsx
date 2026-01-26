@@ -20,11 +20,11 @@ export const CourseLessons = () => {
     const course = useSelector(selectCurrentCourse);
     const loading = useSelector(selectCourseLoadingGet);
     const lessonFilters = useSelector(selectLessonFilters);
-    
+
     // Selection state
     const [selectedItem, setSelectedItem] = useState(null); // { type: 'lesson' | 'learningItem', data: {...} }
     const [lessonMap, setLessonMap] = useState({}); // Map of lessonId -> lesson data for reference
-    
+
     // Modal state
     const [openAddLesson, setOpenAddLesson] = useState(false);
     const [openAddLearningItem, setOpenAddLearningItem] = useState(false);
@@ -95,8 +95,8 @@ export const CourseLessons = () => {
         );
     }
 
-    const currentLesson = selectedItem?.type === 'lesson' 
-        ? selectedItem.data 
+    const currentLesson = selectedItem?.type === 'lesson'
+        ? selectedItem.data
         : (selectedItem?.type === 'learningItem' ? lessonMap[selectedItem.lessonId] : null);
 
     return (
@@ -142,15 +142,15 @@ export const CourseLessons = () => {
                             <LessonDetail
                                 lesson={selectedItem.data}
                                 onAddLearningItem={handleAddLearningItem}
-                                onEdit={() => {}} // TODO: implement edit
-                                onDelete={() => {}} // TODO: implement delete
+                                onEdit={() => { }} // TODO: implement edit
+                                onDelete={() => { }} // TODO: implement delete
                             />
                         ) : selectedItem?.type === 'learningItem' ? (
                             <LearningItemDetail
                                 learningItem={selectedItem.data}
                                 lessonTitle={currentLesson?.title}
-                                onEdit={() => {}} // TODO: implement edit
-                                onDelete={() => {}} // TODO: implement delete
+                                onEdit={() => { }} // TODO: implement edit
+                                onDelete={() => { }} // TODO: implement delete
                             />
                         ) : (
                             <div className="flex items-center justify-center h-full text-muted-foreground">

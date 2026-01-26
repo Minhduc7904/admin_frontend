@@ -35,15 +35,6 @@ export const CourseStudentsAttendance = () => {
     const { id } = useParams();
     const courseId = Number(id);
 
-    /* ===================== VALIDATE COURSE ID ===================== */
-    if (isNaN(courseId) || courseId <= 0) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID khóa học không hợp lệ. Vui lòng kiểm tra lại URL.
-            </div>
-        );
-    }
-
     /* ===================== STORE ===================== */
     const studentsAttendance = useSelector(selectStudentsAttendance);
     const pagination = useSelector(selectStudentsAttendancePagination);

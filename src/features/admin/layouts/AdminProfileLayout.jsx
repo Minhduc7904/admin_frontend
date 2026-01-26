@@ -30,7 +30,7 @@ export const AdminProfileLayout = () => {
     const admin = useAppSelector(selectCurrentAdmin);
     const loading = useAppSelector(selectAdminLoadingGet);
 
-    const invalidId = Number.isNaN(adminId);
+    const invalidId = Number.isNaN(adminId) || adminId <= 0;
 
     // 🔑 FETCH ADMIN (ONCE per adminId)
     useEffect(() => {

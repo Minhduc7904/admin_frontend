@@ -1,12 +1,12 @@
 // src/features/notification/pages/ClassNotifications.jsx
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { 
+import {
     BroadcastNotifications
- } from '../../notification/components/BroadcastNotifications';
+} from '../../notification/components/BroadcastNotifications';
 
 import {
     getAllClassStudentsAsync,
@@ -18,20 +18,11 @@ import {
     sendNotificationAsync,
     selectLoadingSend,
 } from '../../notification/store/notificationSlice';
-
+import { ROUTES } from '../../../core/constants';
 export const ClassNotifications = () => {
     const dispatch = useDispatch();
     const { id } = useParams();
     const classId = Number(id);
-
-    /* ===== VALIDATE ===== */
-    if (isNaN(classId) || classId <= 0) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID lớp học không hợp lệ. Vui lòng kiểm tra lại URL.
-            </div>
-        );
-    }
 
     /* ===== STORE ===== */
     const classStudents = useSelector(selectClassStudents);

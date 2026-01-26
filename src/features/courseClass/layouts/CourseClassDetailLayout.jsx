@@ -6,6 +6,7 @@ import {
     useNavigate,
     useParams,
     useSearchParams,
+    Navigate,
 } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -36,7 +37,7 @@ export const CourseClassDetailLayout = () => {
     const from = searchParams.get('from'); // 'my-classes', 'course-{courseId}', or null
     const isMyClasses = from === 'my-classes';
 
-    const invalidId = Number.isNaN(classId);
+    const invalidId = Number.isNaN(classId) || classId <= 0;
 
     // 🔑 FETCH CLASS (ONCE per classId)
     useEffect(() => {
@@ -44,13 +45,6 @@ export const CourseClassDetailLayout = () => {
             dispatch(getCourseClassByIdAsync(classId));
         }
     }, [dispatch, classId, invalidId, courseClass?.classId]);
-
-    // 🧹 Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            dispatch(clearCurrentClass());
-        };
-    }, [dispatch]);
 
     // 3. Tabs config (route-driven)
     const tabs = useMemo(
@@ -80,14 +74,14 @@ export const CourseClassDetailLayout = () => {
                     onActivate: () =>
                         navigate(ROUTES.CLASS_SESSIONS(classId) + queryString),
                 },
-                {
-                    label: 'Lịch học',
-                    isActive: location.pathname.startsWith(
-                        ROUTES.CLASS_SCHEDULE(classId)
-                    ),
-                    onActivate: () =>
-                        navigate(ROUTES.CLASS_SCHEDULE(classId) + queryString),
-                },
+                // {
+                //     label: 'Lịch học',
+                //     isActive: location.pathname.startsWith(
+                //         ROUTES.CLASS_SCHEDULE(classId)
+                //     ),
+                //     onActivate: () =>
+                //         navigate(ROUTES.CLASS_SCHEDULE(classId) + queryString),
+                // },
                 {
                     label: 'Điểm danh',
                     isActive: location.pathname.startsWith(
@@ -111,17 +105,17 @@ export const CourseClassDetailLayout = () => {
 
     // 4. Guard invalid route
     if (invalidId) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID lớp học không hợp lệ.
-            </div>
-        );
+        return <Navigate to={ROUTES.NOT_FOUND} replace />;
     }
+
+    // if (!loading && !courseClass) {
+    //     return <Navigate to={ROUTES.NOT_FOUND} replace />;
+    // }
 
     // 5. Render
     return (
         <div className="space-y-6">
-            <CourseClassDetailBreadcrumb 
+            <CourseClassDetailBreadcrumb
                 className={courseClass?.className}
                 courseName={courseClass?.course?.title}
                 from={from}

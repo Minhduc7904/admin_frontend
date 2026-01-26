@@ -205,43 +205,23 @@ export const adminRouter = [
                         children: [
                             {
                                 index: true,
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_DETAIL_MANAGEMENT}>
-                                        <CourseDetail />
-                                    </ProtectedRoute>
-                                ),
+                                element: <CourseDetail />
                             },
                             {
                                 path: 'classes',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_CLASS_MANAGEMENT}>
-                                        <CourseClasses />
-                                    </ProtectedRoute>
-                                ),
+                                element: <CourseClasses />
                             },
                             {
                                 path: 'students',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.COURSE_ENROLLMENT_VIEW_COURSE_ENROLLMENT_MANAGEMENT}>
-                                        <CourseEnrollment />
-                                    </ProtectedRoute>
-                                ),
+                                element: <CourseEnrollment />
                             },
                             {
                                 path: 'attendance',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.ATTENDANCE_VIEW_COURSE_ATTENDANCE_MANAGEMENT}>
-                                        <CourseStudentsAttendance />
-                                    </ProtectedRoute>
-                                ),
+                                element: <CourseStudentsAttendance />
                             },
                             {
                                 path: 'lessons',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.LESSON_VIEW_COURSE_LESSON_MANAGEMENT}>
-                                        <CourseLessons />
-                                    </ProtectedRoute>
-                                ),
+                                element: <CourseLessons />
                             },
                         ],
                     },
@@ -257,27 +237,15 @@ export const adminRouter = [
                         children: [
                             {
                                 index: true,
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_CLASS_DETAIL_MANAGEMENT}>
-                                        <CourseClassDetail />
-                                    </ProtectedRoute>
-                                ),
+                                element: <CourseClassDetail />,
                             },
                             {
                                 path: 'students',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.CLASS_STUDENT_VIEW_CLASS_STUDENT_MANAGEMENT}>
-                                        <ClassStudents />
-                                    </ProtectedRoute>
-                                ),
+                                element: <ClassStudents />,
                             },
                             {
                                 path: 'sessions',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.CLASS_SESSION_VIEW_CLASS_SESSION_MANAGEMENT}>
-                                        <ClassSessions />
-                                    </ProtectedRoute>
-                                ),
+                                element: <ClassSessions />,
                             },
                             // {
                             //     path: 'schedule',
@@ -289,19 +257,11 @@ export const adminRouter = [
                             // },
                             {
                                 path: 'attendance',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.ATTENDANCE_VIEW_CLASS_ATTENDANCE_MANAGEMENT}>
-                                        <ClassAttendance />
-                                    </ProtectedRoute>
-                                ),
+                                element: <ClassAttendance />,
                             },
                             {
                                 path: 'notifications',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.NOTIFICATION_VIEW_CLASS_NOTIFICATION_MANAGEMENT}>
-                                        <ClassNotifications />
-                                    </ProtectedRoute>
-                                ),
+                                element: <ClassNotifications />,
                             },
                         ],
                     },
@@ -317,35 +277,19 @@ export const adminRouter = [
                         children: [
                             {
                                 index: true,
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_DETAIL_MANAGEMENT}>
-                                        <AdminDetail />
-                                    </ProtectedRoute>
-                                ),
+                                element: <AdminDetail />,
                             },
                             {
                                 path: 'roles',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_ROLE_MANAGEMENT}>
-                                        <AdminRole />
-                                    </ProtectedRoute>
-                                ),
+                                element: <AdminRole />,
                             },
                             {
                                 path: 'media',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_MEDIA_MANAGEMENT}>
-                                        <AdminMedia />
-                                    </ProtectedRoute>
-                                ),
+                                element: <AdminMedia />
                             },
                             {
                                 path: 'audit-logs',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_AUDIT_LOG_MANAGEMENT}>
-                                        <AuditLogList />
-                                    </ProtectedRoute>
-                                ),
+                                element: <AuditLogList />
                             },
                         ],
                     },
@@ -362,51 +306,27 @@ export const adminRouter = [
                         children: [
                             {
                                 index: true,
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_DETAIL_MANAGEMENT}>
-                                        <StudentDetail />
-                                    </ProtectedRoute>
-                                ),
+                                element: <StudentDetail />,
                             },
                             {
                                 path: 'classes',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_CLASSES_MANAGEMENT}>
-                                        <StudentClasses />
-                                    </ProtectedRoute>
-                                ),
+                                element: <StudentClasses />
                             },
                             {
                                 path: 'courses',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_COURSES_MANAGEMENT}>
-                                        <StudentCourses />
-                                    </ProtectedRoute>
-                                ),
+                                element: <StudentCourses />,
                             },
                             {
                                 path: 'attendance',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_ATTENDANCE_MANAGEMENT}>
-                                        <StudentAttendance />
-                                    </ProtectedRoute>
-                                ),
+                                element: <StudentAttendance />,
                             },
                             {
                                 path: 'roles',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_ROLE_MANAGEMENT}>
-                                        <StudentRole />
-                                    </ProtectedRoute>
-                                ),
+                                element: <StudentRole />,
                             },
                             {
                                 path: 'media',
-                                element: (
-                                    <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_MEDIA_MANAGEMENT}>
-                                        <StudentMedia />
-                                    </ProtectedRoute>
-                                ),
+                                element: <StudentMedia />,
                             },
                         ],
                     },

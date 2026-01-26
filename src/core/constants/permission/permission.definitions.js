@@ -138,6 +138,10 @@ export const PERMISSION_DEFINITIONS = {
                 name: 'Truy cập thông báo lớp học',
                 description: 'Truy cập trang thông báo lớp học',
             },
+            notifyAllUsers: {
+                name: 'Gửi thông báo đến tất cả người dùng',
+                description: 'Gửi thông báo đến tất cả người dùng trong hệ thống',
+            },
             getMy: {
                 name: 'Xem thông báo của tôi',
                 description: 'Xem danh sách thông báo của người dùng hiện tại',
@@ -893,13 +897,25 @@ export const PERMISSION_DEFINITIONS = {
                 name: 'Xem danh sách buckets',
                 description: 'Xem danh sách các storage buckets',
             },
+            getStatisticsBuckets: {
+                name: 'Xem thống kê buckets',
+                description: 'Xem thống kê buckets'
+            },
             download: {
                 name: 'Tải xuống media',
                 description: 'Tạo URL để tải xuống media file',
             },
+            adminDownload: {
+                name: 'Quản trị tải xuống media',
+                description: 'Tạo URL để admin tải xuống media file',
+            },
             view: {
                 name: 'Xem media',
                 description: 'Tạo URL để xem/preview media file',
+            },
+            adminView: {
+                name: 'Quản trị xem media',
+                description: 'Tạo URL để admin xem/preview media file',
             },
             folder: {
                 group: 'MEDIA_FOLDER',
@@ -936,6 +952,14 @@ export const PERMISSION_DEFINITIONS = {
             getAll: {
                 name: 'Xem media usage',
                 description: 'Xem danh sách media usage',
+            },
+            getByMedia: {
+                name: 'Xem media usage theo media',
+                description: 'Xem danh sách media usage của một media cụ thể',
+            },
+            getByEntity: {
+                name: 'Xem media usage theo entity',
+                description: 'Xem danh sách media usage của một entity cụ thể',
             },
             attach: {
                 name: 'Gắn media',

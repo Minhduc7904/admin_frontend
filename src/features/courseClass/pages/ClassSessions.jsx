@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Plus } from 'lucide-react';
 
@@ -34,7 +34,7 @@ import {
     selectClassSessionLoadingDelete,
     setFilters,
 } from '../../classSesssion/store/classSesssionSlice';
-
+import { ROUTES } from '../../../core/constants';
 /**
  * ClassSessions - Danh sách buổi học của một lớp
  */
@@ -42,15 +42,6 @@ export const ClassSessions = () => {
     const dispatch = useDispatch();
     const { id } = useParams();
     const classId = Number(id);
-
-    /* ===================== VALIDATE CLASS ID ===================== */
-    if (isNaN(classId) || classId <= 0) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID lớp học không hợp lệ. Vui lòng kiểm tra lại URL.
-            </div>
-        );
-    }
 
     /* ===================== STORE ===================== */
     const sessions = useSelector(selectClassSessions);

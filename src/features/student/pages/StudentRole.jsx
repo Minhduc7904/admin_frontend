@@ -12,13 +12,6 @@ export const StudentRole = () => {
 
     const invalidId = isNaN(studentId) || studentId <= 0;
 
-    if (invalidId) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID học sinh không hợp lệ. Vui lòng kiểm tra lại đường dẫn.
-            </div>
-        );
-    }
 
     return (
         <UserRolePage

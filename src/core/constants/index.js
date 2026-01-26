@@ -159,6 +159,7 @@ export const API_ENDPOINTS = {
     MY_DOWNLOAD: (id) => `/media/${id}/download/my`,
 
     ADMIN_VIEW: (id) => `/media/admin/${id}/view`,
+    ADMIN_DOWNLOAD: (id) => `/media/admin/${id}/download`,
     BATCH_MY_VIEW: '/media/batch/view/my',
 
     DELETE: (id) => `/media/${id}`,

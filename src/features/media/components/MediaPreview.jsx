@@ -7,12 +7,23 @@ export const MediaPreview = ({ media, onDownload, loadViewUrl, loading }) => {
     const [viewUrl, setViewUrl] = useState(null);
 
     useEffect(() => {
-        // console.log('Media changed:', media);
-        if (media && (media.type === 'IMAGE' || media.type === 'VIDEO' || media.type === 'AUDIO' || media.type === 'DOCUMENT' || media.type === 'OTHER')) {
-            const url = loadViewUrl?.(media);
-            setViewUrl(url);
+        let cancelled = false
+
+        const load = async () => {
+            if (!media) return
+
+            const url = await loadViewUrl?.(media)
+            if (!cancelled) {
+                setViewUrl(url)
+            }
         }
-    }, [media]);
+
+        load()
+
+        return () => {
+            cancelled = true
+        }
+    }, [media])
 
     const handleImageError = (e) => {
         e.target.src = '';

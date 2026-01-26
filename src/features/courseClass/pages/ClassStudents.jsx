@@ -41,15 +41,6 @@ export const ClassStudents = () => {
     const { id } = useParams();
     const classId = Number(id);
 
-    /* ===================== VALIDATE CLASS ID ===================== */
-    if (isNaN(classId) || classId <= 0) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID lớp học không hợp lệ. Vui lòng kiểm tra lại URL.
-            </div>
-        );
-    }
-
     /* ===================== STORE ===================== */
     const classStudents = useSelector(selectClassStudents);
     const pagination = useSelector(selectClassStudentPagination);

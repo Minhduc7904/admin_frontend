@@ -5,6 +5,22 @@ import { NotificationForm } from './NotificationForm';
 import { StudentSelectionList } from './StudentSelectionList';
 import { AdminSelectionList } from './AdminSelectionList';
 import { Dropdown } from '../../../shared/components/ui';
+import { IfAllowed } from '../../../shared/components/permissions/Can';
+
+const NotifyAllUsers = () => {
+    return (
+        <div className="bg-white border border-border rounded-sm p-6">
+            <div className="text-center text-foreground-light">
+                <p className="mb-2 text-lg font-semibold">Gửi đến tất cả người dùng</p>
+                <p className="text-sm">
+                    Thông báo sẽ được gửi đến tất cả người dùng trong hệ thống.
+                    <br />
+                    Không cần chọn đối tượng cụ thể.
+                </p>
+            </div>
+        </div>
+    );
+}
 
 export const BroadcastNotifications = ({
     title,
@@ -27,7 +43,13 @@ export const BroadcastNotifications = ({
     // Grade filter for students
     grade,
     onGradeChange,
+    // Permission props
+    hasGetAllAdminAccess,
+    hasGetAllStudentAccess,
+    hasNotifyAllAccess,
 }) => {
+
+    // Determine available recipient types based on permissions
     const gradeOptions = [
         { value: '', label: 'Tất cả khối' },
         { value: '1', label: 'Khối 1' },
@@ -59,6 +81,9 @@ export const BroadcastNotifications = ({
                 {/* Left */}
                 <div>
                     <NotificationForm
+                        canSendAll={hasNotifyAllAccess}
+                        canSendStudents={hasGetAllStudentAccess}
+                        canSendAdmins={hasGetAllAdminAccess}
                         onSubmit={onSubmit}
                         loading={loadingSend}
                         selectedStudents={
@@ -75,40 +100,35 @@ export const BroadcastNotifications = ({
                     {recipientType === 'STUDENT' && (
                         <>
                             {/* Grade Filter */}
-
-
-                            <StudentSelectionList
-                                students={students}
-                                selectedStudentIds={selectedStudentIds}
-                                onSelectionChange={onSelectionChange}
-                                loading={loadingStudents}
-                                grade={grade}
-                                onGradeChange={onGradeChange}
-                                gradeOptions={gradeOptions}
-                            />
+                            <IfAllowed allowed={hasGetAllStudentAccess}>
+                                <StudentSelectionList
+                                    students={students}
+                                    selectedStudentIds={selectedStudentIds}
+                                    onSelectionChange={onSelectionChange}
+                                    loading={loadingStudents}
+                                    grade={grade}
+                                    onGradeChange={onGradeChange}
+                                    gradeOptions={gradeOptions}
+                                />
+                            </IfAllowed>
                         </>
                     )}
 
                     {recipientType === 'ADMIN' && (
-                        <AdminSelectionList
-                            admins={admins}
-                            selectedAdminIds={selectedAdminIds}
-                            onSelectionChange={onAdminSelectionChange}
-                            loading={loadingAdmins}
-                        />
+                        <IfAllowed allowed={hasGetAllAdminAccess}>
+                            <AdminSelectionList
+                                admins={admins}
+                                selectedAdminIds={selectedAdminIds}
+                                onSelectionChange={onAdminSelectionChange}
+                                loading={loadingAdmins}
+                            />
+                        </IfAllowed>
                     )}
 
                     {recipientType === 'ALL' && (
-                        <div className="bg-white border border-border rounded-sm p-6">
-                            <div className="text-center text-foreground-light">
-                                <p className="mb-2 text-lg font-semibold">Gửi đến tất cả người dùng</p>
-                                <p className="text-sm">
-                                    Thông báo sẽ được gửi đến tất cả người dùng trong hệ thống.
-                                    <br />
-                                    Không cần chọn đối tượng cụ thể.
-                                </p>
-                            </div>
-                        </div>
+                        <IfAllowed allowed={hasNotifyAllAccess}>
+                            <NotifyAllUsers />
+                        </IfAllowed>
                     )}
                 </div>
             </div>

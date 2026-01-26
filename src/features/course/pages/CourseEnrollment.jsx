@@ -47,20 +47,11 @@ export const CourseEnrollment = () => {
     const { id } = useParams();
     const courseId = Number(id);
 
-    /* ===================== VALIDATE COURSE ID ===================== */
-    if (isNaN(courseId) || courseId <= 0) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID khóa học không hợp lệ. Check lại URL đi bro 🧯
-            </div>
-        );
-    }
-
     /* ===================== STORE ===================== */
     const enrollments = useSelector(selectEnrollments);
     const pagination = useSelector(selectEnrollmentPagination);
     const filters = useSelector(selectEnrollmentFilters);
-
+    
     const loadingGet = useSelector(selectEnrollmentLoadingGet);
     const loadingCreate = useSelector(selectEnrollmentLoadingCreate);
     const loadingUpdate = useSelector(selectEnrollmentLoadingUpdate);

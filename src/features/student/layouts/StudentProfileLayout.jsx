@@ -4,6 +4,7 @@ import {
     useLocation,
     useNavigate,
     useParams,
+    Navigate,
 } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
 import {
@@ -28,7 +29,7 @@ export const StudentProfileLayout = () => {
     const student = useAppSelector(selectCurrentStudent);
     const loading = useAppSelector(selectStudentLoadingGet);
 
-    const invalidId = Number.isNaN(studentId);
+    const invalidId = Number.isNaN(studentId) || studentId <= 0;
 
     // Fetch student data
     useEffect(() => {
@@ -88,11 +89,7 @@ export const StudentProfileLayout = () => {
 
     // Guard invalid route
     if (invalidId) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID học sinh không hợp lệ.
-            </div>
-        );
+        return <Navigate to={ROUTES.NOT_FOUND} replace />;
     }
 
     return (

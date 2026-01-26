@@ -16,6 +16,7 @@ import {
     selectMediaFolderLoadingCreate,
     selectMediaFolderLoadingUpdate,
     selectMediaFolderLoadingDelete,
+
 } from '../store/mediaFolderSlice';
 import {
     getMyMediaAsync,
@@ -31,6 +32,9 @@ import {
     selectMediaLoadingSoftDelete,
     setFilters as setMediaFilters,
     selectMediaFilters,
+    getMyViewUrlAsync,
+    getMyMediaDownloadUrlAsync,
+    selectMediaLoadingViewUrl,
 } from '../../media/store/mediaSlice';
 
 export const MediaFolderPage = () => {
@@ -51,6 +55,7 @@ export const MediaFolderPage = () => {
     const loadingUpload = useSelector(selectMediaLoadingUpload);
     const loadingUpdateMedia = useSelector(selectMediaLoadingUpdate);
     const loadingDelete = useSelector(selectMediaLoadingSoftDelete);
+    const loadingViewUrl = useSelector(selectMediaLoadingViewUrl);
 
     // Local state - Folders
     const [expandedNodes, setExpandedNodes] = useState(new Set());
@@ -542,6 +547,34 @@ export const MediaFolderPage = () => {
         return path.length > 0 ? path.join(' / ') : 'Tất cả Media';
     };
 
+    const loadViewUrl = async (media) => {
+        if (!media || !media.mediaId) return;
+        // console.log('Loading view URL for media:', media);
+        const response = await dispatch(getMyViewUrlAsync({ id: media.mediaId }));
+        // console.log('View URL response:', response.payload.data.viewUrl);
+        if (response.payload?.data?.viewUrl) {
+            return response.payload.data.viewUrl;
+        }
+        return null
+    };
+
+    const handleDownload = async (mediaId) => {
+        try {
+            const result = await dispatch(getMyMediaDownloadUrlAsync({ id: mediaId })).unwrap();
+            if (result?.data?.downloadUrl) {
+                // Create temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = result.data.downloadUrl;
+                link.download = result.data.filename || 'download';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            console.error('Error downloading media:', error);
+        }
+    };
+
     const folderPath = getFolderPath(selectedFolderId);
 
     return (
@@ -736,6 +769,9 @@ export const MediaFolderPage = () => {
                     onClose={handleCloseDetail}
                     onDelete={handleDelete}
                     loadingDelete={loadingDelete}
+                    handleDownload={handleDownload}
+                    loadViewUrl={loadViewUrl}
+                    loadingViewUrl={loadingViewUrl}
                 />
             </RightPanel>
 

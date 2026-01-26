@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { BroadcastNotifications } from '../components/BroadcastNotifications';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
-
+import { Navigate } from 'react-router-dom';
 import {
     getAllStudentsAsync,
     selectStudents,
@@ -20,9 +20,20 @@ import {
     sendNotificationAsync,
     selectLoadingSend,
 } from '../store/notificationSlice';
+import { useHasPermission } from '../../../shared/hooks';
+import { PERMISSIONS } from '../../../core/constants/permission/permission.codes';
+import { ROUTES } from '../../../core/constants';
 
 export const BroadcastNotificationsPage = () => {
     const dispatch = useAppDispatch();
+
+    const hasGetAllAdminAccess = useHasPermission(PERMISSIONS.ADMIN_GET_ALL);
+    const hasGetAllStudentAccess = useHasPermission(PERMISSIONS.STUDENT_GET_ALL);
+    const hasNotifyAllAccess = useHasPermission(PERMISSIONS.NOTIFY_ALL_USERS);
+
+    if (!hasGetAllAdminAccess && !hasGetAllStudentAccess && !hasNotifyAllAccess) {
+        return <Navigate to={ROUTES.FORBIDDEN} replace />;
+    }
 
     /* ===== STORE ===== */
     const students = useAppSelector(selectStudents);
@@ -47,39 +58,40 @@ export const BroadcastNotificationsPage = () => {
         return students.filter((student) => student.grade === parseInt(grade));
     }, [students, grade]);
 
-    /* ===== EFFECT: Load students when needed ===== */
     useEffect(() => {
-        if (recipientType === 'STUDENT' && !studentsLoadedRef.current) {
-            dispatch(
-                getAllStudentsAsync({
-                    page: 1,
-                    limit: 1000,
-                })
-            );
+        if (
+            recipientType === 'STUDENT' &&
+            hasGetAllStudentAccess &&
+            !studentsLoadedRef.current
+        ) {
+            dispatch(getAllStudentsAsync({ page: 1, limit: 1000 }));
             studentsLoadedRef.current = true;
         }
-    }, [recipientType, dispatch]);
+    }, [recipientType, hasGetAllStudentAccess, dispatch]);
 
-    /* ===== EFFECT: Load admins when needed ===== */
+
     useEffect(() => {
-        if (recipientType === 'ADMIN' && !adminsLoadedRef.current) {
-            dispatch(
-                getAllAdminsAsync({
-                    page: 1,
-                    limit: 1000,
-                })
-            );
+        if (
+            recipientType === 'ADMIN' &&
+            hasGetAllAdminAccess &&
+            !adminsLoadedRef.current
+        ) {
+            dispatch(getAllAdminsAsync({ page: 1, limit: 1000 }));
             adminsLoadedRef.current = true;
         }
-    }, [recipientType, dispatch]);
+    }, [recipientType, hasGetAllAdminAccess, dispatch]);
 
     /* ===== HANDLERS ===== */
     const handleRecipientTypeChange = (newType) => {
+        if (newType === 'ALL' && !hasNotifyAllAccess) return;
+        if (newType === 'STUDENT' && !hasGetAllStudentAccess) return;
+        if (newType === 'ADMIN' && !hasGetAllAdminAccess) return;
+
         setRecipientType(newType);
-        // Clear selections when switching type
         setSelectedStudentIds([]);
         setSelectedAdminIds([]);
     };
+
 
     const handleStudentSelectionChange = (ids) => {
         setSelectedStudentIds(ids);
@@ -96,30 +108,30 @@ export const BroadcastNotificationsPage = () => {
     };
 
     const handleSubmit = async (formData) => {
+        // 🔒 Permission guard
+        if (recipientType === 'ALL' && !hasNotifyAllAccess) return;
+        if (recipientType === 'STUDENT' && !hasGetAllStudentAccess) return;
+        if (recipientType === 'ADMIN' && !hasGetAllAdminAccess) return;
+
         let userIds = [];
 
         if (recipientType === 'ALL') {
-            // Send to all users - backend will handle
-            userIds = null; // or empty array, depend on backend implementation
-        } else if (recipientType === 'STUDENT') {
+            userIds = null;
+        }
+
+        if (recipientType === 'STUDENT') {
             if (selectedStudentIds.length === 0) return;
-            // Students: use userId from student object
-            console.log('selectedStudentIds', selectedStudentIds);
+
             userIds = selectedStudentIds
-                .map((studentId) => {
-                    const student = students.find((s) => s.studentId === studentId);
-                    return student?.userId;
-                })
+                .map((id) => students.find((s) => s.studentId === id)?.userId)
                 .filter(Boolean);
-        } else if (recipientType === 'ADMIN') {
+        }
+
+        if (recipientType === 'ADMIN') {
             if (selectedAdminIds.length === 0) return;
-            // Admins: use userId from admin object
-            console.log('selectedAdminIds', selectedAdminIds);
+
             userIds = selectedAdminIds
-                .map((adminId) => {
-                    const admin = admins.find((a) => a.adminId === adminId);
-                    return admin?.userId;
-                })
+                .map((id) => admins.find((a) => a.adminId === id)?.userId)
                 .filter(Boolean);
         }
 
@@ -130,7 +142,7 @@ export const BroadcastNotificationsPage = () => {
                 type: formData.type,
                 level: formData.level,
                 userIds,
-                all: recipientType === 'ALL' ? true : false,
+                all: recipientType === 'ALL',
                 data: {
                     entity: 'broadcast',
                     recipientType,
@@ -138,10 +150,10 @@ export const BroadcastNotificationsPage = () => {
             })
         ).unwrap();
 
-        // Clear selections after successful send
         setSelectedStudentIds([]);
         setSelectedAdminIds([]);
     };
+
 
     /* ===== RENDER UI ===== */
     return (
@@ -168,6 +180,10 @@ export const BroadcastNotificationsPage = () => {
             // Grade filter
             grade={grade}
             onGradeChange={handleGradeChange}
+            // Permission props
+            hasGetAllAdminAccess={hasGetAllAdminAccess}
+            hasGetAllStudentAccess={hasGetAllStudentAccess}
+            hasNotifyAllAccess={hasNotifyAllAccess}
         />
     );
 };

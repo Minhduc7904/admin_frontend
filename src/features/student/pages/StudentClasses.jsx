@@ -35,16 +35,6 @@ export const StudentClasses = () => {
     const dispatch = useDispatch();
     const { id } = useParams();
     const studentId = Number(id);
-
-    /* ===================== VALIDATE STUDENT ID ===================== */
-    if (isNaN(studentId) || studentId <= 0) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID học sinh không hợp lệ. Vui lòng kiểm tra lại URL.
-            </div>
-        );
-    }
-
     /* ===================== STORE ===================== */
     const classStudents = useSelector(selectClassStudents);
     const pagination = useSelector(selectClassStudentPagination);

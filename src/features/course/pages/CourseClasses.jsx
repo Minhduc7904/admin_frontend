@@ -14,7 +14,6 @@ import {
 } from '../../courseClass/store/courseClassSlice';
 import { ClassList } from '../../courseClass/pages/ClassList';
 import { useSearch } from '../../../shared/hooks';
-import { ROUTES } from '../../../core/constants';
 
 /**
  * CourseClasses - Container component cho danh sách lớp học của một khóa học
@@ -52,7 +51,7 @@ export const CourseClasses = () => {
 
     /* ===================== EFFECT ===================== */
     useEffect(() => {
-        if (!invalidId && !courseLoading && course) {
+        if (!invalidId && !courseLoading) {
             loadClasses();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -123,31 +122,6 @@ export const CourseClasses = () => {
     /* ===================== ADD CLASS ===================== */
     const openAdd = () => setOpenAddClass(true);
     const closeAdd = () => setOpenAddClass(false);
-
-    /* ===================== VALIDATION ===================== */
-    if (invalidId) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID khóa học không hợp lệ. Vui lòng kiểm tra lại đường dẫn.
-            </div>
-        );
-    }
-
-    if (courseLoading) {
-        return (
-            <div className="bg-white border border-border rounded-sm p-6 text-center text-foreground-light">
-                Đang tải thông tin khóa học...
-            </div>
-        );
-    }
-
-    if (!course) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                Không tìm thấy khóa học. Vui lòng kiểm tra lại.
-            </div>
-        );
-    }
 
     /* ===================== RENDER ===================== */
     return (

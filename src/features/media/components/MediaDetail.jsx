@@ -13,7 +13,7 @@ import {
     clearCurrentMedia,
 } from '../store/mediaSlice';
 
-export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete, loading, loadViewUrl, handleDownload }) => {
+export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete, loadingViewUrl, loadViewUrl, handleDownload }) => {
     const dispatch = useDispatch();
     const media = useSelector(selectCurrentMedia);
     const loading = useSelector(selectMediaLoadingGetById);
@@ -25,8 +25,6 @@ export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete, loading
             dispatch(clearCurrentMedia());
         };
     }, [dispatch]);
-
-    
 
     if (loading) {
         return (
@@ -45,11 +43,11 @@ export const MediaDetail = ({ mediaId, onClose, onDelete, loadingDelete, loading
             <div className="flex-1 overflow-y-auto p-6">
                 {/* Preview */}
                 <div className="flex justify-center items-center">
-                    <MediaPreview 
-                    media={media}
-                    onDownload={handleDownload} 
-                    loadViewUrl={loadViewUrl}
-                    loading={loading}
+                    <MediaPreview
+                        media={media}
+                        onDownload={handleDownload}
+                        loadViewUrl={loadViewUrl}
+                        loading={loadingViewUrl}
                     />
                 </div>
 

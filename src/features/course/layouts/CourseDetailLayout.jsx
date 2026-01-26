@@ -6,6 +6,7 @@ import {
     useNavigate,
     useParams,
     useSearchParams,
+    Navigate,
 } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -35,7 +36,7 @@ export const CourseDetailLayout = () => {
     // Check if coming from "My Courses"
     const isMyCourses = searchParams.get('from') === 'my-courses';
 
-    const invalidId = Number.isNaN(courseId);
+    const invalidId = Number.isNaN(courseId) || courseId <= 0;
 
     // 🔑 FETCH COURSE (ONCE per courseId)
     useEffect(() => {
@@ -43,13 +44,6 @@ export const CourseDetailLayout = () => {
             dispatch(getCourseByIdAsync(courseId));
         }
     }, [dispatch, courseId, invalidId, course?.courseId]);
-
-    // 🧹 Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            dispatch(clearCurrentCourse());
-        };
-    }, [dispatch]);
 
     // 3. Tabs config (route-driven)
     const tabs = useMemo(
@@ -102,18 +96,18 @@ export const CourseDetailLayout = () => {
 
     // 4. Guard invalid route
     if (invalidId) {
-        return (
-            <div className="bg-white border border-error rounded-sm p-6 text-error">
-                ID khóa học không hợp lệ.
-            </div>
-        );
+        return <Navigate to={ROUTES.NOT_FOUND} replace />;
     }
+
+    // if (!loading && !course) {
+    //     return <Navigate to={ROUTES.NOT_FOUND} replace />;
+    // }
 
     // 5. Render
     return (
         <div className="space-y-6">
-            <CourseDetailBreadcrumb 
-                courseTitle={course?.title} 
+            <CourseDetailBreadcrumb
+                courseTitle={course?.title}
                 isMyCourses={isMyCourses}
             />
             <CourseProfileOverview course={course} loading={loading} />
