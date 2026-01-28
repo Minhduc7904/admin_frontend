@@ -1,0 +1,30 @@
+export const GRADE = {
+    1: '1',
+    2: '2',
+    3: '3',
+    4: '4',
+    5: '5',
+    6: '6',
+    7: '7',
+    8: '8',
+    9: '9',
+    10: '10',
+    11: '11',
+    12: '12',
+}
+
+export const GRADE_OPTIONS = [
+    { value: '', label: 'Chọn khối' },
+    { value: GRADE[1], label: 'Khối 1' },
+    { value: GRADE[2], label: 'Khối 2' },
+    { value: GRADE[3], label: 'Khối 3' },
+    { value: GRADE[4], label: 'Khối 4' },
+    { value: GRADE[5], label: 'Khối 5' },
+    { value: GRADE[6], label: 'Khối 6' },
+    { value: GRADE[7], label: 'Khối 7' },
+    { value: GRADE[8], label: 'Khối 8' },
+    { value: GRADE[9], label: 'Khối 9' },
+    { value: GRADE[10], label: 'Khối 10' },
+    { value: GRADE[11], label: 'Khối 11' },
+    { value: GRADE[12], label: 'Khối 12' },
+]

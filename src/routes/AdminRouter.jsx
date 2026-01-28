@@ -9,7 +9,16 @@ import { AdminDetail } from '../features/admin/pages/AdminDetail';
 import { AdminRole } from '../features/admin/pages/AdminRole';
 import { AdminMedia } from '../features/admin/pages/AdminMedia';
 import { ChapterPage } from '../features/chapter/pages';
-import { CourseList, MyCourseListPage, CourseDetail, CourseClasses, CourseEnrollment, CourseStudentsAttendance, CourseLessons } from '../features/course/pages';
+import {
+    CourseList,
+    MyCourseListPage,
+    CourseDetail,
+    CourseClasses,
+    CourseEnrollment,
+    CourseStudentsAttendance,
+    CourseLessons,
+    CoursePricing
+} from '../features/course/pages';
 import { CourseDetailLayout } from '../features/course/layouts';
 import {
     ClassListPage,
@@ -206,6 +215,10 @@ export const adminRouter = [
                             {
                                 index: true,
                                 element: <CourseDetail />
+                            },
+                            {
+                                path: 'pricing',
+                                element: <CoursePricing />
                             },
                             {
                                 path: 'classes',

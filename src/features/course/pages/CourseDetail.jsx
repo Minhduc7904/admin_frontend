@@ -6,9 +6,9 @@ import {
     selectCurrentCourse,
     selectCourseLoadingGet,
 } from '../store/courseSlice';
-import { CourseInfoTab } from '../components/CourseInfoTab';
+import { CourseInfoTab } from '../components/info/CourseInfoTab';
 import { RightPanel } from '../../../shared/components';
-import { EditCourse } from '../components/EditCourse';
+import { EditCourse } from '../components/info/EditCourse';
 
 // 2. Component
 export const CourseDetail = () => {

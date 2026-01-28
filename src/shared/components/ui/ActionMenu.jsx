@@ -12,7 +12,7 @@ const ActionMenuItem = ({ icon, label, onClick, disabled, variant = 'default' })
         <button
             onClick={onClick}
             disabled={disabled}
-            className={`w-full px-4 py-2 text-sm flex items-center gap-2 text-left transition-colors
+            className={`w-full bg-primary px-4 py-2 text-sm flex items-center gap-2 text-left transition-colors
         ${variantClasses[variant]}
         disabled:opacity-50 disabled:cursor-not-allowed`}
         >

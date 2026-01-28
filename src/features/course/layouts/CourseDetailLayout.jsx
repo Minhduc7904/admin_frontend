@@ -46,53 +46,59 @@ export const CourseDetailLayout = () => {
     }, [dispatch, courseId, invalidId, course?.courseId]);
 
     // 3. Tabs config (route-driven)
-    const tabs = useMemo(
-        () => {
-            const queryString = isMyCourses ? '?from=my-courses' : '';
-            return [
-                {
-                    label: 'Thông tin',
-                    isActive:
-                        location.pathname === ROUTES.COURSE_DETAIL(courseId),
-                    onActivate: () =>
-                        navigate(ROUTES.COURSE_DETAIL(courseId) + queryString),
-                },
-                {
-                    label: 'Lớp học',
-                    isActive: location.pathname.startsWith(
-                        ROUTES.COURSE_CLASSES(courseId)
-                    ),
-                    onActivate: () =>
-                        navigate(ROUTES.COURSE_CLASSES(courseId) + queryString),
-                },
-                {
-                    label: 'Học sinh',
-                    isActive: location.pathname.startsWith(
-                        ROUTES.COURSE_STUDENTS(courseId)
-                    ),
-                    onActivate: () =>
-                        navigate(ROUTES.COURSE_STUDENTS(courseId) + queryString),
-                },
-                {
-                    label: 'Điểm danh',
-                    isActive: location.pathname.startsWith(
-                        ROUTES.COURSE_ATTENDANCE(courseId)
-                    ),
-                    onActivate: () =>
-                        navigate(ROUTES.COURSE_ATTENDANCE(courseId) + queryString),
-                },
-                {
-                    label: 'Bài học',
-                    isActive: location.pathname.startsWith(
-                        ROUTES.COURSE_LESSONS(courseId)
-                    ),
-                    onActivate: () =>
-                        navigate(ROUTES.COURSE_LESSONS(courseId) + queryString),
-                }
-            ];
-        },
-        [courseId, location.pathname, navigate, isMyCourses]
-    );
+    const tabs = useMemo(() => {
+        const queryString = isMyCourses ? '?from=my-courses' : '';
+
+        return [
+            {
+                label: 'Thông tin',
+                isActive:
+                    location.pathname === ROUTES.COURSE_DETAIL(courseId),
+                onActivate: () =>
+                    navigate(ROUTES.COURSE_DETAIL(courseId) + queryString),
+            },
+            {
+                label: 'Học phí',
+                isActive: location.pathname.startsWith(
+                    ROUTES.COURSE_PRICING(courseId)
+                ),
+                onActivate: () =>
+                    navigate(ROUTES.COURSE_PRICING(courseId) + queryString),
+            },
+            {
+                label: 'Lớp học',
+                isActive: location.pathname.startsWith(
+                    ROUTES.COURSE_CLASSES(courseId)
+                ),
+                onActivate: () =>
+                    navigate(ROUTES.COURSE_CLASSES(courseId) + queryString),
+            },
+            {
+                label: 'Học sinh',
+                isActive: location.pathname.startsWith(
+                    ROUTES.COURSE_STUDENTS(courseId)
+                ),
+                onActivate: () =>
+                    navigate(ROUTES.COURSE_STUDENTS(courseId) + queryString),
+            },
+            {
+                label: 'Điểm danh',
+                isActive: location.pathname.startsWith(
+                    ROUTES.COURSE_ATTENDANCE(courseId)
+                ),
+                onActivate: () =>
+                    navigate(ROUTES.COURSE_ATTENDANCE(courseId) + queryString),
+            },
+            {
+                label: 'Bài học',
+                isActive: location.pathname.startsWith(
+                    ROUTES.COURSE_LESSONS(courseId)
+                ),
+                onActivate: () =>
+                    navigate(ROUTES.COURSE_LESSONS(courseId) + queryString),
+            },
+        ];
+    }, [courseId, location.pathname, navigate, isMyCourses]);
 
     // 4. Guard invalid route
     if (invalidId) {

@@ -4,12 +4,17 @@ import { useState } from "react";
 import { Input, Button, Dropdown, Textarea } from "../../../shared/components";
 import { AdminSearchSelect } from "../../admin/components/AdminSearchSelect";
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
+import { COURSE_VISIBILITIES } from "../constanst/course-visibility.constants";
+import { GRADE_OPTIONS } from "../../../core/constants/grade-constants";
+import { ACADEMIC_YEARS_OPTIONS } from "../../../core/constants/academic-year-constants";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../core/constants";
 
 export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher = true, loadCourses }) => {
     const dispatch = useDispatch();
     const loadingCreate = useSelector(selectCourseLoadingCreate);
     const [errors, setErrors] = useState({});
-
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: '',
         subtitle: '',
@@ -19,9 +24,8 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
         description: '',
         priceVND: '0',
         compareAtVND: '',
-        visibility: 'DRAFT',
+        visibility: COURSE_VISIBILITIES.DRAFT,
         teacherId: defaultTeacherId || '',
-        isUpdatable: true,
     });
 
     const [selectedAdmin, setSelectedAdmin] = useState(null);
@@ -96,51 +100,26 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
             compareAtVND: formData.compareAtVND ? parseFloat(formData.compareAtVND) : undefined,
             visibility: formData.visibility,
             teacherId: formData.teacherId ? parseInt(formData.teacherId) : undefined,
-            isUpdatable: formData.isUpdatable,
         };
 
         try {
-            await dispatch(createCourseAsync(data)).unwrap();
-            await loadCourses();
+            const response = await dispatch(createCourseAsync(data)).unwrap();
+            console.log(response)
+            if (response?.data?.courseId) {
+                let from = defaultTeacherId ? '?from=my-courses' : '';
+                // Navigate to the newly created course detail page
+                const newCourseId = response.data.courseId;
+                navigate(ROUTES.COURSE_DETAIL(newCourseId) + from);
+            } else {
+                // If courseId is not returned, just reload the courses list
+                loadCourses?.();
+            }
+
             onClose();
         } catch (error) {
             console.error('Error creating course:', error);
         }
     };
-
-    const gradeOptions = [
-        { value: '', label: 'Chọn khối' },
-        { value: '1', label: 'Khối 1' },
-        { value: '2', label: 'Khối 2' },
-        { value: '3', label: 'Khối 3' },
-        { value: '4', label: 'Khối 4' },
-        { value: '5', label: 'Khối 5' },
-        { value: '6', label: 'Khối 6' },
-        { value: '7', label: 'Khối 7' },
-        { value: '8', label: 'Khối 8' },
-        { value: '9', label: 'Khối 9' },
-        { value: '10', label: 'Khối 10' },
-        { value: '11', label: 'Khối 11' },
-        { value: '12', label: 'Khối 12' },
-    ];
-
-    const visibilityOptions = [
-        { value: 'DRAFT', label: 'Bản nháp' },
-        { value: 'PUBLISHED', label: 'Đã xuất bản' },
-        { value: 'PRIVATE', label: 'Riêng tư' },
-    ];
-
-    // Generate academic year options
-    const currentYear = new Date().getFullYear();
-    const academicYearOptions = [
-        { value: '', label: 'Chọn năm học' },
-        ...Array.from({ length: 5 }, (_, i) => {
-            const startYear = currentYear - 2 + i;
-            const endYear = startYear + 1;
-            const value = `${startYear}-${endYear}`;
-            return { value, label: `${value}` };
-        })
-    ];
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
@@ -177,7 +156,7 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
                             label="Khối lớp"
                             value={formData.grade}
                             onChange={(value) => setFormData(prev => ({ ...prev, grade: value }))}
-                            options={gradeOptions}
+                            options={GRADE_OPTIONS}
                             error={errors.grade}
                         />
                     </div>
@@ -186,7 +165,7 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
                             label="Năm học"
                             value={formData.academicYear}
                             onChange={(value) => setFormData(prev => ({ ...prev, academicYear: value }))}
-                            options={academicYearOptions}
+                            options={ACADEMIC_YEARS_OPTIONS}
                             error={errors.academicYear}
                         />
                     </div>
@@ -232,18 +211,6 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
                             min="0"
                         />
                     </div>
-                </div>
-
-                {/* Visibility */}
-                <div>
-                    <Dropdown
-                        label="Trạng thái"
-                        required={true}
-                        value={formData.visibility}
-                        onChange={(value) => setFormData(prev => ({ ...prev, visibility: value }))}
-                        options={visibilityOptions}
-                        error={errors.visibility}
-                    />
                 </div>
 
                 {/* Subject and Teacher Selection */}

@@ -18,8 +18,12 @@ export const courseApi = {
         return axiosClient.post(API_ENDPOINTS.COURSES.CREATE, data);
     },
 
-    update: (id, data) => {
-        return axiosClient.put(API_ENDPOINTS.COURSES.UPDATE(id), data);
+    updateBasicInfo: (id, data) => {
+        return axiosClient.put(API_ENDPOINTS.COURSES.UPDATE_BASIC_INFO(id), data);
+    },
+
+    updatePricing: (id, data) => {
+        return axiosClient.put(API_ENDPOINTS.COURSES.UPDATE_PRICING(id), data);
     },
 
     delete: (id) => {
