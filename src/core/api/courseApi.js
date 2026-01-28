@@ -6,6 +6,10 @@ export const courseApi = {
         return axiosClient.get(API_ENDPOINTS.COURSES.LIST, { params });
     },
 
+    search: (params) => {
+        return axiosClient.get(API_ENDPOINTS.COURSES.SEARCH, { params });
+    },
+
     getMyCourses: (params) => {
         return axiosClient.get(API_ENDPOINTS.COURSES.MY_COURSES, { params });
     },

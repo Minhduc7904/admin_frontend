@@ -1,6 +1,6 @@
 import { Button, Dropdown } from '../../../shared/components/ui';
 import { CourseSearchSelect } from '../../course/components';
-import { ENROLMENT_STATUS_OPTIONS } from '../../../core/constants';
+import { COURSE_ENROLLMENT_STATUS_OPTIONS } from '../../courseEnrollment/constants/course-enrollment.constant';
 /* ===================== STATUS OPTIONS ===================== */
 
 
@@ -47,7 +47,7 @@ export const StudentCoursesForm = ({
                                 target: { name: 'status', value },
                             })
                         }
-                        options={ENROLMENT_STATUS_OPTIONS}
+                        options={COURSE_ENROLLMENT_STATUS_OPTIONS}
                         placeholder="Chọn trạng thái..."
                     />
                     <p className="text-xs text-foreground-light mt-1">

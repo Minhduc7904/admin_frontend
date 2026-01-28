@@ -1,10 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { studentApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
+import { IS_ACTIVE } from "../../../core/constants/is-active.constants";
 
 const initialState = {
     students: [],
     currentStudent: null,
+    stats: null,
+    statsByGrade: null,
+    showStats: false,
     pagination: {
         page: 1,
         limit: 10,
@@ -13,17 +17,53 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    addStudentFormData: {
+        userName: '',
+        fullName: '',
+        email: '',
+        phoneNumber: '',
+        password: '',
+        confirmPassword: '',
+        grade: '',
+        school: '',
+        studentPhone: '',
+        parentPhone: '',
+    },
+    coursesSelection: [],
+    courseClassesSelection: [],
+    classSessionsSelection: [],
     loadingGet: false,
+    loadingStats: false,
+    loadingStatsByGrade: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
+    loadingExport: false,
     error: null,
     filters: {
         search: "",
         sortBy: "createdAt",
         sortOrder: "desc",
         grade: "",
-        isActive: undefined,
+        isActive: IS_ACTIVE.ACTIVE,
+    },
+    exportOptions: {
+        includeSchool: true,
+        includeGender: true,
+        includeDateOfBirth: true,
+        includeUsername:  true,
+        includeParentPhone: true,
+        includeStudentPhone: true,
+        includeGrade: true,
+        includeEmail: true,
+        includeIsActive: true,
+        includeCreatedAt: true,
+        includeClasses: true,
+
+        grade: '',
+        isActive: IS_ACTIVE.ACTIVE,
+        fromDate: '',
+        toDate: '',
     },
 };
 
@@ -34,6 +74,26 @@ export const getAllStudentsAsync = createAsyncThunk(
         return handleAsyncThunk(() => studentApi.getAll(params), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tải danh sách học sinh",
+        });
+    }
+);
+
+export const getStudentStatsByStatusAsync = createAsyncThunk(
+    "student/statsByStatus",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => studentApi.statsByStatus(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải thống kê trạng thái học sinh",
+        });
+    }
+);
+
+export const getStudentStatsByGradeAsync = createAsyncThunk(
+    "student/statsByGrade",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => studentApi.statsByGrade(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải thống kê khối học sinh",
         });
     }
 );
@@ -78,6 +138,42 @@ export const updateStudentAsync = createAsyncThunk(
     }
 );
 
+export const exportStudentListAsync = createAsyncThunk(
+    "student/exportList",
+    async (options = {}, thunkAPI) => {
+        return handleAsyncThunk(async () => {
+            const response = await studentApi.exportList(options);
+
+            const blob = response.data || response;
+
+            // Extract filename from content-disposition header
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'students_export.xlsx';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = decodeURIComponent(filenameMatch[1].replace(/['"]/g, ''));
+                }
+            }
+
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            return { success: true };
+        }, thunkAPI, {
+            successTitle: "Xuất danh sách học sinh thành công",
+            errorTitle: "Lỗi xuất danh sách học sinh",
+        });
+    }
+);
+
 export const studentSlice = createSlice({
     name: "student",
     initialState,
@@ -100,11 +196,30 @@ export const studentSlice = createSlice({
         setPage: (state, action) => {
             state.pagination.page = action.payload;
         },
+        setAddStudentFormData: (state, action) => {
+            state.addStudentFormData = { ...state.addStudentFormData, ...action.payload };
+        },
+        setCoursesSelection: (state, action) => {
+            state.coursesSelection = action.payload;
+        },
+        setCourseClassesSelection: (state, action) => {
+            state.courseClassesSelection = action.payload;
+        },
+        setClassSessionsSelection: (state, action) => {
+            state.classSessionsSelection = action.payload;
+        },
+        setShowStats: (state, action) => {
+            state.showStats = action.payload;
+        },
+        setStudentExportExcelOptions: (state, action) => {
+            state.exportOptions = { ...state.exportOptions, ...action.payload };
+        }
     },
     extraReducers: (builder) => {
         builder
             // Get all students
             .addCase(getAllStudentsAsync.pending, (state) => {
+                state.students = [];
                 state.loadingGet = true;
                 state.error = null;
             })
@@ -114,7 +229,38 @@ export const studentSlice = createSlice({
                 state.pagination = action.payload.meta;
             })
             .addCase(getAllStudentsAsync.rejected, (state, action) => {
+                state.students = [];
                 state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Get student stats by status
+            .addCase(getStudentStatsByStatusAsync.pending, (state) => {
+                state.stats = null;
+                state.loadingStats = true;
+                state.error = null;
+            })
+            .addCase(getStudentStatsByStatusAsync.fulfilled, (state, action) => {
+                state.loadingStats = false;
+                state.stats = action.payload.data;
+            })
+            .addCase(getStudentStatsByStatusAsync.rejected, (state, action) => {
+                state.stats = null;
+                state.loadingStats = false;
+                state.error = action.payload;
+            })
+            // Get student stats by grade
+            .addCase(getStudentStatsByGradeAsync.pending, (state) => {
+                state.statsByGrade = null;
+                state.loadingStatsByGrade = true;
+                state.error = null;
+            })
+            .addCase(getStudentStatsByGradeAsync.fulfilled, (state, action) => {
+                state.loadingStatsByGrade = false;
+                state.statsByGrade = action.payload.data;
+            })
+            .addCase(getStudentStatsByGradeAsync.rejected, (state, action) => {
+                state.statsByGrade = null;
+                state.loadingStatsByGrade = false;
                 state.error = action.payload;
             })
             // Get student by ID
@@ -166,6 +312,18 @@ export const studentSlice = createSlice({
             .addCase(updateStudentAsync.rejected, (state, action) => {
                 state.loadingUpdate = false;
                 state.error = action.payload;
+            })
+            // Export student list
+            .addCase(exportStudentListAsync.pending, (state) => {
+                state.error = null;
+                state.loadingExport = true;
+            })
+            .addCase(exportStudentListAsync.fulfilled, (state, action) => {
+                state.loadingExport = false;
+            })
+            .addCase(exportStudentListAsync.rejected, (state, action) => {
+                state.loadingExport = false;
+                state.error = action.payload;
             });
     },
 });
@@ -177,6 +335,12 @@ export const {
     clearCurrentStudent,
     clearError,
     setPage,
+    setAddStudentFormData,
+    setCoursesSelection,
+    setCourseClassesSelection,
+    setClassSessionsSelection,
+    setShowStats,
+    setStudentExportExcelOptions,
 } = studentSlice.actions;
 
 // Selectors
@@ -189,5 +353,16 @@ export const selectStudentLoadingDelete = (state) => state.student.loadingDelete
 export const selectStudentError = (state) => state.student.error;
 export const selectStudentFilters = (state) => state.student.filters;
 export const selectCurrentStudent = (state) => state.student.currentStudent;
+export const selectAddStudentFormData = (state) => state.student.addStudentFormData;
+export const selectCoursesSelection = (state) => state.student.coursesSelection;
+export const selectCourseClassesSelection = (state) => state.student.courseClassesSelection;
+export const selectClassSessionsSelection = (state) => state.student.classSessionsSelection;
+export const selectStudentStats = (state) => state.student.stats;
+export const selectStudentLoadingStats = (state) => state.student.loadingStats;
+export const selectStudentStatsByGrade = (state) => state.student.statsByGrade;
+export const selectStudentLoadingStatsByGrade = (state) => state.student.loadingStatsByGrade;
+export const selectShowStats = (state) => state.student.showStats;
+export const selectStudentLoadingExport = (state) => state.student.loadingExport;
+export const selectStudentExportExcelOptions = (state) => state.student.exportOptions;
 
 export default studentSlice.reducer;

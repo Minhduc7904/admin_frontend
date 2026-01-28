@@ -10,6 +10,7 @@ export { SearchInput } from './SearchInput';
 export { Dropdown } from './Dropdown';
 export { Select } from './Select';
 export { SearchableSelect } from './SearchableSelect';
+export { SearchableMultiSelect } from './SearchableMultiSelect';
 export { Pagination } from './Pagination';
 export { DateTimePicker } from './DateTimePicker';
 export { StatsCard, StatsGrid } from './StatsCard';

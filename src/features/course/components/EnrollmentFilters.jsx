@@ -1,9 +1,9 @@
 import { SearchInput, Dropdown } from '../../../shared/components/ui';
-import { ENROLMENT_STATUS_OPTIONS } from '../../../core/constants';
+import { COURSE_ENROLLMENT_STATUS_OPTIONS } from '../../courseEnrollment/constants/course-enrollment.constant';
 /* ===================== STATUS OPTIONS ===================== */
 const STATUS_OPTIONS = [
     { value: '', label: 'Tất cả trạng thái' },
-    ...ENROLMENT_STATUS_OPTIONS,
+    ...COURSE_ENROLLMENT_STATUS_OPTIONS,
 ];
 
 export const EnrollmentFilters = ({

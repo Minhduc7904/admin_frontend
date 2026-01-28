@@ -12,3 +12,4 @@ export { EnrollmentForm } from './EnrollmentForm';
 export { EnrollmentDeleteModal } from './EnrollmentDeleteModal';
 export { CourseStudentsAttendanceFilters } from './CourseStudentsAttendanceFilters';
 export { CourseStudentsAttendanceTable } from './CourseStudentsAttendanceTable';
+export { CourseSearchMultiSelect } from './CourseSearchMultiSelect';

@@ -136,43 +136,26 @@ export const EmptyTable = ({
     actionLabel,
     onAction,
     icon = 'database',
-    columns = 4,
+    columns = 1,
 }) => {
     return (
-        <div className="border border-border rounded-sm bg-white">
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-border">
-                            {Array.from({ length: columns }).map((_, index) => (
-                                <th
-                                    key={index}
-                                    className="px-4 py-2 text-xs font-semibold text-foreground-light uppercase tracking-wider text-left"
-                                >
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colSpan={columns} className="px-4">
-                                <EmptyState
-                                    icon={icon}
-                                    title={title}
-                                    description={description}
-                                    actionLabel={actionLabel}
-                                    onAction={onAction}
-                                    size="md"
-                                />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <tr>
+            <td colSpan={columns} className="px-4 py-10">
+                <div className="w-full flex justify-center">
+                    <EmptyState
+                        icon={icon}
+                        title={title}
+                        description={description}
+                        actionLabel={actionLabel}
+                        onAction={onAction}
+                        size="md"
+                    />
+                </div>
+            </td>
+        </tr>
     );
 };
+
 
 /**
  * EmptyList - Empty state for lists

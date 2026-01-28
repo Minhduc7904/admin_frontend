@@ -12,7 +12,7 @@ export const Button = ({
   
   const variants = {
     primary: 'bg-foreground text-white hover:bg-gray-800',
-    outline: 'border border-border text-foreground hover:bg-gray-50',
+    outline: 'bg-primary border border-border text-foreground hover:bg-gray-50',
     danger: 'bg-red-600 text-white hover:bg-red-700',
     ghost: 'text-foreground hover:bg-gray-100',
   };

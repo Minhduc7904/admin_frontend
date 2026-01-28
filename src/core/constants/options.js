@@ -10,13 +10,6 @@ export const SESSION_STATUS_OPTIONS = [
     { value: 'today', label: 'Hôm nay' },
     { value: 'upcoming', label: 'Sắp tới' },
 ];
-
-export const ENROLMENT_STATUS_OPTIONS = [
-    { value: 'ACTIVE', label: 'Đang học' },
-    { value: 'COMPLETED', label: 'Hoàn thành' },
-    { value: 'CANCELLED', label: 'Hủy' },
-];
-
 export const MEDIA_TYPE_OPTIONS = [
     { value: 'IMAGE', label: 'Hình ảnh' },
     { value: 'VIDEO', label: 'Video' },
@@ -44,8 +37,13 @@ export const SORT_ORDER_OPTIONS = [
 ];
 
 export const TIME_RANGE_OPTIONS = [
+    { value: 'today', label: 'Hôm nay' },
+    { value: 'yesterday', label: 'Hôm qua' },
+    { value: 'dayBeforeYesterday', label: 'Hôm kia' },
+
     { value: 'thisWeek', label: 'Tuần này' },
     { value: 'lastWeek', label: 'Tuần trước' },
+
     { value: 'thisMonth', label: 'Tháng này' },
     { value: 'lastMonth', label: 'Tháng trước' },
 ];

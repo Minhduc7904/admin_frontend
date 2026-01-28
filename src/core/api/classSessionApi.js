@@ -6,6 +6,10 @@ export const classSessionApi = {
         return axiosClient.get(API_ENDPOINTS.CLASS_SESSIONS.LIST, { params });
     },
 
+    search: (params) => {
+        return axiosClient.get(API_ENDPOINTS.CLASS_SESSIONS.SEARCH, { params });
+    },
+
     getById: (id) => {
         return axiosClient.get(API_ENDPOINTS.CLASS_SESSIONS.DETAIL(id));
     },

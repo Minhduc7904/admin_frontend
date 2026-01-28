@@ -6,7 +6,7 @@ import { AdminSearchSelect } from "../../admin/components/AdminSearchSelect";
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
 import { COURSE_VISIBILITIES } from "../constanst/course-visibility.constants";
 import { GRADE_OPTIONS } from "../../../core/constants/grade-constants";
-import { ACADEMIC_YEARS_OPTIONS } from "../../../core/constants/academic-year-constants";
+import { ACADEMIC_YEARS_OPTIONS } from "../../../core/constants/academic-year.constants";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../core/constants";
 

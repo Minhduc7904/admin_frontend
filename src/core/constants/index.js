@@ -99,10 +99,13 @@ export const API_ENDPOINTS = {
   },
   STUDENTS: {
     LIST: "/students",
+    STATS_BY_STATUS: "/students/stats/status",
+    STATS_BY_GRADE: "/students/stats/grade",
     DETAIL: (id) => `/students/${id}`,
     CREATE: "/students",
     UPDATE: (id) => `/students/${id}`,
     DELETE: (id) => `/students/${id}`,
+    EXPORT_LIST: "/students/export/excel",
   },
   SUBJECTS: {
     LIST: "/subjects",
@@ -187,6 +190,7 @@ export const API_ENDPOINTS = {
   },
   COURSES: {
     LIST: "/courses",
+    SEARCH: "/courses/search",
     MY_COURSES: "/courses/admin/my",
     DETAIL: (id) => `/courses/${id}`,
     CREATE: "/courses",
@@ -198,6 +202,7 @@ export const API_ENDPOINTS = {
   },
   COURSE_CLASSES: {
     LIST: "/course-classes",
+    SEARCH: "/course-classes/search",
     MY_CLASSES: "/course-classes/admin/my",
     DETAIL: (id) => `/course-classes/${id}`,
     CREATE: "/course-classes",
@@ -213,6 +218,7 @@ export const API_ENDPOINTS = {
   },
   CLASS_SESSIONS: {
     LIST: "/class-sessions",
+    SEARCH: "/class-sessions/search",
     DETAIL: (id) => `/class-sessions/${id}`,
     CREATE: "/class-sessions",
     UPDATE: (id) => `/class-sessions/${id}`,

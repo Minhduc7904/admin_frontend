@@ -57,6 +57,16 @@ export const getAllCourseClassesAsync = createAsyncThunk(
     }
 );
 
+export const searchCourseClassesAsync = createAsyncThunk(
+    "courseClass/search",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => courseClassApi.search(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm lớp học",
+        });
+    }
+);
+
 export const getMyCourseClassesAsync = createAsyncThunk(
     "courseClass/getMyClasses",
     async (params, thunkAPI) => {

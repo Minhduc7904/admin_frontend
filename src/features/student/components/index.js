@@ -1,6 +1,6 @@
 export { StudentFilters } from './StudentFilters';
 export { StudentTable } from './StudentTable';
-export { AddStudent } from './AddStudent';
+export { AddStudent } from './addStudent/AddStudent';
 export { StudentDetailBreadcrumb } from './StudentDetailBreadcrumb';
 export { StudentProfileOverview } from './StudentProfileOverview';
 export { StudentInfoTab } from './StudentInfoTab';
@@ -11,3 +11,4 @@ export { StudentClassesTable } from './StudentClassesTable';
 export { StudentClassesForm } from './StudentClassesForm';
 export { StudentAttendanceFilters } from './StudentAttendanceFilters';
 export { StudentAttendanceTable } from './StudentAttendanceTable';
+export { ExportStudentListModal } from './ExportStudentListModal';

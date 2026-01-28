@@ -107,35 +107,25 @@ export const SkeletonCard = ({ count = 1, className = '' }) => {
 /**
  * Skeleton Table - Loading skeleton cho table
  */
-export const SkeletonTable = ({ rows = 5, columns = 4 }) => {
-  return (
-    <div className="bg-primary border border-border rounded-sm overflow-hidden">
-      {/* Header */}
-      <div className="bg-gray-50 border-b border-border p-3 flex gap-3">
-        {Array.from({ length: columns }).map((_, index) => (
-          <div
-            key={index}
-            className="h-4 bg-gray-200 rounded-sm animate-pulse flex-1"
-          />
-        ))}
-      </div>
-      {/* Rows */}
-      {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div
-          key={rowIndex}
-          className="border-b border-border p-3 flex gap-3"
-        >
-          {Array.from({ length: columns }).map((_, colIndex) => (
-            <div
-              key={colIndex}
-              className="h-4 bg-gray-200 rounded-sm animate-pulse flex-1"
-            />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
+export const SkeletonTable = ({
+    rows = 5,
+    columns = 4,
+}) => {
+    return (
+        <>
+            {Array.from({ length: rows }).map((_, rowIndex) => (
+                <tr key={rowIndex} className="animate-pulse">
+                    {Array.from({ length: columns }).map((_, colIndex) => (
+                        <td key={colIndex} className="px-4 py-2">
+                            <div className="h-4 w-full bg-gray-200 rounded-sm" />
+                        </td>
+                    ))}
+                </tr>
+            ))}
+        </>
+    );
 };
+
 
 /**
  * Skeleton Avatar - Loading skeleton cho avatar/image

@@ -18,6 +18,14 @@ export const studentApi = {
         return axiosClient.get(API_ENDPOINTS.STUDENTS.LIST, { params });
     },
 
+    statsByStatus: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.STUDENTS.STATS_BY_STATUS, { params });
+    },
+
+    statsByGrade: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.STUDENTS.STATS_BY_GRADE, { params });
+    },
+
     /**
      * Get student by ID
      * @param {number} id - Student ID
@@ -70,5 +78,17 @@ export const studentApi = {
      */
     updateMyProfile: (data) => {
         return axiosClient.put("/students/me", data);
-    }
+    },
+
+    /**
+     * Export student list
+     * @param {Object} options - Export options
+     * @returns {Promise<Blob>} Exported file blob
+     */
+    exportList: (options = {}) => {
+        return axiosClient.get(API_ENDPOINTS.STUDENTS.EXPORT_LIST, {
+            params: options,
+            responseType: 'blob', // Important for file download
+        });
+    },
 };

@@ -155,7 +155,7 @@ export const deleteCourseAsync = createAsyncThunk(
 export const searchCoursesAsync = createAsyncThunk(
   "course/search",
   async (params, thunkAPI) => {
-    return handleAsyncThunk(() => courseApi.getAll(params), thunkAPI, {
+    return handleAsyncThunk(() => courseApi.search(params), thunkAPI, {
       showSuccess: false,
       errorTitle: "Lỗi tìm kiếm khóa học",
     });

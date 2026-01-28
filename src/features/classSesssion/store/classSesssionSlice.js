@@ -40,6 +40,16 @@ export const getAllClassSessionsAsync = createAsyncThunk(
     }
 );
 
+export const searchClassSessionsAsync = createAsyncThunk(
+    "classSession/search",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => classSessionApi.search(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm buổi học",
+        });
+    }
+);
+
 export const getClassSessionByIdAsync = createAsyncThunk(
     "classSession/getById",
     async (id, thunkAPI) => {
