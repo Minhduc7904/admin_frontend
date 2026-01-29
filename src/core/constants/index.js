@@ -67,6 +67,7 @@ export const ROUTES = {
   CLASS_NOTIFICATIONS: (id = ':id') => `/classes/${id}/notifications`,
   BROADCAST_NOTIFICATIONS: '/notifications/broadcast',
   NOTIFICATION_LOGS: '/notifications/logs',
+  TUITION_PAYMENTS: '/tuition-payments',
 };
 
 // API Endpoints
@@ -299,6 +300,18 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/notifications/${id}`,
     BY_USER: (userId) => `/notifications/user/${userId}`,
     SEND: "/notifications/send",
+  },
+  TUITION_PAYMENT: {
+    LIST: "/tuition-payments",
+    DETAIL: (id) => `/tuition-payments/${id}`,
+    CREATE: "/tuition-payments",
+    CREATE_BULK: "/tuition-payments/bulk",
+    UPDATE: (id) => `/tuition-payments/${id}`,
+    DELETE: (id) => `/tuition-payments/${id}`,
+    STATS_BY_MONEY: "/tuition-payments/stats/money",
+    STATS_BY_STATUS: "/tuition-payments/stats/status",
+    EXPORT_EXCEL_EXAMPLE: "/tuition-payments/export/excel/example",
+    IMPORT_EXCEL_PREVIEW: "/tuition-payments/import/excel/preview",
   },
 };
 

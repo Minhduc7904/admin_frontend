@@ -39,6 +39,7 @@ import { ROUTES } from '../core/constants';
 import { Outlet } from 'react-router-dom';
 import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
+import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
 import { ProtectedRoute } from '../shared/components';
 import { PERMISSIONS } from '../core/constants/permission/permission.codes';
 
@@ -201,6 +202,15 @@ export const adminRouter = [
                     {
                         path: ROUTES.BROADCAST_NOTIFICATIONS,
                         element: <BroadcastNotificationsPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.TUITION_PAYMENT_VIEW_TUITION_PAYMENT_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.TUITION_PAYMENTS,
+                        element: <TuitionPaymentList />,
                     },
                 ],
             },

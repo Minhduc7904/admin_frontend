@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Bell,
   Send,
+  CreditCard,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -66,6 +67,18 @@ export const AdminSidebar = () => {
           href: ROUTES.STUDENTS,
           icon: Users,
           permission: PERMISSIONS.STUDENT_VIEW_STUDENT_MANAGEMENT,
+        },
+      ],
+    },
+    {
+      label: 'Tài chính',
+      items: [
+        {
+          key: 'tuitionPayments',
+          name: 'Quản lý học phí',
+          href: ROUTES.TUITION_PAYMENTS,
+          icon: CreditCard,
+          permission: PERMISSIONS.TUITION_PAYMENT_VIEW_MANAGEMENT,
         },
       ],
     },

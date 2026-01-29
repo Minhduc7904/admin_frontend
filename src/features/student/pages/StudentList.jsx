@@ -89,15 +89,11 @@ export const StudentList = () => {
         if (showStats) {
             loadStats()
         }
-    }, [currentPage,
-        itemsPerPage,
-        debouncedSearch,
+    }, [
         selectedGrade,
         selectedIsActive,
         fromDate,
         toDate,
-        sort.field,
-        sort.direction,
         showStats
     ])
 
@@ -122,14 +118,9 @@ export const StudentList = () => {
 
     const loadStats = () => {
         const params = {
-            page: currentPage,
-            limit: itemsPerPage,
-            search: debouncedSearch || undefined,
             grade: selectedGrade || undefined,
             fromDate: fromDate || undefined,
             toDate: toDate || undefined,
-            sortBy: sort.field,
-            sortOrder: sort.direction,
         }
 
         if (selectedIsActive === 'true') params.isActive = true
