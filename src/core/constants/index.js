@@ -68,6 +68,8 @@ export const ROUTES = {
   BROADCAST_NOTIFICATIONS: '/notifications/broadcast',
   NOTIFICATION_LOGS: '/notifications/logs',
   TUITION_PAYMENTS: '/tuition-payments',
+  EXAM_IMPORT_SESSIONS: '/exam-import-sessions',
+  EXAM_IMPORT_SESSION_DETAIL: (id = ':id') => `/exam-import-sessions/${id}`,
 };
 
 // API Endpoints
@@ -316,6 +318,11 @@ export const API_ENDPOINTS = {
     EXPORT_EXCEL_EXAMPLE: "/tuition-payments/export/excel/example",
     IMPORT_EXCEL_PREVIEW: "/tuition-payments/import/excel/preview",
     EXPORT_LIST: "/tuition-payments/export/excel",
+  },
+  EXAM_IMPORT_SESSION: {
+    LIST: "/exam-import-sessions",
+    DETAIL: (sessionId) => `/exam-import-sessions/${sessionId}`,
+    CREATE: "/exam-import-sessions",
   },
 };
 

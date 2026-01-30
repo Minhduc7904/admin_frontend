@@ -40,6 +40,7 @@ import { Outlet } from 'react-router-dom';
 import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
+import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { ProtectedRoute } from '../shared/components';
 import { PERMISSIONS } from '../core/constants/permission/permission.codes';
 
@@ -211,6 +212,15 @@ export const adminRouter = [
                     {
                         path: ROUTES.TUITION_PAYMENTS,
                         element: <TuitionPaymentList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute />,
+                children: [
+                    {
+                        path: ROUTES.EXAM_IMPORT_SESSIONS,
+                        element: <ExamImportSessionList />,
                     },
                 ],
             },

@@ -12,6 +12,7 @@ import {
   Bell,
   Send,
   CreditCard,
+  FileQuestion,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -154,6 +155,19 @@ export const AdminSidebar = () => {
           href: ROUTES.MY_CLASSES,
           icon: School,
           permission: PERMISSIONS.COURSE_CLASS_VIEW_MY_CLASSES_MANAGEMENT,
+        },
+      ],
+    },
+
+    {
+      label: 'Đề thi và câu hỏi',
+      items: [
+        {
+          key: 'examImportSessions',
+          name: 'Quản lý phiên import',
+          href: ROUTES.EXAM_IMPORT_SESSIONS,
+          icon: FileQuestion,
+          // permission: PERMISSIONS.EXAM_IMPORT_SESSION_VIEW_MANAGEMENT,
         },
       ],
     },

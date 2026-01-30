@@ -23,6 +23,8 @@ import learningItemReducer from "../../features/learningItem/store/learningItemS
 import lessonReducer from "../../features/lesson/store/lessonSlice";
 import lessonLearningItemReducer from "../../features/lessonLearningitem/store/lessonLearningItemSlice";
 import tuitionPaymentReducer from "../../features/tuitionPayment/store/tuitionPaymentSlice";
+import examImportSessionReducer from "../../features/examImportSession/store/examImportSessionSlice";
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -49,5 +51,6 @@ export const store = configureStore({
     lesson: lessonReducer,
     lessonLearningItem: lessonLearningItemReducer,
     tuitionPayment: tuitionPaymentReducer,
+    examImportSession: examImportSessionReducer,
   },
 });
