@@ -12,3 +12,4 @@ export { StudentClassesForm } from './StudentClassesForm';
 export { StudentAttendanceFilters } from './StudentAttendanceFilters';
 export { StudentAttendanceTable } from './StudentAttendanceTable';
 export { ExportStudentListModal } from './ExportStudentListModal';
+export { StudentSearchSelect } from './StudentSearchSelect';

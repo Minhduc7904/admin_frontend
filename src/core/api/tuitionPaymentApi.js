@@ -15,6 +15,12 @@ export const tuitionPaymentApi = {
     });
   },
 
+  getStatsByMonthly(params = {}) {
+    return axiosClient.get(API_ENDPOINTS.TUITION_PAYMENT.STATS_MONTHLY, {
+      params,
+    });
+  },
+
   getAll(params = {}) {
     return axiosClient.get(API_ENDPOINTS.TUITION_PAYMENT.LIST, { params });
   },
@@ -44,8 +50,16 @@ export const tuitionPaymentApi = {
     return axiosClient.post(API_ENDPOINTS.TUITION_PAYMENT.CREATE_BULK, data);
   },
 
+  createBulkArray(data) {
+    return axiosClient.post(API_ENDPOINTS.TUITION_PAYMENT.CREATE_BULK_ARRAY, data);
+  },
+
   update(id, data) {
     return axiosClient.put(API_ENDPOINTS.TUITION_PAYMENT.UPDATE(id), data);
+  },
+
+  updateBulkArray(data) {
+    return axiosClient.put(API_ENDPOINTS.TUITION_PAYMENT.UPDATE_BULK_ARRAY, data);
   },
 
   delete(id) {
@@ -62,6 +76,13 @@ export const tuitionPaymentApi = {
   importExcelPreview(formData) {
     return axiosClient.post(API_ENDPOINTS.TUITION_PAYMENT.IMPORT_EXCEL_PREVIEW, formData, {
       headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  exportList(options = {}) {
+    return axiosClient.get(API_ENDPOINTS.TUITION_PAYMENT.EXPORT_LIST, {
+      params: options,
+      responseType: 'blob',
     });
   },
 };

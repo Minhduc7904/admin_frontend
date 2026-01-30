@@ -3,17 +3,23 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Plus, Download } from 'lucide-react'
 
 import { Button, RightPanel } from '../../../shared/components'
-import { Pagination } from '../../../shared/components/ui/Pagination'
+import { Pagination, Modal } from '../../../shared/components/ui'
 import { useSearch } from '../../../shared/hooks'
 
 import {
     getTuitionPaymentsAsync,
     getTuitionPaymentStatsByMoneyAsync,
     getTuitionPaymentStatsByStatusAsync,
+    getTuitionPaymentStatsByMonthlyAsync,
+    deleteTuitionPaymentAsync,
+    updateTuitionPaymentAsync,
+    exportTuitionPaymentListAsync,
     setFilters,
+    updatePaymentInList,
     selectTuitionPayments,
     selectTuitionPaymentPagination,
     selectTuitionPaymentLoadingGet,
+    selectTuitionPaymentLoadingExportList,
     selectTuitionPaymentStatsByMoney,
     selectTuitionPaymentStatsByStatus,
     selectTuitionPaymentFilters,
@@ -22,9 +28,12 @@ import {
 import {
     TuitionPaymentFilters,
     TuitionPaymentTable,
-    // TuitionPaymentStats,
+    TuitionPaymentStats,
     AddTuitionPayment,
     ExportExcelModal,
+    ExportTuitionPaymentListModal,
+    TuitionPaymentDetail,
+    EditTuitionPayment,
 } from '../components'
 
 export const TuitionPaymentList = () => {
@@ -33,6 +42,7 @@ export const TuitionPaymentList = () => {
     /* ===================== REDUX ===================== */
     const payments = useSelector(selectTuitionPayments)
     const loadingGet = useSelector(selectTuitionPaymentLoadingGet)
+    const loadingExportList = useSelector(selectTuitionPaymentLoadingExportList)
     const pagination = useSelector(selectTuitionPaymentPagination)
     const statsMoney = useSelector(selectTuitionPaymentStatsByMoney)
     const statsStatus = useSelector(selectTuitionPaymentStatsByStatus)
@@ -46,8 +56,8 @@ export const TuitionPaymentList = () => {
     const [itemsPerPage, setItemsPerPage] = useState(pagination.limit || 10)
 
     const [status, setStatus] = useState(filters.status || '')
-    const [month, setMonth] = useState(filters.month || '')
-    const [year, setYear] = useState(filters.year || '')
+    const [month, setMonth] = useState(filters.month || new Date().getMonth() + 1)
+    const [year, setYear] = useState(filters.year || new Date().getFullYear())
 
     const [sort, setSort] = useState({
         field: filters.sortBy || 'createdAt',
@@ -57,6 +67,11 @@ export const TuitionPaymentList = () => {
     const [showStats, setShowStats] = useState(true)
     const [openAddPanel, setOpenAddPanel] = useState(false)
     const [openExcelModal, setOpenExcelModal] = useState(false)
+    const [openExportListModal, setOpenExportListModal] = useState(false)
+    const [openDetailPanel, setOpenDetailPanel] = useState(false)
+    const [openEditPanel, setOpenEditPanel] = useState(false)
+    const [openDeleteModal, setOpenDeleteModal] = useState(false)
+    const [selectedPayment, setSelectedPayment] = useState(null)
 
     /* ===================== EFFECT ===================== */
     useEffect(() => {
@@ -112,6 +127,15 @@ export const TuitionPaymentList = () => {
                 year: year || undefined,
             }),
         )
+
+        // Chỉ gọi monthly stats khi có year
+        if (year) {
+            dispatch(
+                getTuitionPaymentStatsByMonthlyAsync({
+                    year: Number(year),
+                }),
+            )
+        }
     }
 
     /* ===================== HELPERS ===================== */
@@ -154,6 +178,71 @@ export const TuitionPaymentList = () => {
         setCurrentPage(1)
     }
 
+    /* ===================== VIEW / EDIT / DELETE ===================== */
+    const handleView = (payment) => {
+        setSelectedPayment(payment)
+        setOpenDetailPanel(true)
+    }
+
+    const handleEdit = (payment) => {
+        setSelectedPayment(payment)
+        setOpenEditPanel(true)
+    }
+
+    const handleDelete = (payment) => {
+        setSelectedPayment(payment)
+        setOpenDeleteModal(true)
+    }
+
+    const handleConfirmDelete = async () => {
+        if (!selectedPayment) return
+
+        try {
+            await dispatch(deleteTuitionPaymentAsync(selectedPayment.paymentId)).unwrap()
+            setOpenDeleteModal(false)
+            setSelectedPayment(null)
+            loadPayments()
+        } catch (error) {
+            console.error('Error deleting payment:', error)
+        }
+    }
+
+    /* ===================== QUICK TOGGLE STATUS ===================== */
+    const handleQuickToggleStatus = async (payment) => {
+        const newStatus = payment.status === 'PAID' ? 'UNPAID' : 'PAID'
+        
+        try {
+            const result = await dispatch(
+                updateTuitionPaymentAsync({
+                    id: payment.paymentId,
+                    data: {
+                        status: newStatus,
+                    },
+                })
+            ).unwrap()
+
+            // Cập nhật payment trong list thay vì load lại
+            dispatch(updatePaymentInList(result.data))
+            
+            // Reload stats to update counts
+            if (showStats) {
+                loadStats()
+            }
+        } catch (error) {
+            console.error('Error toggling payment status:', error)
+        }
+    }
+
+    /* ===================== EXPORT LIST ===================== */
+    const handleExportList = async (exportOptions) => {
+        try {
+            await dispatch(exportTuitionPaymentListAsync(exportOptions)).unwrap()
+            setOpenExportListModal(false)
+        } catch (error) {
+            console.error('Error exporting payment list:', error)
+        }
+    }
+
     /* ===================== RENDER ===================== */
     return (
         <>
@@ -170,7 +259,10 @@ export const TuitionPaymentList = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Button variant="outline">
+                        <Button 
+                            variant="outline"
+                            onClick={() => setOpenExportListModal(true)}
+                        >
                             <Download size={16} />
                             Xuất Excel
                         </Button>
@@ -207,10 +299,7 @@ export const TuitionPaymentList = () => {
                 {/* ===================== STATS ===================== */}
                 {showStats && (
                     <div className="mt-4 animate-fade-in">
-                        {/* <TuitionPaymentStats
-                            money={statsMoney}
-                            status={statsStatus}
-                        /> */}
+                        <TuitionPaymentStats loadStats={loadStats} />
                     </div>
                 )}
             </div>
@@ -222,10 +311,47 @@ export const TuitionPaymentList = () => {
                     loading={loadingGet}
                     sort={sort}
                     onSortChange={handleSortChange}
+                    onView={handleView}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onQuickToggle={handleQuickToggleStatus}
                 />
 
                 {/* ===================== PAGINATION + PANEL ===================== */}
                 <div className="p-4 border-t border-border">
+                    <RightPanel
+                        isOpen={openDetailPanel}
+                        onClose={() => {
+                            setOpenDetailPanel(false)
+                            setSelectedPayment(null)
+                        }}
+                        title="Chi tiết học phí"
+                    >
+                        {selectedPayment && (
+                            <TuitionPaymentDetail payment={selectedPayment} />
+                        )}
+                    </RightPanel>
+
+                    <RightPanel
+                        isOpen={openEditPanel}
+                        onClose={() => {
+                            setOpenEditPanel(false)
+                            setSelectedPayment(null)
+                        }}
+                        title="Chỉnh sửa học phí"
+                    >
+                        {selectedPayment && (
+                            <EditTuitionPayment
+                                payment={selectedPayment}
+                                onClose={() => {
+                                    setOpenEditPanel(false)
+                                    setSelectedPayment(null)
+                                }}
+                                onSuccess={loadPayments}
+                            />
+                        )}
+                    </RightPanel>
+
                     <RightPanel
                         isOpen={openAddPanel}
                         onClose={() => setOpenAddPanel(false)}
@@ -253,6 +379,54 @@ export const TuitionPaymentList = () => {
                 isOpen={openExcelModal}
                 onClose={() => setOpenExcelModal(false)}
             />
+
+            {/* Export List Modal */}
+            <ExportTuitionPaymentListModal
+                isOpen={openExportListModal}
+                onClose={() => setOpenExportListModal(false)}
+                onConfirm={handleExportList}
+                loading={loadingExportList}
+            />
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                isOpen={openDeleteModal}
+                onClose={() => setOpenDeleteModal(false)}
+                title="Xác nhận xóa"
+            >
+                <div className="p-6">
+                    <p className="text-foreground mb-4">
+                        Bạn có chắc chắn muốn xóa học phí #{selectedPayment?.paymentId} không?
+                    </p>
+                    {selectedPayment && (
+                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                            <p className="text-sm text-foreground-light">
+                                Học sinh: <span className="font-medium text-foreground">{selectedPayment.student?.fullName}</span>
+                            </p>
+                            <p className="text-sm text-foreground-light">
+                                Kỳ học phí: <span className="font-medium text-foreground">Tháng {selectedPayment.month}/{selectedPayment.year}</span>
+                            </p>
+                            <p className="text-sm text-foreground-light">
+                                Số tiền: <span className="font-medium text-foreground">{selectedPayment.amount?.toLocaleString('vi-VN')} ₫</span>
+                            </p>
+                        </div>
+                    )}
+                    <div className="flex gap-3 justify-end">
+                        <Button
+                            variant="outline"
+                            onClick={() => setOpenDeleteModal(false)}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={handleConfirmDelete}
+                        >
+                            Xóa
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </>
     )
 }

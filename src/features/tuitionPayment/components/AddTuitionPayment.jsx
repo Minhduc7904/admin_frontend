@@ -7,6 +7,7 @@ import {
     selectTuitionPaymentLoadingCreate,
 } from '../store/tuitionPaymentSlice'
 import { TuitionPaymentStatus, STATUS_OPTIONS } from '../constants/tuition-payment.constant'
+import { StudentSearchSelect } from '../../student/components'
 
 const MONTH_OPTIONS = Array.from({ length: 12 }).map((_, i) => ({
     value: i + 1,
@@ -82,13 +83,20 @@ export const AddTuitionPayment = ({ onClose, onSuccess }) => {
         <div className="flex flex-col h-full">
             {/* ===== Content ===== */}
             <div className="flex-1 px-6 py-4 overflow-y-auto space-y-6">
-                <Input
-                    label="ID học sinh"
-                    name="studentId"
+                <StudentSearchSelect
+                    label="Học viên"
+                    placeholder="Tìm theo tên, email..."
                     value={formData.studentId}
-                    onChange={handleChange}
+                    onSelect={(student) => {
+                        setFormData((prev) => ({
+                            ...prev,
+                            studentId: student?.studentId || null,
+                        }))
+
+                        // clear error khi đã chọn
+                        setErrors((prev) => ({ ...prev, studentId: undefined }))
+                    }}
                     error={errors.studentId}
-                    placeholder="VD: 123"
                     required
                 />
 

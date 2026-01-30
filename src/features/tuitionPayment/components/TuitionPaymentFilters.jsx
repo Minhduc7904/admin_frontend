@@ -41,7 +41,7 @@ export const TuitionPaymentFilters = ({
 }) => {
     return (
         <div className="mb-4 bg-white border border-border rounded-sm p-4 space-y-4">
-            {/* ===== Row 1: Search ===== */}
+            {/* ===== Row 1: Search + Filters ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 <div className="lg:col-span-6">
                     <SearchInput
@@ -51,7 +51,7 @@ export const TuitionPaymentFilters = ({
                     />
                 </div>
 
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-2">
                     <Dropdown
                         value={status}
                         onChange={onStatusChange}
@@ -60,7 +60,7 @@ export const TuitionPaymentFilters = ({
                     />
                 </div>
 
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-2">
                     <Dropdown
                         value={month}
                         onChange={onMonthChange}
@@ -68,19 +68,18 @@ export const TuitionPaymentFilters = ({
                         placeholder="Tháng"
                     />
                 </div>
+
+                <div className="lg:col-span-2">
+                    <Dropdown
+                        value={year}
+                        onChange={onYearChange}
+                        options={YEAR_OPTIONS}
+                        placeholder="Năm"
+                    />
+                </div>
             </div>
 
-            {/* ===== Row 2: Year ===== */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Dropdown
-                    value={year}
-                    onChange={onYearChange}
-                    options={YEAR_OPTIONS}
-                    placeholder="Năm"
-                />
-            </div>
-
-            {/* ===== Row 3: Toggle Stats ===== */}
+            {/* ===== Row 2: Toggle Stats ===== */}
             <div className="flex items-center justify-center pt-2 border-t border-border">
                 <button
                     type="button"

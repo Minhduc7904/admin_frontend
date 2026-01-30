@@ -17,6 +17,16 @@ const initialState = {
     paid: 0,
     unpaid: 0,
   },
+  statsByMonthly: {
+    year: new Date().getFullYear(),
+    months: [],
+    totalPaidAmount: 0,
+    totalUnpaidAmount: 0,
+    totalAmount: 0,
+    totalPaidCount: 0,
+    totalUnpaidCount: 0,
+    totalCount: 0,
+  },
 
   pagination: {
     page: 1,
@@ -29,20 +39,24 @@ const initialState = {
 
   loadingGet: false,
   loadingExport: false,
+  loadingExportList: false,
   loadingImport: false,
   loadingGetStatsMoney: false,
   loadingGetStatsStatus: false,
+  loadingGetStatsMonthly: false,
   loadingCreate: false,
   loadingUpdate: false,
   loadingDelete: false,
+  loadingCreateBulkArray: false,
+  loadingUpdateBulkArray: false,
 
   error: null,
 
   filters: {
     studentId: "",
     courseId: "",
-    month: "",
-    year: "",
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
     status: "",
     sortBy: "createdAt",
     sortOrder: "desc",
@@ -53,19 +67,28 @@ const initialState = {
     year: "",
   },
 
-  importPreview: {
-    summary: {
-      totalRows: 0,
-      validRows: 0,
-      invalidRows: 0,
-      exitingPayments: 0,
-      newPayments: 0,
-    },
+  exportOptions: {
+    includeStudentName: true,
+    includeStudentPhone: true,
+    includeParentPhone: true,
+    includeSchool: true,
+    includeGrade: true,
+    includeAmount: true,
+    includeMonth: true,
+    includeYear: true,
+    includeStatus: true,
+    includePaidAt: true,
+    includeNotes: false,
+    includeCreatedAt: true,
 
-    existingPayments: [],
-    newPayments: [],
-    invalidRows: [],
+    studentId: "",
+    courseId: "",
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    status: "",
   },
+
+  importPreview: null,
 };
 
 /* =========================
@@ -118,6 +141,20 @@ export const getTuitionPaymentStatsByStatusAsync = createAsyncThunk(
       {
         showSuccess: false,
         errorTitle: "Lỗi thống kê học phí theo trạng thái",
+      }
+    );
+  }
+);
+
+export const getTuitionPaymentStatsByMonthlyAsync = createAsyncThunk(
+  "tuitionPayment/statsByMonthly",
+  async (params, thunkAPI) => {
+    return handleAsyncThunk(
+      () => tuitionPaymentApi.getStatsByMonthly(params),
+      thunkAPI,
+      {
+        showSuccess: false,
+        errorTitle: "Lỗi thống kê học phí theo tháng",
       }
     );
   }
@@ -220,6 +257,79 @@ export const importTuitionPaymentExcelPreviewAsync = createAsyncThunk(
   }
 );
 
+// ===== CREATE BULK ARRAY =====
+export const createBulkArrayTuitionPaymentAsync = createAsyncThunk(
+  "tuitionPayment/createBulkArray",
+  async (data, thunkAPI) => {
+    return handleAsyncThunk(
+      () => tuitionPaymentApi.createBulkArray(data),
+      thunkAPI,
+      {
+        showSuccess: true,
+        successTitle: "Tạo hàng loạt học phí thành công",
+        errorTitle: "Lỗi tạo hàng loạt học phí",
+      }
+    );
+  }
+);
+
+// ===== UPDATE BULK ARRAY =====
+export const updateBulkArrayTuitionPaymentAsync = createAsyncThunk(
+  "tuitionPayment/updateBulkArray",
+  async (data, thunkAPI) => {
+    return handleAsyncThunk(
+      () => tuitionPaymentApi.updateBulkArray(data),
+      thunkAPI,
+      {
+        showSuccess: true,
+        successTitle: "Cập nhật hàng loạt học phí thành công",
+        errorTitle: "Lỗi cập nhật hàng loạt học phí",
+      }
+    );
+  }
+);
+
+export const exportTuitionPaymentListAsync = createAsyncThunk(
+  "tuitionPayment/exportList",
+  async (options, thunkAPI) => {
+    return handleAsyncThunk(
+      async () => {
+        const response = await tuitionPaymentApi.exportList(options);
+        
+        const blob = response.data || response;
+
+        // Extract filename from content-disposition header
+        const contentDisposition = response.headers['content-disposition'];
+        let filename = 'tuition_payments_export.xlsx';
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (filenameMatch && filenameMatch[1]) {
+            filename = decodeURIComponent(filenameMatch[1].replace(/['"]/g, ''));
+          }
+        }
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        return { success: true };
+      },
+      thunkAPI,
+      {
+        showSuccess: true,
+        successTitle: "Xuất danh sách học phí thành công",
+        errorTitle: "Lỗi xuất danh sách học phí",
+      }
+    );
+  }
+);
+
 /* =========================
    Slice
 ========================= */
@@ -245,6 +355,19 @@ export const tuitionPaymentSlice = createSlice({
     setExportExample: (state, action) => {
       state.exportExample = { ...state.exportExample, ...action.payload };
     },
+    setTuitionPaymentExportExcelOptions: (state, action) => {
+      state.exportOptions = { ...state.exportOptions, ...action.payload };
+    },
+    setImportPreview: (state, action) => {
+      state.importPreview = action.payload;
+    },
+    updatePaymentInList: (state, action) => {
+      const updatedPayment = action.payload;
+      const index = state.payments.findIndex(p => p.paymentId === updatedPayment.paymentId);
+      if (index !== -1) {
+        state.payments[index] = updatedPayment;
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -309,6 +432,25 @@ export const tuitionPaymentSlice = createSlice({
         getTuitionPaymentStatsByStatusAsync.rejected,
         (state, action) => {
           state.loadingGetStatsStatus = false;
+          state.error = action.payload;
+        }
+      )
+
+      // ===== STATS BY MONTHLY =====
+      .addCase(getTuitionPaymentStatsByMonthlyAsync.pending, (state) => {
+        state.loadingGetStatsMonthly = true;
+      })
+      .addCase(
+        getTuitionPaymentStatsByMonthlyAsync.fulfilled,
+        (state, action) => {
+          state.loadingGetStatsMonthly = false;
+          state.statsByMonthly = action.payload.data;
+        }
+      )
+      .addCase(
+        getTuitionPaymentStatsByMonthlyAsync.rejected,
+        (state, action) => {
+          state.loadingGetStatsMonthly = false;
           state.error = action.payload;
         }
       )
@@ -379,7 +521,43 @@ export const tuitionPaymentSlice = createSlice({
           state.loadingImport = false;
           state.error = action.payload;
         }
-      );
+      )
+
+      // ===== CREATE BULK ARRAY =====
+      .addCase(createBulkArrayTuitionPaymentAsync.pending, (state) => {
+        state.loadingCreateBulkArray = true;
+      })
+      .addCase(createBulkArrayTuitionPaymentAsync.fulfilled, (state) => {
+        state.loadingCreateBulkArray = false;
+      })
+      .addCase(createBulkArrayTuitionPaymentAsync.rejected, (state, action) => {
+        state.loadingCreateBulkArray = false;
+        state.error = action.payload;
+      })
+
+      // ===== UPDATE BULK ARRAY =====
+      .addCase(updateBulkArrayTuitionPaymentAsync.pending, (state) => {
+        state.loadingUpdateBulkArray = true;
+      })
+      .addCase(updateBulkArrayTuitionPaymentAsync.fulfilled, (state) => {
+        state.loadingUpdateBulkArray = false;
+      })
+      .addCase(updateBulkArrayTuitionPaymentAsync.rejected, (state, action) => {
+        state.loadingUpdateBulkArray = false;
+        state.error = action.payload;
+      })
+
+      // ===== EXPORT LIST =====
+      .addCase(exportTuitionPaymentListAsync.pending, (state) => {
+        state.loadingExportList = true;
+      })
+      .addCase(exportTuitionPaymentListAsync.fulfilled, (state) => {
+        state.loadingExportList = false;
+      })
+      .addCase(exportTuitionPaymentListAsync.rejected, (state, action) => {
+        state.loadingExportList = false;
+        state.error = action.payload;
+      });
   },
 });
 
@@ -393,6 +571,9 @@ export const {
   setPagination,
   resetPagination,
   setExportExample,
+  setTuitionPaymentExportExcelOptions,
+  setImportPreview,
+  updatePaymentInList,
 } = tuitionPaymentSlice.actions;
 
 export const selectTuitionPayments = (state) => state.tuitionPayment.payments;
@@ -403,6 +584,8 @@ export const selectTuitionPaymentStatsByMoney = (state) =>
   state.tuitionPayment.statsByMoney;
 export const selectTuitionPaymentStatsByStatus = (state) =>
   state.tuitionPayment.statsByStatus;
+export const selectTuitionPaymentStatsByMonthly = (state) =>
+  state.tuitionPayment.statsByMonthly;
 
 export const selectTuitionPaymentPagination = (state) =>
   state.tuitionPayment.pagination;
@@ -410,6 +593,8 @@ export const selectTuitionPaymentFilters = (state) =>
   state.tuitionPayment.filters;
 export const selectExportExample = (state) =>
   state.tuitionPayment.exportExample;
+export const selectTuitionPaymentExportExcelOptions = (state) =>
+  state.tuitionPayment.exportOptions;
 export const selectImportPreview = (state) =>
   state.tuitionPayment.importPreview;
 
@@ -421,14 +606,22 @@ export const selectTuitionPaymentLoadingStatsMoney = (state) =>
   state.tuitionPayment.loadingGetStatsMoney;
 export const selectTuitionPaymentLoadingStatsStatus = (state) =>
   state.tuitionPayment.loadingGetStatsStatus;
+export const selectTuitionPaymentLoadingStatsMonthly = (state) =>
+  state.tuitionPayment.loadingGetStatsMonthly;
 export const selectTuitionPaymentLoadingUpdate = (state) =>
   state.tuitionPayment.loadingUpdate;
 export const selectTuitionPaymentLoadingDelete = (state) =>
   state.tuitionPayment.loadingDelete;
 export const selectTuitionPaymentLoadingExport = (state) =>
   state.tuitionPayment.loadingExport;
+export const selectTuitionPaymentLoadingExportList = (state) =>
+  state.tuitionPayment.loadingExportList;
 export const selectTuitionPaymentLoadingImport = (state) =>
   state.tuitionPayment.loadingImport;
+export const selectTuitionPaymentLoadingCreateBulkArray = (state) =>
+  state.tuitionPayment.loadingCreateBulkArray;
+export const selectTuitionPaymentLoadingUpdateBulkArray = (state) =>
+  state.tuitionPayment.loadingUpdateBulkArray;
 export const selectTuitionPaymentError = (state) => state.tuitionPayment.error;
 
 export default tuitionPaymentSlice.reducer;

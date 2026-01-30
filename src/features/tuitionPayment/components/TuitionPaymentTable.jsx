@@ -1,5 +1,5 @@
-import { Eye } from 'lucide-react'
-import { Table } from '../../../shared/components/ui'
+import { Eye, Edit, Trash2 } from 'lucide-react'
+import { Table, Checkbox } from '../../../shared/components/ui'
 import { TuitionPaymentStatus } from '../constants/tuition-payment.constant'
 
 /* ===================== CONFIG ===================== */
@@ -27,6 +27,9 @@ export const TuitionPaymentTable = ({
     sort,
     onSortChange,
     onView,
+    onEdit,
+    onDelete,
+    onQuickToggle,
 }) => {
     const columns = [
         {
@@ -52,6 +55,33 @@ export const TuitionPaymentTable = ({
                         #{payment.studentId}
                     </span>
                 </div>
+            ),
+        },
+        {
+            key: 'studentPhone',
+            label: 'SĐT học sinh',
+            render: (payment) => (
+                <span className="text-sm text-foreground-light">
+                    {payment.student?.studentPhone || '—'}
+                </span>
+            ),
+        },
+        {
+            key: 'parentPhone',
+            label: 'SĐT phụ huynh',
+            render: (payment) => (
+                <span className="text-sm text-foreground-light">
+                    {payment.student?.parentPhone || '—'}
+                </span>
+            ),
+        },
+        {
+            key: 'school',
+            label: 'Trường',
+            render: (payment) => (
+                <span className="text-sm text-foreground-light">
+                    {payment.student?.school?.schoolName || '—'}
+                </span>
             ),
         },
         {
@@ -83,16 +113,23 @@ export const TuitionPaymentTable = ({
             render: (payment) => {
                 const cfg = STATUS_CONFIG[payment.status]
                 return (
-                    <span
-                        className={`
-                            inline-flex items-center
-                            px-2.5 py-0.5 rounded-full
-                            text-xs font-medium
-                            ${cfg?.className || 'bg-gray-100 text-gray-700'}
-                        `}
-                    >
-                        {cfg?.label || 'Không xác định'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <Checkbox
+                            checked={payment.status === 'PAID'}
+                            onChange={(checked) => onQuickToggle?.(payment)}
+                            label=""
+                        />
+                        <span
+                            className={`
+                                inline-flex items-center
+                                px-2.5 py-0.5 rounded-full
+                                text-xs font-medium
+                                ${cfg?.className || 'bg-gray-100 text-gray-700'}
+                            `}
+                        >
+                            {cfg?.label || 'Không xác định'}
+                        </span>
+                    </div>
                 )
             },
         },
@@ -136,6 +173,26 @@ export const TuitionPaymentTable = ({
                         title="Xem chi tiết"
                     >
                         <Eye size={16} className="text-info" />
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit?.(payment)
+                        }}
+                        className="p-1 rounded hover:bg-gray-200 transition-colors"
+                        title="Chỉnh sửa"
+                    >
+                        <Edit size={16} className="text-warning" />
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onDelete?.(payment)
+                        }}
+                        className="p-1 rounded hover:bg-gray-200 transition-colors"
+                        title="Xóa"
+                    >
+                        <Trash2 size={16} className="text-danger" />
                     </button>
                 </div>
             ),

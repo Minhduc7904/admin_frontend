@@ -306,12 +306,16 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/tuition-payments/${id}`,
     CREATE: "/tuition-payments",
     CREATE_BULK: "/tuition-payments/bulk",
+    CREATE_BULK_ARRAY: "/tuition-payments/bulk-array",
     UPDATE: (id) => `/tuition-payments/${id}`,
+    UPDATE_BULK_ARRAY: "/tuition-payments/bulk-array",
     DELETE: (id) => `/tuition-payments/${id}`,
     STATS_BY_MONEY: "/tuition-payments/stats/money",
     STATS_BY_STATUS: "/tuition-payments/stats/status",
+    STATS_MONTHLY: "/tuition-payments/stats/monthly",
     EXPORT_EXCEL_EXAMPLE: "/tuition-payments/export/excel/example",
     IMPORT_EXCEL_PREVIEW: "/tuition-payments/import/excel/preview",
+    EXPORT_LIST: "/tuition-payments/export/excel",
   },
 };
 

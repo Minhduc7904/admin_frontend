@@ -32,7 +32,7 @@ import {
 import { Pagination } from '../../../shared/components/ui/Pagination'
 import { ROUTES } from '../../../core/constants'
 import { toggleUserActivationAsync } from '../../user/store/userSlice'
-import { StudentStats } from './StudentStats'
+import { StudentStats } from '../components/StudentStats'
 
 export const StudentList = () => {
     const dispatch = useDispatch()
