@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 
-import { Button, RightPanel } from '../../../shared/components'
+import { Button } from '../../../shared/components'
 import {
     getExamImportSessionsAsync,
+    createExamImportSessionAsync,
     setFilters,
     selectExamImportSessions,
     selectExamImportSessionLoadingGet,
@@ -17,7 +18,6 @@ import { useSearch } from '../../../shared/hooks'
 import {
     ExamImportSessionFilters,
     ExamImportSessionCard,
-    AddExamImportSession,
 } from '../components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
 import { ROUTES } from '../../../core/constants'
@@ -46,8 +46,6 @@ export const ExamImportSessionList = () => {
         field: filters.sortBy || 'createdAt',
         direction: filters.sortOrder || 'desc',
     })
-
-    const [openAddSessionRightPanel, setOpenAddSessionRightPanel] = useState(false)
 
     /* ===================== EFFECT ===================== */
     useEffect(() => {
@@ -100,8 +98,12 @@ export const ExamImportSessionList = () => {
         navigate(ROUTES.EXAM_IMPORT_SESSION_DETAIL(session.sessionId))
     }
 
-    const handleAddNewSession = () => {
-        setOpenAddSessionRightPanel(true)
+    const handleAddNewSession = async () => {
+        const result = await dispatch(createExamImportSessionAsync())
+        if (result.payload && result.payload.data) {
+            const newSessionId = result.payload.data.sessionId
+            navigate(ROUTES.EXAM_IMPORT_SESSION_DETAIL(newSessionId))
+        }
     }
 
     /* ===================== RENDER ===================== */
@@ -197,18 +199,6 @@ export const ExamImportSessionList = () => {
                     </div>
                 )}
             </div>
-
-            {/* ===================== RIGHT PANEL ===================== */}
-            <RightPanel
-                isOpen={openAddSessionRightPanel}
-                onClose={() => setOpenAddSessionRightPanel(false)}
-                title="Tạo Session Mới"
-            >
-                <AddExamImportSession
-                    onClose={() => setOpenAddSessionRightPanel(false)}
-                    loadSessions={loadSessions}
-                />
-            </RightPanel>
         </>
     )
 }

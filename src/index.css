@@ -36,3 +36,7 @@ input[type='range']::-moz-range-thumb {
   background: #111827;
   border: 2px solid white;
 }
+
+html {
+  overflow: hidden; /* 🚫 chặn scroll ở <html> */
+}

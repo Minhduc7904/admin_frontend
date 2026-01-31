@@ -8,6 +8,7 @@ import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 const initialState = {
     sessions: [],
     currentSession: null,
+    rawContent: null,
 
     pagination: {
         page: 1,
@@ -20,6 +21,8 @@ const initialState = {
 
     loadingGet: false,
     loadingCreate: false,
+    loadingRawContent: false,
+    loadingUpdateRawContent: false,
 
     error: null,
 
@@ -66,12 +69,43 @@ export const getExamImportSessionByIdAsync = createAsyncThunk(
 // ===== CREATE =====
 export const createExamImportSessionAsync = createAsyncThunk(
     "examImportSession/create",
-    async (data, thunkAPI) => {
-        return handleAsyncThunk(() => examImportSessionApi.create(data), thunkAPI, {
+    async (_, thunkAPI) => {
+        return handleAsyncThunk(() => examImportSessionApi.create(), thunkAPI, {
             showSuccess: true,
             successTitle: "Tạo phiên import đề thi thành công",
             errorTitle: "Lỗi tạo phiên import đề thi",
         });
+    }
+);
+
+// ===== GET RAW CONTENT =====
+export const getSessionRawContentAsync = createAsyncThunk(
+    "examImportSession/getRawContent",
+    async ({ sessionId, expiry = 3600 }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => examImportSessionApi.getMyRawContent(sessionId, expiry),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: "Lỗi tải raw content",
+            }
+        );
+    }
+);
+
+// ===== UPDATE RAW CONTENT =====
+export const updateSessionRawContentAsync = createAsyncThunk(
+    "examImportSession/updateRawContent",
+    async ({ sessionId, rawContent }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => examImportSessionApi.updateMyRawContent(sessionId, rawContent),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Cập nhật raw content thành công",
+                errorTitle: "Lỗi cập nhật raw content",
+            }
+        );
     }
 );
 
@@ -91,6 +125,9 @@ export const examImportSessionSlice = createSlice({
         clearCurrentSession: (state) => {
             state.currentSession = null;
         },
+        clearRawContent: (state) => {
+            state.rawContent = null;
+        },
         setPagination: (state, action) => {
             state.pagination = { ...state.pagination, ...action.payload };
         },
@@ -107,8 +144,8 @@ export const examImportSessionSlice = createSlice({
             })
             .addCase(getExamImportSessionsAsync.fulfilled, (state, action) => {
                 state.loadingGet = false;
-                state.sessions = action.payload.data.data || [];
-                state.pagination = action.payload.data.pagination || initialState.pagination;
+                state.sessions = action.payload.data || [];
+                state.pagination = action.payload.meta || initialState.pagination;
             })
             .addCase(getExamImportSessionsAsync.rejected, (state, action) => {
                 state.loadingGet = false;
@@ -140,6 +177,37 @@ export const examImportSessionSlice = createSlice({
             .addCase(createExamImportSessionAsync.rejected, (state, action) => {
                 state.loadingCreate = false;
                 state.error = action.payload;
+            })
+
+            // ===== GET RAW CONTENT =====
+            .addCase(getSessionRawContentAsync.pending, (state) => {
+                state.loadingRawContent = true;
+                state.error = null;
+            })
+            .addCase(getSessionRawContentAsync.fulfilled, (state, action) => {
+                state.loadingRawContent = false;
+                state.rawContent = action.payload.data;
+            })
+            .addCase(getSessionRawContentAsync.rejected, (state, action) => {
+                state.loadingRawContent = false;
+                state.error = action.payload;
+            })
+
+            // ===== UPDATE RAW CONTENT =====
+            .addCase(updateSessionRawContentAsync.pending, (state) => {
+                state.loadingUpdateRawContent = true;
+                state.error = null;
+            })
+            .addCase(updateSessionRawContentAsync.fulfilled, (state, action) => {
+                state.loadingUpdateRawContent = false;
+                // Update rawContent with the new content
+                if (state.rawContent) {
+                    state.rawContent.rawContent = action.payload.data.rawContent;
+                }
+            })
+            .addCase(updateSessionRawContentAsync.rejected, (state, action) => {
+                state.loadingUpdateRawContent = false;
+                state.error = action.payload;
             });
     },
 });
@@ -151,16 +219,20 @@ export const {
     setFilters,
     resetFilters,
     clearCurrentSession,
+    clearRawContent,
     setPagination,
     resetPagination,
 } = examImportSessionSlice.actions;
 
 export const selectExamImportSessions = (state) => state.examImportSession.sessions;
 export const selectCurrentExamImportSession = (state) => state.examImportSession.currentSession;
+export const selectExamImportSessionRawContent = (state) => state.examImportSession.rawContent;
 export const selectExamImportSessionPagination = (state) => state.examImportSession.pagination;
 export const selectExamImportSessionFilters = (state) => state.examImportSession.filters;
 export const selectExamImportSessionLoadingGet = (state) => state.examImportSession.loadingGet;
 export const selectExamImportSessionLoadingCreate = (state) => state.examImportSession.loadingCreate;
+export const selectExamImportSessionLoadingRawContent = (state) => state.examImportSession.loadingRawContent;
+export const selectExamImportSessionLoadingUpdateRawContent = (state) => state.examImportSession.loadingUpdateRawContent;
 export const selectExamImportSessionError = (state) => state.examImportSession.error;
 
 export default examImportSessionSlice.reducer;

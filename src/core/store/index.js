@@ -24,6 +24,7 @@ import lessonReducer from "../../features/lesson/store/lessonSlice";
 import lessonLearningItemReducer from "../../features/lessonLearningitem/store/lessonLearningItemSlice";
 import tuitionPaymentReducer from "../../features/tuitionPayment/store/tuitionPaymentSlice";
 import examImportSessionReducer from "../../features/examImportSession/store/examImportSessionSlice";
+import tempExamReducer from "../../features/examTemp/store/tempExamSlice";
 
 export const store = configureStore({
   reducer: {
@@ -52,5 +53,6 @@ export const store = configureStore({
     lessonLearningItem: lessonLearningItemReducer,
     tuitionPayment: tuitionPaymentReducer,
     examImportSession: examImportSessionReducer,
+    tempExam: tempExamReducer,
   },
 });

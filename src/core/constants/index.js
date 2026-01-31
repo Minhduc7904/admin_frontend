@@ -70,6 +70,7 @@ export const ROUTES = {
   TUITION_PAYMENTS: '/tuition-payments',
   EXAM_IMPORT_SESSIONS: '/exam-import-sessions',
   EXAM_IMPORT_SESSION_DETAIL: (id = ':id') => `/exam-import-sessions/${id}`,
+  EXAM_IMPORT_SESSION_UPLOAD: (id = ':id') => `/exam-import-sessions/${id}/upload`,
 };
 
 // API Endpoints
@@ -173,6 +174,9 @@ export const API_ENDPOINTS = {
     SOFT_DELETE_BY_USER: (id) => `/media/${id}/my`,
     HARD_DELETE: (id) => `/media/${id}/permanent`,
     BUCKET_STATISTICS: "/media/statistics/buckets",
+    EXTRACT_TEXT: (id) => `/media/${id}/extract-text`,
+    ADMIN_RAW_CONTENT: (id) => `/media/admin/${id}/raw-content`,
+    MY_RAW_CONTENT: (id) => `/media/${id}/raw-content/my`,
   },
   MEDIA_FOLDERS: {
     CREATE: "/media-folders",
@@ -323,6 +327,13 @@ export const API_ENDPOINTS = {
     LIST: "/exam-import-sessions",
     DETAIL: (sessionId) => `/exam-import-sessions/${sessionId}`,
     CREATE: "/exam-import-sessions",
+    MY_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/raw-content/my`,
+    UPDATE_MY_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/raw-content/my`,
+  },
+  TEMP_EXAM: {
+    BY_SESSION: (sessionId) => `/temp-exams/session/${sessionId}`,
+    CREATE: (sessionId) => `/temp-exams/session/${sessionId}`,
+    UPDATE: (tempExamId) => `/temp-exams/${tempExamId}`,
   },
 };
 

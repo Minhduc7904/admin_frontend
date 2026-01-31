@@ -28,6 +28,11 @@ const initialState = {
     loadingDownloadUrl: false,
     loadingViewUrl: false,
     loadingBatchViewUrl: false,
+    loadingExtractText: false,
+    extractedText: null,
+    loadingAdminRawContent: false,
+    loadingMyRawContent: false,
+    rawContent: null,
     error: null,
     filters: {
         search: "",
@@ -265,6 +270,51 @@ export const getBucketStatisticsAsync = createAsyncThunk(
             showSuccess: false,
             errorTitle: "Lỗi tải thống kê bucket",
         });
+    }
+);
+
+export const extractTextAsync = createAsyncThunk(
+    "media/extractText",
+    async ({ id, includeImageBase64 = false }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => mediaApi.extractText(id, { includeImageBase64 }),
+            thunkAPI,
+            {
+                successTitle: "Trích xuất văn bản thành công",
+                successMessage: "Văn bản đã được trích xuất từ file",
+                errorTitle: "Trích xuất văn bản thất bại",
+            }
+        );
+    }
+);
+
+export const getAdminRawContentAsync = createAsyncThunk(
+    "media/getAdminRawContent",
+    async ({ id, expiry = 3600 }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => mediaApi.getAdminRawContent(id, expiry),
+            thunkAPI,
+            {
+                successTitle: "Lấy nội dung thành công",
+                successMessage: "Nội dung đã được tải",
+                errorTitle: "Lấy nội dung thất bại",
+            }
+        );
+    }
+);
+
+export const getMyRawContentAsync = createAsyncThunk(
+    "media/getMyRawContent",
+    async ({ id, expiry = 3600 }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => mediaApi.getMyRawContent(id, expiry),
+            thunkAPI,
+            {
+                successTitle: "Lấy nội dung thành công",
+                successMessage: "Nội dung đã được tải",
+                errorTitle: "Lấy nội dung thất bại",
+            }
+        );
     }
 );
 
@@ -602,6 +652,51 @@ const mediaSlice = createSlice({
             .addCase(getBucketStatisticsAsync.rejected, (state, action) => {
                 state.loadingBucketStatistics = false;
                 state.error = action.payload;
+            })
+            // Extract Text
+            .addCase(extractTextAsync.pending, (state) => {
+                state.loadingExtractText = true;
+                state.extractedText = null;
+                state.error = null;
+            })
+            .addCase(extractTextAsync.fulfilled, (state, action) => {
+                state.loadingExtractText = false;
+                state.extractedText = action.payload.data;
+                state.error = null;
+            })
+            .addCase(extractTextAsync.rejected, (state, action) => {
+                state.loadingExtractText = false;
+                state.error = action.payload;
+            })
+            // Get Admin Raw Content
+            .addCase(getAdminRawContentAsync.pending, (state) => {
+                state.loadingAdminRawContent = true;
+                state.rawContent = null;
+                state.error = null;
+            })
+            .addCase(getAdminRawContentAsync.fulfilled, (state, action) => {
+                state.loadingAdminRawContent = false;
+                state.rawContent = action.payload.data;
+                state.error = null;
+            })
+            .addCase(getAdminRawContentAsync.rejected, (state, action) => {
+                state.loadingAdminRawContent = false;
+                state.error = action.payload;
+            })
+            // Get My Raw Content
+            .addCase(getMyRawContentAsync.pending, (state) => {
+                state.loadingMyRawContent = true;
+                state.rawContent = null;
+                state.error = null;
+            })
+            .addCase(getMyRawContentAsync.fulfilled, (state, action) => {
+                state.loadingMyRawContent = false;
+                state.rawContent = action.payload.data;
+                state.error = null;
+            })
+            .addCase(getMyRawContentAsync.rejected, (state, action) => {
+                state.loadingMyRawContent = false;
+                state.error = action.payload;
             });
     },
 });
@@ -646,5 +741,10 @@ export const selectBucketStatistics = (state) => state.media.bucketStatistics;
 export const selectBucketStatisticsLoading = (state) =>
     state.media.loadingBucketStatistics;
 export const selectMediaLoadingViewUrl = (state) => state.media.loadingViewUrl;
+export const selectMediaLoadingExtractText = (state) => state.media.loadingExtractText;
+export const selectExtractedText = (state) => state.media.extractedText;
+export const selectMediaLoadingAdminRawContent = (state) => state.media.loadingAdminRawContent;
+export const selectMediaLoadingMyRawContent = (state) => state.media.loadingMyRawContent;
+export const selectMediaRawContent = (state) => state.media.rawContent;
 
 export default mediaSlice.reducer;

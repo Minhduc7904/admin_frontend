@@ -166,14 +166,16 @@ const mediaUsageSlice = createSlice({
             // Get Media Usages By Entity
             .addCase(getMediaUsagesByEntityAsync.pending, (state) => {
                 state.loadingByEntity = true;
+                state.entityUsages = [];
                 state.error = null;
             })
             .addCase(getMediaUsagesByEntityAsync.fulfilled, (state, action) => {
                 state.loadingByEntity = false;
-                state.entityUsages = action.payload.data;
+                state.entityUsages = action.payload.data.data;
                 state.error = null;
             })
             .addCase(getMediaUsagesByEntityAsync.rejected, (state, action) => {
+                state.entityUsages = [];
                 state.loadingByEntity = false;
                 state.error = action.payload;
             })

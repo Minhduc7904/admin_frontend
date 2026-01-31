@@ -16,6 +16,7 @@
     "@mui/system": "^7.3.7",
     "@mui/x-charts": "^8.26.0",
     "@reduxjs/toolkit": "^2.11.2",
+    "@uiw/react-md-editor": "^4.0.11",
     "autoprefixer": "^10.4.23",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
@@ -25,11 +26,17 @@
     "qs": "^6.14.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.11.0",
     "react-toastify": "^11.0.5",
+    "rehype-katex": "^7.0.1",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "socket.io-client": "^4.8.3",
-    "tailwindcss": "^3.4.19"
+    "tailwindcss": "^3.4.19",
+    "tiptap-markdown": "^0.9.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

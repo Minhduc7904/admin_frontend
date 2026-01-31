@@ -1,0 +1,31 @@
+/* Sticky toolbar for markdown editor */
+.markdown-editor-container {
+  position: relative;
+}
+
+.markdown-editor-container .w-md-editor {
+  border: none;
+}
+
+.markdown-editor-container .w-md-editor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.markdown-editor-container .w-md-editor-content {
+  height: 100%;
+}
+
+.markdown-editor-container .w-md-editor-text-pre,
+.markdown-editor-container .w-md-editor-text-input {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Optimize rendering performance */
+.markdown-editor-container .w-md-editor-text {
+  will-change: scroll-position;
+}

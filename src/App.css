@@ -2,7 +2,7 @@
 
 /* Smooth scrolling */
 html {
-  scroll-behavior: smooth;
+  overflow: hidden; /* 🚫 chặn scroll ở <html> */
 }
 
 /* Custom scrollbar */

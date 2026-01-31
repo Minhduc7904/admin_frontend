@@ -166,7 +166,7 @@ export const MediaPickerModal = ({
                                             <MediaGridItem
                                                 key={item.mediaId}
                                                 media={item}
-                                                viewUrl={library.viewUrlsMap[item.mediaId]}
+                                                viewUrl={item.viewUrl}
                                                 isSelected={selection.selectedMediaId === item.mediaId}
                                                 onClick={() =>
                                                     selection.setSelectedMediaId(item.mediaId)

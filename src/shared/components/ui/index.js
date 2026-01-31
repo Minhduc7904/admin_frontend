@@ -20,6 +20,7 @@ export { Tabs } from './Tabs'
 export { Textarea } from './Textarea'
 export { RightPanel } from './RightPanel';
 export { Slider } from './Slider';
+export { Tooltip } from './Tooltip';
 
 // Empty states
 export * from '../empty';

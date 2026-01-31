@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { authRouter, adminRouter, profileRouter } from './routes';
+import { authRouter, adminRouter, profileRouter, examImportSessionRouter } from './routes';
 import { NotificationContainer } from './features/notification/components';
 import { ProtectedRoute } from './shared/components';
 import { NotFound } from './shared/pages/NotFound';
@@ -43,6 +43,7 @@ function App() {
           {renderRoutes(authRouter, { parentKey: 'auth' })}
           {renderRoutes(adminRouter, { parentKey: 'admin' })}
           {renderRoutes(profileRouter, { parentKey: 'profile' })}
+          {renderRoutes(examImportSessionRouter, { parentKey: 'exam-import-session' })}
 
           <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
           <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />

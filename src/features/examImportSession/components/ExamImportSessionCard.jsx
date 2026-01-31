@@ -1,63 +1,108 @@
-import { Calendar, FileText, User } from 'lucide-react'
+import {
+    Calendar,
+    FileText,
+    User,
+    Clock,
+    CheckCircle,
+} from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
+const STATUS_CONFIG = {
+    PENDING: {
+        label: 'Đang chờ',
+        color: 'text-yellow-700 bg-yellow-100',
+        icon: Clock,
+    },
+    PROCESSING: {
+        label: 'Đang xử lý',
+        color: 'text-blue-700 bg-blue-100',
+        icon: FileText,
+    },
+    COMPLETED: {
+        label: 'Hoàn tất',
+        color: 'text-green-700 bg-green-100',
+        icon: CheckCircle,
+    },
+}
+
 export const ExamImportSessionCard = ({ session, onClick }) => {
+    const statusConfig = STATUS_CONFIG[session.status] || STATUS_CONFIG.PENDING
+    const StatusIcon = statusConfig.icon
+
     return (
         <div
             onClick={() => onClick?.(session)}
-            className="group relative aspect-square bg-white border-2 border-gray-200 rounded-xl hover:shadow-lg hover:border-primary transition-all cursor-pointer overflow-hidden"
+            className="
+                group relative aspect-square
+                bg-white border-2 border-gray-200 rounded-xl
+                hover:border-primary hover:shadow-lg
+                transition cursor-pointer
+            "
         >
-        <div className="absolute inset-0 p-4 flex flex-col justify-between">
-            {/* Header */}
-            <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                            Session {session.sessionId}
-                        </h3>
-                        {session.description && (
-                            <p className="text-sm text-foreground-light mt-1 line-clamp-2">
-                                {session.description}
-                            </p>
-                        )}
-                    </div>
-                    <FileText className="text-foreground-light group-hover:text-primary transition-colors flex-shrink-0 ml-2" size={20} />
-                </div>
+            <div className="absolute inset-0 p-4 flex flex-col justify-between">
+                {/* ===== HEADER ===== */}
+                <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                        <div>
+                            <h3 className="
+                                font-semibold text-foreground
+                                group-hover:text-primary-700
+                                transition-colors
+                            ">
+                                Import Session
+                            </h3>
 
-                {/* Metadata */}
-                <div className="space-y-2">
-                    {session.createdBy && (
+                            <p className="text-sm text-foreground-light">
+                                {session.sessionId}
+                            </p>
+                        </div>
+
+                        <StatusIcon
+                            size={20}
+                            className="
+                                text-foreground-light
+                                group-hover:text-primary-600
+                                transition-colors
+                            "
+                        />
+                    </div>
+
+                    {/* ===== META ===== */}
+                    <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-foreground-light">
                             <User size={14} />
-                            <span className="line-clamp-1">{session.createdBy.fullName || 'N/A'}</span>
+                            <span>User #{session.createdBy}</span>
                         </div>
-                    )}
-                    
-                    <div className="flex items-center gap-2 text-sm text-foreground-light">
-                        <Calendar size={14} />
-                        <span>
-                            {session.createdAt
-                                ? formatDistanceToNow(new Date(session.createdAt), {
-                                      addSuffix: true,
-                                      locale: vi,
-                                  })
-                                : 'N/A'}
-                        </span>
+
+                        <div className="flex items-center gap-2 text-sm text-foreground-light">
+                            <Calendar size={14} />
+                            <span>
+                                {formatDistanceToNow(
+                                    new Date(session.createdAt),
+                                    { addSuffix: true, locale: vi }
+                                )}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Footer */}
-            <div className="mt-4 pt-3 border-t border-border">
-                <div className="flex items-center justify-between text-xs text-foreground-light">
-                    <span className="truncate">ID: {session.sessionId.slice(0, 8)}...</span>
-                    <span className="px-2 py-1 bg-primary/10 text-primary rounded flex-shrink-0">
-                        Session
+                {/* ===== FOOTER ===== */}
+                <div className="pt-3 border-t border-border flex items-center justify-between">
+                    <span className="text-xs text-foreground-light truncate">
+                        ID: {session.sessionId}
+                    </span>
+
+                    <span
+                        className={`
+                            px-2 py-1 text-xs rounded font-medium
+                            ${statusConfig.color}
+                        `}
+                    >
+                        {statusConfig.label}
                     </span>
                 </div>
             </div>
-        </div>
         </div>
     )
 }

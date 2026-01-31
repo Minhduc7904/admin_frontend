@@ -22,10 +22,33 @@ export const examImportSessionApi = {
 
   /**
    * Create new exam import session
-   * @param {Object} data - Session data
    * @returns {Promise}
    */
-  create(data) {
-    return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.CREATE, data);
+  create() {
+    return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.CREATE);
+  },
+
+  /**
+   * Get raw content with presigned URLs for session
+   * @param {string} sessionId - Session ID
+   * @param {number} expiry - URL expiry time in seconds (default: 3600)
+   * @returns {Promise}
+   */
+  getMyRawContent(sessionId, expiry = 3600) {
+    return axiosClient.get(API_ENDPOINTS.EXAM_IMPORT_SESSION.MY_RAW_CONTENT(sessionId), {
+      params: { expiry },
+    });
+  },
+
+  /**
+   * Update raw content for session
+   * @param {string} sessionId - Session ID
+   * @param {string} rawContent - New raw content
+   * @returns {Promise}
+   */
+  updateMyRawContent(sessionId, rawContent) {
+    return axiosClient.put(API_ENDPOINTS.EXAM_IMPORT_SESSION.UPDATE_MY_RAW_CONTENT(sessionId), {
+      rawContent,
+    });
   },
 };

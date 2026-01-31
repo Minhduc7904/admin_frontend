@@ -1,0 +1,152 @@
+/* Markdown Renderer Styles */
+.markdown-renderer {
+    @apply text-foreground;
+    line-height: 1.7;
+}
+
+/* Headings */
+.markdown-renderer h1 {
+    @apply text-3xl font-bold mt-6 mb-4 text-foreground border-b border-border pb-2;
+}
+
+.markdown-renderer h2 {
+    @apply text-2xl font-bold mt-5 mb-3 text-foreground border-b border-border pb-2;
+}
+
+.markdown-renderer h3 {
+    @apply text-xl font-semibold mt-4 mb-2 text-foreground;
+}
+
+.markdown-renderer h4 {
+    @apply text-lg font-semibold mt-3 mb-2 text-foreground;
+}
+
+.markdown-renderer h5 {
+    @apply text-base font-semibold mt-2 mb-1 text-foreground;
+}
+
+.markdown-renderer h6 {
+    @apply text-sm font-semibold mt-2 mb-1 text-foreground-light;
+}
+
+/* Paragraphs */
+.markdown-renderer p {
+    @apply mb-4;
+}
+
+/* Lists */
+.markdown-renderer ul {
+    @apply list-disc list-inside mb-4 ml-4 space-y-2;
+}
+
+.markdown-renderer ol {
+    @apply list-decimal list-inside mb-4 ml-4 space-y-2;
+}
+
+.markdown-renderer li {
+    @apply text-foreground;
+}
+
+.markdown-renderer li > ul,
+.markdown-renderer li > ol {
+    @apply mt-2 ml-4;
+}
+
+/* Links */
+.markdown-link {
+    @apply text-primary hover:text-primary-dark underline transition-colors;
+}
+
+/* Inline Code */
+.markdown-renderer .inline-code {
+    @apply bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+/* Code Blocks */
+.markdown-renderer .code-block {
+    @apply block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono my-4;
+}
+
+.markdown-renderer pre {
+    @apply bg-gray-900 rounded-lg overflow-hidden my-4;
+}
+
+/* Blockquotes */
+.markdown-renderer blockquote {
+    @apply border-l-4 border-primary bg-gray-50 pl-4 py-2 my-4 italic text-foreground-light;
+}
+
+/* Tables */
+.markdown-renderer .table-wrapper {
+    @apply overflow-x-auto my-4;
+}
+
+.markdown-renderer .markdown-table {
+    @apply min-w-full border-collapse border border-border;
+}
+
+.markdown-renderer .markdown-table th {
+    @apply bg-gray-100 border border-border px-4 py-2 text-left font-semibold text-foreground;
+}
+
+.markdown-renderer .markdown-table td {
+    @apply border border-border px-4 py-2 text-foreground;
+}
+
+.markdown-renderer .markdown-table tr:nth-child(even) {
+    @apply bg-gray-50;
+}
+
+/* Images */
+.markdown-renderer .markdown-image {
+    @apply max-w-full h-auto rounded-lg shadow-md my-4;
+}
+
+/* Horizontal Rules */
+.markdown-renderer hr {
+    @apply my-6 border-t-2 border-border;
+}
+
+/* Strong/Bold */
+.markdown-renderer strong {
+    @apply font-bold text-foreground;
+}
+
+/* Emphasis/Italic */
+.markdown-renderer em {
+    @apply italic;
+}
+
+/* Strikethrough */
+.markdown-renderer del {
+    @apply line-through text-foreground-light;
+}
+
+/* Task Lists */
+.markdown-renderer input[type="checkbox"] {
+    @apply mr-2;
+}
+
+/* KaTeX Math */
+.markdown-renderer .katex {
+    @apply text-base;
+}
+
+.markdown-renderer .katex-display {
+    @apply my-4 overflow-x-auto;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .markdown-renderer h1 {
+        @apply text-2xl;
+    }
+    
+    .markdown-renderer h2 {
+        @apply text-xl;
+    }
+    
+    .markdown-renderer h3 {
+        @apply text-lg;
+    }
+}

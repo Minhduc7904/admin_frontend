@@ -148,4 +148,39 @@ export const mediaApi = {
     getBucketStatistics: () => {
         return axiosClient.get(API_ENDPOINTS.MEDIA.BUCKET_STATISTICS);
     },
+
+    /**
+     * Extract text from PDF or image using Mistral AI OCR
+     * @param {number} id - Media ID
+     * @param {Object} options - Extraction options
+     * @param {boolean} options.includeImageBase64 - Include image base64 in response
+     * @returns {Promise<Object>} Extracted text with metadata
+     */
+    extractText: (id, options = {}) => {
+        return axiosClient.post(API_ENDPOINTS.MEDIA.EXTRACT_TEXT(id), options);
+    },
+
+    /**
+     * Get raw content with presigned URLs (Admin)
+     * @param {number} id - Media ID
+     * @param {number} expiry - URL expiry in seconds (default: 3600)
+     * @returns {Promise<Object>} Raw content with processed URLs
+     */
+    getAdminRawContent: (id, expiry = 3600) => {
+        return axiosClient.get(API_ENDPOINTS.MEDIA.ADMIN_RAW_CONTENT(id), {
+            params: { expiry },
+        });
+    },
+
+    /**
+     * Get raw content with presigned URLs (My Media)
+     * @param {number} id - Media ID
+     * @param {number} expiry - URL expiry in seconds (default: 3600)
+     * @returns {Promise<Object>} Raw content with processed URLs
+     */
+    getMyRawContent: (id, expiry = 3600) => {
+        return axiosClient.get(API_ENDPOINTS.MEDIA.MY_RAW_CONTENT(id), {
+            params: { expiry },
+        });
+    },
 };
