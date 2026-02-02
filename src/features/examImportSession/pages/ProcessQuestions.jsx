@@ -4,8 +4,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     splitExamFromSessionAsync,
     splitExamFromRawContentAsync,
+    classifyChaptersAsync,
     selectExamImportSessionSplitResult,
     selectExamImportSessionLoadingSplit,
+    selectExamImportSessionLoadingClassifyChapters,
     getSessionRawContentAsync,
     selectExamImportSessionRawContent,
     selectExamImportSessionLoadingRawContent,
@@ -45,6 +47,7 @@ export const ProcessQuestions = () => {
 
     const splitResult = useSelector(selectExamImportSessionSplitResult);
     const splitLoading = useSelector(selectExamImportSessionLoadingSplit);
+    const classifyChaptersLoading = useSelector(selectExamImportSessionLoadingClassifyChapters);
     const tempQuestions = useSelector(selectTempQuestions);
     const tempQuestionsLoading = useSelector(selectTempQuestionLoadingGet);
     const questionDeleteLoading = useSelector(selectTempQuestionLoadingDelete);
@@ -213,6 +216,18 @@ export const ProcessQuestions = () => {
         }
     };
 
+    const handleClassifyChapters = async () => {
+        if (!id) return;
+        
+        try {
+            await dispatch(classifyChaptersAsync(id)).unwrap();
+            // Reload questions to show updated chapters
+            dispatch(getTempQuestionsBySessionAsync(id));
+        } catch (error) {
+            // Error already handled by asyncThunkHelper
+        }
+    };
+
     return (
         <>
             <div className="grid grid-cols-2 gap-6 h-full">
@@ -241,6 +256,8 @@ export const ProcessQuestions = () => {
                         onDeleteQuestion={handleDeleteQuestion}
                         onDeleteStatement={handleDeleteStatement}
                         onReorderStatements={handleReorderStatements}
+                        onClassifyChapters={handleClassifyChapters}
+                        classifyChaptersLoading={classifyChaptersLoading}
                     />
                 </div>
             </div>

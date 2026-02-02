@@ -14,7 +14,7 @@ import {
     selectMediaUsageLoadingAttach,
     selectMediaUsageLoadingDetach,
 } from '../../mediaUsage/store/mediaUsageSlice';
-
+import { VISIBILITY_LABELS } from '../../../core/constants';
 export const TempExamInfo = ({ tempExam, onEdit, onMediaClick, onYoutubeClick }) => {
     const dispatch = useDispatch();
     const [modalState, setModalState] = useState({
@@ -226,7 +226,7 @@ export const TempExamInfo = ({ tempExam, onEdit, onMediaClick, onYoutubeClick })
                         Trạng thái hiển thị
                     </label>
                     <p className="text-foreground mt-1">
-                        {tempExam.visibility === 'PUBLIC' ? 'Công khai' : 'Riêng tư'}
+                        {VISIBILITY_LABELS[tempExam.visibility] || 'Không xác định'}
                     </p>
                 </div>
 

@@ -72,4 +72,23 @@ export const examImportSessionApi = {
       rawContent,
     });
   },
+
+  /**
+   * Classify chapters for questions in a session using AI
+   * @param {string} sessionId - Session ID
+   * @returns {Promise}
+   */
+  classifyChapters(sessionId) {
+    return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.CLASSIFY_CHAPTERS(sessionId));
+  },
+
+  /**
+   * Migrate temp exam data to final exam tables
+   * Creates Exam, Sections, Questions, Statements from temp tables
+   * @param {string|number} sessionId - Session ID
+   * @returns {Promise<{examId: number, totalSections: number, totalQuestions: number, totalStatements: number, totalChapters: number}>}
+   */
+  migrate(sessionId) {
+    return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.MIGRATE(sessionId));
+  },
 };

@@ -10,6 +10,7 @@ const initialState = {
     currentSession: null,
     rawContent: null,
     splitResult: null, // Kết quả tách câu hỏi
+    migrateResult: null, // Kết quả migrate đề thi
 
     pagination: {
         page: 1,
@@ -25,6 +26,8 @@ const initialState = {
     loadingRawContent: false,
     loadingUpdateRawContent: false,
     loadingSplit: false, // Loading cho việc tách câu hỏi
+    loadingClassifyChapters: false, // Loading cho việc phân loại chương
+    loadingMigrate: false, // Loading cho việc migrate đề thi
 
     error: null,
 
@@ -143,6 +146,40 @@ export const splitExamFromRawContentAsync = createAsyncThunk(
     }
 );
 
+// ===== CLASSIFY CHAPTERS =====
+export const classifyChaptersAsync = createAsyncThunk(
+    "examImportSession/classifyChapters",
+    async (sessionId, thunkAPI) => {
+        return handleAsyncThunk(
+            () => examImportSessionApi.classifyChapters(sessionId),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Phân loại chương thành công",
+                successMessage: "Các câu hỏi đã được phân loại chương tự động",
+                errorTitle: "Lỗi phân loại chương",
+            }
+        );
+    }
+);
+
+// ===== MIGRATE TO FINAL EXAM =====
+export const migrateExamAsync = createAsyncThunk(
+    "examImportSession/migrate",
+    async (sessionId, thunkAPI) => {
+        return handleAsyncThunk(
+            () => examImportSessionApi.migrate(sessionId),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Migrate đề thi thành công",
+                successMessage: "Đề thi đã được tạo và lưu vào hệ thống",
+                errorTitle: "Lỗi migrate đề thi",
+            }
+        );
+    }
+);
+
 /* =========================
    Slice
 ========================= */
@@ -164,6 +201,9 @@ export const examImportSessionSlice = createSlice({
         },
         clearSplitResult: (state) => {
             state.splitResult = null;
+        },
+        clearMigrateResult: (state) => {
+            state.migrateResult = null;
         },
         setPagination: (state, action) => {
             state.pagination = { ...state.pagination, ...action.payload };
@@ -275,6 +315,38 @@ export const examImportSessionSlice = createSlice({
             .addCase(splitExamFromRawContentAsync.rejected, (state, action) => {
                 state.loadingSplit = false;
                 state.error = action.payload;
+            })
+
+            // ===== CLASSIFY CHAPTERS =====
+            .addCase(classifyChaptersAsync.pending, (state) => {
+                state.loadingClassifyChapters = true;
+                state.error = null;
+            })
+            .addCase(classifyChaptersAsync.fulfilled, (state) => {
+                state.loadingClassifyChapters = false;
+            })
+            .addCase(classifyChaptersAsync.rejected, (state, action) => {
+                state.loadingClassifyChapters = false;
+                state.error = action.payload;
+            })
+
+            // ===== MIGRATE TO FINAL EXAM =====
+            .addCase(migrateExamAsync.pending, (state) => {
+                state.loadingMigrate = true;
+                state.error = null;
+                state.migrateResult = null;
+            })
+            .addCase(migrateExamAsync.fulfilled, (state, action) => {
+                state.loadingMigrate = false;
+                state.migrateResult = action.payload.data;
+                // Update session status to COMPLETED after successful migration
+                if (state.currentSession) {
+                    state.currentSession.status = 'COMPLETED';
+                }
+            })
+            .addCase(migrateExamAsync.rejected, (state, action) => {
+                state.loadingMigrate = false;
+                state.error = action.payload;
             });
     },
 });
@@ -290,6 +362,7 @@ export const {
     setPagination,
     resetPagination,
     clearSplitResult,
+    clearMigrateResult,
 } = examImportSessionSlice.actions;
 
 export const selectExamImportSessions = (state) => state.examImportSession.sessions;
@@ -304,6 +377,9 @@ export const selectExamImportSessionLoadingUpdateRawContent = (state) => state.e
 export const selectExamImportSessionError = (state) => state.examImportSession.error;
 export const selectExamImportSessionSplitResult = (state) => state.examImportSession.splitResult;
 export const selectExamImportSessionLoadingSplit = (state) => state.examImportSession.loadingSplit;
+export const selectExamImportSessionLoadingClassifyChapters = (state) => state.examImportSession.loadingClassifyChapters;
+export const selectExamImportSessionMigrateResult = (state) => state.examImportSession.migrateResult;
+export const selectExamImportSessionLoadingMigrate = (state) => state.examImportSession.loadingMigrate;
 
 
 export default examImportSessionSlice.reducer;

@@ -5,6 +5,8 @@ import { MarkdownEditorModal } from '../../../shared/components/markdown/Markdow
 import { Edit } from 'lucide-react';
 import { createTempQuestionAsync } from '../../tempQuestion/store/tempQuestionSlice';
 import { QuestionType, Difficulty } from '../../../core/constants/question-constants';
+import { SubjectSearchSelect } from '../../subject/components/SubjectSearchSelect';
+import { ChapterSearchMultiSelect } from '../../chapter/components/ChapterSearchMultiSelect';
 
 export const CreateQuestionModal = ({ isOpen, onClose, sessionId, onSuccess }) => {
     const dispatch = useDispatch();
@@ -21,6 +23,8 @@ export const CreateQuestionModal = ({ isOpen, onClose, sessionId, onSuccess }) =
         grade: '',
         pointsOrigin: '',
         correctAnswer: '',
+        subject: null,
+        chapters: [],
     });
 
     // Reset form when modal opens
@@ -34,6 +38,8 @@ export const CreateQuestionModal = ({ isOpen, onClose, sessionId, onSuccess }) =
                 grade: '',
                 pointsOrigin: '',
                 correctAnswer: '',
+                subject: null,
+                chapters: [],
             });
             setErrors({});
         }
@@ -91,6 +97,8 @@ export const CreateQuestionModal = ({ isOpen, onClose, sessionId, onSuccess }) =
                 grade: formData.grade ? parseInt(formData.grade) : undefined,
                 pointsOrigin: formData.pointsOrigin ? parseFloat(formData.pointsOrigin) : undefined,
                 correctAnswer: formData.correctAnswer?.trim() || undefined,
+                subjectId: formData.subject?.subjectId || undefined,
+                chapterIds: formData.chapters?.length > 0 ? formData.chapters.map(c => c.chapterId) : undefined,
             };
 
             await dispatch(createTempQuestionAsync({
@@ -196,6 +204,24 @@ export const CreateQuestionModal = ({ isOpen, onClose, sessionId, onSuccess }) =
                                     <Edit size={16} />
                                 </button>
                             </div>
+                        </div>
+
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            {/* Subject */}
+                            <SubjectSearchSelect
+                                label="Môn học"
+                                value={formData.subject}
+                                onSelect={(subject) => setFormData(prev => ({ ...prev, subject }))}
+                                error={errors.subjectId}
+                            />
+
+                            {/* Chapters */}
+                            <ChapterSearchMultiSelect
+                                label="Chương"
+                                value={formData.chapters}
+                                onChange={(chapters) => setFormData(prev => ({ ...prev, chapters }))}
+                                error={errors.chapterIds}
+                            />
                         </div>
 
                         {/* Type */}

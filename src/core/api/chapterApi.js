@@ -20,6 +20,17 @@ export const chapterApi = {
     },
 
     /**
+     * Search chapters - lightweight search for autocomplete/dropdown
+     * @param {Object} params - Query parameters
+     * @param {string} params.search - Search keyword
+     * @param {number} params.subjectId - Subject ID filter (optional)
+     * @returns {Promise<Object>} First 10 chapters sorted by orderInParent
+     */
+    search: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.CHAPTERS.SEARCH, { params });
+    },
+
+    /**
      * Get chapter by ID
      * @param {number} id - Chapter ID
      * @returns {Promise<Object>} Chapter data with children

@@ -3,10 +3,7 @@ import { Input, Button, Dropdown, Textarea } from '../../../shared/components';
 import { SubjectSearchSelect } from '../../subject/components/SubjectSearchSelect';
 import { GRADE_OPTIONS } from '../../../core/constants/grade-constants';
 
-const VISIBILITY_OPTIONS = [
-    { value: 'PRIVATE', label: 'Riêng tư' },
-    { value: 'PUBLIC', label: 'Công khai' },
-];
+import { VISIBILITY_OPTIONS } from '../../../core/constants';
 
 export const TempExamForm = ({ 
     formData, 

@@ -68,6 +68,12 @@ export const QuestionCard = ({
                             </span>
                         )}
 
+                        {question.subject?.name && (
+                            <span className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">
+                                {question.subject.name}
+                            </span>
+                        )}
+
                         <ViewModeToggle
                             viewMode={viewMode}
                             onChange={setViewMode}
@@ -106,6 +112,22 @@ export const QuestionCard = ({
 
             {/* ================= Content ================= */}
             <div className="p-4 space-y-4">
+                {/* Chapters */}
+                {question.chapters && question.chapters.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pb-3 border-b border-gray-200">
+                        <span className="text-xs font-medium text-gray-600">Chương:</span>
+                        {question.chapters.map((chapter) => (
+                            <span
+                                key={chapter.chapterId}
+                                className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200"
+                                title={chapter.name}
+                            >
+                                {chapter.name}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
                 {/* Question content */}
                 <QuestionContent question={question} viewMode={viewMode} />
 

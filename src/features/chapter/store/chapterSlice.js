@@ -41,6 +41,16 @@ export const getAllChaptersAsync = createAsyncThunk(
     }
 );
 
+export const searchChaptersAsync = createAsyncThunk(
+    "chapter/search",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => chapterApi.search(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm chương",
+        });
+    }
+);
+
 export const getChaptersBySubjectIdAsync = createAsyncThunk(
     "chapter/getBySubjectId",
     async ({ subjectId, params }, thunkAPI) => {
@@ -146,6 +156,21 @@ const chapterSlice = createSlice({
                 state.error = null;
             })
             .addCase(getAllChaptersAsync.rejected, (state, action) => {
+                state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Search Chapters
+            .addCase(searchChaptersAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(searchChaptersAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                state.chapters = action.payload.data;
+                state.pagination = action.payload.meta;
+                state.error = null;
+            })
+            .addCase(searchChaptersAsync.rejected, (state, action) => {
                 state.loadingGet = false;
                 state.error = action.payload;
             })

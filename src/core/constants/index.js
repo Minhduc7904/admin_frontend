@@ -122,6 +122,7 @@ export const API_ENDPOINTS = {
   },
   CHAPTERS: {
     LIST: "/chapters",
+    SEARCH: "/chapters/search",
     DETAIL: (id) => `/chapters/${id}`,
     CREATE: "/chapters",
     UPDATE: (id) => `/chapters/${id}`,
@@ -333,6 +334,8 @@ export const API_ENDPOINTS = {
     UPDATE_MY_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/raw-content/my`,
     SPLIT_FROM_SESSION: (sessionId) => `/exam-import-sessions/${sessionId}/split-questions/my`,
     SPLIT_FROM_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/split-question/raw-content`,
+    CLASSIFY_CHAPTERS: (sessionId) => `/exam-import-sessions/${sessionId}/classify-chapters/my`,
+    MIGRATE: (sessionId) => `/exam-import-sessions/${sessionId}/migrate/my`,
   },
   TEMP_EXAM: {
     BY_SESSION: (sessionId) => `/temp-exams/session/${sessionId}`,

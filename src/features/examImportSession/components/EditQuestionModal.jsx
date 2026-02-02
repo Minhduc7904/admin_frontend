@@ -5,6 +5,8 @@ import { MarkdownEditorModal } from '../../../shared/components/markdown/Markdow
 import { Edit } from 'lucide-react';
 import { updateTempQuestionAsync } from '../../tempQuestion/store/tempQuestionSlice';
 import { QuestionType, Difficulty } from '../../../core/constants/question-constants';
+import { SubjectSearchSelect } from '../../subject/components/SubjectSearchSelect';
+import { ChapterSearchMultiSelect } from '../../chapter/components/ChapterSearchMultiSelect';
 
 export const EditQuestionModal = ({
     isOpen,
@@ -30,6 +32,8 @@ export const EditQuestionModal = ({
         processedContent: '',
         processedSolution: '',
         solutionYoutubeUrl: '',
+        subject: null,
+        chapters: [],
     });
 
     /* ------------------------------------------------------------------
@@ -48,6 +52,8 @@ export const EditQuestionModal = ({
                 processedContent: question.processedContent || '',
                 processedSolution: question.processedSolution || '',
                 solutionYoutubeUrl: question.solutionYoutubeUrl || '',
+                subject: question.subject || null,
+                chapters: question.chapters || [],
             });
             setErrors({});
         }
@@ -147,6 +153,8 @@ export const EditQuestionModal = ({
                     ? parseFloat(formData.pointsOrigin)
                     : undefined,
                 solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || undefined,
+                subjectId: formData.subject?.subjectId || undefined,
+                chapterIds: formData.chapters?.length > 0 ? formData.chapters.map(c => c.chapterId) : [],
 
                 ...(allowManualCorrectAnswer && {
                     correctAnswer:
@@ -269,7 +277,27 @@ export const EditQuestionModal = ({
                             </div>
                         </div>
 
-                        {/* ===== Row 1: Type - Difficulty - Grade - Points ===== */}
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            {/* Subject */}
+                            <SubjectSearchSelect
+                                label="Môn học"
+                                value={formData.subject}
+                                onSelect={(subject) => {
+                                    setFormData(prev => ({ ...prev, subject }))
+                                }}
+                                error={errors.subjectId}
+                            />
+
+                            {/* Chapters */}
+                            <ChapterSearchMultiSelect
+                                label="Chương"
+                                value={formData.chapters}
+                                onChange={(chapters) => setFormData(prev => ({ ...prev, chapters }))}
+                                error={errors.chapterIds}
+                            />
+                        </div>
+
+                        {/* Type - Difficulty - Grade - Points */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <Dropdown
                                 label="Loại câu hỏi"
@@ -315,7 +343,7 @@ export const EditQuestionModal = ({
                             />
                         </div>
 
-                        {/* ===== Row 2: Correct Answer (ONLY ESSAY / SHORT_ANSWER) ===== */}
+                        {/* Correct Answer (for ESSAY / SHORT_ANSWER only) */}
                         {(formData.type === QuestionType.ESSAY ||
                             formData.type === QuestionType.SHORT_ANSWER) && (
                                 <div className="max-w-md">
@@ -334,7 +362,7 @@ export const EditQuestionModal = ({
                                 </div>
                             )}
 
-                        {/* ===== YouTube Solution URL ===== */}
+                        {/* YouTube Solution URL */}
                         <div>
                             <Input
                                 name="solutionYoutubeUrl"

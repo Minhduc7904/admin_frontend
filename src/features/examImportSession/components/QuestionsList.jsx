@@ -1,4 +1,4 @@
-import { Loader2, Sparkles, Plus } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Wand2 } from 'lucide-react';
 import { QuestionCard } from './QuestionCard';
 
 export const QuestionsList = ({
@@ -11,6 +11,8 @@ export const QuestionsList = ({
     onDeleteQuestion,
     onDeleteStatement,
     onReorderStatements,
+    onClassifyChapters,
+    classifyChaptersLoading,
 }) => {
     const hasQuestions = questions && questions.length > 0;
 
@@ -30,24 +32,51 @@ export const QuestionsList = ({
                         </p>
                     </div>
 
-                    {onCreateQuestion && (
-                        <button
-                            onClick={onCreateQuestion}
-                            className="
-                                flex items-center gap-2
-                                px-3 py-2
-                                text-sm font-medium
-                                rounded border border-gray-300
-                                text-gray-700
-                                hover:bg-gray-100
-                                transition
-                            "
-                            title="Thêm câu hỏi mới"
-                        >
-                            <Plus size={16} />
-                            Thêm câu hỏi
-                        </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {onClassifyChapters && hasQuestions && (
+                            <button
+                                onClick={onClassifyChapters}
+                                disabled={classifyChaptersLoading}
+                                className="
+                                    flex items-center gap-2
+                                    px-3 py-2
+                                    text-sm font-medium
+                                    rounded border border-purple-300
+                                    text-purple-700 bg-purple-50
+                                    hover:bg-purple-100
+                                    disabled:opacity-50 disabled:cursor-not-allowed
+                                    transition
+                                "
+                                title="Phân loại chương tự động bằng AI"
+                            >
+                                {classifyChaptersLoading ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    <Wand2 size={16} />
+                                )}
+                                Phân loại chương AI
+                            </button>
+                        )}
+                        
+                        {onCreateQuestion && (
+                            <button
+                                onClick={onCreateQuestion}
+                                className="
+                                    flex items-center gap-2
+                                    px-3 py-2
+                                    text-sm font-medium
+                                    rounded border border-gray-300
+                                    text-gray-700
+                                    hover:bg-gray-100
+                                    transition
+                                "
+                                title="Thêm câu hỏi mới"
+                            >
+                                <Plus size={16} />
+                                Thêm câu hỏi
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 

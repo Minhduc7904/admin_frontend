@@ -23,6 +23,7 @@ import {
     MediaPreviewPanel,
     YouTubePreviewPanel,
 } from '../components';
+import { VISIBILITY } from '../../../core/constants';
 
 export const ExamImportSessionDetail = () => {
     const { id } = useParams();
@@ -38,7 +39,7 @@ export const ExamImportSessionDetail = () => {
         description: '',
         grade: '',
         subjectId: '',
-        visibility: 'PRIVATE',
+        visibility: VISIBILITY.PRIVATE,
         solutionYoutubeUrl: '',
     });
 
@@ -68,7 +69,7 @@ export const ExamImportSessionDetail = () => {
                 description: tempExam.description || '',
                 grade: tempExam.grade?.toString() || '',
                 subjectId: tempExam.subjectId?.toString() || '',
-                visibility: tempExam.visibility || 'PRIVATE',
+                visibility: tempExam.visibility || VISIBILITY.PRIVATE,
                 solutionYoutubeUrl: tempExam.solutionYoutubeUrl || '',
             });
         }
@@ -170,7 +171,7 @@ export const ExamImportSessionDetail = () => {
                 description: '',
                 grade: '',
                 subjectId: '',
-                visibility: 'PRIVATE',
+                visibility: VISIBILITY.PRIVATE,
                 solutionYoutubeUrl: '',
             });
             setErrors({});
@@ -188,7 +189,7 @@ export const ExamImportSessionDetail = () => {
             description: '',
             grade: '',
             subjectId: '',
-            visibility: 'PRIVATE',
+            visibility: VISIBILITY.PRIVATE,
             solutionYoutubeUrl: '',
         });
         setErrors({});
