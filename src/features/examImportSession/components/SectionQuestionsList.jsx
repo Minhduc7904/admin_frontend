@@ -99,7 +99,7 @@ export const SectionQuestionsList = ({
         return (
             <div 
                 className={`
-                    bg-white rounded-lg border-2 border-dashed p-8 transition-colors
+                    bg-white rounded-lg border-2 border-dashed p-8 transition-colors h-full
                     ${showDropZone ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}
                 `}
                 onDragOver={!isUncategorized ? onDragOver : undefined}
@@ -126,7 +126,7 @@ export const SectionQuestionsList = ({
     return (
         <div 
             className={`
-                space-y-4 rounded-lg border-2 border-dashed p-4 transition-colors
+                space-y-4 rounded-lg h-full border-2 border-dashed p-4 transition-colors
                 ${showDropZone ? 'border-blue-500 bg-blue-50' : 'border-transparent'}
             `}
             onDragOver={!isUncategorized ? onDragOver : undefined}

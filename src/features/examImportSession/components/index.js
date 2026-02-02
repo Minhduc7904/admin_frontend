@@ -21,3 +21,5 @@ export { EditQuestionModal } from './EditQuestionModal';
 export { EditStatementModal } from './EditStatementModal';
 export { CreateQuestionModal } from './CreateQuestionModal';
 export { CreateStatementModal } from './CreateStatementModal';
+export { YouTubePreviewPanel } from './YouTubePreviewPanel';
+export { YoutubePreview } from './YoutubePreview';

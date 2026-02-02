@@ -29,6 +29,7 @@ import { SectionDetailPanel } from '../components/SectionDetailPanel';
 import { SectionQuestionsList } from '../components/SectionQuestionsList';
 import { PreviewQuestionsList } from '../components/PreviewQuestionsList';
 import { TempSectionForm } from '../components/TempSectionForm';
+import { ExamPreview } from '../components/ExamPreview';
 import { ConfirmModal } from '../../../shared/components';
 
 export const PreviewConfirm = () => {
@@ -41,6 +42,9 @@ export const PreviewConfirm = () => {
     const [isEditingSection, setIsEditingSection] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [sectionToDelete, setSectionToDelete] = useState(null);
+    
+    // Right panel tab state: 'questions' | 'preview'
+    const [rightPanelTab, setRightPanelTab] = useState('questions');
     
     // Drag & drop state
     const [draggedQuestion, setDraggedQuestion] = useState(null);
@@ -138,14 +142,14 @@ export const PreviewConfirm = () => {
                 data: formData 
             })).unwrap();
 
-            // Success - close form and switch to new section
-            setIsCreatingSection(false);
-            
             // Reload sections to ensure UI is in sync
             await dispatch(getTempSectionsBySessionAsync(id));
             
-            // Switch to the newly created section
+            // Switch to the newly created section first
             setActiveTab(result.tempSectionId);
+            
+            // Then close form to show the new section
+            setIsCreatingSection(false);
         } catch (error) {
             // Error handling is done by asyncThunkHelper with toast
             console.error('Failed to create section:', error);
@@ -296,74 +300,115 @@ export const PreviewConfirm = () => {
     };
 
     return (
-        <div className="flex-1 grid grid-cols-2 gap-6 p-6 overflow-hidden">
-            {/* Left Panel - Section Details & Questions */}
-            <div className="flex flex-col gap-4 overflow-hidden ">
-                {/* Browser-like tabs */}
-                <SectionTabs
-                    sections={sortedSections}
-                    activeTab={activeTab}
-                    onTabChange={handleTabChange}
-                    onCreateSection={handleCreateSection}
-                    onCloseTab={handleCloseTab}
-                />
+        <div className="h-full flex flex-col">
+            <div className="flex-1 grid grid-cols-2 gap-6 overflow-hidden">
+                {/* Left Panel - Section Details & Questions */}
+                <div className="flex flex-col gap-4 min-h-0">
+                    {/* Browser-like tabs */}
+                    <SectionTabs
+                        sections={sortedSections}
+                        activeTab={activeTab}
+                        onTabChange={handleTabChange}
+                        onCreateSection={handleCreateSection}
+                        onCloseTab={handleCloseTab}
+                    />
 
-                {/* Scrollable content or Create Form */}
-                <div className="flex flex-col gap-6 overflow-y-auto bg-primary border border-border rounded-lg p-4 flex-1">
-                    {isCreatingSection ? (
-                        <TempSectionForm
-                            onSubmit={handleSubmitCreate}
-                            onCancel={handleCancelCreate}
-                            isSubmitting={createSectionLoading}
-                        />
-                    ) : isEditingSection ? (
-                        <TempSectionForm
-                            onSubmit={handleSubmitEdit}
-                            onCancel={handleCancelEdit}
-                            isSubmitting={updateSectionLoading}
-                            initialData={currentSection}
-                        />
-                    ) : (
-                        <>
-                            <SectionDetailPanel
-                                section={currentSection}
-                                questionsCount={filteredQuestions.length}
-                                onEdit={handleEditSection}
+                    {/* Scrollable content or Create Form */}
+                    <div className="flex flex-col gap-6 overflow-y-auto bg-primary border border-border rounded-lg p-4 flex-1 min-h-0">
+                        {isCreatingSection ? (
+                            <TempSectionForm
+                                onSubmit={handleSubmitCreate}
+                                onCancel={handleCancelCreate}
+                                isSubmitting={createSectionLoading}
                             />
+                        ) : isEditingSection ? (
+                            <TempSectionForm
+                                onSubmit={handleSubmitEdit}
+                                onCancel={handleCancelEdit}
+                                isSubmitting={updateSectionLoading}
+                                initialData={currentSection}
+                            />
+                        ) : (
+                            <>
+                                <SectionDetailPanel
+                                    section={currentSection}
+                                    questionsCount={filteredQuestions.length}
+                                    onEdit={handleEditSection}
+                                />
 
-                            <SectionQuestionsList
-                                questions={filteredQuestions}
-                                loading={tempQuestionsLoading || tempSectionsLoading}
-                                sectionTitle={currentSection?.title}
-                                isDragOver={isDragOverSection}
-                                onDragOver={handleSectionDragOver}
-                                onDragLeave={handleSectionDragLeave}
-                                onDrop={handleSectionDrop}
-                                draggedQuestionId={draggedQuestion?.tempQuestionId}
-                                onQuestionDragStart={handleQuestionDragStart}
-                                onQuestionDragEnd={handleQuestionDragEnd}
-                                isUncategorized={activeTab === null}
-                                onReorderQuestions={handleReorderQuestions}
-                                dragSource={dragSource}
-                            />
-                        </>
-                    )}
+                                <SectionQuestionsList
+                                    questions={filteredQuestions}
+                                    loading={tempQuestionsLoading || tempSectionsLoading}
+                                    sectionTitle={currentSection?.title}
+                                    isDragOver={isDragOverSection}
+                                    onDragOver={handleSectionDragOver}
+                                    onDragLeave={handleSectionDragLeave}
+                                    onDrop={handleSectionDrop}
+                                    draggedQuestionId={draggedQuestion?.tempQuestionId}
+                                    onQuestionDragStart={handleQuestionDragStart}
+                                    onQuestionDragEnd={handleQuestionDragEnd}
+                                    isUncategorized={activeTab === null}
+                                    onReorderQuestions={handleReorderQuestions}
+                                    dragSource={dragSource}
+                                />
+                            </>
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            {/* Right Panel - Uncategorized Questions Only */}
-            <div className="flex flex-col overflow-y-auto">
-                <PreviewQuestionsList
-                    loading={tempQuestionsLoading}
-                    questions={uncategorizedQuestions}
-                    draggedQuestionId={draggedQuestion?.tempQuestionId}
-                    onDragStart={handleQuestionDragStart}
-                    onDragEnd={handleQuestionDragEnd}
-                    isDragOver={isDragOverUncategorized}
-                    onDragOver={handleUncategorizedDragOver}
-                    onDragLeave={handleUncategorizedDragLeave}
-                    onDrop={handleUncategorizedDrop}
-                />
+                {/* Right Panel - Tabs and Content */}
+                <div className="flex flex-col min-h-0 gap-4">
+                    {/* Tab Switcher */}
+                    <div className="flex gap-2 border-b border-border">
+                        <button
+                            onClick={() => setRightPanelTab('questions')}
+                            className={`
+                                px-4 py-2 font-medium text-sm transition-colors
+                                ${rightPanelTab === 'questions'
+                                    ? 'text-blue-600 border-b-2 border-blue-600'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                }
+                            `}
+                        >
+                            Danh sách câu hỏi
+                        </button>
+                        <button
+                            onClick={() => setRightPanelTab('preview')}
+                            className={`
+                                px-4 py-2 font-medium text-sm transition-colors
+                                ${rightPanelTab === 'preview'
+                                    ? 'text-blue-600 border-b-2 border-blue-600'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                }
+                            `}
+                        >
+                            Preview đề thi
+                        </button>
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                        {rightPanelTab === 'questions' ? (
+                            <PreviewQuestionsList
+                                loading={tempQuestionsLoading}
+                                questions={uncategorizedQuestions}
+                                draggedQuestionId={draggedQuestion?.tempQuestionId}
+                                onDragStart={handleQuestionDragStart}
+                                onDragEnd={handleQuestionDragEnd}
+                                isDragOver={isDragOverUncategorized}
+                                onDragOver={handleUncategorizedDragOver}
+                                onDragLeave={handleUncategorizedDragLeave}
+                                onDrop={handleUncategorizedDrop}
+                            />
+                        ) : (
+                            <ExamPreview
+                                tempSections={sortedSections}
+                                tempQuestions={tempQuestions}
+                                loading={tempQuestionsLoading || tempSectionsLoading}
+                            />
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Delete Section Confirmation Modal */}

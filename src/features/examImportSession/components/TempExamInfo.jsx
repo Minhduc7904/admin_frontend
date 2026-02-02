@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FileText, Edit2, X, File, Video } from 'lucide-react';
+import { FileText, Edit2, X, File, Video, Youtube } from 'lucide-react';
 import { Button } from '../../../shared/components';
 import { ENTITY_TYPES, TEMP_EXAM_FIELDS } from '../../../shared/constants';
 import { MediaPickerModal } from '../../media/components/mediaPicker/MediaPickerModal';
@@ -15,7 +15,7 @@ import {
     selectMediaUsageLoadingDetach,
 } from '../../mediaUsage/store/mediaUsageSlice';
 
-export const TempExamInfo = ({ tempExam, onEdit, onMediaClick }) => {
+export const TempExamInfo = ({ tempExam, onEdit, onMediaClick, onYoutubeClick }) => {
     const dispatch = useDispatch();
     const [modalState, setModalState] = useState({
         isOpen: false,
@@ -283,7 +283,30 @@ export const TempExamInfo = ({ tempExam, onEdit, onMediaClick }) => {
                     onUploadClick={handleOpenModal}
                     renderItem={renderVideoItem}
                 />
-
+                {/* YouTube Solution URL */}
+                {tempExam.solutionYoutubeUrl && (
+                    <div>
+                        <label className="text-sm font-medium text-foreground-light mb-2 block">
+                            Link YouTube hướng dẫn giải
+                        </label>
+                        <div
+                            onClick={() => onYoutubeClick?.(tempExam.solutionYoutubeUrl)}
+                            className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 cursor-pointer transition-colors group"
+                        >
+                            <div className="flex-shrink-0 w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center group-hover:bg-red-600 transition-colors">
+                                <Youtube className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-foreground">
+                                    Video hướng dẫn giải bài
+                                </p>
+                                <p className="text-xs text-foreground-light truncate">
+                                    {tempExam.solutionYoutubeUrl}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="pt-4 border-t border-border">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>

@@ -55,12 +55,14 @@ export const MarkdownRenderer = ({ content, className = '', components: customCo
             }
             
             return (
-                <img
-                    className="markdown-image"
-                    loading="lazy"
-                    {...props}
-                    alt={props.alt || 'Image'}
-                />
+                <div className="flex justify-center my-4">
+                    <img
+                        className="markdown-image max-w-full max-h-[600px] object-contain"
+                        loading="lazy"
+                        {...props}
+                        alt={props.alt || 'Image'}
+                    />
+                </div>
             );
         },
         // Custom rendering for tables

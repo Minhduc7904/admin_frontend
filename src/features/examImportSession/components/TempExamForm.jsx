@@ -85,6 +85,17 @@ export const TempExamForm = ({
                         error={errors.visibility}
                     />
                 </div>
+
+                <div>
+                    <Input
+                        error={errors.solutionYoutubeUrl}
+                        name="solutionYoutubeUrl"
+                        label="Link YouTube hướng dẫn giải"
+                        value={formData.solutionYoutubeUrl}
+                        onChange={onChange}
+                        placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                </div>
             </div>
 
             <div className="pt-6 flex gap-3 border-t border-border mt-auto">

@@ -8,9 +8,11 @@ import {
 import {
     getTempExamBySessionAsync,
     createTempExamAsync,
+    updateTempExamAsync,
     selectCurrentTempExam,
     selectTempExamLoadingGet,
     selectTempExamLoadingCreate,
+    selectTempExamLoadingUpdate,
     clearCurrentTempExam,
 } from '../../examTemp/store/tempExamSlice';
 import {
@@ -19,6 +21,7 @@ import {
     TempExamEmptyState,
     ExamProcessing,
     MediaPreviewPanel,
+    YouTubePreviewPanel,
 } from '../components';
 
 export const ExamImportSessionDetail = () => {
@@ -29,12 +32,14 @@ export const ExamImportSessionDetail = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [errors, setErrors] = useState({});
     const [selectedMedia, setSelectedMedia] = useState(null);
+    const [selectedYoutubeUrl, setSelectedYoutubeUrl] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         grade: '',
         subjectId: '',
         visibility: 'PRIVATE',
+        solutionYoutubeUrl: '',
     });
 
     const session = useSelector(selectCurrentExamImportSession);
@@ -43,6 +48,7 @@ export const ExamImportSessionDetail = () => {
     const tempExam = useSelector(selectCurrentTempExam);
     const tempExamLoading = useSelector(selectTempExamLoadingGet);
     const tempExamCreating = useSelector(selectTempExamLoadingCreate);
+    const tempExamUpdating = useSelector(selectTempExamLoadingUpdate);
 
     // Load TempExam by SessionId
     useEffect(() => {
@@ -63,6 +69,7 @@ export const ExamImportSessionDetail = () => {
                 grade: tempExam.grade?.toString() || '',
                 subjectId: tempExam.subjectId?.toString() || '',
                 visibility: tempExam.visibility || 'PRIVATE',
+                solutionYoutubeUrl: tempExam.solutionYoutubeUrl || '',
             });
         }
     }, [isEditing, tempExam]);
@@ -111,6 +118,7 @@ export const ExamImportSessionDetail = () => {
             grade: formData.grade ? Number(formData.grade) : undefined,
             subjectId: formData.subjectId ? Number(formData.subjectId) : undefined,
             visibility: formData.visibility,
+            solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || undefined,
         };
 
         const result = await dispatch(createTempExamAsync({
@@ -126,8 +134,49 @@ export const ExamImportSessionDetail = () => {
                 grade: '',
                 subjectId: '',
                 visibility: 'PRIVATE',
+                solutionYoutubeUrl: '',
             });
             setErrors({});
+        }
+    };
+
+    const handleUpdateTempExam = async () => {
+        const validationErrors = validateTempExam(formData);
+        
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
+        const payload = {
+            title: formData.title.trim(),
+            description: formData.description?.trim() || undefined,
+            grade: formData.grade ? Number(formData.grade) : undefined,
+            subjectId: formData.subjectId ? Number(formData.subjectId) : undefined,
+            visibility: formData.visibility,
+            solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || undefined,
+        };
+
+        const result = await dispatch(updateTempExamAsync({
+            tempExamId: tempExam.tempExamId,
+            data: payload,
+        }));
+
+        if (result.type.endsWith('/fulfilled')) {
+            setShowForm(false);
+            setIsEditing(false);
+            setFormData({
+                title: '',
+                description: '',
+                grade: '',
+                subjectId: '',
+                visibility: 'PRIVATE',
+                solutionYoutubeUrl: '',
+            });
+            setErrors({});
+            
+            // Reload tempExam to get updated data
+            dispatch(getTempExamBySessionAsync(id));
         }
     };
 
@@ -140,6 +189,7 @@ export const ExamImportSessionDetail = () => {
             grade: '',
             subjectId: '',
             visibility: 'PRIVATE',
+            solutionYoutubeUrl: '',
         });
         setErrors({});
     };
@@ -166,6 +216,16 @@ export const ExamImportSessionDetail = () => {
         setSelectedMedia(null);
     };
 
+    const handleYoutubeClick = (url) => {
+        setSelectedYoutubeUrl(url);
+        setSelectedMedia(null);
+        setShowForm(false);
+    };
+
+    const handleCloseYoutube = () => {
+        setSelectedYoutubeUrl(null);
+    };
+
     if (sessionLoading || tempExamLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -188,13 +248,19 @@ export const ExamImportSessionDetail = () => {
                         tempExam={tempExam}
                         onEdit={handleEditClick}
                         onMediaClick={handleMediaClick}
+                        onYoutubeClick={handleYoutubeClick}
                     />
                 )}
             </div>
 
             {/* Right Side - Form or Processing or Preview */}
             <div className="flex flex-col h-full overflow-y-auto">
-                {selectedMedia ? (
+                {selectedYoutubeUrl ? (
+                    <YouTubePreviewPanel
+                        youtubeUrl={selectedYoutubeUrl}
+                        onClose={handleCloseYoutube}
+                    />
+                ) : selectedMedia ? (
                     <MediaPreviewPanel
                         media={selectedMedia}
                         onClose={handleClosePreview}
@@ -203,9 +269,9 @@ export const ExamImportSessionDetail = () => {
                     <TempExamForm
                         formData={formData}
                         onChange={handleInputChange}
-                        onSubmit={handleCreateTempExam}
+                        onSubmit={isEditing ? handleUpdateTempExam : handleCreateTempExam}
                         onCancel={handleCancelForm}
-                        isSubmitting={tempExamCreating}
+                        isSubmitting={isEditing ? tempExamUpdating : tempExamCreating}
                         errors={errors}
                         isEditing={isEditing}
                         onGradeChange={(value) => {

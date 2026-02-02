@@ -29,6 +29,7 @@ export const EditQuestionModal = ({
         correctAnswer: '',
         processedContent: '',
         processedSolution: '',
+        solutionYoutubeUrl: '',
     });
 
     /* ------------------------------------------------------------------
@@ -46,6 +47,7 @@ export const EditQuestionModal = ({
                 correctAnswer: question.correctAnswer || '',
                 processedContent: question.processedContent || '',
                 processedSolution: question.processedSolution || '',
+                solutionYoutubeUrl: question.solutionYoutubeUrl || '',
             });
             setErrors({});
         }
@@ -144,6 +146,7 @@ export const EditQuestionModal = ({
                 pointsOrigin: formData.pointsOrigin
                     ? parseFloat(formData.pointsOrigin)
                     : undefined,
+                solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || undefined,
 
                 ...(allowManualCorrectAnswer && {
                     correctAnswer:
@@ -330,6 +333,18 @@ export const EditQuestionModal = ({
                                     />
                                 </div>
                             )}
+
+                        {/* ===== YouTube Solution URL ===== */}
+                        <div>
+                            <Input
+                                name="solutionYoutubeUrl"
+                                label="Link YouTube hướng dẫn giải"
+                                value={formData.solutionYoutubeUrl}
+                                onChange={handleChange}
+                                error={errors.solutionYoutubeUrl}
+                                placeholder="https://www.youtube.com/watch?v=..."
+                            />
+                        </div>
                     </div>
 
                     <div className="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">

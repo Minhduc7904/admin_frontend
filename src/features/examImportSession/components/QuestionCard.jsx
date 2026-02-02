@@ -13,6 +13,7 @@ import {
 import { QuestionContent } from './QuestionContent';
 import { QuestionSolution } from './QuestionSolution';
 import { StatementList } from './StatementList';
+import { YoutubePreview } from './YoutubePreview';
 
 export const QuestionCard = ({
     question,
@@ -118,6 +119,11 @@ export const QuestionCard = ({
                     onCreateStatement={onCreateStatement}
                     onReorderStatements={onReorderStatements}
                 />
+
+                {/* ================= YouTube Solution ================= */}
+                {question.solutionYoutubeUrl && (
+                    <YoutubePreview youtubeUrl={question.solutionYoutubeUrl} />
+                )}
 
                 {/* ================= Solution ================= */}
                 <QuestionSolution
