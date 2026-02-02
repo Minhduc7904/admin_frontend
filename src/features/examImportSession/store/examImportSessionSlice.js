@@ -9,6 +9,7 @@ const initialState = {
     sessions: [],
     currentSession: null,
     rawContent: null,
+    splitResult: null, // Kết quả tách câu hỏi
 
     pagination: {
         page: 1,
@@ -23,6 +24,7 @@ const initialState = {
     loadingCreate: false,
     loadingRawContent: false,
     loadingUpdateRawContent: false,
+    loadingSplit: false, // Loading cho việc tách câu hỏi
 
     error: null,
 
@@ -109,6 +111,38 @@ export const updateSessionRawContentAsync = createAsyncThunk(
     }
 );
 
+// ===== SPLIT FROM SESSION =====
+export const splitExamFromSessionAsync = createAsyncThunk(
+    "examImportSession/splitFromSession",
+    async (sessionId, thunkAPI) => {
+        return handleAsyncThunk(
+            () => examImportSessionApi.splitFromSession(sessionId),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Tách câu hỏi thành công",
+                errorTitle: "Lỗi tách câu hỏi từ session",
+            }
+        );
+    }
+);
+
+// ===== SPLIT FROM RAW CONTENT =====
+export const splitExamFromRawContentAsync = createAsyncThunk(
+    "examImportSession/splitFromRawContent",
+    async ({ sessionId, rawContent }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => examImportSessionApi.splitFromRawContent(sessionId, rawContent),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Tách câu hỏi thành công",
+                errorTitle: "Lỗi tách câu hỏi",
+            }
+        );
+    }
+);
+
 /* =========================
    Slice
 ========================= */
@@ -127,6 +161,9 @@ export const examImportSessionSlice = createSlice({
         },
         clearRawContent: (state) => {
             state.rawContent = null;
+        },
+        clearSplitResult: (state) => {
+            state.splitResult = null;
         },
         setPagination: (state, action) => {
             state.pagination = { ...state.pagination, ...action.payload };
@@ -208,6 +245,36 @@ export const examImportSessionSlice = createSlice({
             .addCase(updateSessionRawContentAsync.rejected, (state, action) => {
                 state.loadingUpdateRawContent = false;
                 state.error = action.payload;
+            })
+
+            // ===== SPLIT FROM SESSION =====
+            .addCase(splitExamFromSessionAsync.pending, (state) => {
+                state.loadingSplit = true;
+                state.error = null;
+                state.splitResult = null;
+            })
+            .addCase(splitExamFromSessionAsync.fulfilled, (state, action) => {
+                state.loadingSplit = false;
+                state.splitResult = action.payload.data;
+            })
+            .addCase(splitExamFromSessionAsync.rejected, (state, action) => {
+                state.loadingSplit = false;
+                state.error = action.payload;
+            })
+
+            // ===== SPLIT FROM RAW CONTENT (PREVIEW) =====
+            .addCase(splitExamFromRawContentAsync.pending, (state) => {
+                state.loadingSplit = true;
+                state.error = null;
+                state.splitResult = null;
+            })
+            .addCase(splitExamFromRawContentAsync.fulfilled, (state, action) => {
+                state.loadingSplit = false;
+                state.splitResult = action.payload.data;
+            })
+            .addCase(splitExamFromRawContentAsync.rejected, (state, action) => {
+                state.loadingSplit = false;
+                state.error = action.payload;
             });
     },
 });
@@ -222,6 +289,7 @@ export const {
     clearRawContent,
     setPagination,
     resetPagination,
+    clearSplitResult,
 } = examImportSessionSlice.actions;
 
 export const selectExamImportSessions = (state) => state.examImportSession.sessions;
@@ -234,5 +302,8 @@ export const selectExamImportSessionLoadingCreate = (state) => state.examImportS
 export const selectExamImportSessionLoadingRawContent = (state) => state.examImportSession.loadingRawContent;
 export const selectExamImportSessionLoadingUpdateRawContent = (state) => state.examImportSession.loadingUpdateRawContent;
 export const selectExamImportSessionError = (state) => state.examImportSession.error;
+export const selectExamImportSessionSplitResult = (state) => state.examImportSession.splitResult;
+export const selectExamImportSessionLoadingSplit = (state) => state.examImportSession.loadingSplit;
+
 
 export default examImportSessionSlice.reducer;

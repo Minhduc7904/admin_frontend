@@ -88,7 +88,16 @@ export const MarkdownRenderer = ({ content, className = '', components: customCo
         <div className={`markdown-renderer ${className}`}>
             <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeRaw, rehypeKatex]}
+                rehypePlugins={[
+                    rehypeRaw, 
+                    [rehypeKatex, { 
+                        strict: false,
+                        trust: true,
+                        throwOnError: false,
+                        errorColor: '#cc0000',
+                        output: 'html'
+                    }]
+                ]}
                 components={{
                     ...defaultComponents,
                     ...customComponents,

@@ -2,6 +2,8 @@ import { Outlet } from 'react-router-dom';
 import { ExamImportSessionLayout } from '../features/examImportSession/layouts/ExamImportSessionLayout';
 import { ExamImportSessionDetail } from '../features/examImportSession/pages/ExamImportSessionDetail';
 import { UploadPdfExtraction } from '../features/examImportSession/pages/UploadPdfExtraction';
+import { ProcessQuestions } from '../features/examImportSession/pages/ProcessQuestions';
+import { PreviewConfirm } from '../features/examImportSession/pages/PreviewConfirm';
 import { ROUTES } from '../core/constants';
 
 export const examImportSessionRouter = [
@@ -20,6 +22,14 @@ export const examImportSessionRouter = [
             {
                 path: 'upload',
                 element: <UploadPdfExtraction />,
+            },
+            {
+                path: 'process',
+                element: <ProcessQuestions />,
+            },
+            {
+                path: 'preview',
+                element: <PreviewConfirm />,
             },
         ],
     },

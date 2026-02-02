@@ -3,11 +3,11 @@ import { API_BASE_URL, STORAGE_KEYS, ROUTES } from "../constants";
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 600000, // 600 giây
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
-});
+})
 
 // Request interceptor
 axiosClient.interceptors.request.use(

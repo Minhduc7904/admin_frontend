@@ -16,7 +16,7 @@ export const AdminLayout = ({ children }) => {
         {!isProfilePage && <AdminSidebar />}
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-y-auto h-[calc(100vh-73.5px)] p-6">
           {children}
         </main>
       </div>

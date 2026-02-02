@@ -51,4 +51,25 @@ export const examImportSessionApi = {
       rawContent,
     });
   },
+
+  /**
+   * Split questions from session's raw content
+   * @param {string} sessionId - Session ID
+   * @returns {Promise}
+   */
+  splitFromSession(sessionId) {
+    return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.SPLIT_FROM_SESSION(sessionId));
+  },
+
+  /**
+   * Split questions from provided raw content for a specific session
+   * @param {number} sessionId - Session ID
+   * @param {string} rawContent - Raw content to split
+   * @returns {Promise}
+   */
+  splitFromRawContent(sessionId, rawContent) {
+    return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.SPLIT_FROM_RAW_CONTENT(sessionId), {
+      rawContent,
+    });
+  },
 };

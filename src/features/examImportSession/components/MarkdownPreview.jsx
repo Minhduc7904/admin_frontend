@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { FileText, Eye, Code, Edit } from 'lucide-react'
-import { MarkdownRenderer, MarkdownEditorModal, Button } from '../../../shared/components'
+import { FileText, Edit } from 'lucide-react'
+import { MarkdownRenderer, MarkdownEditorModal, Button, ViewModeToggle } from '../../../shared/components'
 
 export const MarkdownPreview = ({ 
   rawContent, 
@@ -50,33 +50,10 @@ export const MarkdownPreview = ({
             </Button>
 
             {/* View mode toggle */}
-            <div className="flex items-center gap-1 bg-gray-100 rounded p-0.5">
-              <button
-                onClick={() => setViewMode('preview')}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
-                  viewMode === 'preview'
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-foreground-light hover:text-foreground'
-                }`}
-                title="Xem dạng markdown"
-              >
-                <Eye className="w-3 h-3" />
-                Preview
-              </button>
-
-              <button
-                onClick={() => setViewMode('text')}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
-                  viewMode === 'text'
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-foreground-light hover:text-foreground'
-                }`}
-                title="Xem dạng text thô"
-              >
-                <Code className="w-3 h-3" />
-                Text
-              </button>
-            </div>
+            <ViewModeToggle 
+              viewMode={viewMode} 
+              onChange={setViewMode} 
+            />
 
             {/* Metadata */}
             {metadata && (

@@ -26,13 +26,13 @@ const STEPS = [
         key: 'process',
         label: 'Xử lý câu hỏi',
         icon: Settings,
-        path: '/exam/import/process',
+        path: ROUTES.EXAM_IMPORT_SESSION_PROCESS(),
     },
     {
         key: 'preview',
         label: 'Xem trước & xác nhận',
         icon: Eye,
-        path: '/exam/import/preview',
+        path: ROUTES.EXAM_IMPORT_SESSION_PREVIEW(),
     },
 ]
 
@@ -47,6 +47,12 @@ export const ExamImportSessionSidebar = () => {
         }
         if (step.key === 'upload') {
             return ROUTES.EXAM_IMPORT_SESSION_UPLOAD(id)
+        }
+        if (step.key === 'process') {
+            return ROUTES.EXAM_IMPORT_SESSION_PROCESS(id)
+        }
+        if (step.key === 'preview') {
+            return ROUTES.EXAM_IMPORT_SESSION_PREVIEW(id)
         }
         return step.path
     }

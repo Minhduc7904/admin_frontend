@@ -21,6 +21,7 @@ export { Textarea } from './Textarea'
 export { RightPanel } from './RightPanel';
 export { Slider } from './Slider';
 export { Tooltip } from './Tooltip';
+export { ViewModeToggle } from './ViewModeToggle';
 
 // Empty states
 export * from '../empty';

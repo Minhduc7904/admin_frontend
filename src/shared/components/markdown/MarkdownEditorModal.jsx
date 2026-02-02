@@ -92,10 +92,10 @@ export const MarkdownEditorModal = ({
       // Get view URL
       const result = await dispatch(getMyViewUrlAsync({ id: mediaId, expiry: 3600 })).unwrap()
       const viewUrl = result.data.viewUrl
-      
+
       // Insert markdown image syntax
       const imageMarkdown = `![media:${mediaId}](${viewUrl})`
-      
+
       // Insert at cursor position or append
       if (cursorPosition !== null) {
         const before = value.substring(0, cursorPosition)
@@ -104,7 +104,7 @@ export const MarkdownEditorModal = ({
       } else {
         setValue(value + '\n' + imageMarkdown)
       }
-      
+
       setIsMediaPickerOpen(false)
       setCursorPosition(null)
     } catch (error) {
@@ -122,7 +122,7 @@ export const MarkdownEditorModal = ({
       title="Chỉnh sửa nội dung Markdown"
       size="max"
     >
-      <div className="flex flex-col h-[85vh]">
+      <div className="flex flex-col h-[80vh]">
         {/* ---------------- Split View ---------------- */}
         <div className="flex-1 grid grid-cols-2 gap-4 overflow-hidden">
           {/* ================= Editor ================= */}

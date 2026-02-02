@@ -71,6 +71,8 @@ export const ROUTES = {
   EXAM_IMPORT_SESSIONS: '/exam-import-sessions',
   EXAM_IMPORT_SESSION_DETAIL: (id = ':id') => `/exam-import-sessions/${id}`,
   EXAM_IMPORT_SESSION_UPLOAD: (id = ':id') => `/exam-import-sessions/${id}/upload`,
+  EXAM_IMPORT_SESSION_PROCESS: (id = ':id') => `/exam-import-sessions/${id}/process`,
+  EXAM_IMPORT_SESSION_PREVIEW: (id = ':id') => `/exam-import-sessions/${id}/preview`,
 };
 
 // API Endpoints
@@ -329,11 +331,36 @@ export const API_ENDPOINTS = {
     CREATE: "/exam-import-sessions",
     MY_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/raw-content/my`,
     UPDATE_MY_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/raw-content/my`,
+    SPLIT_FROM_SESSION: (sessionId) => `/exam-import-sessions/${sessionId}/split-questions/my`,
+    SPLIT_FROM_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/split-question/raw-content`,
   },
   TEMP_EXAM: {
     BY_SESSION: (sessionId) => `/temp-exams/session/${sessionId}`,
     CREATE: (sessionId) => `/temp-exams/session/${sessionId}`,
     UPDATE: (tempExamId) => `/temp-exams/${tempExamId}`,
+  },
+  TEMP_SECTION: {
+    BY_SESSION: (sessionId) => `/temp-sections/session/${sessionId}`,
+    BY_ID: (tempSectionId) => `/temp-sections/${tempSectionId}`,
+    CREATE: (sessionId) => `/temp-sections/session/${sessionId}`,
+    UPDATE: (tempSectionId) => `/temp-sections/${tempSectionId}`,
+    DELETE: (tempSectionId) => `/temp-sections/${tempSectionId}`,
+    REORDER: '/temp-sections/reorder',
+  },
+  TEMP_QUESTION: {
+    BY_SESSION: (sessionId) => `/temp-questions/session/${sessionId}`,
+    BY_ID: (tempQuestionId) => `/temp-questions/${tempQuestionId}`,
+    CREATE: (sessionId) => `/temp-questions/session/${sessionId}`,
+    UPDATE: (tempQuestionId) => `/temp-questions/${tempQuestionId}`,
+    DELETE: (tempQuestionId) => `/temp-questions/${tempQuestionId}`,
+    REORDER: '/temp-questions/reorder',
+    LINK_SECTION: (tempQuestionId) => `/temp-questions/${tempQuestionId}/link-section`,
+  },
+  TEMP_STATEMENT: {
+    CREATE: (tempQuestionId) => `/temp-statements/question/${tempQuestionId}`,
+    UPDATE: (tempStatementId) => `/temp-statements/${tempStatementId}`,
+    DELETE: (tempStatementId) => `/temp-statements/${tempStatementId}`,
+    REORDER: '/temp-statements/reorder',
   },
 };
 
