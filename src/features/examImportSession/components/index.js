@@ -22,4 +22,4 @@ export { EditStatementModal } from './EditStatementModal';
 export { CreateQuestionModal } from './CreateQuestionModal';
 export { CreateStatementModal } from './CreateStatementModal';
 export { YouTubePreviewPanel } from './YouTubePreviewPanel';
-export { YoutubePreview } from './YoutubePreview';
+export { YoutubePreview } from '../../media/components/previews/YoutubePreview';

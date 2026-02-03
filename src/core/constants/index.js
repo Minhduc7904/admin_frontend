@@ -73,6 +73,8 @@ export const ROUTES = {
   EXAM_IMPORT_SESSION_UPLOAD: (id = ':id') => `/exam-import-sessions/${id}/upload`,
   EXAM_IMPORT_SESSION_PROCESS: (id = ':id') => `/exam-import-sessions/${id}/process`,
   EXAM_IMPORT_SESSION_PREVIEW: (id = ':id') => `/exam-import-sessions/${id}/preview`,
+  QUESTIONS: '/questions',
+  EXAMS: '/exams',
 };
 
 // API Endpoints
@@ -364,6 +366,20 @@ export const API_ENDPOINTS = {
     UPDATE: (tempStatementId) => `/temp-statements/${tempStatementId}`,
     DELETE: (tempStatementId) => `/temp-statements/${tempStatementId}`,
     REORDER: '/temp-statements/reorder',
+  },
+  QUESTIONS: {
+    LIST: "/questions",
+    DETAIL: (id) => `/questions/${id}`,
+    CREATE: "/questions",
+    UPDATE: (id) => `/questions/${id}`,
+    DELETE: (id) => `/questions/${id}`,
+  },
+  EXAMS: {
+    LIST: "/exams",
+    DETAIL: (id) => `/exams/${id}`,
+    CREATE: "/exams",
+    UPDATE: (id) => `/exams/${id}`,
+    DELETE: (id) => `/exams/${id}`,
   },
 };
 

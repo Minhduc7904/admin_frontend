@@ -20,7 +20,7 @@ import './markdown-styles.css';
  * @param {string} className - Additional CSS classes
  * @param {object} components - Custom component renderers
  */
-export const MarkdownRenderer = ({ content, className = '', components: customComponents }) => {
+export const MarkdownRenderer = ({ content, className = '', components: customComponents, imgClassNameSize = 'max-w-full max-h-[600px]' }) => {
     if (!content) {
         return null;
     }
@@ -57,7 +57,7 @@ export const MarkdownRenderer = ({ content, className = '', components: customCo
             return (
                 <div className="flex justify-center my-4">
                     <img
-                        className="markdown-image max-w-full max-h-[600px] object-contain"
+                        className={`markdown-image object-contain ${imgClassNameSize}`}
                         loading="lazy"
                         {...props}
                         alt={props.alt || 'Image'}

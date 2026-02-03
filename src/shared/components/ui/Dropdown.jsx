@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { createPortal } from 'react-dom'
 import { ChevronDown, Check } from 'lucide-react'
 
 export const Dropdown = ({
@@ -18,19 +17,16 @@ export const Dropdown = ({
     className = '',
 }) => {
     const [isOpen, setIsOpen] = useState(false)
-    const [menuStyle, setMenuStyle] = useState({})
-    const triggerRef = useRef(null)
+    const containerRef = useRef(null)
     const menuRef = useRef(null)
     const dropdownId = id || name
 
-    // Click outside (trigger + menu)
+    // Click outside
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (
-                triggerRef.current &&
-                !triggerRef.current.contains(e.target) &&
-                menuRef.current &&
-                !menuRef.current.contains(e.target)
+                containerRef.current &&
+                !containerRef.current.contains(e.target)
             ) {
                 setIsOpen(false)
             }
@@ -40,25 +36,6 @@ export const Dropdown = ({
         return () =>
             document.removeEventListener('mousedown', handleClickOutside)
     }, [])
-
-    // Calculate menu position
-    useEffect(() => {
-        if (!isOpen || !triggerRef.current) return
-
-        const rect = triggerRef.current.getBoundingClientRect()
-
-        const top = dropUp
-            ? rect.top
-            : rect.bottom
-
-        setMenuStyle({
-            position: 'fixed',
-            top: dropUp ? rect.top - 4 : rect.bottom + 4,
-            left: rect.left,
-            width: rect.width,
-            zIndex: 9999,
-        })
-    }, [isOpen, dropUp])
 
     const selectedOption = options.find((opt) => opt.value === value)
 
@@ -79,16 +56,16 @@ export const Dropdown = ({
                 </label>
             )}
 
-            {/* Trigger */}
-            <button
-                ref={triggerRef}
+            <div ref={containerRef} className="relative">
+                {/* Trigger */}
+                <button
                 id={dropdownId}
                 type="button"
                 onClick={() => !disabled && setIsOpen((v) => !v)}
                 disabled={disabled}
                 className={`
                     w-full flex items-center justify-between px-3 py-2 text-sm border rounded-sm
-                    focus:outline-none
+                    focus:outline-none truncate
                     ${error
                         ? 'border-red-500'
                         : 'border-border focus:border-foreground'}
@@ -111,22 +88,21 @@ export const Dropdown = ({
 
                 <ChevronDown
                     size={16}
-                    className={`text-foreground-lighter transition-transform ${isOpen ? 'rotate-180' : ''
+                    className={`text-foreground-lighter shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''
                         }`}
                 />
             </button>
 
-            {/* Portal menu */}
-            {isOpen &&
-                !disabled &&
-                createPortal(
+                {/* Menu */}
+                {isOpen && !disabled && (
                     <div
                         ref={menuRef}
-                        style={menuStyle}
-                        className="
+                        className={`
+                            absolute ${dropUp ? 'bottom-full mb-1' : 'top-full mt-1'}
+                            left-0 right-0 z-50
                             bg-primary border border-border rounded-sm shadow-lg
                             max-h-60 overflow-y-auto
-                        "
+                        `}
                     >
                         {options.map((option) => (
                             <button
@@ -155,11 +131,9 @@ export const Dropdown = ({
                                 )}
                             </button>
                         ))}
-                    </div>,
-                    document.body,
+                    </div>
                 )}
-
-            {/* Error / Helper */}
+            </div>
             {error && (
                 <p className="text-xs text-red-500 mt-1">{error}</p>
             )}

@@ -13,7 +13,7 @@ import {
 import { QuestionContent } from './QuestionContent';
 import { QuestionSolution } from './QuestionSolution';
 import { StatementList } from './StatementList';
-import { YoutubePreview } from './YoutubePreview';
+import { YoutubePreview } from '../../media/components/previews/YoutubePreview';
 
 export const QuestionCard = ({
     question,

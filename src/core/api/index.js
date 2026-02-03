@@ -27,3 +27,5 @@ export { homeworkSubmitApi } from './homeworkSubmitApi';
 export { lessonLearningItemApi } from './lessonLearningItemApi';
 export { notificationApi } from './notificationApi';
 export { tuitionPaymentApi } from './tuitionPaymentApi';
+export { questionApi } from './questionApi';
+export { examApi } from './examApi';

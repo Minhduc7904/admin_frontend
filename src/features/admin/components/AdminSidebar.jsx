@@ -160,6 +160,26 @@ export const AdminSidebar = () => {
     },
 
     {
+      label: 'Quản lý đề thi',
+      items: [
+        {
+          key: 'questions',
+          name: 'Danh sách câu hỏi',
+          href: ROUTES.QUESTIONS,
+          icon: FileQuestion,
+          // permission: PERMISSIONS.QUESTION_VIEW_MANAGEMENT,
+        },
+        {
+          key: 'exams',
+          name: 'Danh sách đề thi',
+          href: ROUTES.EXAMS,
+          icon: FileText,
+          // permission: PERMISSIONS.EXAM_VIEW_MANAGEMENT,
+        },
+      ],
+    },
+
+    {
       label: 'Đề thi và câu hỏi',
       items: [
         {

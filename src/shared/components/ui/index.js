@@ -3,6 +3,7 @@ export { Badge } from './Badge';
 export { Checkbox } from './Checkbox';
 export { Input } from './Input';
 export { PasswordInput } from './PasswordInput';
+export { YoutubeInput } from './YoutubeInput';
 export { Modal } from './Modal';
 export { ConfirmModal } from './ConfirmModal';
 export { Switch } from './Switch';

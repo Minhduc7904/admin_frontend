@@ -41,6 +41,8 @@ import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
 import { ExamImportSessionList } from '../features/examImportSession/pages';
+import { QuestionListPage } from '../features/question/pages';
+import { ExamListPage } from '../features/exam/pages/ExamListPage';
 import { ProtectedRoute } from '../shared/components';
 import { PERMISSIONS } from '../core/constants/permission/permission.codes';
 
@@ -216,11 +218,29 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute />,
+                element: <ProtectedRoute permission={PERMISSIONS.EXAM_IMPORT_SESSION_VIEW_MANAGEMENT} />,
                 children: [
                     {
                         path: ROUTES.EXAM_IMPORT_SESSIONS,
                         element: <ExamImportSessionList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.QUESTION_VIEW_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.QUESTIONS,
+                        element: <QuestionListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.EXAM_VIEW_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.EXAMS,
+                        element: <ExamListPage />,
                     },
                 ],
             },

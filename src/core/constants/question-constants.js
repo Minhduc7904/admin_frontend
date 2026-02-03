@@ -10,6 +10,14 @@ export const QUESTION_TYPES = {
     TRUE_FALSE: 'TRUE_FALSE',
 };
 
+export const QUESTION_TYPE_OPTIONS = [
+    { value: QUESTION_TYPES.SINGLE_CHOICE, label: 'Trắc nghiệm' },
+    { value: QUESTION_TYPES.MULTIPLE_CHOICE, label: 'Trắc nghiệm nhiều đáp án' },
+    { value: QUESTION_TYPES.SHORT_ANSWER, label: 'Tự luận ngắn' },
+    { value: QUESTION_TYPES.ESSAY, label: 'Tự luận' },
+    { value: QUESTION_TYPES.TRUE_FALSE, label: 'Đúng/Sai' },
+];
+
 // Export as QuestionType for convenience
 export const QuestionType = QUESTION_TYPES;
 
@@ -60,6 +68,13 @@ export const DIFFICULTY = {
     VD: 'VD',  // Vận dụng
     VDC: 'VDC', // Vận dụng cao
 };
+
+export const DIFFICULTY_OPTIONS = [
+    { value: DIFFICULTY.NB, label: 'Nhận biết' },
+    { value: DIFFICULTY.TH, label: 'Thông hiểu' },
+    { value: DIFFICULTY.VD, label: 'Vận dụng' },
+    { value: DIFFICULTY.VDC, label: 'Vận dụng cao' },
+];
 
 // Export as Difficulty for convenience
 export const Difficulty = DIFFICULTY;

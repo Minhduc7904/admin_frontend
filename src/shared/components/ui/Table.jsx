@@ -24,6 +24,8 @@ export const Table = ({
     onEmptyAction,
     rowClassName,
     onRowClick,
+    onRowMouseEnter,
+    onRowMouseLeave,
     lastRowRef,
     onDragStart,
 }) => {
@@ -128,6 +130,8 @@ export const Table = ({
                                     ${onRowClick ? 'cursor-pointer' : ''}
                                 `}
                                 onClick={() => onRowClick?.(row, rowIndex)}
+                                onMouseEnter={() => onRowMouseEnter?.(row, rowIndex)}
+                                onMouseLeave={() => onRowMouseLeave?.(row, rowIndex)}
                             >
                                 {columns.map((column, colIndex) => {
                                     const cellClass =
