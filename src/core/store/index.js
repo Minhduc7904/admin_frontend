@@ -29,6 +29,7 @@ import tempSectionReducer from "../../features/tempSection/store/tempSectionSlic
 import tempQuestionReducer from "../../features/tempQuestion/store/tempQuestionSlice";
 import tempStatementReducer from "../../features/tempStatement/store/tempStatementSlice";
 import questionReducer from "../../features/question/store/questionSlice";
+import statementReducer from "../../features/statement/store/statementSlice";
 import examReducer from "../../features/exam/store/examSlice";
 
 export const store = configureStore({
@@ -63,6 +64,7 @@ export const store = configureStore({
     tempQuestion: tempQuestionReducer,
     tempStatement: tempStatementReducer,
     question: questionReducer,
+    statement: statementReducer,
     exam: examReducer,
   },
 });

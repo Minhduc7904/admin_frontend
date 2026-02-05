@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react'
 import { Button, RightPanel } from '../../../shared/components'
-import { QuestionFilters, QuestionTable, AddQuestion, ViewQuestion } from '../components'
+import { QuestionFilters, QuestionTable, AddQuestion, ViewQuestion, EditQuestion, QuestionDeleteModal } from '../components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
 
 export const QuestionList = ({
@@ -37,6 +37,10 @@ export const QuestionList = ({
     openAddQuestion,
     openViewQuestion,
     viewQuestionId,
+    openEditQuestion,
+    editQuestionId,
+    openDeleteModal,
+    deleteQuestion,
 
     // handlers
     onSearchChange,
@@ -53,6 +57,9 @@ export const QuestionList = ({
     onOpenAddQuestion,
     onCloseAddQuestion,
     onCloseViewQuestion,
+    onCloseEditQuestion,
+    onCloseDeleteModal,
+    onConfirmDelete,
 }) => {
     return (
         <>
@@ -138,6 +145,31 @@ export const QuestionList = ({
             >
                 {viewQuestionId && <ViewQuestion questionId={viewQuestionId} />}
             </RightPanel>
+
+            {/* Edit Question */}
+            <RightPanel
+                isOpen={openEditQuestion}
+                onClose={onCloseEditQuestion}
+                title="Chỉnh sửa câu hỏi"
+                width='w-[800px]'
+            >
+                {editQuestionId && (
+                    <EditQuestion 
+                        questionId={editQuestionId} 
+                        onClose={onCloseEditQuestion}
+                        loadQuestions={loadQuestions}
+                    />
+                )}
+            </RightPanel>
+
+            {/* Delete Confirmation Modal */}
+            <QuestionDeleteModal
+                isOpen={openDeleteModal}
+                onClose={onCloseDeleteModal}
+                onConfirm={onConfirmDelete}
+                question={deleteQuestion}
+                loading={loading}
+            />
         </>
     )
 }

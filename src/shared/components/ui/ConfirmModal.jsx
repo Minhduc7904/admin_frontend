@@ -61,9 +61,9 @@ export const ConfirmModal = ({
         </h3>
 
         {/* Message */}
-        <p className="text-sm text-foreground-light mb-6">
+        <div className="text-sm text-foreground-light mb-6">
           {message}
-        </p>
+        </div>
 
         {/* Actions */}
         <div className="flex gap-2">

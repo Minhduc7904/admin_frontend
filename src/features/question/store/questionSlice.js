@@ -14,6 +14,7 @@ const initialState = {
         hasNext: false,
     },
     loadingGet: false,
+    loadingGetById: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
@@ -93,6 +94,9 @@ const questionSlice = createSlice({
         setFilters: (state, action) => {
             state.filters = { ...state.filters, ...action.payload };
         },
+        setPagination: (state, action) => {
+            state.pagination = { ...state.pagination, ...action.payload };
+        },
         resetFilters: (state) => {
             state.filters = initialState.filters;
         },
@@ -122,16 +126,16 @@ const questionSlice = createSlice({
             })
             // Get Question By ID
             .addCase(getQuestionByIdAsync.pending, (state) => {
-                state.loadingGet = true;
+                state.loadingGetById = true;
                 state.error = null;
             })
             .addCase(getQuestionByIdAsync.fulfilled, (state, action) => {
-                state.loadingGet = false;
+                state.loadingGetById = false;
                 state.currentQuestion = action.payload.data;
                 state.error = null;
             })
             .addCase(getQuestionByIdAsync.rejected, (state, action) => {
-                state.loadingGet = false;
+                state.loadingGetById = false;
                 state.error = action.payload;
             })
             // Create Question
@@ -195,7 +199,7 @@ const questionSlice = createSlice({
     },
 });
 
-export const { setFilters, resetFilters, clearCurrentQuestion, clearError } =
+export const { setFilters, setPagination, resetFilters, clearCurrentQuestion, clearError } =
     questionSlice.actions;
 
 // Selectors

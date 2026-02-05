@@ -142,11 +142,12 @@ export const PreviewConfirm = () => {
                 data: formData 
             })).unwrap();
 
+            if (!result || !result.data) return;
             // Reload sections to ensure UI is in sync
             await dispatch(getTempSectionsBySessionAsync(id));
-            
+
             // Switch to the newly created section first
-            setActiveTab(result.tempSectionId);
+            setActiveTab(result.data?.tempSectionId);
             
             // Then close form to show the new section
             setIsCreatingSection(false);

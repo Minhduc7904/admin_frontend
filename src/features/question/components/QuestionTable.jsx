@@ -162,26 +162,28 @@ export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, is
             align: 'right',
             className: 'relative',
             render: (question) => (
-                <ActionMenu
-                    items={[
-                        {
-                            label: 'Xem chi tiết',
-                            icon: <Eye size={14} />,
-                            onClick: () => onView(question),
-                        },
-                        {
-                            label: 'Chỉnh sửa',
-                            icon: <Edit size={14} />,
-                            onClick: () => onEdit(question),
-                        },
-                        {
-                            label: 'Xóa câu hỏi',
-                            icon: <Trash2 size={14} />,
-                            variant: 'danger',
-                            onClick: () => onDelete(question),
-                        },
-                    ]}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                    <ActionMenu
+                        items={[
+                            {
+                                label: 'Xem chi tiết',
+                                icon: <Eye size={14} />,
+                                onClick: () => onView(question),
+                            },
+                            {
+                                label: 'Chỉnh sửa',
+                                icon: <Edit size={14} />,
+                                onClick: () => onEdit(question),
+                            },
+                            {
+                                label: 'Xóa câu hỏi',
+                                icon: <Trash2 size={14} />,
+                                variant: 'danger',
+                                onClick: () => onDelete(question),
+                            },
+                        ]}
+                    />
+                </div>
             )
         }
     ];

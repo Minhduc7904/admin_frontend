@@ -28,4 +28,5 @@ export { lessonLearningItemApi } from './lessonLearningItemApi';
 export { notificationApi } from './notificationApi';
 export { tuitionPaymentApi } from './tuitionPaymentApi';
 export { questionApi } from './questionApi';
+export { statementApi } from './statementApi';
 export { examApi } from './examApi';

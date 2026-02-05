@@ -6,6 +6,7 @@ import {
     getAllQuestionsAsync,
     deleteQuestionAsync,
     setFilters,
+    setPagination,
     clearCurrentQuestion,
 } from '../store/questionSlice'
 
@@ -35,6 +36,10 @@ export const QuestionListPage = () => {
     const [openAddQuestion, setOpenAddQuestion] = useState(false)
     const [viewQuestionId, setViewQuestionId] = useState(null)
     const [openViewQuestion, setOpenViewQuestion] = useState(false)
+    const [editQuestionId, setEditQuestionId] = useState(null)
+    const [openEditQuestion, setOpenEditQuestion] = useState(false)
+    const [deleteQuestion, setDeleteQuestion] = useState(null)
+    const [openDeleteModal, setOpenDeleteModal] = useState(false)
 
     // Lấy từ filters và pagination
     const grade = filters.grade || ''
@@ -81,35 +86,41 @@ export const QuestionListPage = () => {
     /* ===================== HANDLERS ===================== */
     const handleSearch = (value) => {
         handleSearchChange(value)
-        dispatch(setFilters({ search: value, page: 1 }))
+        dispatch(setFilters({ search: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleGradeChange = (value) => {
-        dispatch(setFilters({ grade: value, page: 1 }))
+        dispatch(setFilters({ grade: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleVisibilityChange = (value) => {
-        dispatch(setFilters({ visibility: value, page: 1 }))
+        dispatch(setFilters({ visibility: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleDifficultyChange = (value) => {
-        dispatch(setFilters({ difficulty: value, page: 1 }))
+        dispatch(setFilters({ difficulty: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleTypeChange = (value) => {
-        dispatch(setFilters({ type: value, page: 1 }))
+        dispatch(setFilters({ type: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleSubjectIdChange = (value) => {
-        dispatch(setFilters({ subjectId: value, page: 1 }))
+        dispatch(setFilters({ subjectId: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handlePageChange = (page) => {
-        dispatch(setFilters({ page }))
+        dispatch(setPagination({ page }))
     }
 
     const handleItemsPerPageChange = (value) => {
-        dispatch(setFilters({ limit: value, page: 1 }))
+        dispatch(setPagination({ limit: value, page: 1 }))
     }
 
     const handleView = (question) => {
@@ -118,17 +129,22 @@ export const QuestionListPage = () => {
     }
 
     const handleEdit = (question) => {
-        // TODO: Navigate to question edit page or open edit modal
-        console.log('Edit question:', question)
+        setEditQuestionId(question.questionId)
+        setOpenEditQuestion(true)
     }
 
-    const handleDelete = async (question) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa câu hỏi "${question.content}"?`)) {
-            return
-        }
+    const handleDelete = (question) => {
+        setDeleteQuestion(question)
+        setOpenDeleteModal(true)
+    }
+
+    const handleConfirmDelete = async () => {
+        if (!deleteQuestion) return
 
         try {
-            await dispatch(deleteQuestionAsync(question.questionId)).unwrap()
+            await dispatch(deleteQuestionAsync(deleteQuestion.questionId)).unwrap()
+            setOpenDeleteModal(false)
+            setDeleteQuestion(null)
             loadQuestions()
         } catch (error) {
             console.error('Delete question failed:', error)
@@ -143,6 +159,18 @@ export const QuestionListPage = () => {
     const closeView = () => {
         setOpenViewQuestion(false)
         setViewQuestionId(null)
+    }
+
+    /* ===================== EDIT QUESTION ===================== */
+    const closeEdit = () => {
+        setOpenEditQuestion(false)
+        setEditQuestionId(null)
+    }
+
+    /* ===================== DELETE QUESTION ===================== */
+    const closeDelete = () => {
+        setOpenDeleteModal(false)
+        setDeleteQuestion(null)
     }
 
     /* ===================== RENDER ===================== */
@@ -174,6 +202,10 @@ export const QuestionListPage = () => {
             openAddQuestion={openAddQuestion}
             openViewQuestion={openViewQuestion}
             viewQuestionId={viewQuestionId}
+            openEditQuestion={openEditQuestion}
+            editQuestionId={editQuestionId}
+            openDeleteModal={openDeleteModal}
+            deleteQuestion={deleteQuestion}
 
             /* handlers */
             onSearchChange={handleSearch}
@@ -190,6 +222,9 @@ export const QuestionListPage = () => {
             onOpenAddQuestion={openAdd}
             onCloseAddQuestion={closeAdd}
             onCloseViewQuestion={closeView}
+            onCloseEditQuestion={closeEdit}
+            onCloseDeleteModal={closeDelete}
+            onConfirmDelete={handleConfirmDelete}
         />
     )
 }

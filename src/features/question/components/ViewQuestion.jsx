@@ -16,7 +16,7 @@ import { Calendar, User, BookOpen, Award, Eye, FileText, Youtube, Hash } from 'l
 export const ViewQuestion = ({ questionId }) => {
     const dispatch = useDispatch();
     const question = useSelector((state) => state.question.currentQuestion);
-    const loading = useSelector((state) => state.question.loadingGet);
+    const loading = useSelector((state) => state.question.loadingGetById);
     const [showYoutubePreview, setShowYoutubePreview] = useState(false);
 
     useEffect(() => {

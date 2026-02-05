@@ -374,6 +374,11 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/questions/${id}`,
     DELETE: (id) => `/questions/${id}`,
   },
+  STATEMENTS: {
+    CREATE: (questionId) => `/statements/question/${questionId}`,
+    UPDATE: (id) => `/statements/${id}`,
+    DELETE: (id) => `/statements/${id}`,
+  },
   EXAMS: {
     LIST: "/exams",
     DETAIL: (id) => `/exams/${id}`,
