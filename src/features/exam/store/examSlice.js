@@ -90,6 +90,9 @@ const examSlice = createSlice({
         setFilters: (state, action) => {
             state.filters = { ...state.filters, ...action.payload };
         },
+        setPagination: (state, action) => {
+            state.pagination = { ...state.pagination, ...action.payload };
+        },
         resetFilters: (state) => {
             state.filters = initialState.filters;
         },
@@ -192,7 +195,7 @@ const examSlice = createSlice({
     },
 });
 
-export const { setFilters, resetFilters, clearCurrentExam, clearError } =
+export const { setFilters, setPagination, resetFilters, clearCurrentExam, clearError } =
     examSlice.actions;
 
 // Selectors

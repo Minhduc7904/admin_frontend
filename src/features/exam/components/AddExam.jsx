@@ -1,9 +1,11 @@
 import { createExamAsync, selectExamLoadingCreate } from "../store/examSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { Input, Button, Dropdown, Textarea } from "../../../shared/components";
+import { Input, Button, Dropdown, YoutubeInput } from "../../../shared/components";
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
 import { GRADE_OPTIONS } from "../../../core/constants/grade-constants";
+import { MarkdownEditorPreview } from "../../../shared/components/markdown/MarkdownEditorPreview";
+import { VISIBILITY_OPTIONS, VISIBILITY } from "../../../core/constants";
 
 export const AddExam = ({ onClose, loadExams }) => {
     const dispatch = useDispatch();
@@ -15,16 +17,13 @@ export const AddExam = ({ onClose, loadExams }) => {
         grade: '',
         subjectId: '',
         description: '',
-        visibility: 'DRAFT',
+        visibility: VISIBILITY.DRAFT,
         solutionYoutubeUrl: '',
     });
 
     const [selectedSubject, setSelectedSubject] = useState(null);
 
-    const visibilityOptions = [
-        { value: 'DRAFT', label: 'Bản nháp' },
-        { value: 'PUBLISHED', label: 'Đã xuất bản' },
-    ];
+    const visibilityOptions = VISIBILITY_OPTIONS;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -41,8 +40,8 @@ export const AddExam = ({ onClose, loadExams }) => {
             errors.title = 'Tiêu đề không được để trống';
         } else if (formData.title.trim().length < 3) {
             errors.title = 'Tiêu đề phải có ít nhất 3 ký tự';
-        } else if (formData.title.trim().length > 200) {
-            errors.title = 'Tiêu đề không được quá 200 ký tự';
+        } else if (formData.title.trim().length > 500) {
+            errors.title = 'Tiêu đề không được quá 500 ký tự';
         }
 
         if (!formData.grade) {
@@ -55,11 +54,8 @@ export const AddExam = ({ onClose, loadExams }) => {
             errors.visibility = 'Vui lòng chọn trạng thái';
         }
 
-        if (formData.solutionYoutubeUrl && formData.solutionYoutubeUrl.trim()) {
-            const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
-            if (!youtubeRegex.test(formData.solutionYoutubeUrl.trim())) {
-                errors.solutionYoutubeUrl = 'URL YouTube không hợp lệ';
-            }
+        if (formData.description && formData.description.trim().length > 2000) {
+            errors.description = 'Mô tả không được quá 2000 ký tự';
         }
 
         return errors;
@@ -133,19 +129,6 @@ export const AddExam = ({ onClose, loadExams }) => {
                     </div>
                 </div>
 
-                {/* Description */}
-                <div>
-                    <Textarea
-                        error={errors.description}
-                        name="description"
-                        label="Mô tả"
-                        value={formData.description}
-                        onChange={handleChange}
-                        placeholder="Mô tả chi tiết về đề thi..."
-                        rows={4}
-                    />
-                </div>
-
                 {/* Subject Selection */}
                 <div>
                     <SubjectSearchSelect
@@ -163,14 +146,31 @@ export const AddExam = ({ onClose, loadExams }) => {
                     />
                 </div>
 
+                {/* Description */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Mô tả
+                    </label>
+                    <MarkdownEditorPreview
+                        value={formData.description}
+                        onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                        height="300px"
+                        editable={true}
+                        maxLength={2000}
+                    />
+                    {errors.description && (
+                        <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                    )}
+                </div>
+
                 {/* Solution YouTube URL */}
                 <div>
-                    <Input
-                        error={errors.solutionYoutubeUrl}
+                    <YoutubeInput
                         name="solutionYoutubeUrl"
                         label="Link video giải (YouTube)"
                         value={formData.solutionYoutubeUrl}
                         onChange={handleChange}
+                        error={errors.solutionYoutubeUrl}
                         placeholder="https://youtube.com/watch?v=..."
                     />
                 </div>

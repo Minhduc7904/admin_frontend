@@ -154,8 +154,8 @@ export const QuestionList = ({
                 width='w-[800px]'
             >
                 {editQuestionId && (
-                    <EditQuestion 
-                        questionId={editQuestionId} 
+                    <EditQuestion
+                        questionId={editQuestionId}
                         onClose={onCloseEditQuestion}
                         loadQuestions={loadQuestions}
                     />

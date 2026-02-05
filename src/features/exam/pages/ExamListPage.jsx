@@ -6,6 +6,7 @@ import {
     getAllExamsAsync,
     deleteExamAsync,
     setFilters,
+    setPagination,
     clearCurrentExam,
 } from '../store/examSlice'
 
@@ -73,27 +74,31 @@ export const ExamListPage = () => {
     /* ===================== HANDLERS ===================== */
     const handleSearch = (value) => {
         handleSearchChange(value)
-        dispatch(setFilters({ search: value, page: 1 }))
+        dispatch(setFilters({ search: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleGradeChange = (value) => {
-        dispatch(setFilters({ grade: value, page: 1 }))
+        dispatch(setFilters({ grade: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleVisibilityChange = (value) => {
-        dispatch(setFilters({ visibility: value, page: 1 }))
+        dispatch(setFilters({ visibility: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handleSubjectIdChange = (value) => {
-        dispatch(setFilters({ subjectId: value, page: 1 }))
+        dispatch(setFilters({ subjectId: value }))
+        dispatch(setPagination({ page: 1 }))
     }
 
     const handlePageChange = (page) => {
-        dispatch(setFilters({ page }))
+        dispatch(setPagination({ page }))
     }
 
     const handleItemsPerPageChange = (value) => {
-        dispatch(setFilters({ limit: value, page: 1 }))
+        dispatch(setPagination({ limit: value, page: 1 }))
     }
 
     const handleView = (exam) => {

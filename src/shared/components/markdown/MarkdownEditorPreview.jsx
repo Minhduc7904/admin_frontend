@@ -26,6 +26,7 @@ export const MarkdownEditorPreview = ({
     onChange,
     height = '70vh',
     editable = true,
+    maxLength,
 }) => {
     const dispatch = useDispatch()
     const [value, setValue] = useState(controlledValue ?? '')
@@ -99,8 +100,22 @@ export const MarkdownEditorPreview = ({
     )
 
     /* ----------------------------------------------------------
+     * Calculate character count (excluding media markdown)
+     * ---------------------------------------------------------- */
+    const getCharCountWithoutMedia = useCallback((text) => {
+        if (!text) return 0
+        // Remove media markdown: ![media:123](url)
+        const textWithoutMedia = text.replace(/!\[media:\d+\]\([^)]+\)/g, '')
+        return textWithoutMedia.length
+    }, [])
+
+    /* ----------------------------------------------------------
      * Render
      * ---------------------------------------------------------- */
+    const charCount = getCharCountWithoutMedia(value)
+    const isNearLimit = maxLength && charCount > maxLength * 0.9
+    const isOverLimit = maxLength && charCount > maxLength
+
     return (
         <div className="flex flex-col" style={{ height }}>
             <div className="flex-1 grid grid-cols-2 gap-4 overflow-hidden">
@@ -108,8 +123,24 @@ export const MarkdownEditorPreview = ({
                 <div className="flex flex-col border rounded overflow-hidden">
                     <div className="bg-gray-50 px-4 py-2 border-b">
                         <h4 className="text-sm font-semibold flex items-center gap-2">
-                            <Edit className="w-4 h-4" />
-                            Markdown Editor
+                            <div className="flex items-start flex-col">
+                                <div className='flex flex-row items-center gap-2'>
+                                    <Edit className="w-4 h-4" />
+                                    Markdown Editor
+                                </div>
+                                {maxLength && (
+                                    <span
+                                        className={`text-xs font-normal ${isOverLimit
+                                            ? 'text-red-600 font-semibold'
+                                            : isNearLimit
+                                                ? 'text-orange-600'
+                                                : 'text-gray-500'
+                                            }`}
+                                    >
+                                        {charCount} / {maxLength}
+                                    </span>
+                                )}
+                            </div>
                             {editable && (
                                 <button
                                     type='button'
