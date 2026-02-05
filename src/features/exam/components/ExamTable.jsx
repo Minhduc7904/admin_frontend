@@ -138,5 +138,10 @@ export const ExamTable = ({ exams, onView, onEdit, onDelete, loading }) => {
         }
     ];
 
-    return <Table columns={columns} data={exams} loading={loading} />;
+    return <Table
+        columns={columns}
+        data={exams}
+        loading={loading}
+        onRowClick={(exam) => onView(exam)}
+    />;
 };

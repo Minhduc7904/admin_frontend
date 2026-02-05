@@ -12,6 +12,7 @@ import {
 
 import { ExamList } from './ExamList'
 import { useSearch } from '../../../shared/hooks'
+import { ROUTES } from '../../../core/constants'
 
 /**
  * ExamListPage
@@ -102,8 +103,7 @@ export const ExamListPage = () => {
     }
 
     const handleView = (exam) => {
-        // TODO: Navigate to exam detail page
-        console.log('View exam:', exam)
+        navigate(ROUTES.EXAM_DETAIL(exam.examId))
     }
 
     const handleEdit = (exam) => {

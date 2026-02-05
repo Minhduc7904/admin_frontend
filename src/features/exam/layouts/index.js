@@ -1,0 +1,1 @@
+export { ExamDetailLayout } from './ExamDetailLayout';

@@ -69,4 +69,18 @@ export const questionApi = {
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.QUESTIONS.DELETE(id));
     },
+
+    /**
+     * Get questions by exam ID
+     * @param {number} examId - Exam ID
+     * @param {Object} params - Query parameters
+     * @param {number} params.page - Page number
+     * @param {number} params.limit - Items per page
+     * @param {string} params.type - Question type filter
+     * @param {string} params.difficulty - Difficulty filter
+     * @returns {Promise<Object>} Questions list with pagination
+     */
+    getByExam: (examId, params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.QUESTIONS.BY_EXAM(examId), { params });
+    },
 };

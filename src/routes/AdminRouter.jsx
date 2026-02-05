@@ -43,6 +43,8 @@ import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaym
 import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage } from '../features/question/pages';
 import { ExamListPage } from '../features/exam/pages/ExamListPage';
+import { ExamDetail, ExamQuestions, ExamPreview } from '../features/exam/pages';
+import { ExamDetailLayout } from '../features/exam/layouts';
 import { ProtectedRoute } from '../shared/components';
 import { PERMISSIONS } from '../core/constants/permission/permission.codes';
 
@@ -380,6 +382,31 @@ export const adminRouter = [
                             {
                                 path: 'media',
                                 element: <StudentMedia />,
+                            },
+                        ],
+                    },
+                ],
+            },
+
+            // 🔥 Exam detail group
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.EXAM_VIEW_MANAGEMENT} />,
+                children: [
+                    {
+                        path: ROUTES.EXAM_DETAIL(':id'),
+                        element: <ExamDetailLayout />,
+                        children: [
+                            {
+                                index: true,
+                                element: <ExamDetail />,
+                            },
+                            {
+                                path: 'questions',
+                                element: <ExamQuestions />,
+                            },
+                            {
+                                path: 'preview',
+                                element: <ExamPreview />,
                             },
                         ],
                     },

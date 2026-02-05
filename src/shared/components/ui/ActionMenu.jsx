@@ -62,7 +62,10 @@ export const ActionMenu = ({ items }) => {
         <div ref={menuRef} className="relative">
             <button
                 ref={buttonRef}
-                onClick={toggleMenu}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    toggleMenu()
+                }}
                 className="rounded-sm bg-primary text-foreground-light hover:text-foreground hover:bg-gray-50"
             >
                 <MoreVertical size={18} />

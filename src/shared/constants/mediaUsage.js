@@ -30,6 +30,14 @@ export const TEMP_EXAM_FIELDS = {
     SOLUTION_VIDEO: 'TEMP_SOLUTION_VIDEO',
 };
 
+// Field Names for Exam
+export const EXAM_FIELDS = {
+    EXAM_FILE: 'EXAM_FILE',
+    SOLUTION_FILE: 'EXAM_SOLUTION_FILE',
+    EXAM_IMAGE: 'EXAM_IMAGE',
+    SOLUTION_VIDEO: 'EXAM_SOLUTION_VIDEO',
+};
+
 // Field Names for User
 export const USER_FIELDS = {
     AVATAR: 'USER_AVATAR',

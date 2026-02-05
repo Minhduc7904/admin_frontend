@@ -87,6 +87,16 @@ export const deleteQuestionAsync = createAsyncThunk(
     }
 );
 
+export const getQuestionsByExamAsync = createAsyncThunk(
+    "question/getByExam",
+    async ({ examId, params }, thunkAPI) => {
+        return handleAsyncThunk(() => questionApi.getByExam(examId, params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách câu hỏi theo đề thi",
+        });
+    }
+);
+
 const questionSlice = createSlice({
     name: "question",
     initialState,
@@ -194,6 +204,21 @@ const questionSlice = createSlice({
             })
             .addCase(deleteQuestionAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
+                state.error = action.payload;
+            })
+            // Get Questions By Exam
+            .addCase(getQuestionsByExamAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(getQuestionsByExamAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                state.questions = action.payload.data;
+                state.pagination = action.payload.meta;
+                state.error = null;
+            })
+            .addCase(getQuestionsByExamAsync.rejected, (state, action) => {
+                state.loadingGet = false;
                 state.error = action.payload;
             });
     },

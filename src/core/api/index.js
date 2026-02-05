@@ -30,3 +30,4 @@ export { tuitionPaymentApi } from './tuitionPaymentApi';
 export { questionApi } from './questionApi';
 export { statementApi } from './statementApi';
 export { examApi } from './examApi';
+export { sectionApi } from './sectionApi';
