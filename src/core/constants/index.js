@@ -377,6 +377,9 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/questions/${id}`,
     DELETE: (id) => `/questions/${id}`,
     BY_EXAM: (examId) => `/exams/${examId}/questions`,
+    REORDER: "/questions/reorder",
+    REMOVE_FROM_EXAM: "/questions/exam",
+    ADD_TO_SECTION: "/questions/section",
   },
   STATEMENTS: {
     CREATE: (questionId) => `/statements/question/${questionId}`,

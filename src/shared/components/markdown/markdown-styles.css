@@ -31,7 +31,7 @@
 
 /* Paragraphs */
 .markdown-renderer p {
-    @apply mb-4;
+    @apply mb-0;
 }
 
 /* Lists */

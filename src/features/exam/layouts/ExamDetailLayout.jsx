@@ -69,7 +69,7 @@ export const ExamDetailLayout = () => {
 
     // 5. Render
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 flex-1">
             <ExamDetailBreadcrumb examName="Đề thi mẫu" />
             <Tabs tabs={tabs} />
 

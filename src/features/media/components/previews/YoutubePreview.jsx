@@ -41,9 +41,6 @@ export const YoutubePreview = ({ youtubeUrl }) => {
 
     return (
         <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-                Video hướng dẫn giải
-            </label>
             <div className="relative w-full rounded-lg overflow-hidden bg-black" style={{ paddingBottom: '56.25%' }}>
                 <iframe
                     className="absolute top-0 left-0 w-full h-full"

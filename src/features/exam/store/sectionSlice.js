@@ -172,4 +172,9 @@ const sectionSlice = createSlice({
 });
 
 export const { clearCurrentSection, clearError, clearSections } = sectionSlice.actions;
+
+// Selectors
+export const selectSectionLoadingCreate = (state) => state.section.loadingCreate;
+export const selectSectionLoadingUpdate = (state) => state.section.loadingUpdate;
+
 export default sectionSlice.reducer;

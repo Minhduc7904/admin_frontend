@@ -1,4 +1,7 @@
-export const ExamSectionDetail = ({ section, questionsCount }) => {
+import { Pencil } from 'lucide-react';
+import { MarkdownRenderer } from '../../../shared/components/markdown/MarkdownRenderer';
+
+export const ExamSectionDetail = ({ section, questionsCount, onEditSection }) => {
     if (!section) {
         return (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -22,14 +25,23 @@ export const ExamSectionDetail = ({ section, questionsCount }) => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {section.title}
                     </h3>
-                    {section.description && (
-                        <p className="text-sm text-gray-600">
-                            {section.description}
-                        </p>
+                    {(section.processedDescription || section.description) && (
+                        <div className="mt-2 prose prose-sm max-w-none">
+                            <MarkdownRenderer 
+                                content={section.processedDescription || section.description} 
+                            />
+                        </div>
                     )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => onEditSection?.(section)}
+                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="Chỉnh sửa phần"
+                    >
+                        <Pencil size={18} />
+                    </button>
+                    <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs">
                         Thứ tự: {section.order}
                     </span>
                 </div>

@@ -1,38 +1,48 @@
-import { PlusCircle } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { SectionTab } from './SectionTab';
 
-export const ExamSectionTabs = ({ sections, activeTab, onTabChange }) => {
+export const ExamSectionTabs = ({ sections, activeTab, onTabChange, onAddSection }) => {
     return (
-        <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border">
-            {/* Uncategorized Tab */}
-            <button
-                onClick={() => onTabChange(null)}
-                className={`
-                    flex items-center gap-2 px-4 py-2 rounded-t-lg border transition-colors whitespace-nowrap
-                    ${activeTab === null
-                        ? 'bg-white border-border border-b-white text-blue-600 font-medium -mb-[1px]'
-                        : 'bg-gray-50 border-transparent hover:bg-gray-100 text-gray-600'
-                    }
-                `}
-            >
-                <span>Chưa phân loại</span>
-            </button>
+        <div className="relative flex items-end border-b border-border px-2">
+            {/* Scrollable tabs */}
+            <div className="flex items-end overflow-x-auto scrollbar-thin pt-2 gap-1">
+                {/* Fixed tab - Uncategorized */}
+                <SectionTab
+                    section={{ title: 'Chưa phân loại' }}
+                    isActive={activeTab === null}
+                    onClick={() => onTabChange(null)}
+                    isFixed
+                />
 
-            {/* Section Tabs */}
-            {sections.map((section) => (
-                <button
-                    key={section.sectionId}
-                    onClick={() => onTabChange(section.sectionId)}
-                    className={`
-                        flex items-center gap-2 px-4 py-2 rounded-t-lg border transition-colors whitespace-nowrap
-                        ${activeTab === section.sectionId
-                            ? 'bg-white border-border border-b-white text-blue-600 font-medium -mb-[1px]'
-                            : 'bg-gray-50 border-transparent hover:bg-gray-100 text-gray-600'
-                        }
-                    `}
-                >
-                    <span>{section.title}</span>
-                </button>
-            ))}
+                {/* Section tabs */}
+                {sections.map((section) => (
+                    <SectionTab
+                        key={section.sectionId}
+                        section={section}
+                        isActive={activeTab === section.sectionId}
+                        onClick={() => onTabChange(section.sectionId)}
+                    />
+                ))}
+            </div>
+
+            {/* Add section button */}
+            <button
+                onClick={onAddSection}
+                title="Tạo Section mới"
+                className="
+                    ml-2 mb-1
+                    h-8 w-8
+                    flex items-center justify-center
+                    rounded-md
+                    border border-gray-300
+                    bg-white
+                    text-gray-600
+                    hover:bg-gray-50
+                    transition
+                "
+            >
+                <Plus size={16} />
+            </button>
         </div>
     );
 };

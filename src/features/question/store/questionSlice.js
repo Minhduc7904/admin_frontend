@@ -18,6 +18,9 @@ const initialState = {
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
+    loadingReorder: false,
+    loadingRemoveFromExam: false,
+    loadingAddToSection: false,
     error: null,
     filters: {
         search: "",
@@ -97,6 +100,39 @@ export const getQuestionsByExamAsync = createAsyncThunk(
     }
 );
 
+export const reorderQuestionsAsync = createAsyncThunk(
+    "question/reorder",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => questionApi.reorder(data), thunkAPI, {
+            successTitle: "Cập nhật thứ tự thành công",
+            successMessage: "Thứ tự câu hỏi đã được cập nhật",
+            errorTitle: "Cập nhật thứ tự thất bại",
+        });
+    }
+);
+
+export const removeQuestionFromExamAsync = createAsyncThunk(
+    "question/removeFromExam",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => questionApi.removeFromExam(data), thunkAPI, {
+            successTitle: "Xóa câu hỏi thành công",
+            successMessage: "Câu hỏi đã được xóa khỏi đề thi",
+            errorTitle: "Xóa câu hỏi thất bại",
+        });
+    }
+);
+
+export const addQuestionToSectionAsync = createAsyncThunk(
+    "question/addToSection",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => questionApi.addToSection(data), thunkAPI, {
+            successTitle: "Thêm câu hỏi thành công",
+            successMessage: "Câu hỏi đã được thêm vào phần thi",
+            errorTitle: "Thêm câu hỏi thất bại",
+        });
+    }
+);
+
 const questionSlice = createSlice({
     name: "question",
     initialState,
@@ -115,6 +151,25 @@ const questionSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
+        },
+        updateQuestionSectionInfo: (state, action) => {
+            const { questionId, sectionId, order } = action.payload;
+            const question = state.questions.find(q => q.questionId === questionId);
+            if (question) {
+                question.sectionId = sectionId;
+                if (order !== undefined) {
+                    question.order = order;
+                }
+            }
+        },
+        updateQuestionsOrder: (state, action) => {
+            const { items } = action.payload;
+            items.forEach(({ questionId, order }) => {
+                const question = state.questions.find(q => q.questionId === questionId);
+                if (question) {
+                    question.order = order;
+                }
+            });
         },
     },
     extraReducers: (builder) => {
@@ -220,11 +275,72 @@ const questionSlice = createSlice({
             .addCase(getQuestionsByExamAsync.rejected, (state, action) => {
                 state.loadingGet = false;
                 state.error = action.payload;
+            })
+            // Reorder Questions
+            .addCase(reorderQuestionsAsync.pending, (state) => {
+                state.loadingReorder = true;
+                state.error = null;
+            })
+            .addCase(reorderQuestionsAsync.fulfilled, (state, action) => {
+                state.loadingReorder = false;
+                // Update local state with new order if items are provided
+                const { items } = action.meta.arg;
+                if (items && Array.isArray(items)) {
+                    items.forEach(({ questionId, order }) => {
+                        const question = state.questions.find(q => q.questionId === questionId);
+                        if (question) {
+                            question.order = order;
+                        }
+                    });
+                    // Sort questions by order
+                    state.questions.sort((a, b) => (a.order || 0) - (b.order || 0));
+                }
+                state.error = null;
+            })
+            .addCase(reorderQuestionsAsync.rejected, (state, action) => {
+                state.loadingReorder = false;
+                state.error = action.payload;
+            })
+            // Remove Question From Exam
+            .addCase(removeQuestionFromExamAsync.pending, (state) => {
+                state.loadingRemoveFromExam = true;
+                state.error = null;
+            })
+            .addCase(removeQuestionFromExamAsync.fulfilled, (state, action) => {
+                state.loadingRemoveFromExam = false;
+                // Remove question from local state
+                const { questionId } = action.meta.arg;
+                state.questions = state.questions.filter(
+                    (q) => q.questionId !== questionId
+                );
+                if (state.currentQuestion?.questionId === questionId) {
+                    state.currentQuestion = null;
+                }
+                state.error = null;
+            })
+            .addCase(removeQuestionFromExamAsync.rejected, (state, action) => {
+                state.loadingRemoveFromExam = false;
+                state.error = action.payload;
+            })
+            // Add Question To Section
+            .addCase(addQuestionToSectionAsync.pending, (state) => {
+                state.loadingAddToSection = true;
+                state.error = null;
+            })
+            .addCase(addQuestionToSectionAsync.fulfilled, (state, action) => {
+                state.loadingAddToSection = false;
+                // Question was added/moved to section successfully
+                // We could optionally update local state here if needed
+                state.error = null;
+            })
+            .addCase(addQuestionToSectionAsync.rejected, (state, action) => {
+                state.loadingAddToSection = false;
+                state.error = action.payload;
             });
     },
 });
 
-export const { setFilters, setPagination, resetFilters, clearCurrentQuestion, clearError } =
+export const { setFilters, setPagination, resetFilters, clearCurrentQuestion, clearError, updateQuestionSectionInfo, updateQuestionsOrder } =
     questionSlice.actions;
 
 // Selectors
@@ -235,6 +351,9 @@ export const selectQuestionLoadingGet = (state) => state.question.loadingGet;
 export const selectQuestionLoadingCreate = (state) => state.question.loadingCreate;
 export const selectQuestionLoadingUpdate = (state) => state.question.loadingUpdate;
 export const selectQuestionLoadingDelete = (state) => state.question.loadingDelete;
+export const selectQuestionLoadingReorder = (state) => state.question.loadingReorder;
+export const selectQuestionLoadingRemoveFromExam = (state) => state.question.loadingRemoveFromExam;
+export const selectQuestionLoadingAddToSection = (state) => state.question.loadingAddToSection;
 export const selectQuestionError = (state) => state.question.error;
 export const selectQuestionFilters = (state) => state.question.filters;
 

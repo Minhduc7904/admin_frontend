@@ -1,4 +1,4 @@
-import { Eye, Code } from 'lucide-react';
+import { Eye, FileText } from 'lucide-react';
 
 /**
  * ViewModeToggle Component
@@ -33,7 +33,7 @@ export const ViewModeToggle = ({
                 }`}
                 title="Xem dạng text thô"
             >
-                <Code className="w-3 h-3" />
+                <FileText className="w-3 h-3" />
                 Text
             </button>
         </div>

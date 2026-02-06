@@ -8,10 +8,19 @@ import {
 import {
     getQuestionsByExamAsync,
     clearCurrentQuestion,
+    addQuestionToSectionAsync,
+    selectQuestionLoadingAddToSection,
+    updateQuestionSectionInfo,
+    reorderQuestionsAsync,
+    selectQuestionLoadingReorder,
+    updateQuestionsOrder,
 } from '../../question/store/questionSlice';
 import { ExamSectionTabs } from '../components/ExamSectionTabs';
 import { ExamSectionDetail } from '../components/ExamSectionDetail';
 import { ExamQuestionsList } from '../components/ExamQuestionsList';
+import { AddSection } from '../components/AddSection';
+import { EditSection } from '../components/EditSection';
+import { RightPanel } from '../../../shared/components';
 
 export const ExamQuestions = () => {
     const { id } = useParams();
@@ -19,12 +28,25 @@ export const ExamQuestions = () => {
 
     // Active tab state: null = uncategorized, number = sectionId
     const [activeTab, setActiveTab] = useState(null);
+    
+    // Right panel state
+    const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+    const [rightPanelMode, setRightPanelMode] = useState('add'); // 'add' | 'edit'
+    const [editingSection, setEditingSection] = useState(null);
+    
+    // Drag & drop state
+    const [draggedQuestion, setDraggedQuestion] = useState(null);
+    const [isDragOverSection, setIsDragOverSection] = useState(false);
+    const [isDragOverAllQuestions, setIsDragOverAllQuestions] = useState(false);
+    const [dragSource, setDragSource] = useState(null); // 'section' | 'allQuestions'
 
     // Selectors
     const sections = useSelector((state) => state.section.sections);
     const sectionsLoading = useSelector((state) => state.section.loadingGet);
     const questions = useSelector((state) => state.question.questions);
     const questionsLoading = useSelector((state) => state.question.loadingGet);
+    const addToSectionLoading = useSelector(selectQuestionLoadingAddToSection);
+    const reorderLoading = useSelector(selectQuestionLoadingReorder);
 
     // Load sections and questions when component mounts
     useEffect(() => {
@@ -48,18 +70,20 @@ export const ExamQuestions = () => {
     const filteredQuestions = useMemo(() => {
         if (!questions) return [];
 
-        // Note: Backend doesn't return sectionId in question response yet
-        // For now, show all questions in uncategorized tab
-        // TODO: Update backend to include sectionId in question response
         if (activeTab === null) {
-            // Uncategorized: all questions for now
-            return questions;
+            // Uncategorized: questions without sectionId
+            return questions.filter(q => !q.sectionId);
         } else {
             // Questions belonging to selected section
-            // TODO: Filter by sectionId when backend supports it
             return questions.filter(q => q.sectionId === activeTab);
         }
     }, [questions, activeTab]);
+
+    // Uncategorized questions for right panel (only questions without sectionId)
+    const uncategorizedQuestions = useMemo(() => {
+        if (!questions) return [];
+        return questions.filter(q => !q.sectionId);
+    }, [questions]);
 
     // Get current section object
     const currentSection = useMemo(() => {
@@ -71,32 +95,183 @@ export const ExamQuestions = () => {
         setActiveTab(sectionId);
     };
 
+    const handleAddSection = () => {
+        setRightPanelMode('add');
+        setEditingSection(null);
+        setIsRightPanelOpen(true);
+    };
+
+    const handleEditSection = (section) => {
+        setRightPanelMode('edit');
+        setEditingSection(section);
+        setIsRightPanelOpen(true);
+    };
+
+    const handleCloseRightPanel = () => {
+        setIsRightPanelOpen(false);
+        setEditingSection(null);
+    };
+
+    const handleSectionCreated = (newSection) => {
+        // Auto-select the newly created section
+        setActiveTab(newSection.sectionId);
+    };
+
+    const handleSectionUpdated = (updatedSection) => {
+        // Keep the current tab active after update
+        // Redux will automatically update the section in the list
+    };
+
+    // Drag & Drop handlers
+    const handleQuestionDragStart = (question, source = 'allQuestions') => {
+        setDraggedQuestion(question);
+        setDragSource(source);
+    };
+
+    const handleQuestionDragEnd = () => {
+        setDraggedQuestion(null);
+        setIsDragOverSection(false);
+        setIsDragOverAllQuestions(false);
+        setDragSource(null);
+    };
+
+    const handleSectionDragOver = (e) => {
+        e.preventDefault();
+        if (draggedQuestion && dragSource === 'allQuestions') {
+            setIsDragOverSection(true);
+        }
+    };
+
+    const handleSectionDragLeave = () => {
+        setIsDragOverSection(false);
+    };
+
+    const handleSectionDrop = async (e) => {
+        e.preventDefault();
+        setIsDragOverSection(false);
+
+        if (!draggedQuestion || dragSource !== 'allQuestions') return;
+
+        const targetSectionId = activeTab; // null = uncategorized, number = sectionId
+
+        // Check if question is already in this section
+        if (draggedQuestion.sectionId === targetSectionId) {
+            setDraggedQuestion(null);
+            return;
+        }
+
+        try {
+            await dispatch(addQuestionToSectionAsync({
+                examId: parseInt(id),
+                questionId: draggedQuestion.questionId,
+                sectionId: targetSectionId, // null will unlink
+            })).unwrap();
+
+            // Update question's sectionId in Redux state instead of reloading
+            dispatch(updateQuestionSectionInfo({
+                questionId: draggedQuestion.questionId,
+                sectionId: targetSectionId,
+            }));
+            
+            setDraggedQuestion(null);
+        } catch (error) {
+            console.error('Failed to add question to section:', error);
+            setDraggedQuestion(null);
+        }
+    };
+
+    const handleAllQuestionsDragOver = (e) => {
+        e.preventDefault();
+        if (draggedQuestion && draggedQuestion.sectionId && dragSource === 'section') {
+            // Only allow drop if question is currently in a section
+            setIsDragOverAllQuestions(true);
+        }
+    };
+
+    const handleAllQuestionsDragLeave = () => {
+        setIsDragOverAllQuestions(false);
+    };
+
+    const handleAllQuestionsDrop = async (e) => {
+        e.preventDefault();
+        setIsDragOverAllQuestions(false);
+
+        if (!draggedQuestion || !draggedQuestion.sectionId || dragSource !== 'section') return;
+
+        try {
+            await dispatch(addQuestionToSectionAsync({
+                examId: parseInt(id),
+                questionId: draggedQuestion.questionId,
+                sectionId: null, // Unlink from section
+            })).unwrap();
+
+            // Update question's sectionId to null in Redux state instead of reloading
+            dispatch(updateQuestionSectionInfo({
+                questionId: draggedQuestion.questionId,
+                sectionId: null,
+            }));
+            
+            setDraggedQuestion(null);
+        } catch (error) {
+            console.error('Failed to remove question from section:', error);
+            setDraggedQuestion(null);
+        }
+    };
+
+    const handleReorderQuestions = async (items) => {
+        try {
+            items.examId = parseInt(id);
+            await dispatch(reorderQuestionsAsync(items)).unwrap();
+            
+            // Update questions order in Redux state instead of reloading
+            dispatch(updateQuestionsOrder({ items: items.items }));
+        } catch (error) {
+            console.error('Failed to reorder questions:', error);
+            // Reload questions to revert UI changes on error
+            if (id) {
+                dispatch(getQuestionsByExamAsync({ examId: id, params: { limit: 1000 } }));
+            }
+        }
+    };
+
     const isLoading = sectionsLoading || questionsLoading;
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex-1 flex flex-col">
             <div className="flex-1 grid grid-cols-2 gap-6 overflow-hidden">
                 {/* Left Panel - Section Details & Questions */}
-                <div className="flex flex-col gap-4 min-h-0">
+                <div className="flex flex-1 flex-col gap-4">
                     {/* Section Tabs */}
                     <ExamSectionTabs
                         sections={sortedSections}
                         activeTab={activeTab}
                         onTabChange={handleTabChange}
+                        onAddSection={handleAddSection}
                     />
 
                     {/* Scrollable content */}
-                    <div className="flex-1 overflow-y-auto bg-primary border border-border rounded-lg p-4 min-h-0">
-                        <div className="flex flex-col gap-6">
+                    <div className="flex-1 bg-primary border border-border rounded-lg p-4">
+                        <div className="flex flex-1 flex-col gap-6">
                             <ExamSectionDetail
                                 section={currentSection}
                                 questionsCount={filteredQuestions.length}
+                                onEditSection={handleEditSection}
                             />
 
                             <ExamQuestionsList
                                 questions={filteredQuestions}
                                 loading={isLoading}
                                 sectionTitle={currentSection?.title}
+                                isDragOver={isDragOverSection}
+                                onDragOver={handleSectionDragOver}
+                                onDragLeave={handleSectionDragLeave}
+                                onDrop={handleSectionDrop}
+                                draggedQuestionId={draggedQuestion?.questionId}
+                                onQuestionDragStart={handleQuestionDragStart}
+                                onQuestionDragEnd={handleQuestionDragEnd}
+                                isUncategorized={activeTab === null}
+                                dragSource={dragSource}
+                                onReorderQuestions={handleReorderQuestions}
                             />
                         </div>
                     </div>
@@ -104,17 +279,54 @@ export const ExamQuestions = () => {
 
                 {/* Right Panel - All Questions */}
                 <div className="flex flex-col min-h-0">
-                    <div className="flex-1 overflow-y-auto bg-primary border border-border rounded-lg p-4">
+                    <div 
+                        className={`
+                            h-fit bg-primary border-2 rounded-lg p-4 transition-colors
+                            ${isDragOverAllQuestions && dragSource === 'section' 
+                                ? 'border-blue-500 bg-blue-50' 
+                                : 'border-border'
+                            }
+                        `}
+                        onDragOver={handleAllQuestionsDragOver}
+                        onDragLeave={handleAllQuestionsDragLeave}
+                        onDrop={handleAllQuestionsDrop}
+                    >
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Tất cả câu hỏi
+                            Câu hỏi chưa phân loại
                         </h3>
                         <ExamQuestionsList
-                            questions={questions}
+                            questions={uncategorizedQuestions}
                             loading={isLoading}
+                            draggedQuestionId={draggedQuestion?.questionId}
+                            onQuestionDragStart={handleQuestionDragStart}
+                            onQuestionDragEnd={handleQuestionDragEnd}
+                            dragSource={dragSource}
+                            isAllQuestions={true}
                         />
                     </div>
                 </div>
             </div>
+
+            {/* Right Panel for Adding/Editing Section */}
+            <RightPanel
+                isOpen={isRightPanelOpen}
+                onClose={handleCloseRightPanel}
+                title={rightPanelMode === 'add' ? 'Tạo phần mới' : 'Chỉnh sửa phần'}
+            >
+                {rightPanelMode === 'add' ? (
+                    <AddSection 
+                        onClose={handleCloseRightPanel}
+                        examId={id}
+                        onSectionCreated={handleSectionCreated}
+                    />
+                ) : (
+                    <EditSection 
+                        onClose={handleCloseRightPanel}
+                        section={editingSection}
+                        onSectionUpdated={handleSectionUpdated}
+                    />
+                )}
+            </RightPanel>
         </div>
     );
 };

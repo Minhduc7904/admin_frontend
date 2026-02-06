@@ -83,4 +83,40 @@ export const questionApi = {
     getByExam: (examId, params = {}) => {
         return axiosClient.get(API_ENDPOINTS.QUESTIONS.BY_EXAM(examId), { params });
     },
+
+    /**
+     * Reorder questions in an exam
+     * @param {Object} data - Reorder data
+     * @param {number} data.examId - Exam ID
+     * @param {Array} data.items - Array of {questionId, order}
+     * @returns {Promise<Object>} Reorder result
+     */
+    reorder: (data) => {
+        return axiosClient.put(API_ENDPOINTS.QUESTIONS.REORDER, data);
+    },
+
+    /**
+     * Remove a question from an exam
+     * @param {Object} data - Remove data
+     * @param {number} data.examId - Exam ID
+     * @param {number} data.questionId - Question ID
+     * @returns {Promise<Object>} Remove result
+     */
+    removeFromExam: (data) => {
+        return axiosClient.delete(API_ENDPOINTS.QUESTIONS.REMOVE_FROM_EXAM, { data });
+    },
+
+    /**
+     * Add a question to a section in an exam
+     * @param {Object} data - Add to section data
+     * @param {number} data.examId - Exam ID
+     * @param {number} data.questionId - Question ID
+     * @param {number} data.sectionId - Section ID
+     * @param {number} [data.order] - Optional order position
+     * @param {number} [data.points] - Optional points
+     * @returns {Promise<Object>} Add result
+     */
+    addToSection: (data) => {
+        return axiosClient.post(API_ENDPOINTS.QUESTIONS.ADD_TO_SECTION, data);
+    },
 };
