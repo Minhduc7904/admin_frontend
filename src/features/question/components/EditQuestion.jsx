@@ -2,7 +2,7 @@ import { updateQuestionAsync, selectQuestionLoadingUpdate, getQuestionByIdAsync 
 import { createStatementAsync, updateStatementAsync, deleteStatementAsync } from "../../statement/store/statementSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
-import { Input, Button, Dropdown, YoutubeInput } from "../../../shared/components";
+import { Input, Button, Dropdown, YoutubeInput, Spinner } from "../../../shared/components";
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
 import { ChapterSearchMultiSelect } from "../../chapter/components/ChapterSearchMultiSelect";
 import { GRADE_OPTIONS } from "../../../core/constants/grade-constants";
@@ -146,7 +146,7 @@ export const EditQuestion = ({ questionId, onClose, loadQuestions }) => {
     if (loadingGetById) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <Spinner size="lg" />
             </div>
         );
     }

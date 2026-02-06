@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { FileText, Edit2, X, File, Video, Youtube } from 'lucide-react';
-import { Button, RightPanel } from '../../../shared/components';
+import { Button, RightPanel, InlineLoading } from '../../../shared/components';
 import { ENTITY_TYPES, EXAM_FIELDS } from '../../../shared/constants';
 import { MediaPickerModal } from '../../media/components/mediaPicker/MediaPickerModal';
 import { MediaPreviewModal } from '../../media/components/MediaPreviewModal';
@@ -259,7 +259,7 @@ export const ExamDetail = () => {
     if (loadingExam && !exam) {
         return (
             <div className="bg-white rounded-lg shadow-sm p-6">
-                <p className="text-gray-600">Đang tải thông tin đề thi...</p>
+                <InlineLoading message="Đang tải thông tin đề thi..." />
             </div>
         );
     }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react';
 import { MarkdownRenderer } from '../../../shared/components/markdown/MarkdownRenderer';
 import { ViewModeToggle } from '../../../shared/components/ui/ViewModeToggle';
 import { YoutubePreview } from '../../media/components/previews/YoutubePreview';
@@ -26,8 +26,8 @@ const DIFFICULTY_COLORS = {
     VDC: 'bg-red-100 text-red-700',
 };
 
-export const ExamQuestionCard = ({ question, index, isDragging = false, isDragOver = false, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop }) => {
-    const [viewMode, setViewMode] = useState('preview');
+export const ExamQuestionCard = ({ question, index, isDragging = false, isDragOver = false, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop, onEdit, onRemove }) => {
+    const [viewMode, setViewMode] = useState('text'); // 'text' or 'preview'
     const [showVideo, setShowVideo] = useState(false);
 
     const handleDragStart = (e) => {
@@ -86,8 +86,30 @@ export const ExamQuestionCard = ({ question, index, isDragging = false, isDragOv
                         </div>
                     </div>
                 </div>
-                {/* Mode Switch */}
-                <ViewModeToggle viewMode={viewMode} onChange={setViewMode} />
+                <div className="flex items-center gap-2">
+                    {/* Remove Button */}
+                    {onRemove && (
+                        <button
+                            onClick={() => onRemove(question)}
+                            className="p-1 hover:bg-red-100 rounded-md transition-colors"
+                            title="Gỡ câu hỏi khỏi đề thi"
+                        >
+                            <Trash2 size={18} className="text-red-600" />
+                        </button>
+                    )}
+                    {/* Edit Button */}
+                    {onEdit && (
+                        <button
+                            onClick={() => onEdit(question)}
+                            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                            title="Chỉnh sửa câu hỏi"
+                        >
+                            <Edit size={18} className="text-gray-600" />
+                        </button>
+                    )}
+                    {/* Mode Switch */}
+                    <ViewModeToggle viewMode={viewMode} onChange={setViewMode} />
+                </div>
             </div>
 
             {/* Question Content */}

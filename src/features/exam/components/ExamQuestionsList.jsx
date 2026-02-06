@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FileQuestion } from 'lucide-react';
 import { ExamQuestionCard } from './ExamQuestionCard';
+import { InlineLoading } from '../../../shared/components';
 
 export const ExamQuestionsList = ({ 
     questions, 
@@ -17,6 +18,9 @@ export const ExamQuestionsList = ({
     dragSource = null,
     isAllQuestions = false,
     onReorderQuestions,
+    height = 'h-full',
+    onEditQuestion,
+    onRemoveQuestion,
 }) => {
     const [draggedIndex, setDraggedIndex] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -139,9 +143,8 @@ export const ExamQuestionsList = ({
     };
     if (loading) {
         return (
-            <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-4 text-gray-600">Đang tải câu hỏi...</p>
+            <div className="bg-white border border-gray-200 rounded-lg p-8 flex justify-center">
+                <InlineLoading message="Đang tải câu hỏi..." />
             </div>
         );
     }
@@ -194,7 +197,7 @@ export const ExamQuestionsList = ({
             </div>
             <div 
                 ref={scrollContainerRef}
-                className='flex flex-col gap-2 flex-1 h-[600px] overflow-y-auto overflow-x-hidden'
+                className={`flex flex-col gap-2 flex-1 ${height} overflow-y-auto overflow-x-hidden`}
             >
                 {questions.map((question, index) => (
                     <ExamQuestionCard
@@ -220,6 +223,8 @@ export const ExamQuestionsList = ({
                         onDragOver={!isUncategorized && !isAllQuestions && dragSource === 'section' ? (e) => handleReorderDragOver(e, index) : undefined}
                         onDragLeave={!isUncategorized && !isAllQuestions && dragSource === 'section' ? handleReorderDragLeave : undefined}
                         onDrop={!isUncategorized && !isAllQuestions && dragSource === 'section' ? (e) => handleReorderDrop(e, index) : undefined}
+                        onEdit={onEditQuestion}
+                        onRemove={onRemoveQuestion}
                     />
                 ))}
             </div>

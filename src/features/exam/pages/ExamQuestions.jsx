@@ -14,13 +14,16 @@ import {
     reorderQuestionsAsync,
     selectQuestionLoadingReorder,
     updateQuestionsOrder,
+    removeQuestionFromExamAsync,
+    selectQuestionLoadingRemoveFromExam,
 } from '../../question/store/questionSlice';
 import { ExamSectionTabs } from '../components/ExamSectionTabs';
 import { ExamSectionDetail } from '../components/ExamSectionDetail';
 import { ExamQuestionsList } from '../components/ExamQuestionsList';
 import { AddSection } from '../components/AddSection';
 import { EditSection } from '../components/EditSection';
-import { RightPanel } from '../../../shared/components';
+import { EditQuestion } from '../../question/components/EditQuestion';
+import { RightPanel, ConfirmModal } from '../../../shared/components';
 
 export const ExamQuestions = () => {
     const { id } = useParams();
@@ -31,14 +34,19 @@ export const ExamQuestions = () => {
     
     // Right panel state
     const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
-    const [rightPanelMode, setRightPanelMode] = useState('add'); // 'add' | 'edit'
+    const [rightPanelMode, setRightPanelMode] = useState('add'); // 'add' | 'edit' | 'editQuestion'
     const [editingSection, setEditingSection] = useState(null);
+    const [editingQuestion, setEditingQuestion] = useState(null);
     
     // Drag & drop state
     const [draggedQuestion, setDraggedQuestion] = useState(null);
     const [isDragOverSection, setIsDragOverSection] = useState(false);
     const [isDragOverAllQuestions, setIsDragOverAllQuestions] = useState(false);
     const [dragSource, setDragSource] = useState(null); // 'section' | 'allQuestions'
+    
+    // Confirm modal state
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [questionToRemove, setQuestionToRemove] = useState(null);
 
     // Selectors
     const sections = useSelector((state) => state.section.sections);
@@ -47,6 +55,7 @@ export const ExamQuestions = () => {
     const questionsLoading = useSelector((state) => state.question.loadingGet);
     const addToSectionLoading = useSelector(selectQuestionLoadingAddToSection);
     const reorderLoading = useSelector(selectQuestionLoadingReorder);
+    const removeFromExamLoading = useSelector(selectQuestionLoadingRemoveFromExam);
 
     // Load sections and questions when component mounts
     useEffect(() => {
@@ -110,6 +119,7 @@ export const ExamQuestions = () => {
     const handleCloseRightPanel = () => {
         setIsRightPanelOpen(false);
         setEditingSection(null);
+        setEditingQuestion(null);
     };
 
     const handleSectionCreated = (newSection) => {
@@ -120,6 +130,46 @@ export const ExamQuestions = () => {
     const handleSectionUpdated = (updatedSection) => {
         // Keep the current tab active after update
         // Redux will automatically update the section in the list
+    };
+
+    const handleEditQuestion = (question) => {
+        setRightPanelMode('editQuestion');
+        setEditingQuestion(question);
+        setIsRightPanelOpen(true);
+    };
+
+    const handleQuestionUpdated = () => {
+        // Reload questions after update
+        if (id) {
+            dispatch(getQuestionsByExamAsync({ examId: id, params: { limit: 1000 } }));
+        }
+    };
+
+    const handleRemoveQuestion = (question) => {
+        setQuestionToRemove(question);
+        setIsConfirmModalOpen(true);
+    };
+
+    const handleConfirmRemove = async () => {
+        if (!questionToRemove) return;
+
+        try {
+            await dispatch(removeQuestionFromExamAsync({
+                examId: parseInt(id),
+                questionId: questionToRemove.questionId,
+            })).unwrap();
+
+            // Redux slice đã xử lý việc xóa question khỏi state
+            setIsConfirmModalOpen(false);
+            setQuestionToRemove(null);
+        } catch (error) {
+            console.error('Failed to remove question from exam:', error);
+        }
+    };
+
+    const handleCancelRemove = () => {
+        setIsConfirmModalOpen(false);
+        setQuestionToRemove(null);
     };
 
     // Drag & Drop handlers
@@ -272,6 +322,9 @@ export const ExamQuestions = () => {
                                 isUncategorized={activeTab === null}
                                 dragSource={dragSource}
                                 onReorderQuestions={handleReorderQuestions}
+                                height='h-[600px]'
+                                onEditQuestion={handleEditQuestion}
+                                onRemoveQuestion={handleRemoveQuestion}
                             />
                         </div>
                     </div>
@@ -302,22 +355,37 @@ export const ExamQuestions = () => {
                             onQuestionDragEnd={handleQuestionDragEnd}
                             dragSource={dragSource}
                             isAllQuestions={true}
+                            height="h-[800px]"
+                            onEditQuestion={handleEditQuestion}
+                            onRemoveQuestion={handleRemoveQuestion}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Right Panel for Adding/Editing Section */}
+            {/* Right Panel for Adding/Editing Section or Question */}
             <RightPanel
                 isOpen={isRightPanelOpen}
                 onClose={handleCloseRightPanel}
-                title={rightPanelMode === 'add' ? 'Tạo phần mới' : 'Chỉnh sửa phần'}
+                title={
+                    rightPanelMode === 'add' 
+                        ? 'Tạo phần mới' 
+                        : rightPanelMode === 'editQuestion'
+                        ? 'Chỉnh sửa câu hỏi'
+                        : 'Chỉnh sửa phần'
+                }
             >
                 {rightPanelMode === 'add' ? (
                     <AddSection 
                         onClose={handleCloseRightPanel}
                         examId={id}
                         onSectionCreated={handleSectionCreated}
+                    />
+                ) : rightPanelMode === 'editQuestion' ? (
+                    <EditQuestion
+                        questionId={editingQuestion?.questionId}
+                        onClose={handleCloseRightPanel}
+                        loadQuestions={handleQuestionUpdated}
                     />
                 ) : (
                     <EditSection 
@@ -327,6 +395,19 @@ export const ExamQuestions = () => {
                     />
                 )}
             </RightPanel>
+
+            {/* Confirm Modal for Removing Question */}
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                onClose={handleCancelRemove}
+                onConfirm={handleConfirmRemove}
+                title="Gỡ câu hỏi khỏi đề thi"
+                message={`Bạn có chắc chắn muốn gỡ câu hỏi "${questionToRemove?.content?.substring(0, 50)}..." khỏi đề thi này không?`}
+                confirmText="Gỡ câu hỏi"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={removeFromExamLoading}
+            />
         </div>
     );
 };

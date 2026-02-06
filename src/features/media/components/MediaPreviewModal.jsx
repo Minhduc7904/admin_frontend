@@ -1,5 +1,5 @@
-import { X, RefreshCw } from 'lucide-react';
-import { Modal } from '../../../shared/components/ui';
+import { X } from 'lucide-react';
+import { Modal, Spinner } from '../../../shared/components';
 import { ImagePreview, VideoPreview, DocumentPreview } from './previews';
 import { YoutubePreview } from './previews/YoutubePreview';
 
@@ -18,11 +18,9 @@ export const MediaPreviewModal = ({ isOpen, onClose, media, youtubeUrl, loading 
         // Show loading state
         if (loading) {
             return (
-                <div className="flex items-center justify-center p-12">
-                    <div className="text-center">
-                        <RefreshCw className="animate-spin mx-auto mb-2 text-info" size={32} />
-                        <p className="text-sm text-foreground-light">Đang tải...</p>
-                    </div>
+                <div className="flex flex-col items-center justify-center p-12 gap-3">
+                    <Spinner size="lg" />
+                    <p className="text-sm text-foreground-light">Đang tải...</p>
                 </div>
             );
         }

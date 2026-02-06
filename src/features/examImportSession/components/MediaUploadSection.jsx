@@ -1,5 +1,5 @@
 import { Upload } from 'lucide-react';
-import { Button } from '../../../shared/components';
+import { Button, InlineLoading } from '../../../shared/components';
 
 export const MediaUploadSection = ({
     title,
@@ -31,7 +31,9 @@ export const MediaUploadSection = ({
             </div>
             <div className={gridLayout ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
                 {loading ? (
-                    <div className="text-sm text-foreground-light">Đang tải...</div>
+                    <div className={gridLayout ? 'col-span-2' : ''}>
+                        <InlineLoading message="Đang tải..." />
+                    </div>
                 ) : items.length > 0 ? (
                     items.map(renderItem)
                 ) : (
