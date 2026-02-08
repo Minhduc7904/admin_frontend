@@ -24,6 +24,25 @@ export const questionApi = {
     },
 
     /**
+     * Get my questions (created by current user) with pagination and filtering
+     * @param {Object} params - Query parameters
+     * @param {number} params.page - Page number
+     * @param {number} params.limit - Items per page
+     * @param {string} params.search - Search keyword
+     * @param {number} params.subjectId - Subject ID filter
+     * @param {string} params.type - Question type filter
+     * @param {string} params.difficulty - Difficulty filter
+     * @param {number} params.grade - Grade filter
+     * @param {string} params.visibility - Visibility filter
+     * @param {string} params.sortBy - Sort field
+     * @param {string} params.sortOrder - Sort order (asc/desc)
+     * @returns {Promise<Object>} Questions list with pagination
+     */
+    getMyQuestions: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.QUESTIONS.MY_QUESTIONS, { params });
+    },
+
+    /**
      * Get question by ID
      * @param {number} id - Question ID
      * @returns {Promise<Object>} Question data
@@ -107,6 +126,19 @@ export const questionApi = {
     },
 
     /**
+     * Add a question to an exam (without section)
+     * @param {Object} data - Add to exam data
+     * @param {number} data.examId - Exam ID
+     * @param {number} data.questionId - Question ID
+     * @param {number} [data.order] - Optional order position
+     * @param {number} [data.points] - Optional points
+     * @returns {Promise<Object>} Add result
+     */
+    addToExam: (data) => {
+        return axiosClient.post(API_ENDPOINTS.QUESTIONS.ADD_TO_EXAM, data);
+    },
+
+    /**
      * Add a question to a section in an exam
      * @param {Object} data - Add to section data
      * @param {number} data.examId - Exam ID
@@ -118,5 +150,25 @@ export const questionApi = {
      */
     addToSection: (data) => {
         return axiosClient.post(API_ENDPOINTS.QUESTIONS.ADD_TO_SECTION, data);
+    },
+
+    /**
+     * Search questions with advanced filters
+     * @param {Object} params - Search parameters
+     * @param {number} params.page - Page number
+     * @param {number} params.limit - Items per page
+     * @param {string} params.search - Search keyword (searches in content, solution, answer, statements)
+     * @param {string} params.difficulty - Difficulty filter (EASY, MEDIUM, HARD)
+     * @param {string} params.type - Question type filter (SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER, ESSAY)
+     * @param {number} params.chapterId - Chapter ID filter
+     * @param {number} params.grade - Grade filter (1-12)
+     * @param {number} params.subjectId - Subject ID filter
+     * @param {string} params.visibility - Visibility filter (PUBLIC, PRIVATE)
+     * @param {string} params.sortBy - Sort field (default: createdAt)
+     * @param {string} params.sortOrder - Sort order (asc/desc)
+     * @returns {Promise<Object>} Search results with pagination and relevance scores
+     */
+    search: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.QUESTIONS.SEARCH, { params });
     },
 };

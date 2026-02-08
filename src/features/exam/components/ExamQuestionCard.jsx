@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronDown, ChevronUp, Edit, Trash2, Plus } from 'lucide-react';
 import { MarkdownRenderer } from '../../../shared/components/markdown/MarkdownRenderer';
 import { ViewModeToggle } from '../../../shared/components/ui/ViewModeToggle';
 import { YoutubePreview } from '../../media/components/previews/YoutubePreview';
@@ -26,7 +26,7 @@ const DIFFICULTY_COLORS = {
     VDC: 'bg-red-100 text-red-700',
 };
 
-export const ExamQuestionCard = ({ question, index, isDragging = false, isDragOver = false, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop, onEdit, onRemove }) => {
+export const ExamQuestionCard = ({ question, index, isDragging = false, isDragOver = false, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop, onEdit, onRemove, onAddToExam }) => {
     const [viewMode, setViewMode] = useState('text'); // 'text' or 'preview'
     const [showVideo, setShowVideo] = useState(false);
 
@@ -87,6 +87,17 @@ export const ExamQuestionCard = ({ question, index, isDragging = false, isDragOv
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {/* Add to Exam Button */}
+                    {onAddToExam && (
+                        <button
+                            onClick={() => onAddToExam(question)}
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors shadow-sm flex items-center gap-1"
+                            title="Thêm vào đề thi"
+                        >
+                            <Plus size={16} />
+                            Thêm vào đề
+                        </button>
+                    )}
                     {/* Remove Button */}
                     {onRemove && (
                         <button

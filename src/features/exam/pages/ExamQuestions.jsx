@@ -20,6 +20,7 @@ import {
 import { ExamSectionTabs } from '../components/ExamSectionTabs';
 import { ExamSectionDetail } from '../components/ExamSectionDetail';
 import { ExamQuestionsList } from '../components/ExamQuestionsList';
+import { ExamQuestionsRightPanel } from '../components/ExamQuestionsRightPanel';
 import { AddSection } from '../components/AddSection';
 import { EditSection } from '../components/EditSection';
 import { EditQuestion } from '../../question/components/EditQuestion';
@@ -31,19 +32,19 @@ export const ExamQuestions = () => {
 
     // Active tab state: null = uncategorized, number = sectionId
     const [activeTab, setActiveTab] = useState(null);
-    
+
     // Right panel state
     const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
     const [rightPanelMode, setRightPanelMode] = useState('add'); // 'add' | 'edit' | 'editQuestion'
     const [editingSection, setEditingSection] = useState(null);
     const [editingQuestion, setEditingQuestion] = useState(null);
-    
+
     // Drag & drop state
     const [draggedQuestion, setDraggedQuestion] = useState(null);
     const [isDragOverSection, setIsDragOverSection] = useState(false);
     const [isDragOverAllQuestions, setIsDragOverAllQuestions] = useState(false);
     const [dragSource, setDragSource] = useState(null); // 'section' | 'allQuestions'
-    
+
     // Confirm modal state
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [questionToRemove, setQuestionToRemove] = useState(null);
@@ -222,7 +223,7 @@ export const ExamQuestions = () => {
                 questionId: draggedQuestion.questionId,
                 sectionId: targetSectionId,
             }));
-            
+
             setDraggedQuestion(null);
         } catch (error) {
             console.error('Failed to add question to section:', error);
@@ -260,7 +261,7 @@ export const ExamQuestions = () => {
                 questionId: draggedQuestion.questionId,
                 sectionId: null,
             }));
-            
+
             setDraggedQuestion(null);
         } catch (error) {
             console.error('Failed to remove question from section:', error);
@@ -272,7 +273,7 @@ export const ExamQuestions = () => {
         try {
             items.examId = parseInt(id);
             await dispatch(reorderQuestionsAsync(items)).unwrap();
-            
+
             // Update questions order in Redux state instead of reloading
             dispatch(updateQuestionsOrder({ items: items.items }));
         } catch (error) {
@@ -332,34 +333,23 @@ export const ExamQuestions = () => {
 
                 {/* Right Panel - All Questions */}
                 <div className="flex flex-col min-h-0">
-                    <div 
-                        className={`
-                            h-fit bg-primary border-2 rounded-lg p-4 transition-colors
-                            ${isDragOverAllQuestions && dragSource === 'section' 
-                                ? 'border-blue-500 bg-blue-50' 
-                                : 'border-border'
-                            }
-                        `}
-                        onDragOver={handleAllQuestionsDragOver}
-                        onDragLeave={handleAllQuestionsDragLeave}
-                        onDrop={handleAllQuestionsDrop}
-                    >
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Câu hỏi chưa phân loại
-                        </h3>
-                        <ExamQuestionsList
-                            questions={uncategorizedQuestions}
-                            loading={isLoading}
-                            draggedQuestionId={draggedQuestion?.questionId}
-                            onQuestionDragStart={handleQuestionDragStart}
-                            onQuestionDragEnd={handleQuestionDragEnd}
-                            dragSource={dragSource}
-                            isAllQuestions={true}
-                            height="h-[800px]"
-                            onEditQuestion={handleEditQuestion}
-                            onRemoveQuestion={handleRemoveQuestion}
-                        />
-                    </div>
+                    <ExamQuestionsRightPanel
+                        examId={id}
+                        uncategorizedQuestions={uncategorizedQuestions}
+                        allQuestionsInExam={questions}
+                        loading={isLoading}
+                        draggedQuestion={draggedQuestion}
+                        onQuestionDragStart={handleQuestionDragStart}
+                        onQuestionDragEnd={handleQuestionDragEnd}
+                        dragSource={dragSource}
+                        onEditQuestion={handleEditQuestion}
+                        onRemoveQuestion={handleRemoveQuestion}
+                        isDragOverAllQuestions={isDragOverAllQuestions}
+                        onAllQuestionsDragOver={handleAllQuestionsDragOver}
+                        onAllQuestionsDragLeave={handleAllQuestionsDragLeave}
+                        onAllQuestionsDrop={handleAllQuestionsDrop}
+                        onQuestionAdded={handleQuestionUpdated}
+                    />
                 </div>
             </div>
 
@@ -367,16 +357,17 @@ export const ExamQuestions = () => {
             <RightPanel
                 isOpen={isRightPanelOpen}
                 onClose={handleCloseRightPanel}
+                width='w-[800px]'
                 title={
-                    rightPanelMode === 'add' 
-                        ? 'Tạo phần mới' 
+                    rightPanelMode === 'add'
+                        ? 'Tạo phần mới'
                         : rightPanelMode === 'editQuestion'
-                        ? 'Chỉnh sửa câu hỏi'
-                        : 'Chỉnh sửa phần'
+                            ? 'Chỉnh sửa câu hỏi'
+                            : 'Chỉnh sửa phần'
                 }
             >
                 {rightPanelMode === 'add' ? (
-                    <AddSection 
+                    <AddSection
                         onClose={handleCloseRightPanel}
                         examId={id}
                         onSectionCreated={handleSectionCreated}
@@ -388,7 +379,7 @@ export const ExamQuestions = () => {
                         loadQuestions={handleQuestionUpdated}
                     />
                 ) : (
-                    <EditSection 
+                    <EditSection
                         onClose={handleCloseRightPanel}
                         section={editingSection}
                         onSectionUpdated={handleSectionUpdated}

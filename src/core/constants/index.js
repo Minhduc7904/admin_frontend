@@ -23,6 +23,7 @@ export const ROUTES = {
   PROFILE_SECURITY: "/profile/security",
   SETTINGS: "/settings",
   NOT_FOUND: '/404',
+  FORBIDDEN: '/403',
   LOADING_REDIRECT: '/loading',
   ROLES: '/roles',
   ROLES_CREATE: '/roles/create',
@@ -74,7 +75,9 @@ export const ROUTES = {
   EXAM_IMPORT_SESSION_PROCESS: (id = ':id') => `/exam-import-sessions/${id}/process`,
   EXAM_IMPORT_SESSION_PREVIEW: (id = ':id') => `/exam-import-sessions/${id}/preview`,
   QUESTIONS: '/questions',
+  MY_QUESTIONS: '/my-questions',
   EXAMS: '/exams',
+  MY_EXAMS: '/my-exams',
   EXAM_DETAIL: (id = ':id') => `/exams/${id}`,
   EXAM_QUESTIONS: (id = ':id') => `/exams/${id}/questions`,
   EXAM_PREVIEW: (id = ':id') => `/exams/${id}/preview`,
@@ -103,6 +106,7 @@ export const API_ENDPOINTS = {
   },
   ADMINS: {
     LIST: "/admins",
+    SEARCH: "/admins/search",
     DETAIL: (id) => `/admins/${id}`,
     CREATE: "/admins",
     UPDATE: (id) => `/admins/${id}`,
@@ -110,6 +114,7 @@ export const API_ENDPOINTS = {
   },
   STUDENTS: {
     LIST: "/students",
+    SEARCH: "/students/search",
     STATS_BY_STATUS: "/students/stats/status",
     STATS_BY_GRADE: "/students/stats/grade",
     DETAIL: (id) => `/students/${id}`,
@@ -372,12 +377,15 @@ export const API_ENDPOINTS = {
   },
   QUESTIONS: {
     LIST: "/questions",
+    MY_QUESTIONS: "/questions/my-questions",
+    SEARCH: "/questions/search",
     DETAIL: (id) => `/questions/${id}`,
     CREATE: "/questions",
     UPDATE: (id) => `/questions/${id}`,
     DELETE: (id) => `/questions/${id}`,
     BY_EXAM: (examId) => `/exams/${examId}/questions`,
     REORDER: "/questions/reorder",
+    ADD_TO_EXAM: "/questions/exam",
     REMOVE_FROM_EXAM: "/questions/exam",
     ADD_TO_SECTION: "/questions/section",
   },
@@ -388,6 +396,7 @@ export const API_ENDPOINTS = {
   },
   EXAMS: {
     LIST: "/exams",
+    MY_EXAMS: "/exams/my-exams",
     DETAIL: (id) => `/exams/${id}`,
     CREATE: "/exams",
     UPDATE: (id) => `/exams/${id}`,
@@ -417,3 +426,4 @@ export const HTTP_STATUS = {
 
 export * from "./visibility"
 export * from "./options"
+export * from "./permission/permission.codes"

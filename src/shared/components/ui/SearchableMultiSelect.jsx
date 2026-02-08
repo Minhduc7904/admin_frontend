@@ -3,6 +3,7 @@ import { ChevronDown, Search, X } from 'lucide-react';
 import { InlineLoading } from '../loading/Loading';
 import { EmptyInline } from '../empty/EmptyState';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 /**
  * SearchableMultiSelect
@@ -11,8 +12,8 @@ import { useDebounce } from '../../hooks/useDebounce';
  * @param {string} props.label
  * @param {string} props.placeholder
  * @param {Function} props.onChange              // (items[]) => void
- * @param {Function} props.searchFunction
- * @param {Function} props.fetchDefaultItems
+ * @param {Function} props.searchFunction        // (keyword, page) => Promise<{ data, meta }>
+ * @param {Function} props.fetchDefaultItems     // (page) => Promise<{ data, meta }>
  * @param {Function} props.getOptionLabel
  * @param {Function} props.getOptionValue
  * @param {Function} props.renderOption
@@ -21,6 +22,7 @@ import { useDebounce } from '../../hooks/useDebounce';
  * @param {boolean} props.required
  * @param {boolean} props.disabled
  * @param {number} props.debounceMs
+ * @param {boolean} props.enableInfiniteScroll   // Enable infinite scroll
  */
 export const SearchableMultiSelect = ({
     label,
@@ -36,14 +38,19 @@ export const SearchableMultiSelect = ({
     required = false,
     disabled = false,
     debounceMs = 300,
+    enableInfiniteScroll = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
 
     const containerRef = useRef(null);
     const debouncedSearchTerm = useDebounce(searchTerm, debounceMs);
+    const prevSearchTermRef = useRef('');
+    const isFirstOpenRef = useRef(true);
 
     /* ===================== OUTSIDE CLICK ===================== */
     useEffect(() => {
@@ -60,38 +67,78 @@ export const SearchableMultiSelect = ({
     useEffect(() => {
         if (!isOpen) return;
 
-        if (debouncedSearchTerm) {
-            search(debouncedSearchTerm);
-        } else {
-            loadDefault();
+        // Check if search term changed
+        const searchTermChanged = debouncedSearchTerm !== prevSearchTermRef.current;
+        
+        // If search term changed, reset page and options
+        if (searchTermChanged) {
+            setPage(1);
+            setOptions([]);
+            prevSearchTermRef.current = debouncedSearchTerm;
+            
+            if (debouncedSearchTerm) {
+                search(debouncedSearchTerm, 1);
+            } else {
+                loadDefault(1);
+            }
+        } 
+        // If opening for the first time or no options yet, load data
+        else if (isFirstOpenRef.current || options.length === 0) {
+            isFirstOpenRef.current = false;
+            
+            if (debouncedSearchTerm) {
+                search(debouncedSearchTerm, 1);
+            } else {
+                loadDefault(1);
+            }
         }
     }, [debouncedSearchTerm, isOpen]);
 
-    const loadDefault = async () => {
+    const loadDefault = async (pageNum) => {
         if (!fetchDefaultItems) return;
         setLoading(true);
         try {
-            const res = await fetchDefaultItems();
-            setOptions(res?.data || res || []);
+            const res = await fetchDefaultItems(pageNum);
+            const newData = res?.data || res || [];
+            setOptions(prev => pageNum === 1 ? newData : [...prev, ...newData]);
+            setHasMore(res?.meta?.hasNext || false);
         } catch {
             setOptions([]);
+            setHasMore(false);
         } finally {
             setLoading(false);
         }
     };
 
-    const search = async (keyword) => {
+    const search = async (keyword, pageNum) => {
         if (!searchFunction) return;
         setLoading(true);
         try {
-            const res = await searchFunction(keyword);
-            setOptions(res?.data || res || []);
+            const res = await searchFunction(keyword, pageNum);
+            const newData = res?.data || res || [];
+            setOptions(prev => pageNum === 1 ? newData : [...prev, ...newData]);
+            setHasMore(res?.meta?.hasNext || false);
         } catch {
             setOptions([]);
+            setHasMore(false);
         } finally {
             setLoading(false);
         }
     };
+
+    /* ===================== LOAD MORE ===================== */
+    const loadMore = () => {
+        if (!enableInfiniteScroll || loading || !hasMore) return;
+        const nextPage = page + 1;
+        setPage(nextPage);
+        if (debouncedSearchTerm) {
+            search(debouncedSearchTerm, nextPage);
+        } else {
+            loadDefault(nextPage);
+        }
+    };
+
+    const lastElementRef = useInfiniteScroll(loadMore, hasMore, loading);
 
     /* ===================== SELECT ===================== */
     const isSelected = (item) =>
@@ -175,17 +222,19 @@ export const SearchableMultiSelect = ({
 
                     {/* List */}
                     <div className="overflow-y-auto flex-1">
-                        {loading ? (
-                            <InlineLoading message="Đang tải..." />
+                        {loading && options.length === 0 ? (
+                            <div className='w-full flex justify-center items-center text-center'><InlineLoading message="Đang tải..." /></div>
                         ) : options.length === 0 ? (
                             <EmptyInline icon="search" message="Không có dữ liệu" />
                         ) : (
                             <ul>
-                                {options.map(item => {
+                                {options.map((item, index) => {
                                     const selected = isSelected(item);
+                                    const isLast = index === options.length - 1;
                                     return (
                                         <li
-                                            key={getOptionValue(item)}
+                                            key={getOptionValue(item) + '-' + index}
+                                            ref={enableInfiniteScroll && isLast ? lastElementRef : null}
                                             onClick={() => toggleSelect(item)}
                                             className={`
                                                 px-4 py-2 text-sm cursor-pointer flex justify-between
@@ -199,6 +248,11 @@ export const SearchableMultiSelect = ({
                                         </li>
                                     );
                                 })}
+                                {loading && options.length > 0 && (
+                                    <li className="px-4 py-2 text-center text-sm text-gray-500">
+                                        <InlineLoading message="Đang tải thêm..." />
+                                    </li>
+                                )}
                             </ul>
                         )}
                     </div>

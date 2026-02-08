@@ -78,6 +78,16 @@ export const getAllStudentsAsync = createAsyncThunk(
     }
 );
 
+export const searchStudentsAsync = createAsyncThunk(
+    "student/search",
+    async (query, thunkAPI) => {
+        return handleAsyncThunk(() => studentApi.search(query), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm học sinh",
+        });
+    }
+);
+
 export const getStudentStatsByStatusAsync = createAsyncThunk(
     "student/statsByStatus",
     async (params, thunkAPI) => {
@@ -94,16 +104,6 @@ export const getStudentStatsByGradeAsync = createAsyncThunk(
         return handleAsyncThunk(() => studentApi.statsByGrade(params), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tải thống kê khối học sinh",
-        });
-    }
-);
-
-export const searchStudentsAsync = createAsyncThunk(
-    "student/search",
-    async (params, thunkAPI) => {
-        return handleAsyncThunk(() => studentApi.getAll(params), thunkAPI, {
-            showSuccess: false,
-            errorTitle: "Lỗi tìm kiếm học sinh",
         });
     }
 );
@@ -229,6 +229,22 @@ export const studentSlice = createSlice({
                 state.pagination = action.payload.meta;
             })
             .addCase(getAllStudentsAsync.rejected, (state, action) => {
+                state.students = [];
+                state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Search students
+            .addCase(searchStudentsAsync.pending, (state) => {
+                state.students = [];
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(searchStudentsAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                state.students = action.payload.data;
+                state.pagination = action.payload.meta;
+            })
+            .addCase(searchStudentsAsync.rejected, (state, action) => {
                 state.students = [];
                 state.loadingGet = false;
                 state.error = action.payload;

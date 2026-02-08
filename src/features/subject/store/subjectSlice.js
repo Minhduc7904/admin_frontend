@@ -13,7 +13,19 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    // Search state (for SearchableSelect)
+    searchSubjects: [],
+    searchPagination: {
+        page: 1,
+        limit: 50,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    searchTerm: '',
     loadingGet: false,
+    loadingSearch: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
@@ -106,6 +118,14 @@ const subjectSlice = createSlice({
         clearError: (state) => {
             state.error = null;
         },
+        setSearchTerm: (state, action) => {
+            state.searchTerm = action.payload;
+        },
+        clearSearchSubjects: (state) => {
+            state.searchSubjects = [];
+            state.searchPagination = initialState.searchPagination;
+            state.searchTerm = '';
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -122,6 +142,39 @@ const subjectSlice = createSlice({
             })
             .addCase(getAllSubjectsAsync.rejected, (state, action) => {
                 state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Search Subjects
+            .addCase(searchSubjectsAsync.pending, (state) => {
+                state.loadingSearch = true;
+                state.error = null;
+            })
+            .addCase(searchSubjectsAsync.fulfilled, (state, action) => {
+                state.loadingSearch = false;
+                const { page } = action.meta.arg;
+                
+                if (page === 1) {
+                    // First page - replace
+                    state.searchSubjects = action.payload.data;
+                } else {
+                    // Subsequent pages - append and deduplicate
+                    const existing = state.searchSubjects;
+                    const newItems = action.payload.data;
+                    const merged = [...existing, ...newItems];
+                    const uniqueMap = new Map();
+                    merged.forEach(item => {
+                        if (!uniqueMap.has(item.subjectId)) {
+                            uniqueMap.set(item.subjectId, item);
+                        }
+                    });
+                    state.searchSubjects = Array.from(uniqueMap.values());
+                }
+                
+                state.searchPagination = action.payload.meta;
+                state.error = null;
+            })
+            .addCase(searchSubjectsAsync.rejected, (state, action) => {
+                state.loadingSearch = false;
                 state.error = action.payload;
             })
             // Get Subject By ID
@@ -195,26 +248,18 @@ const subjectSlice = createSlice({
             .addCase(deleteSubjectAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
-            })
-            // Search subjects
-            .addCase(searchSubjectsAsync.pending, (state) => {
-                state.loadingGet = true;
-                state.error = null;
-            })
-            .addCase(searchSubjectsAsync.fulfilled, (state, action) => {
-                state.loadingGet = false;
-                // Store search results but don't update pagination
-                // This is for dropdown usage only
-            })
-            .addCase(searchSubjectsAsync.rejected, (state, action) => {
-                state.loadingGet = false;
-                state.error = action.payload;
             });
     },
 });
 
-export const { setFilters, resetFilters, clearCurrentSubject, clearError } =
-    subjectSlice.actions;
+export const {
+    setFilters,
+    resetFilters,
+    clearCurrentSubject,
+    clearError,
+    setSearchTerm,
+    clearSearchSubjects,
+} = subjectSlice.actions;
 
 // Selectors
 export const selectSubjects = (state) => state.subject.subjects;
@@ -226,5 +271,10 @@ export const selectSubjectLoadingCreate = (state) => state.subject.loadingCreate
 export const selectSubjectLoadingUpdate = (state) => state.subject.loadingUpdate;
 export const selectSubjectLoadingDelete = (state) => state.subject.loadingDelete;
 export const selectSubjectError = (state) => state.subject.error;
+// Search selectors
+export const selectSearchSubjects = (state) => state.subject.searchSubjects;
+export const selectSearchPagination = (state) => state.subject.searchPagination;
+export const selectSearchTerm = (state) => state.subject.searchTerm;
+export const selectSubjectLoadingSearch = (state) => state.subject.loadingSearch;
 
 export default subjectSlice.reducer;

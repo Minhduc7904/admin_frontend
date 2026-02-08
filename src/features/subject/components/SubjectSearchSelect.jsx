@@ -1,6 +1,14 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { SearchableSelect } from '../../../shared/components/ui';
-import { searchSubjectsAsync } from '../store/subjectSlice';
+import {
+    searchSubjectsAsync,
+    selectSearchSubjects,
+    selectSearchPagination,
+    selectSearchTerm,
+    selectSubjectLoadingSearch,
+    setSearchTerm,
+    clearSearchSubjects,
+} from '../store/subjectSlice';
 
 /**
  * SubjectSearchSelect - Wrapper component for searching and selecting subjects
@@ -17,36 +25,79 @@ export const SubjectSearchSelect = ({
     className = ''
 }) => {
     const dispatch = useDispatch();
+    
+    // Redux state
+    const searchSubjects = useSelector(selectSearchSubjects);
+    const searchPagination = useSelector(selectSearchPagination);
+    const searchTerm = useSelector(selectSearchTerm);
+    const loading = useSelector(selectSubjectLoadingSearch);
 
-    // Search function using Redux thunk
-    const handleSearch = async (keyword) => {
+    // Search function using Redux thunk with caching
+    const handleSearch = async (keyword, page = 1) => {
         try {
+            // Check if we already have data for this search
+            const isSameSearch = keyword === searchTerm;
+            const hasCache = isSameSearch && searchSubjects.length > 0 && page <= searchPagination.page;
+            
+            if (hasCache) {
+                // Return cached data
+                return {
+                    data: searchSubjects,
+                    meta: searchPagination,
+                };
+            }
+
+            // Update search term in Redux
+            if (keyword !== searchTerm) {
+                dispatch(setSearchTerm(keyword));
+            }
+
             const result = await dispatch(searchSubjectsAsync({
                 search: keyword,
-                limit: 10,
+                page,
+                limit: 50,
                 sortBy: 'name',
                 sortOrder: 'asc'
             })).unwrap();
+            
             return result;
         } catch (error) {
             console.error('Error searching subjects:', error);
-            return { data: [] };
+            return { data: [], meta: { hasNext: false } };
         }
     };
 
-    // Fetch default items (all subjects sorted by name)
-    const fetchDefaultSubjects = async () => {
+    // Fetch default items with caching
+    const fetchDefaultSubjects = async (page = 1) => {
         try {
+            // Check if we already have data (no search term)
+            const isSameSearch = !searchTerm;
+            const hasCache = isSameSearch && searchSubjects.length > 0 && page <= searchPagination.page;
+            
+            if (hasCache) {
+                // Return cached data
+                return {
+                    data: searchSubjects,
+                    meta: searchPagination,
+                };
+            }
+
+            // Clear search term
+            if (searchTerm) {
+                dispatch(setSearchTerm(''));
+            }
+
             const result = await dispatch(searchSubjectsAsync({
-                page: 1,
-                limit: 50, // Load more subjects as they are usually limited
+                page,
+                limit: 50,
                 sortBy: 'name',
                 sortOrder: 'asc'
             })).unwrap();
+            
             return result;
         } catch (error) {
             console.error('Error fetching default subjects:', error);
-            return { data: [] };
+            return { data: [], meta: { hasNext: false } };
         }
     };
 
@@ -79,6 +130,8 @@ export const SubjectSearchSelect = ({
             required={required}
             disabled={disabled}
             className={className}
+            enableInfiniteScroll={true}
+            debounceMs={1000}
         />
     );
 };

@@ -1,6 +1,17 @@
-import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { SearchableMultiSelect } from '../../../shared/components/ui';
-import { searchChaptersAsync } from '../store/chapterSlice';
+import {
+    searchChaptersAsync,
+    selectSearchChapters,
+    selectSearchPagination,
+    selectSearchTerm,
+    selectSearchSubjectId,
+    selectChapterLoadingSearch,
+    setSearchTerm,
+    setSearchSubjectId,
+    clearSearchChapters,
+} from '../store/chapterSlice';
 
 /**
  * ChapterSearchMultiSelect
@@ -18,37 +29,90 @@ export const ChapterSearchMultiSelect = ({
     filterSubjectId = null,
 }) => {
     const dispatch = useDispatch();
+    
+    // Redux state
+    const searchChapters = useSelector(selectSearchChapters);
+    const searchPagination = useSelector(selectSearchPagination);
+    const searchTerm = useSelector(selectSearchTerm);
+    const searchSubjectId = useSelector(selectSearchSubjectId);
+    const loading = useSelector(selectChapterLoadingSearch);
+
+    // Clear search when subject changes
+    useEffect(() => {
+        if (filterSubjectId !== searchSubjectId) {
+            dispatch(clearSearchChapters());
+            dispatch(setSearchSubjectId(filterSubjectId));
+        }
+    }, [filterSubjectId, searchSubjectId, dispatch]);
 
     /* ===================== SEARCH ===================== */
-    const handleSearch = async (keyword) => {
+    const handleSearch = async (keyword, page = 1) => {
         try {
+            // Check if we already have data for this search
+            const isSameSearch = keyword === searchTerm && filterSubjectId === searchSubjectId;
+            const hasCache = isSameSearch && searchChapters.length > 0 && page <= searchPagination.page;
+            
+            if (hasCache) {
+                // Return cached data
+                return {
+                    data: searchChapters,
+                    meta: searchPagination,
+                };
+            }
+
+            // Update search term in Redux
+            if (keyword !== searchTerm) {
+                dispatch(setSearchTerm(keyword));
+            }
+
             const result = await dispatch(
                 searchChaptersAsync({
                     search: keyword,
                     subjectId: filterSubjectId || undefined,
+                    page,
+                    limit: 20,
                 })
             ).unwrap();
-
-            return result.data || [];
+            
+            return result;
         } catch (error) {
             console.error('Error searching chapters:', error);
-            return [];
+            return { data: [], meta: { hasNext: false } };
         }
     };
 
     /* ===================== DEFAULT ===================== */
-    const fetchDefaultChapters = async () => {
+    const fetchDefaultChapters = async (page = 1) => {
         try {
+            // Check if we already have data (no search term)
+            const isSameSearch = !searchTerm && filterSubjectId === searchSubjectId;
+            const hasCache = isSameSearch && searchChapters.length > 0 && page <= searchPagination.page;
+            
+            if (hasCache) {
+                // Return cached data
+                return {
+                    data: searchChapters,
+                    meta: searchPagination,
+                };
+            }
+
+            // Clear search term
+            if (searchTerm) {
+                dispatch(setSearchTerm(''));
+            }
+
             const result = await dispatch(
                 searchChaptersAsync({
                     subjectId: filterSubjectId || undefined,
+                    page,
+                    limit: 20,
                 })
             ).unwrap();
 
-            return result.data || [];
+            return result;
         } catch (error) {
             console.error('Error fetching default chapters:', error);
-            return [];
+            return { data: [], meta: { hasNext: false } };
         }
     };
 
@@ -92,6 +156,8 @@ export const ChapterSearchMultiSelect = ({
             required={required}
             disabled={disabled}
             className={className}
+            enableInfiniteScroll={true}
+            debounceMs={1000}
         />
     );
 };

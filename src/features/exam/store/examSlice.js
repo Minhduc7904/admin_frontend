@@ -40,6 +40,16 @@ export const getAllExamsAsync = createAsyncThunk(
     }
 );
 
+export const getMyExamsAsync = createAsyncThunk(
+    "exam/getMyExams",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => examApi.getMyExams(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách đề thi của tôi",
+        });
+    }
+);
+
 export const getExamByIdAsync = createAsyncThunk(
     "exam/getById",
     async (id, thunkAPI) => {
@@ -117,6 +127,21 @@ const examSlice = createSlice({
                 state.error = null;
             })
             .addCase(getAllExamsAsync.rejected, (state, action) => {
+                state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Get My Exams
+            .addCase(getMyExamsAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(getMyExamsAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                state.exams = action.payload.data;
+                state.pagination = action.payload.meta;
+                state.error = null;
+            })
+            .addCase(getMyExamsAsync.rejected, (state, action) => {
                 state.loadingGet = false;
                 state.error = action.payload;
             })

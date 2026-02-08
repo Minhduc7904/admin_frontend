@@ -10,7 +10,7 @@ import {
 import { VISIBILITY, VISIBILITY_LABELS } from '../../../core/constants';
 import { QuestionContentTooltip } from './QuestionContentTooltip';
 
-export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, isViewPanelOpen }) => {
+export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, sort, onSortChange, isViewPanelOpen }) => {
     const [hoveredQuestion, setHoveredQuestion] = useState(null);
     const contentRefsMap = useRef(new Map());
     const getVisibilityBadge = (visibility) => {
@@ -65,6 +65,8 @@ export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, is
         {
             key: 'questionId',
             label: 'ID',
+            sortDirection: sort?.field === 'questionId' ? sort.direction : null,
+            onSort: (direction) => onSortChange('questionId', direction),
             render: (question) => (
                 <span className="text-sm text-foreground-light">#{question.questionId}</span>
             )
@@ -113,6 +115,8 @@ export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, is
         {
             key: 'type',
             label: 'Loại',
+            sortDirection: sort?.field === 'type' ? sort.direction : null,
+            onSort: (direction) => onSortChange('type', direction),
             render: (question) => getTypeBadge(question.type)
         },
         {
@@ -127,6 +131,8 @@ export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, is
         {
             key: 'grade',
             label: 'Khối',
+            sortDirection: sort?.field === 'grade' ? sort.direction : null,
+            onSort: (direction) => onSortChange('grade', direction),
             render: (question) => (
                 question.grade ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
@@ -140,11 +146,15 @@ export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, is
         {
             key: 'difficulty',
             label: 'Độ khó',
+            sortDirection: sort?.field === 'difficulty' ? sort.direction : null,
+            onSort: (direction) => onSortChange('difficulty', direction),
             render: (question) => getDifficultyBadge(question.difficulty)
         },
         {
             key: 'pointsOrigin',
             label: 'Điểm',
+            sortDirection: sort?.field === 'pointsOrigin' ? sort.direction : null,
+            onSort: (direction) => onSortChange('pointsOrigin', direction),
             render: (question) => (
                 <div className="text-sm text-foreground">
                     {question.pointsOrigin || <span className="italic text-foreground-lighter">-</span>}
@@ -154,7 +164,20 @@ export const QuestionTable = ({ questions, onView, onEdit, onDelete, loading, is
         {
             key: 'visibility',
             label: 'Trạng thái',
+            sortDirection: sort?.field === 'visibility' ? sort.direction : null,
+            onSort: (direction) => onSortChange('visibility', direction),
             render: (question) => getVisibilityBadge(question.visibility)
+        },
+        {
+            key: 'createdAt',
+            label: 'Ngày tạo',
+            sortDirection: sort?.field === 'createdAt' ? sort.direction : null,
+            onSort: (direction) => onSortChange('createdAt', direction),
+            render: (question) => (
+                <span className="text-sm text-foreground-light">
+                    {new Date(question.createdAt).toLocaleDateString('vi-VN')}
+                </span>
+            )
         },
         {
             key: 'actions',

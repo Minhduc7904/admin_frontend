@@ -39,7 +39,7 @@ export const getAllAdminsAsync = createAsyncThunk(
 export const searchAdminsAsync = createAsyncThunk(
     "admin/search",
     async (query, thunkAPI) => {
-        return handleAsyncThunk(() => adminApi.getAll(query), thunkAPI, {
+        return handleAsyncThunk(() => adminApi.search(query), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tìm kiếm quản trị viên",
         });

@@ -41,8 +41,8 @@ import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
 import { ExamImportSessionList } from '../features/examImportSession/pages';
-import { QuestionListPage } from '../features/question/pages';
-import { ExamListPage } from '../features/exam/pages/ExamListPage';
+import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
+import { ExamListPage, MyExamListPage } from '../features/exam/pages';
 import { ExamDetail, ExamQuestions, ExamPreview } from '../features/exam/pages';
 import { ExamDetailLayout } from '../features/exam/layouts';
 import { ProtectedRoute } from '../shared/components';
@@ -67,7 +67,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ROLE_VIEW_ROLE_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.ROLES} />,
                 children: [
                     {
                         path: ROUTES.ROLES,
@@ -76,7 +76,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ROLE_VIEW_ROLE_CREATION} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.ROLE_CREATE} />,
                 children: [
                     {
                         path: ROUTES.ROLES_CREATE,
@@ -85,7 +85,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ROLE_VIEW_ROLE_EDIT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.ROLE_EDIT} />,
                 children: [
                     {
                         path: ROUTES.ROLES_EDIT(':id'),
@@ -94,7 +94,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.PERMISSION_VIEW_PERMISSION_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.PERMISSIONS} />,
                 children: [
                     {
                         path: ROUTES.PERMISSIONS,
@@ -103,7 +103,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.AUDIT_LOG_VIEW_AUDIT_LOGS_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.AUDIT_LOGS} />,
                 children: [
                     {
                         path: ROUTES.AUDIT_LOGS,
@@ -112,7 +112,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.MEDIA_VIEW_MEDIA_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.MEDIA} />,
                 children: [
                     {
                         path: ROUTES.MEDIA,
@@ -121,7 +121,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.MEDIA_VIEW_MY_MEDIA_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.MEDIA_FOLDERS} />,
                 children: [
                     {
                         path: ROUTES.MEDIA_FOLDERS,
@@ -130,7 +130,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.ADMINS} />,
                 children: [
                     {
                         path: ROUTES.ADMINS,
@@ -139,7 +139,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.STUDENTS} />,
                 children: [
                     {
                         path: ROUTES.STUDENTS,
@@ -148,7 +148,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.CHAPTER_VIEW_CHAPTER_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.CHAPTERS} />,
                 children: [
                     {
                         path: ROUTES.CHAPTERS,
@@ -157,7 +157,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.SUBJECT_VIEW_SUBJECT_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.SUBJECTS} />,
                 children: [
                     {
                         path: ROUTES.SUBJECTS,
@@ -166,7 +166,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.COURSES} />,
                 children: [
                     {
                         path: ROUTES.COURSES,
@@ -175,7 +175,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_MY_COURSE_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.MY_COURSES} />,
                 children: [
                     {
                         path: ROUTES.MY_COURSES,
@@ -184,7 +184,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_CLASS_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.CLASSES} />,
                 children: [
                     {
                         path: ROUTES.CLASSES,
@@ -193,7 +193,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_MY_CLASSES_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.MY_CLASSES} />,
                 children: [
                     {
                         path: ROUTES.MY_CLASSES,
@@ -202,7 +202,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.NOTIFICATION_SEND} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.BROADCAST_NOTIFICATIONS} />,
                 children: [
                     {
                         path: ROUTES.BROADCAST_NOTIFICATIONS,
@@ -211,7 +211,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.TUITION_PAYMENT_VIEW_TUITION_PAYMENT_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.TUITION_PAYMENTS} />,
                 children: [
                     {
                         path: ROUTES.TUITION_PAYMENTS,
@@ -220,7 +220,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.EXAM_IMPORT_SESSION_VIEW_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.EXAM_IMPORT_SESSIONS} />,
                 children: [
                     {
                         path: ROUTES.EXAM_IMPORT_SESSIONS,
@@ -229,7 +229,7 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.QUESTION_VIEW_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.QUESTIONS} />,
                 children: [
                     {
                         path: ROUTES.QUESTIONS,
@@ -238,7 +238,16 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.EXAM_VIEW_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.MY_QUESTIONS} />,
+                children: [
+                    {
+                        path: ROUTES.MY_QUESTIONS,
+                        element: <MyQuestionListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.EXAMS} />,
                 children: [
                     {
                         path: ROUTES.EXAMS,
@@ -246,9 +255,18 @@ export const adminRouter = [
                     },
                 ],
             },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.MY_EXAMS} />,
+                children: [
+                    {
+                        path: ROUTES.MY_EXAMS,
+                        element: <MyExamListPage />,
+                    },
+                ],
+            },
             // 🔥 Course profile group
             {
-                element: <ProtectedRoute permission={PERMISSIONS.COURSE_VIEW_COURSE_DETAIL_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.COURSE_DETAIL} />,
                 children: [
                     {
                         path: ROUTES.COURSE_DETAIL(':id'),
@@ -284,7 +302,7 @@ export const adminRouter = [
             },
             // 🔥 Class profile group
             {
-                element: <ProtectedRoute permission={PERMISSIONS.COURSE_CLASS_VIEW_CLASS_DETAIL_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.CLASS_DETAIL} />,
                 children: [
                     {
                         path: ROUTES.CLASS_DETAIL(':id'),
@@ -324,7 +342,7 @@ export const adminRouter = [
             },
             // 🔥 Admin profile group
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_VIEW_ADMIN_DETAIL_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.ADMIN_DETAIL} />,
                 children: [
                     {
                         path: ROUTES.ADMIN_DETAIL(':id'),
@@ -353,7 +371,7 @@ export const adminRouter = [
 
             // 🔥 Student profile group
             {
-                element: <ProtectedRoute permission={PERMISSIONS.STUDENT_VIEW_STUDENT_DETAIL_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.STUDENT_DETAIL} />,
                 children: [
                     {
                         path: ROUTES.STUDENT_DETAIL(':id'),
@@ -390,7 +408,7 @@ export const adminRouter = [
 
             // 🔥 Exam detail group
             {
-                element: <ProtectedRoute permission={PERMISSIONS.EXAM_VIEW_MANAGEMENT} />,
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.EXAMS} />,
                 children: [
                     {
                         path: ROUTES.EXAM_DETAIL(':id'),

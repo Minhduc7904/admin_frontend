@@ -24,13 +24,46 @@ import { useHasPermission } from '../../../shared/hooks';
 import { PERMISSIONS } from '../../../core/constants/permission/permission.codes';
 import { ROUTES } from '../../../core/constants';
 
+/**
+ * PERMISSIONS REQUIRED FOR THIS PAGE
+ * 
+ * === ROUTER LEVEL ===
+ * - ADMIN_PAGE.BROADCAST_NOTIFICATIONS ('admin:page:broadcast-notifications')
+ *   → Quyền truy cập trang gửi thông báo broadcast
+ *   → Được kiểm tra bởi ProtectedRoute trong AdminRouter.jsx
+ * 
+ * === PAGE OPERATIONS ===
+ * 
+ * 1. ADMIN_GET_ALL ('admin:get-all')
+ *    → Quyền xem danh sách tất cả admins
+ *    → Dùng khi recipientType là 'ADMIN'
+ *    → Gọi getAllAdminsAsync để load danh sách admins
+ * 
+ * 2. STUDENT_GET_ALL ('student:get-all')
+ *    → Quyền xem danh sách tất cả students
+ *    → Dùng khi recipientType là 'STUDENT'
+ *    → Gọi getAllStudentsAsync để load danh sách students
+ * 
+ * 3. NOTIFY_ALL_USERS ('notification:notify-all-users')
+ *    → Quyền gửi thông báo đến tất cả người dùng trong hệ thống
+ *    → Dùng khi recipientType là 'ALL'
+ *    → Cho phép gửi broadcast notification không giới hạn người nhận
+ * 
+ * === PERMISSION LOGIC ===
+ * - Người dùng phải có ít nhất 1 trong 3 quyền để truy cập trang
+ * - Mỗi recipientType được kiểm soát bởi permission tương ứng
+ * - UI sẽ disable/hide các option không có quyền
+ */
+
 export const BroadcastNotificationsPage = () => {
     const dispatch = useAppDispatch();
 
-    const hasGetAllAdminAccess = useHasPermission(PERMISSIONS.ADMIN_GET_ALL);
-    const hasGetAllStudentAccess = useHasPermission(PERMISSIONS.STUDENT_GET_ALL);
-    const hasNotifyAllAccess = useHasPermission(PERMISSIONS.NOTIFY_ALL_USERS);
+    /* ===== PERMISSION HOOKS ===== */
+    const hasGetAllAdminAccess = useHasPermission(PERMISSIONS.ADMIN.GET_ALL);
+    const hasGetAllStudentAccess = useHasPermission(PERMISSIONS.STUDENT.GET_ALL);
+    const hasNotifyAllAccess = useHasPermission(PERMISSIONS.NOTIFICATION.SEND);
 
+    // Kiểm tra quyền truy cập trang: cần ít nhất 1 trong 3 quyền
     if (!hasGetAllAdminAccess && !hasGetAllStudentAccess && !hasNotifyAllAccess) {
         return <Navigate to={ROUTES.FORBIDDEN} replace />;
     }
@@ -58,6 +91,8 @@ export const BroadcastNotificationsPage = () => {
         return students.filter((student) => student.grade === parseInt(grade));
     }, [students, grade]);
 
+    /* ===== EFFECTS ===== */
+    // Load students khi chọn recipientType là STUDENT và có quyền
     useEffect(() => {
         if (
             recipientType === 'STUDENT' &&
@@ -69,7 +104,7 @@ export const BroadcastNotificationsPage = () => {
         }
     }, [recipientType, hasGetAllStudentAccess, dispatch]);
 
-
+    // Load admins khi chọn recipientType là ADMIN và có quyền
     useEffect(() => {
         if (
             recipientType === 'ADMIN' &&
@@ -82,7 +117,9 @@ export const BroadcastNotificationsPage = () => {
     }, [recipientType, hasGetAllAdminAccess, dispatch]);
 
     /* ===== HANDLERS ===== */
+    // Thay đổi loại người nhận (kiểm tra permission cho từng loại)
     const handleRecipientTypeChange = (newType) => {
+        // 🔒 Permission guards
         if (newType === 'ALL' && !hasNotifyAllAccess) return;
         if (newType === 'STUDENT' && !hasGetAllStudentAccess) return;
         if (newType === 'ADMIN' && !hasGetAllAdminAccess) return;
@@ -107,8 +144,9 @@ export const BroadcastNotificationsPage = () => {
         setSelectedStudentIds([]);
     };
 
+    // Gửi notification (kiểm tra permission trước khi gửi)
     const handleSubmit = async (formData) => {
-        // 🔒 Permission guard
+        // 🔒 Permission guards - Kiểm tra lại permission trước khi gửi
         if (recipientType === 'ALL' && !hasNotifyAllAccess) return;
         if (recipientType === 'STUDENT' && !hasGetAllStudentAccess) return;
         if (recipientType === 'ADMIN' && !hasGetAllAdminAccess) return;

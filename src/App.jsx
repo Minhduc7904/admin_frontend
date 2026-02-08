@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { authRouter, adminRouter, profileRouter, examImportSessionRouter } from './routes';
 import { NotificationContainer } from './features/notification/components';
 import { ProtectedRoute } from './shared/components';
-import { NotFound } from './shared/pages/NotFound';
+import { NotFound, NoPermissionPage } from './shared/pages';
 import { ROUTES } from './core/constants';
 import { SocketProvider } from './shared/components/socket/SocketProvider';
 
@@ -45,6 +45,7 @@ function App() {
           {renderRoutes(profileRouter, { parentKey: 'profile' })}
           {renderRoutes(examImportSessionRouter, { parentKey: 'exam-import-session' })}
 
+          <Route path={ROUTES.FORBIDDEN} element={<NoPermissionPage />} />
           <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
           <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />
         </Routes>

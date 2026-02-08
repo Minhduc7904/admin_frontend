@@ -18,6 +18,18 @@ export const studentApi = {
         return axiosClient.get(API_ENDPOINTS.STUDENTS.LIST, { params });
     },
 
+    /**
+     * Search students (fixed pagination: page=1, limit=10)
+     * @param {Object} params - Search parameters
+     * @param {string} params.search - Search keyword
+     * @param {number} params.grade - Grade filter (1-12)
+     * @param {boolean} params.isActive - Active status filter
+     * @returns {Promise<Object>} Students search results
+     */
+    search: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.STUDENTS.SEARCH, { params });
+    },
+
     statsByStatus: (params = {}) => {
         return axiosClient.get(API_ENDPOINTS.STUDENTS.STATS_BY_STATUS, { params });
     },

@@ -33,6 +33,9 @@ export const QuestionList = ({
     currentPage,
     itemsPerPage,
 
+    // sort state
+    sort,
+
     // ui state
     openAddQuestion,
     openViewQuestion,
@@ -51,6 +54,7 @@ export const QuestionList = ({
     onSubjectIdChange,
     onPageChange,
     onItemsPerPageChange,
+    onSortChange,
     onView,
     onEdit,
     onDelete,
@@ -102,6 +106,8 @@ export const QuestionList = ({
                 <QuestionTable
                     questions={questions}
                     loading={loading}
+                    sort={sort}
+                    onSortChange={onSortChange}
                     onView={onView}
                     onEdit={onEdit}
                     onDelete={onDelete}

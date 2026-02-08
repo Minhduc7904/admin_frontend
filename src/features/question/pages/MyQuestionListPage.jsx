@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 import {
-    getAllQuestionsAsync,
+    getMyQuestionsAsync,
     deleteQuestionAsync,
     setFilters,
     setPagination,
@@ -14,10 +14,10 @@ import { QuestionList } from './QuestionList'
 import { useSearch } from '../../../shared/hooks'
 
 /**
- * QuestionListPage
- * Container component – xử lý logic, data, routing
+ * MyQuestionListPage
+ * Container component – xử lý logic, data, routing cho câu hỏi của tôi
  */
-export const QuestionListPage = () => {
+export const MyQuestionListPage = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
@@ -75,7 +75,7 @@ export const QuestionListPage = () => {
     /* ===================== DATA ===================== */
     const loadQuestions = () => {
         dispatch(
-            getAllQuestionsAsync({
+            getMyQuestionsAsync({
                 page: currentPage,
                 limit: itemsPerPage,
                 search: debouncedSearch || undefined,
@@ -188,8 +188,8 @@ export const QuestionListPage = () => {
     /* ===================== RENDER ===================== */
     return (
         <QuestionList
-            title="Quản lý câu hỏi"
-            subtitle="Quản lý danh sách câu hỏi trong hệ thống."
+            title="Câu hỏi của tôi"
+            subtitle="Quản lý danh sách câu hỏi do bạn tạo."
             
             loadQuestions={loadQuestions}
 

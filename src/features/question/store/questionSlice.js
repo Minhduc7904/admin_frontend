@@ -13,13 +13,32 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    // Separate state for search functionality
+    searchResults: [],
+    searchFilters: {
+        search: "",
+        difficulty: "",
+        type: "",
+        grade: "",
+        subjectId: null,
+        chapterIds: [],
+    },
+    searchPagination: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+        hasNext: false,
+    },
     loadingGet: false,
+    loadingSearch: false,
     loadingGetById: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
     loadingReorder: false,
     loadingRemoveFromExam: false,
+    loadingAddToExam: false,
     loadingAddToSection: false,
     error: null,
     filters: {
@@ -43,6 +62,16 @@ export const getAllQuestionsAsync = createAsyncThunk(
         return handleAsyncThunk(() => questionApi.getAll(params), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tải danh sách câu hỏi",
+        });
+    }
+);
+
+export const getMyQuestionsAsync = createAsyncThunk(
+    "question/getMyQuestions",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => questionApi.getMyQuestions(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải danh sách câu hỏi của tôi",
         });
     }
 );
@@ -100,6 +129,16 @@ export const getQuestionsByExamAsync = createAsyncThunk(
     }
 );
 
+export const searchQuestionsAsync = createAsyncThunk(
+    "question/search",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => questionApi.search(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm câu hỏi",
+        });
+    }
+);
+
 export const reorderQuestionsAsync = createAsyncThunk(
     "question/reorder",
     async (data, thunkAPI) => {
@@ -133,6 +172,17 @@ export const addQuestionToSectionAsync = createAsyncThunk(
     }
 );
 
+export const addQuestionToExamAsync = createAsyncThunk(
+    "question/addToExam",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => questionApi.addToExam(data), thunkAPI, {
+            successTitle: "Thêm câu hỏi thành công",
+            successMessage: "Câu hỏi đã được thêm vào đề thi",
+            errorTitle: "Thêm câu hỏi thất bại",
+        });
+    }
+);
+
 const questionSlice = createSlice({
     name: "question",
     initialState,
@@ -151,6 +201,16 @@ const questionSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
+        },
+        setSearchFilters: (state, action) => {
+            state.searchFilters = { ...state.searchFilters, ...action.payload };
+        },
+        setSearchPagination: (state, action) => {
+            state.searchPagination = { ...state.searchPagination, ...action.payload };
+        },
+        clearSearchResults: (state) => {
+            state.searchResults = [];
+            state.searchPagination = initialState.searchPagination;
         },
         updateQuestionSectionInfo: (state, action) => {
             const { questionId, sectionId, order } = action.payload;
@@ -171,6 +231,18 @@ const questionSlice = createSlice({
                 }
             });
         },
+        addQuestionToExamLocally: (state, action) => {
+            const { question } = action.payload;
+            // Add question to the questions array (uncategorized)
+            state.questions.push(question);
+        },
+        removeQuestionFromSearchResults: (state, action) => {
+            const { questionId } = action.payload;
+            // Remove from search results
+            state.searchResults = state.searchResults.filter(
+                q => q.questionId !== questionId
+            );
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -186,6 +258,21 @@ const questionSlice = createSlice({
                 state.error = null;
             })
             .addCase(getAllQuestionsAsync.rejected, (state, action) => {
+                state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Get My Questions
+            .addCase(getMyQuestionsAsync.pending, (state) => {
+                state.loadingGet = true;
+                state.error = null;
+            })
+            .addCase(getMyQuestionsAsync.fulfilled, (state, action) => {
+                state.loadingGet = false;
+                state.questions = action.payload.data;
+                state.pagination = action.payload.meta;
+                state.error = null;
+            })
+            .addCase(getMyQuestionsAsync.rejected, (state, action) => {
                 state.loadingGet = false;
                 state.error = action.payload;
             })
@@ -276,6 +363,32 @@ const questionSlice = createSlice({
                 state.loadingGet = false;
                 state.error = action.payload;
             })
+            // Search Questions
+            .addCase(searchQuestionsAsync.pending, (state) => {
+                state.loadingSearch = true;
+                state.error = null;
+            })
+            .addCase(searchQuestionsAsync.fulfilled, (state, action) => {
+                state.loadingSearch = false;
+                // If page 1, replace results; otherwise append for infinite scroll
+                if (action.payload.meta.page === 1) {
+                    state.searchResults = action.payload.data;
+                } else {
+                    state.searchResults = [...state.searchResults, ...action.payload.data];
+                }
+                state.searchPagination = {
+                    page: action.payload.meta.page,
+                    limit: action.payload.meta.limit,
+                    total: action.payload.meta.total,
+                    totalPages: action.payload.meta.totalPages,
+                    hasNext: action.payload.meta.hasNext,
+                };
+                state.error = null;
+            })
+            .addCase(searchQuestionsAsync.rejected, (state, action) => {
+                state.loadingSearch = false;
+                state.error = action.payload;
+            })
             // Reorder Questions
             .addCase(reorderQuestionsAsync.pending, (state) => {
                 state.loadingReorder = true;
@@ -336,23 +449,54 @@ const questionSlice = createSlice({
             .addCase(addQuestionToSectionAsync.rejected, (state, action) => {
                 state.loadingAddToSection = false;
                 state.error = action.payload;
+            })
+            // Add Question To Exam
+            .addCase(addQuestionToExamAsync.pending, (state) => {
+                state.loadingAddToExam = true;
+                state.error = null;
+            })
+            .addCase(addQuestionToExamAsync.fulfilled, (state, action) => {
+                state.loadingAddToExam = false;
+                // Question was added to exam successfully
+                state.error = null;
+            })
+            .addCase(addQuestionToExamAsync.rejected, (state, action) => {
+                state.loadingAddToExam = false;
+                state.error = action.payload;
             });
     },
 });
 
-export const { setFilters, setPagination, resetFilters, clearCurrentQuestion, clearError, updateQuestionSectionInfo, updateQuestionsOrder } =
-    questionSlice.actions;
+export const { 
+    setFilters, 
+    setPagination, 
+    resetFilters, 
+    clearCurrentQuestion, 
+    clearError, 
+    updateQuestionSectionInfo, 
+    updateQuestionsOrder,
+    setSearchFilters,
+    setSearchPagination,
+    clearSearchResults,
+    addQuestionToExamLocally,
+    removeQuestionFromSearchResults,
+} = questionSlice.actions;
 
 // Selectors
 export const selectQuestions = (state) => state.question.questions;
 export const selectCurrentQuestion = (state) => state.question.currentQuestion;
 export const selectQuestionPagination = (state) => state.question.pagination;
+export const selectSearchResults = (state) => state.question.searchResults;
+export const selectSearchFilters = (state) => state.question.searchFilters;
+export const selectSearchPagination = (state) => state.question.searchPagination;
 export const selectQuestionLoadingGet = (state) => state.question.loadingGet;
+export const selectQuestionLoadingSearch = (state) => state.question.loadingSearch;
 export const selectQuestionLoadingCreate = (state) => state.question.loadingCreate;
 export const selectQuestionLoadingUpdate = (state) => state.question.loadingUpdate;
 export const selectQuestionLoadingDelete = (state) => state.question.loadingDelete;
 export const selectQuestionLoadingReorder = (state) => state.question.loadingReorder;
 export const selectQuestionLoadingRemoveFromExam = (state) => state.question.loadingRemoveFromExam;
+export const selectQuestionLoadingAddToExam = (state) => state.question.loadingAddToExam;
 export const selectQuestionLoadingAddToSection = (state) => state.question.loadingAddToSection;
 export const selectQuestionError = (state) => state.question.error;
 export const selectQuestionFilters = (state) => state.question.filters;

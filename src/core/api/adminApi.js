@@ -16,6 +16,18 @@ export const adminApi = {
         return axiosClient.get(API_ENDPOINTS.ADMINS.LIST, { params });
     },
 
+    /**
+     * Search admins (fixed pagination: page=1, limit=10)
+     * @param {Object} params - Search parameters
+     * @param {string} params.search - Search keyword
+     * @param {boolean} params.isActive - Active status filter
+     * @param {number} params.subjectId - Subject ID filter
+     * @returns {Promise<Object>} Admins search results
+     */
+    search: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.ADMINS.SEARCH, { params });
+    },
+
     getById: (id) => {
         return axiosClient.get(API_ENDPOINTS.ADMINS.DETAIL(id));
     },

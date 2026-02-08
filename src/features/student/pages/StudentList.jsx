@@ -22,7 +22,7 @@ import {
     selectStudentLoadingExport,
 } from '../store/studentSlice'
 
-import { useSearch } from '../../../shared/hooks'
+import { useSearch, useHasPermission } from '../../../shared/hooks'
 import {
     StudentFilters,
     StudentTable,
@@ -30,9 +30,35 @@ import {
     ExportStudentListModal
 } from '../components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
-import { ROUTES } from '../../../core/constants'
+import { ROUTES, PERMISSIONS } from '../../../core/constants'
 import { toggleUserActivationAsync } from '../../user/store/userSlice'
 import { StudentStats } from '../components/StudentStats'
+import { CanAccess } from '../../../shared/components/permissions'
+
+/**
+ * PERMISSIONS REQUIRED FOR THIS PAGE
+ * ===================================
+ * 
+ * Router Level (AdminRouter.jsx):
+ * - PERMISSIONS.ADMIN_PAGE.STUDENTS ('admin:page:students')
+ *   → Quyền truy cập trang quản lý học sinh
+ * 
+ * Page Operations:
+ * - PERMISSIONS.STUDENT.GET_ALL ('student:get-all')
+ *   → Quyền xem danh sách tất cả học sinh (getAllStudentsAsync)
+ * 
+ * - PERMISSIONS.STUDENT.CREATE ('student:create')
+ *   → Quyền tạo học sinh mới (nút "Thêm học sinh mới")
+ * 
+ * - PERMISSIONS.STUDENT.GET_BY_ID ('student:get-by-id')
+ *   → Quyền xem chi tiết học sinh (nút "Xem" trong bảng)
+ * 
+ * - PERMISSIONS.USER.TOGGLE_ACTIVATION ('user:toggle-activation')
+ *   → Quyền kích hoạt/vô hiệu hóa tài khoản học sinh
+ * 
+ * - PERMISSIONS.STUDENT.EXPORT_EXCEL ('student:export-excel')
+ *   → Quyền xuất danh sách học sinh ra file Excel
+ */
 
 export const StudentList = () => {
     const dispatch = useDispatch()
@@ -68,6 +94,12 @@ export const StudentList = () => {
     })
 
     const [openAddStudentRightPanel, setOpenAddStudentRightPanel] = useState(false)
+
+    /* ===================== PERMISSIONS ===================== */
+    const canCreateStudent = useHasPermission(PERMISSIONS.STUDENT.CREATE)
+    const canViewStudent = useHasPermission(PERMISSIONS.STUDENT.GET_BY_ID)
+    const canToggleActivation = useHasPermission(PERMISSIONS.USER.TOGGLE_ACTIVATION)
+    const canExportExcel = useHasPermission(PERMISSIONS.STUDENT.EXPORT_EXCEL)
 
     /* ===================== EFFECT ===================== */
     useEffect(() => {
@@ -197,10 +229,12 @@ export const StudentList = () => {
 
     /* ===================== ACTIONS ===================== */
     const handleView = (student) => {
+        if (!canViewStudent) return
         navigate(ROUTES.STUDENT_DETAIL(student.studentId))
     }
 
     const handleToggleActivation = async (student) => {
+        if (!canToggleActivation) return
         await dispatch(toggleUserActivationAsync(student.userId)).unwrap()
         loadStudents()
     }
@@ -221,20 +255,24 @@ export const StudentList = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Button
-                            variant="outline"
-                            onClick={handleOpenExportModal}
-                            disabled={loadingExport}
-                            loading={loadingExport}
-                        >
-                            <Download size={16} />
-                            Xuất Excel
-                        </Button>
+                        <CanAccess permission={PERMISSIONS.STUDENT.EXPORT_EXCEL}>
+                            <Button
+                                variant="outline"
+                                onClick={handleOpenExportModal}
+                                disabled={loadingExport}
+                                loading={loadingExport}
+                            >
+                                <Download size={16} />
+                                Xuất Excel
+                            </Button>
+                        </CanAccess>
 
-                        <Button onClick={() => setOpenAddStudentRightPanel(true)}>
-                            <Plus size={16} />
-                            Thêm học sinh mới
-                        </Button>
+                        <CanAccess permission={PERMISSIONS.STUDENT.CREATE}>
+                            <Button onClick={() => setOpenAddStudentRightPanel(true)}>
+                                <Plus size={16} />
+                                Thêm học sinh mới
+                            </Button>
+                        </CanAccess>
                     </div>
                 </div>
 
@@ -273,6 +311,8 @@ export const StudentList = () => {
                     onSortChange={handleSortChange}
                     onView={handleView}
                     onToggleActivation={handleToggleActivation}
+                    canViewStudent={canViewStudent}
+                    canToggleActivation={canToggleActivation}
                 />
 
                 {/* ===================== PAGINATION + PANEL ===================== */}

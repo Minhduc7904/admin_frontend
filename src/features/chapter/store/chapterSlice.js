@@ -15,7 +15,20 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    // Search state (for SearchableMultiSelect)
+    searchChapters: [],
+    searchPagination: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    searchTerm: '',
+    searchSubjectId: null,
     loadingGet: false,
+    loadingSearch: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
@@ -141,6 +154,31 @@ const chapterSlice = createSlice({
                 state.chaptersBySubject = {};
             }
         },
+        setSearchTerm: (state, action) => {
+            state.searchTerm = action.payload;
+        },
+        setSearchSubjectId: (state, action) => {
+            state.searchSubjectId = action.payload;
+        },
+        clearSearchChapters: (state) => {
+            state.searchChapters = [];
+            state.searchPagination = initialState.searchPagination;
+            state.searchTerm = '';
+            state.searchSubjectId = null;
+        },
+        appendSearchChapters: (state, action) => {
+            // Append new chapters and remove duplicates
+            const existing = state.searchChapters;
+            const newItems = action.payload;
+            const merged = [...existing, ...newItems];
+            const uniqueMap = new Map();
+            merged.forEach(item => {
+                if (!uniqueMap.has(item.chapterId)) {
+                    uniqueMap.set(item.chapterId, item);
+                }
+            });
+            state.searchChapters = Array.from(uniqueMap.values());
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -161,17 +199,35 @@ const chapterSlice = createSlice({
             })
             // Search Chapters
             .addCase(searchChaptersAsync.pending, (state) => {
-                state.loadingGet = true;
+                state.loadingSearch = true;
                 state.error = null;
             })
             .addCase(searchChaptersAsync.fulfilled, (state, action) => {
-                state.loadingGet = false;
-                state.chapters = action.payload.data;
-                state.pagination = action.payload.meta;
+                state.loadingSearch = false;
+                const { page } = action.meta.arg;
+                
+                if (page === 1) {
+                    // First page - replace
+                    state.searchChapters = action.payload.data;
+                } else {
+                    // Subsequent pages - append and deduplicate
+                    const existing = state.searchChapters;
+                    const newItems = action.payload.data;
+                    const merged = [...existing, ...newItems];
+                    const uniqueMap = new Map();
+                    merged.forEach(item => {
+                        if (!uniqueMap.has(item.chapterId)) {
+                            uniqueMap.set(item.chapterId, item);
+                        }
+                    });
+                    state.searchChapters = Array.from(uniqueMap.values());
+                }
+                
+                state.searchPagination = action.payload.meta;
                 state.error = null;
             })
             .addCase(searchChaptersAsync.rejected, (state, action) => {
-                state.loadingGet = false;
+                state.loadingSearch = false;
                 state.error = action.payload;
             })
             // Get Chapters By Subject ID
@@ -333,6 +389,10 @@ export const {
     clearCurrentChapter,
     clearError,
     clearChaptersBySubject,
+    setSearchTerm,
+    setSearchSubjectId,
+    clearSearchChapters,
+    appendSearchChapters,
 } = chapterSlice.actions;
 
 // Selectors
@@ -348,5 +408,11 @@ export const selectChapterLoadingCreate = (state) => state.chapter.loadingCreate
 export const selectChapterLoadingUpdate = (state) => state.chapter.loadingUpdate;
 export const selectChapterLoadingDelete = (state) => state.chapter.loadingDelete;
 export const selectChapterError = (state) => state.chapter.error;
+// Search selectors
+export const selectSearchChapters = (state) => state.chapter.searchChapters;
+export const selectSearchPagination = (state) => state.chapter.searchPagination;
+export const selectSearchTerm = (state) => state.chapter.searchTerm;
+export const selectSearchSubjectId = (state) => state.chapter.searchSubjectId;
+export const selectChapterLoadingSearch = (state) => state.chapter.loadingSearch;
 
 export default chapterSlice.reducer;

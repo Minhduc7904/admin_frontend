@@ -32,7 +32,7 @@ export const ProtectedRoute = ({ permission }) => {
 
   // 3️⃣ Có permission requirement nhưng không đủ quyền
   if (permission && !hasPermission(userPermissions, permission, userRoles)) {
-    return <Navigate to={ROUTES.FORBIDDEN || '/403'} replace />;
+    return <Navigate to={ROUTES.FORBIDDEN} replace />;
   }
 
   // 4️⃣ OK → render route con

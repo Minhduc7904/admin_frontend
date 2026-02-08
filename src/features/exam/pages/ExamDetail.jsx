@@ -27,7 +27,7 @@ import {
     selectMediaLoadingViewUrl,
 } from '../../media/store/mediaSlice';
 import { VISIBILITY_LABELS } from '../../../core/constants';
-
+import { MarkdownRenderer } from '../../../shared/components';
 export const ExamDetail = () => {
     const { id } = useParams();
     const examId = Number(id);
@@ -297,12 +297,14 @@ export const ExamDetail = () => {
                     <p className="text-foreground mt-1">{exam.title}</p>
                 </div>
 
-                {exam.description && (
+                {exam.processedDescription && (
                     <div>
                         <label className="text-sm font-medium text-foreground-light">
                             Mô tả
                         </label>
-                        <p className="text-foreground mt-1">{exam.description}</p>
+                        <div className="mt-1">
+                            <MarkdownRenderer content={exam.processedDescription} />
+                        </div>
                     </div>
                 )}
 

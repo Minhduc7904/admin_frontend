@@ -10,13 +10,36 @@ import {
     selectAdminLoadingGet,
     selectAdminPagination,
 } from '../store/adminSlice';
-import { useSearch } from '../../../shared/hooks';
+import { useSearch, useHasPermission } from '../../../shared/hooks';
 import { AdminFilters, AdminTable, AddAdmin } from '../components';
 import { Pagination } from '../../../shared/components/ui/Pagination';
-import { ROUTES } from '../../../core/constants';
+import { ROUTES, PERMISSIONS } from '../../../core/constants';
 import {
     toggleUserActivationAsync
 } from '../../user/store/userSlice';
+import { CanAccess } from '../../../shared/components/permissions';
+
+/**
+ * PERMISSIONS REQUIRED FOR THIS PAGE
+ * ===================================
+ * 
+ * Router Level (AdminRouter.jsx):
+ * - PERMISSIONS.ADMIN_PAGE.ADMINS ('admin:page:admins')
+ *   → Quyền truy cập trang quản lý admin
+ * 
+ * Page Operations:
+ * - PERMISSIONS.ADMIN.GET_ALL ('admin:get-all')
+ *   → Quyền xem danh sách tất cả admin (getAllAdminsAsync)
+ * 
+ * - PERMISSIONS.ADMIN.CREATE ('admin:create')
+ *   → Quyền tạo admin mới (nút "Thêm quản trị viên mới")
+ * 
+ * - PERMISSIONS.ADMIN.GET_BY_ID ('admin:get-by-id')
+ *   → Quyền xem chi tiết admin (nút "Xem" trong bảng)
+ * 
+ * - PERMISSIONS.USER.TOGGLE_ACTIVATION ('user:toggle-activation')
+ *   → Quyền kích hoạt/vô hiệu hóa tài khoản admin
+ */
 
 
 export const AdminList = () => {
@@ -33,6 +56,11 @@ export const AdminList = () => {
     const [selectedIsActive, setSelectedIsActive] = useState('');
 
     const [openAddAdminRightPanel, setOpenAddAdminRightPanel] = useState(false);
+
+    // Permission hooks
+    const canCreateAdmin = useHasPermission(PERMISSIONS.ADMIN.CREATE);
+    const canViewAdmin = useHasPermission(PERMISSIONS.ADMIN.GET_BY_ID);
+    const canToggleActivation = useHasPermission(PERMISSIONS.USER.TOGGLE_ACTIVATION);
 
     useEffect(() => {
         loadAdmins();
@@ -76,10 +104,12 @@ export const AdminList = () => {
     };
 
     const handleView = (admin) => {
+        if (!canViewAdmin) return;
         navigate(ROUTES.ADMIN_DETAIL(admin.adminId));
     };
 
     const handleOpenAddAdmin = () => {
+        if (!canCreateAdmin) return;
         setOpenAddAdminRightPanel(true);
     }
 
@@ -88,6 +118,7 @@ export const AdminList = () => {
     }
 
     const handleToggleActivation = async (admin) => {
+        if (!canToggleActivation) return;
         await dispatch(toggleUserActivationAsync(admin.userId)).unwrap();
         loadAdmins();
     }
@@ -100,13 +131,15 @@ export const AdminList = () => {
                     <div>
                         <h1 className="text-2xl font-bold text-foreground">Quản lý Admin</h1>
                         <p className="text-foreground-light text-sm mt-1">
-                            Quản lý danh sách quản trị viên trong hệ thống.
+                            Quản lý danh sách quản trị viên của hệ thống.
                         </p>
                     </div>
-                    <Button onClick={handleOpenAddAdmin}>
-                        <Plus size={16} />
-                        Thêm quản trị viên mới
-                    </Button>
+                     <CanAccess permission={PERMISSIONS.ADMIN.CREATE}>
+                        <Button onClick={handleOpenAddAdmin}>
+                            <Plus size={16} />
+                            Thêm quản trị viên mới
+                        </Button>
+                    </CanAccess>
                 </div>
 
                 {/* Filter and Search */}
@@ -121,6 +154,8 @@ export const AdminList = () => {
             {/* Table */}
             <div className="bg-white border border-border rounded-sm">
                 <AdminTable
+                    canViewAdmin={canViewAdmin}
+                    canToggleActivation={canToggleActivation}
                     admins={admins}
                     onView={handleView}
                     // onDelete={handleDelete}

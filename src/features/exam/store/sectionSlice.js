@@ -174,7 +174,13 @@ const sectionSlice = createSlice({
 export const { clearCurrentSection, clearError, clearSections } = sectionSlice.actions;
 
 // Selectors
+export const selectSections = (state) => state.section.sections;
+export const selectCurrentSection = (state) => state.section.currentSection;
+export const selectSectionLoadingGet = (state) => state.section.loadingGet;
+export const selectSectionLoadingGetById = (state) => state.section.loadingGetById;
 export const selectSectionLoadingCreate = (state) => state.section.loadingCreate;
 export const selectSectionLoadingUpdate = (state) => state.section.loadingUpdate;
+export const selectSectionLoadingDelete = (state) => state.section.loadingDelete;
+export const selectSectionError = (state) => state.section.error;
 
 export default sectionSlice.reducer;
