@@ -23,7 +23,6 @@ export const AdminSearchSelect = ({
         try {
             const result = await dispatch(searchAdminsAsync({
                 search: keyword,
-                limit: 10
             })).unwrap();
             return result.data;
         } catch (error) {
@@ -35,12 +34,7 @@ export const AdminSearchSelect = ({
     // Fetch default items (latest 10 admins)
     const fetchDefaultAdmins = async () => {
         try {
-            const result = await dispatch(searchAdminsAsync({
-                page: 1,
-                limit: 10,
-                sortBy: 'createdAt',
-                sortOrder: 'desc'
-            })).unwrap();
+            const result = await dispatch(searchAdminsAsync()).unwrap();
             return result.data;
         } catch (error) {
             console.error('Error fetching default admins:', error);

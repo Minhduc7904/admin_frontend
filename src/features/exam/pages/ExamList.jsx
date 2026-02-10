@@ -26,6 +26,7 @@ export const ExamList = ({
 
     // ui state
     openAddExam,
+    showSubject = true,
 
     // handlers
     onSearchChange,
@@ -77,6 +78,7 @@ export const ExamList = ({
                 <ExamTable
                     exams={exams}
                     loading={loading}
+                    showSubject={showSubject}
                     onView={onView}
                     onEdit={onEdit}
                     onDelete={onDelete}

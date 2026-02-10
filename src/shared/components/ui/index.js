@@ -2,6 +2,7 @@ export * from './Button'
 export { Badge } from './Badge';
 export { Checkbox } from './Checkbox';
 export { Input } from './Input';
+export { CurrencyInput } from './CurrencyInput';
 export { PasswordInput } from './PasswordInput';
 export { YoutubeInput } from './YoutubeInput';
 export { Modal } from './Modal';

@@ -8,7 +8,7 @@ import {
   selectMediaLoadingCompleteUpload,
 } from "../store/mediaSlice";
 
-export const useMediaUpload = ({ type, folderId, onUploaded }) => {
+export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false }) => {
   const dispatch = useDispatch();
 
   // Loading từ redux
@@ -23,6 +23,11 @@ export const useMediaUpload = ({ type, folderId, onUploaded }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadedMediaData, setUploadedMediaData] = useState(null);
+  
+  // Multiple upload state
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const [totalFiles, setTotalFiles] = useState(0);
+  const [uploadedMediaList, setUploadedMediaList] = useState([]);
 
   /**
    * Cấu hình loại file được phép upload
@@ -47,28 +52,22 @@ export const useMediaUpload = ({ type, folderId, onUploaded }) => {
   }, [type]);
 
   /**
-   * Xử lý upload file
+   * Xử lý upload 1 file
    */
   const processFile = async (file) => {
     // Validate dung lượng
     if (file.size > acceptedTypes.maxSize * 1024 * 1024) {
       alert(`File vượt quá ${acceptedTypes.maxSize}MB`);
-      return;
+      return null;
     }
 
-    // Reset state
     setUploadFile(file);
-    setUploadProgress(0);
-    setUploadSuccess(false);
-    setUploadedMediaData(null);
 
     // Preview ảnh
-    if (file.type.startsWith("image/")) {
+    if (file.type.startsWith("image/") && !multiple) {
       const reader = new FileReader();
       reader.onload = () => setUploadPreview(reader.result);
       reader.readAsDataURL(file);
-    } else {
-      setUploadPreview(null);
     }
 
     try {
@@ -110,12 +109,55 @@ export const useMediaUpload = ({ type, folderId, onUploaded }) => {
         })
       ).unwrap();
 
-      setUploadSuccess(true);
-      setUploadedMediaData(completed.data);
-      onUploaded?.(completed.data);
+      return completed.data;
     } catch (error) {
       console.error("Upload thất bại:", error);
       setUploadProgress(0);
+      return null;
+    }
+  };
+
+  /**
+   * Xử lý upload nhiều files (tuần tự)
+   */
+  const processFiles = async (files) => {
+    const fileArray = Array.from(files);
+    setTotalFiles(fileArray.length);
+    setUploadedCount(0);
+    setUploadedMediaList([]);
+    setUploadProgress(0);
+
+    const uploadedList = [];
+
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      const result = await processFile(file);
+      
+      if (result) {
+        uploadedList.push(result);
+        setUploadedCount(i + 1);
+        
+        // Call onUploaded for each file if in multiple mode
+        if (multiple) {
+          onUploaded?.(result);
+        }
+      }
+      
+      // Update overall progress
+      const overallProgress = Math.round(((i + 1) / fileArray.length) * 100);
+      setUploadProgress(overallProgress);
+    }
+
+    setUploadedMediaList(uploadedList);
+    
+    if (uploadedList.length > 0) {
+      setUploadSuccess(true);
+      setUploadedMediaData(uploadedList[uploadedList.length - 1]); // Last uploaded
+      
+      // Call onUploaded with last item if single mode
+      if (!multiple) {
+        onUploaded?.(uploadedList[0]);
+      }
     }
   };
 
@@ -128,6 +170,44 @@ export const useMediaUpload = ({ type, folderId, onUploaded }) => {
     setUploadProgress(0);
     setUploadSuccess(false);
     setUploadedMediaData(null);
+    setUploadedCount(0);
+    setTotalFiles(0);
+    setUploadedMediaList([]);
+  };
+
+  const handleFileChange = (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Reset state first
+    setUploadProgress(0);
+    setUploadSuccess(false);
+    setUploadedMediaData(null);
+
+    if (multiple && files.length > 1) {
+      processFiles(files);
+    } else {
+      processFile(files[0]);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+
+    // Reset state first
+    setUploadProgress(0);
+    setUploadSuccess(false);
+    setUploadedMediaData(null);
+
+    if (multiple && files.length > 1) {
+      processFiles(files);
+    } else {
+      processFile(files[0]);
+    }
   };
 
   return {
@@ -139,9 +219,12 @@ export const useMediaUpload = ({ type, folderId, onUploaded }) => {
       uploadedMediaData,
       isDragging,
       loadingUpload,
+      uploadedCount,
+      totalFiles,
+      uploadedMediaList,
     },
     handlers: {
-      fileChange: (e) => e.target.files?.[0] && processFile(e.target.files[0]),
+      fileChange: handleFileChange,
       dragEnter: (e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -151,11 +234,7 @@ export const useMediaUpload = ({ type, folderId, onUploaded }) => {
         setIsDragging(false);
       },
       dragOver: (e) => e.preventDefault(),
-      drop: (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-        e.dataTransfer.files?.[0] && processFile(e.dataTransfer.files[0]);
-      },
+      drop: handleDrop,
       reset,
     },
     acceptedTypes,

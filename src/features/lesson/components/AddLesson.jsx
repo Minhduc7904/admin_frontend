@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { Input, Button, Dropdown, Textarea, Checkbox } from "../../../shared/components";
 import { AdminSearchSelect } from "../../admin/components/AdminSearchSelect";
-import { ChapterMultiSelect } from "../../chapter/components/ChapterMultiSelect";
+import { ChapterMultiSearchSelect } from "../../chapter/components";
 
 export const AddLesson = ({
     onClose,
@@ -22,7 +22,6 @@ export const AddLesson = ({
         description: '',
         teacherId: defaultTeacherId || '',
         chapterIds: [],
-        orderInCourse: '',
         visibility: 'DRAFT',
         allowTrial: false,
     });
@@ -60,10 +59,6 @@ export const AddLesson = ({
             errors.title = 'Tiêu đề không được quá 200 ký tự';
         }
 
-        if (formData.orderInCourse && (parseInt(formData.orderInCourse) < 1)) {
-            errors.orderInCourse = 'Thứ tự phải lớn hơn 0';
-        }
-
         return errors;
     };
 
@@ -83,7 +78,6 @@ export const AddLesson = ({
             description: formData.description?.trim() || undefined,
             teacherId: formData.teacherId ? parseInt(formData.teacherId) : undefined,
             chapterIds: formData.chapterIds.length > 0 ? formData.chapterIds : undefined,
-            orderInCourse: formData.orderInCourse ? parseInt(formData.orderInCourse) : undefined,
             visibility: formData.visibility,
             allowTrial: formData.allowTrial,
         };
@@ -134,21 +128,6 @@ export const AddLesson = ({
                     />
                 </div>
 
-                {/* Order in Course */}
-                <div>
-                    <Input
-                        error={errors.orderInCourse}
-                        name="orderInCourse"
-                        label="Thứ tự bài học"
-                        type="number"
-                        value={formData.orderInCourse}
-                        onChange={handleChange}
-                        placeholder="Để trống để tự động tính"
-                        min="1"
-                        helperText="Nếu để trống, hệ thống sẽ tự động đặt bài học vào cuối"
-                    />
-                </div>
-
                 {/* Visibility and Allow Trial */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -193,11 +172,11 @@ export const AddLesson = ({
 
                 {/* Chapter Selection */}
                 <div>
-                    <ChapterMultiSelect
+                    <ChapterMultiSearchSelect
                         label="Chương liên quan"
-                        placeholder="Chọn các chương..."
-                        value={formData.chapterIds}
-                        onSelect={(chapters) => {
+                        placeholder="Tìm kiếm và chọn các chương..."
+                        value={selectedChapters}
+                        onChange={(chapters) => {
                             setSelectedChapters(chapters);
                             setFormData(prev => ({
                                 ...prev,

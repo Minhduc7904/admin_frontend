@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { lessonLearningItemApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
+import { updateLearningItemAsync } from "../../learningItem/store/learningItemSlice";
 
 const initialState = {
     lessonLearningItems: [],
@@ -17,6 +18,7 @@ const initialState = {
     loadingGetById: false,
     loadingCreate: false,
     loadingDelete: false,
+    loadingReorder: false,
     error: null,
     filters: {
         lessonId: "",
@@ -69,6 +71,17 @@ export const deleteLessonLearningItemAsync = createAsyncThunk(
     }
 );
 
+export const reorderLessonLearningItemsAsync = createAsyncThunk(
+    "lessonLearningItem/reorder",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(() => lessonLearningItemApi.reorder(data), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Cập nhật thứ tự thành công",
+            errorTitle: "Lỗi cập nhật thứ tự",
+        });
+    }
+);
+
 export const lessonLearningItemSlice = createSlice({
     name: "lessonLearningItem",
     initialState,
@@ -93,6 +106,25 @@ export const lessonLearningItemSlice = createSlice({
                 delete state.lessonLearningItems[action.payload];
             } else {
                 state.lessonLearningItems = {};
+            }
+        },
+        // Update local order optimistically (for drag & drop)
+        updateLocalOrder: (state, action) => {
+            const { lessonId, items } = action.payload;
+            if (state.lessonLearningItems[lessonId]) {
+                // Create a map of learningItemId -> new order
+                const orderMap = {};
+                items.forEach(item => {
+                    orderMap[item.learningItemId] = item.order;
+                });
+                
+                // Update order for each item
+                state.lessonLearningItems[lessonId] = state.lessonLearningItems[lessonId]
+                    .map(item => ({
+                        ...item,
+                        order: orderMap[item.learningItemId] ?? item.order
+                    }))
+                    .sort((a, b) => a.order - b.order);
             }
         },
     },
@@ -174,6 +206,40 @@ export const lessonLearningItemSlice = createSlice({
             .addCase(deleteLessonLearningItemAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+
+            // Reorder lesson learning items
+            .addCase(reorderLessonLearningItemsAsync.pending, (state) => {
+                state.loadingReorder = true;
+                state.error = null;
+            })
+            .addCase(reorderLessonLearningItemsAsync.fulfilled, (state) => {
+                state.loadingReorder = false;
+                state.error = null;
+            })
+            .addCase(reorderLessonLearningItemsAsync.rejected, (state, action) => {
+                state.loadingReorder = false;
+                state.error = action.payload;
+            })
+
+            // Listen to updateLearningItemAsync from learningItem slice
+            // Update nested learningItem data in lessonLearningItems
+            .addCase(updateLearningItemAsync.fulfilled, (state, action) => {
+                const updatedLearningItem = action.payload.data;
+                if (!updatedLearningItem) return;
+
+                // Update nested learningItem in all lessons that contain this item
+                Object.keys(state.lessonLearningItems).forEach(lessonId => {
+                    state.lessonLearningItems[lessonId] = state.lessonLearningItems[lessonId].map(item => {
+                        if (item.learningItemId === updatedLearningItem.learningItemId) {
+                            return {
+                                ...item,
+                                learningItem: updatedLearningItem
+                            };
+                        }
+                        return item;
+                    });
+                });
             });
     },
 });
@@ -185,6 +251,7 @@ export const {
     setPagination,
     resetPagination,
     clearLessonLearningItems,
+    updateLocalOrder,
 } = lessonLearningItemSlice.actions;
 
 export const selectLessonLearningItems = (lessonId) => (state) =>
@@ -195,6 +262,7 @@ export const selectLessonLearningItemLoadingGet = (lessonId) => (state) =>
     state.lessonLearningItem.loadingGet[lessonId] || false;
 export const selectLessonLearningItemLoadingCreate = (state) => state.lessonLearningItem.loadingCreate;
 export const selectLessonLearningItemLoadingDelete = (state) => state.lessonLearningItem.loadingDelete;
+export const selectLessonLearningItemLoadingReorder = (state) => state.lessonLearningItem.loadingReorder;
 export const selectLessonLearningItemError = (state) => state.lessonLearningItem.error;
 export const selectLessonLearningItemFilters = (state) => state.lessonLearningItem.filters;
 export const selectLessonLearningItemLoadingGetById = (state) => state.lessonLearningItem.loadingGetById;

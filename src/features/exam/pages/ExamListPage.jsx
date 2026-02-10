@@ -153,6 +153,7 @@ export const ExamListPage = () => {
 
             /* ui */
             openAddExam={openAddExam}
+            showSubject={true}
 
             /* handlers */
             onSearchChange={handleSearch}

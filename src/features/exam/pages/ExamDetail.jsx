@@ -273,12 +273,30 @@ export const ExamDetail = () => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    Thông tin đề thi
-                </h2>
+        <div className="bg-white rounded-lg shadow-sm">
+            {/* Compact Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-600/10 rounded-lg flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-semibold text-foreground">
+                            {exam.title}
+                        </h2>
+                        <div className="flex items-center gap-3 mt-1">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                exam.visibility === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                            }`}>
+                                {VISIBILITY_LABELS[exam.visibility]}
+                            </span>
+                            {exam.grade && (
+                                <span className="text-xs text-foreground-light">Khối {exam.grade}</span>
+                            )}
+                            <span className="text-xs text-foreground-light">{exam.questionCount || 0} câu hỏi</span>
+                        </div>
+                    </div>
+                </div>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -289,158 +307,133 @@ export const ExamDetail = () => {
                 </Button>
             </div>
 
-            <div className="space-y-4">
-                <div>
-                    <label className="text-sm font-medium text-foreground-light">
-                        Tiêu đề
-                    </label>
-                    <p className="text-foreground mt-1">{exam.title}</p>
-                </div>
-
-                {exam.processedDescription && (
-                    <div>
-                        <label className="text-sm font-medium text-foreground-light">
-                            Mô tả
-                        </label>
-                        <div className="mt-1">
-                            <MarkdownRenderer content={exam.processedDescription} />
-                        </div>
-                    </div>
-                )}
-
-                {exam.grade && (
-                    <div>
-                        <label className="text-sm font-medium text-foreground-light">
-                            Khối
-                        </label>
-                        <p className="text-foreground mt-1">Khối {exam.grade}</p>
-                    </div>
-                )}
-
-                {exam.subjectName && (
-                    <div>
-                        <label className="text-sm font-medium text-foreground-light">
-                            Môn học
-                        </label>
-                        <p className="text-foreground mt-1">{exam.subjectName}</p>
-                    </div>
-                )}
-
-                <div>
-                    <label className="text-sm font-medium text-foreground-light">
-                        Trạng thái hiển thị
-                    </label>
-                    <p className="text-foreground mt-1">
-                        {VISIBILITY_LABELS[exam.visibility] || 'Không xác định'}
-                    </p>
-                </div>
-
-                {/* File đề thi */}
-                <MediaUploadSection
-                    title="File đề thi"
-                    fieldName={EXAM_FIELDS.EXAM_FILE}
-                    mediaType="DOCUMENT"
-                    items={examFiles}
-                    loading={loadingUsages}
-                    disabled={loadingAttach}
-                    emptyMessage="Chưa có file"
-                    onUploadClick={handleOpenModal}
-                    renderItem={renderFileItem}
-                />
-
-                {/* File lời giải */}
-                <MediaUploadSection
-                    title="File lời giải"
-                    fieldName={EXAM_FIELDS.SOLUTION_FILE}
-                    mediaType="DOCUMENT"
-                    items={solutionFiles}
-                    loading={loadingUsages}
-                    disabled={loadingAttach}
-                    emptyMessage="Chưa có file"
-                    onUploadClick={handleOpenModal}
-                    renderItem={renderFileItem}
-                />
-
-                {/* Hình ảnh đề thi */}
-                <MediaUploadSection
-                    title="Hình ảnh đề thi"
-                    fieldName={EXAM_FIELDS.EXAM_IMAGE}
-                    mediaType="IMAGE"
-                    items={examImages}
-                    loading={loadingUsages}
-                    disabled={loadingAttach}
-                    emptyMessage="Chưa có hình ảnh"
-                    gridLayout={true}
-                    onUploadClick={handleOpenModal}
-                    renderItem={renderImageItem}
-                />
-
-                {/* Video chữa đề */}
-                <MediaUploadSection
-                    title="Video chữa đề"
-                    fieldName={EXAM_FIELDS.SOLUTION_VIDEO}
-                    mediaType="VIDEO"
-                    items={solutionVideos}
-                    loading={loadingUsages}
-                    disabled={loadingAttach}
-                    emptyMessage="Chưa có video"
-                    gridLayout={true}
-                    onUploadClick={handleOpenModal}
-                    renderItem={renderVideoItem}
-                />
-
-                {/* YouTube Solution URL */}
-                {exam.solutionYoutubeUrl && (
-                    <div>
-                        <label className="text-sm font-medium text-foreground-light mb-2 block">
-                            Link YouTube hướng dẫn giải
-                        </label>
-                        <div
-                            onClick={() => handleYoutubeClick(exam.solutionYoutubeUrl)}
-                            className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 cursor-pointer transition-colors group"
-                        >
-                            <div className="flex-shrink-0 w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center group-hover:bg-red-600 transition-colors">
-                                <Youtube className="w-6 h-6 text-white" />
+            <div className="p-6">
+                {/* Main Info Grid - 2 columns */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    {/* Left Column */}
+                    <div className="space-y-4">
+                        {exam.processedDescription && (
+                            <div>
+                                <label className="text-xs font-semibold text-foreground-light uppercase tracking-wide">
+                                    Mô tả
+                                </label>
+                                <div className="mt-2 text-sm">
+                                    <MarkdownRenderer content={exam.processedDescription} />
+                                </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-foreground">
-                                    Video hướng dẫn giải bài
+                        )}
+
+                        {/* Info Cards */}
+                        <div className="grid grid-cols-2 gap-3">
+                            {exam.subjectName && (
+                                <div className="p-3 bg-gray-50 rounded-lg border border-border">
+                                    <label className="text-xs font-medium text-foreground-light">Môn học</label>
+                                    <p className="text-sm font-semibold text-foreground mt-1">{exam.subjectName}</p>
+                                </div>
+                            )}
+                            
+                            {exam.createdByAdmin && (
+                                <div className="p-3 bg-gray-50 rounded-lg border border-border">
+                                    <label className="text-xs font-medium text-foreground-light">Người tạo</label>
+                                    <p className="text-sm font-semibold text-foreground mt-1">{exam.createdByAdmin.fullName}</p>
+                                    {exam.createdByAdmin.email && (
+                                        <p className="text-xs text-foreground-light truncate">{exam.createdByAdmin.email}</p>
+                                    )}
+                                </div>
+                            )}
+                            
+                            <div className="p-3 bg-gray-50 rounded-lg border border-border">
+                                <label className="text-xs font-medium text-foreground-light">Ngày tạo</label>
+                                <p className="text-sm font-semibold text-foreground mt-1">
+                                    {exam.createdAt ? new Date(exam.createdAt).toLocaleDateString('vi-VN') : '-'}
                                 </p>
-                                <p className="text-xs text-foreground-light truncate">
-                                    {exam.solutionYoutubeUrl}
+                            </div>
+                            
+                            <div className="p-3 bg-gray-50 rounded-lg border border-border">
+                                <label className="text-xs font-medium text-foreground-light">Cập nhật</label>
+                                <p className="text-sm font-semibold text-foreground mt-1">
+                                    {exam.updatedAt ? new Date(exam.updatedAt).toLocaleDateString('vi-VN') : '-'}
                                 </p>
                             </div>
                         </div>
                     </div>
-                )}
 
-                <div className="pt-4 border-t border-border">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <label className="text-foreground-light">Người tạo</label>
-                            <p className="text-foreground mt-1">
-                                {exam.createdByName || 'Không xác định'}
-                            </p>
+                    {/* Right Column - Media Files */}
+                    <div className="space-y-4">
+                        {/* File đề thi & lời giải - Compact */}
+                        <div className="space-y-3">
+                            <MediaUploadSection
+                                title="File đề thi"
+                                fieldName={EXAM_FIELDS.EXAM_FILE}
+                                mediaType="DOCUMENT"
+                                items={examFiles}
+                                loading={loadingUsages}
+                                disabled={loadingAttach}
+                                emptyMessage="Chưa có file"
+                                onUploadClick={handleOpenModal}
+                                renderItem={renderFileItem}
+                            />
+
+                            <MediaUploadSection
+                                title="File lời giải"
+                                fieldName={EXAM_FIELDS.SOLUTION_FILE}
+                                mediaType="DOCUMENT"
+                                items={solutionFiles}
+                                loading={loadingUsages}
+                                disabled={loadingAttach}
+                                emptyMessage="Chưa có file"
+                                onUploadClick={handleOpenModal}
+                                renderItem={renderFileItem}
+                            />
                         </div>
-                        <div>
-                            <label className="text-foreground-light">Số câu hỏi</label>
-                            <p className="text-foreground mt-1">
-                                {exam.questionCount || 0} câu
-                            </p>
-                        </div>
-                        <div>
-                            <label className="text-foreground-light">Ngày tạo</label>
-                            <p className="text-foreground mt-1">
-                                {exam.createdAt ? new Date(exam.createdAt).toLocaleString('vi-VN') : '-'}
-                            </p>
-                        </div>
-                        <div>
-                            <label className="text-foreground-light">Cập nhật</label>
-                            <p className="text-foreground mt-1">
-                                {exam.updatedAt ? new Date(exam.updatedAt).toLocaleString('vi-VN') : '-'}
-                            </p>
-                        </div>
+
+                        {/* YouTube Solution */}
+                        {exam.solutionYoutubeUrl && (
+                            <div
+                                onClick={() => handleYoutubeClick(exam.solutionYoutubeUrl)}
+                                className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 cursor-pointer transition-colors group"
+                            >
+                                <div className="flex-shrink-0 w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center group-hover:bg-red-600 transition-colors">
+                                    <Youtube className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-semibold text-foreground">Video hướng dẫn giải</p>
+                                    <p className="text-xs text-foreground-light truncate">{exam.solutionYoutubeUrl}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
+                </div>
+
+                {/* Media Gallery - Full Width */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4 border-t border-border">
+                    {/* Hình ảnh đề thi */}
+                    <MediaUploadSection
+                        title="Hình ảnh đề thi"
+                        fieldName={EXAM_FIELDS.EXAM_IMAGE}
+                        mediaType="IMAGE"
+                        items={examImages}
+                        loading={loadingUsages}
+                        disabled={loadingAttach}
+                        emptyMessage="Chưa có hình ảnh"
+                        gridLayout={true}
+                        onUploadClick={handleOpenModal}
+                        renderItem={renderImageItem}
+                    />
+
+                    {/* Video chữa đề */}
+                    <MediaUploadSection
+                        title="Video chữa đề"
+                        fieldName={EXAM_FIELDS.SOLUTION_VIDEO}
+                        mediaType="VIDEO"
+                        items={solutionVideos}
+                        loading={loadingUsages}
+                        disabled={loadingAttach}
+                        emptyMessage="Chưa có video"
+                        gridLayout={true}
+                        onUploadClick={handleOpenModal}
+                        renderItem={renderVideoItem}
+                    />
                 </div>
             </div>
 

@@ -5,7 +5,7 @@ import { Spinner } from '../../../../shared/components/loading';
 /* =====================
    Media Grid Item
 ===================== */
-export const MediaGridItem = ({ media, isSelected, onClick, viewUrl }) => {
+export const MediaGridItem = ({ media, isSelected, onClick, viewUrl, multiple = false }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -57,16 +57,27 @@ export const MediaGridItem = ({ media, isSelected, onClick, viewUrl }) => {
                 )}
             </div>
 
-            {/* Selected Indicator */}
-            {isSelected && (
-                <div className="absolute top-2 right-2 w-6 h-6 bg-info rounded-full flex items-center justify-center shadow-lg">
-                    <Check size={16} className="text-white" />
+            {/* Selected Indicator - Checkbox for multiple, Check icon for single */}
+            {multiple ? (
+                <div className={`absolute top-2 right-2 w-6 h-6 rounded border-2 flex items-center justify-center shadow-lg
+                    ${isSelected 
+                        ? 'bg-info border-info' 
+                        : 'bg-white border-gray-300'
+                    }
+                `}>
+                    {isSelected && <Check size={16} className="text-white" />}
                 </div>
+            ) : (
+                isSelected && (
+                    <div className="absolute top-2 right-2 w-6 h-6 bg-info rounded-full flex items-center justify-center shadow-lg">
+                        <Check size={16} className="text-white" />
+                    </div>
+                )
             )}
 
             {/* File Name */}
             <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-2 rounded-b truncate">
-                {media.fileName || media.originalName}
+                { media.originalName || media.fileName}
             </div>
         </div>
     );

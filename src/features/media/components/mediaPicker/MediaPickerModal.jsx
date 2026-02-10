@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { X, Folder, Image as ImageIcon, Upload, Check } from 'lucide-react'
 
+import { Modal } from '../../../../shared/components/ui'
 import { Button } from '../../../../shared/components/ui/Button'
 import { Tabs } from '../../../../shared/components/ui/Tabs'
 import { Spinner, InlineLoading } from '../../../../shared/components/loading'
@@ -23,6 +24,7 @@ export const MediaPickerModal = ({
     selectedMediaId = null,
     title = 'Chọn Media',
     type,
+    multiple = false,
 }) => {
     /* -----------------
        Tabs
@@ -41,13 +43,24 @@ export const MediaPickerModal = ({
         type,
     })
 
-    const selection = useMediaSelection(selectedMediaId)
+    const selection = useMediaSelection(selectedMediaId, multiple)
 
     const upload = useMediaUpload({
         type,
         folderId: folders.selectedFolderId,
+        multiple,
         onUploaded: (media) => {
-            selection.setSelectedMediaId(media.mediaId)
+            if (multiple) {
+                // Add to selection in multiple mode
+                selection.setSelectedMediaIds(prev => {
+                    if (!prev.includes(media.mediaId)) {
+                        return [...prev, media.mediaId]
+                    }
+                    return prev
+                })
+            } else {
+                selection.setSelectedMediaId(media.mediaId)
+            }
             library.reload()
         },
     })
@@ -66,20 +79,35 @@ export const MediaPickerModal = ({
     if (!isOpen) return null
 
     /* -----------------
+       Handlers
+    ----------------- */
+    const handleSave = () => {
+        if (multiple) {
+            onSave(selection.selectedMediaIds)
+        } else {
+            onSave(selection.selectedMediaId)
+        }
+    }
+
+    const selectedCount = multiple ? selection.selectedMediaIds.length : (selection.selectedMediaId ? 1 : 0)
+
+    /* -----------------
        Render
     ----------------- */
     return (
-        <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            onClick={onClose}
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            size="5xl"
+            showCloseButton={false}
+            customContent={true}
         >
-            <div
-                className="bg-white rounded-lg shadow-lg w-full max-w-5xl h-[85vh] flex flex-col"
-                onClick={(e) => e.stopPropagation()}
-            >
+            <div className="h-[85vh] flex flex-col">
                 {/* ===== Header ===== */}
                 <div className="flex items-center justify-between p-4 border-b border-border mb-2">
-                    <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+                    <h3 className="text-lg font-semibold text-foreground">
+                        {title} {multiple && '(Chọn nhiều)'}
+                    </h3>
                     <button
                         onClick={onClose}
                         className="p-1 hover:bg-gray-100 rounded-sm text-foreground-light hover:text-foreground"
@@ -167,10 +195,9 @@ export const MediaPickerModal = ({
                                                 key={item.mediaId}
                                                 media={item}
                                                 viewUrl={item.viewUrl}
-                                                isSelected={selection.selectedMediaId === item.mediaId}
-                                                onClick={() =>
-                                                    selection.setSelectedMediaId(item.mediaId)
-                                                }
+                                                isSelected={selection.isSelected(item.mediaId)}
+                                                onClick={() => selection.toggleMediaId(item.mediaId)}
+                                                multiple={multiple}
                                             />
                                         ))}
                                     </div>
@@ -183,6 +210,7 @@ export const MediaPickerModal = ({
                             state={upload.state}
                             handlers={upload.handlers}
                             meta={upload.acceptedTypes}
+                            multiple={multiple}
                         />
                     )}
                 </div>
@@ -190,10 +218,10 @@ export const MediaPickerModal = ({
                 {/* ===== Footer ===== */}
                 <div className="flex items-center justify-between p-4 border-t border-border bg-gray-50">
                     <div className="text-sm text-foreground-light">
-                        {selection.selectedMediaId ? (
+                        {selectedCount > 0 ? (
                             <span className="flex items-center gap-2">
                                 <Check size={16} className="text-success" />
-                                Đã chọn 1 media
+                                Đã chọn {selectedCount} media
                             </span>
                         ) : (
                             'Chưa chọn media nào'
@@ -205,14 +233,14 @@ export const MediaPickerModal = ({
                             Hủy
                         </Button>
                         <Button
-                            disabled={!selection.selectedMediaId}
-                            onClick={() => onSave(selection.selectedMediaId)}
+                            disabled={selectedCount === 0}
+                            onClick={handleSave}
                         >
                             Lưu
                         </Button>
                     </div>
                 </div>
             </div>
-        </div>
+        </Modal>
     )
 }

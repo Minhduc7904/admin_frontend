@@ -21,6 +21,7 @@ export { chapterApi } from './chapterApi';
 export { learningItemApi } from './learningItemApi';
 export { lessonApi } from './lessonApi';
 export { videoContentApi } from './videoContentApi';
+export { documentContentApi } from './documentContentApi';
 export { youtubeContentApi } from './youtubeContentApi';
 export { homeworkContentApi } from './homeworkContentApi';
 export { homeworkSubmitApi } from './homeworkSubmitApi';

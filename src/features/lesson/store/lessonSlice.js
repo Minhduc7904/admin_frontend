@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { lessonApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
-
+import { createLessonLearningItemAsync, deleteLessonLearningItemAsync } from "../../lessonLearningitem/store/lessonLearningItemSlice";
+import { createLearningItemAsync } from "../../learningItem/store/learningItemSlice";
 const initialState = {
     lessons: [],
     currentLesson: null,
@@ -203,6 +204,54 @@ export const lessonSlice = createSlice({
             .addCase(deleteLessonAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+
+            // Listen to lessonLearningItem changes to update count
+            // When learning item is added to lesson
+            .addCase(createLessonLearningItemAsync.fulfilled, (state, action) => {
+                const lessonId = action.meta.arg.lessonId;
+                const lessonIndex = state.lessons.findIndex(l => l.lessonId === lessonId);
+
+                if (lessonIndex !== -1) {
+                    state.lessons[lessonIndex].learningItemsCount = 
+                        (state.lessons[lessonIndex].learningItemsCount || 0) + 1;
+                }
+                
+                if (state.currentLesson && state.currentLesson.lessonId === lessonId) {
+                    state.currentLesson.learningItemsCount = 
+                        (state.currentLesson.learningItemsCount || 0) + 1;
+                }
+            })
+
+            // 
+            .addCase(createLearningItemAsync.fulfilled, (state, action) => {
+                const { lessonId } = action.meta.arg;
+                const lessonIndex = state.lessons.findIndex(l => l.lessonId === lessonId);
+                if (lessonIndex !== -1) {
+                    state.lessons[lessonIndex].learningItemsCount = 
+                        (state.lessons[lessonIndex].learningItemsCount || 0) + 1;
+                }
+                if (state.currentLesson && state.currentLesson.lessonId === lessonId) {
+                    state.currentLesson.learningItemsCount = 
+                        (state.currentLesson.learningItemsCount || 0) + 1;
+                }
+            })
+            
+            // When learning item is removed from lesson
+            .addCase(deleteLessonLearningItemAsync.fulfilled, (state, action) => {
+                const lessonId = action.meta.arg.lessonId;
+                const lessonIndex = state.lessons.findIndex(l => l.lessonId === lessonId);
+                
+                if (lessonIndex !== -1 && state.lessons[lessonIndex].learningItemsCount > 0) {
+                    state.lessons[lessonIndex].learningItemsCount = 
+                        state.lessons[lessonIndex].learningItemsCount - 1;
+                }
+                
+                if (state.currentLesson && state.currentLesson.lessonId === lessonId && 
+                    state.currentLesson.learningItemsCount > 0) {
+                    state.currentLesson.learningItemsCount = 
+                        state.currentLesson.learningItemsCount - 1;
+                }
             });
     },
 });

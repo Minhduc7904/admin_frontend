@@ -1,7 +1,7 @@
 import { createCourseAsync, getAllCoursesAsync, selectCourseLoadingCreate } from "../store/courseSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { Input, Button, Dropdown, Textarea } from "../../../shared/components";
+import { Input, Button, Dropdown, Textarea, CurrencyInput } from "../../../shared/components";
 import { AdminSearchSelect } from "../../admin/components/AdminSearchSelect";
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
 import { COURSE_VISIBILITIES } from "../constanst/course-visibility.constants";
@@ -187,28 +187,24 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
                 {/* Price and Compare At Price */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <Input
+                        <CurrencyInput
                             error={errors.priceVND}
                             name="priceVND"
-                            label="Giá khóa học (VNĐ)"
-                            type="number"
+                            label="Giá khóa học"
                             required={true}
                             value={formData.priceVND}
                             onChange={handleChange}
                             placeholder="0"
-                            min="0"
                         />
                     </div>
                     <div>
-                        <Input
+                        <CurrencyInput
                             error={errors.compareAtVND}
                             name="compareAtVND"
-                            label="Giá gốc (VNĐ)"
-                            type="number"
+                            label="Giá gốc"
                             value={formData.compareAtVND}
                             onChange={handleChange}
                             placeholder="Để trống nếu không giảm giá"
-                            min="0"
                         />
                     </div>
                 </div>

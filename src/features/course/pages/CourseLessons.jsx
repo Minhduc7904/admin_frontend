@@ -1,17 +1,41 @@
 // src/features/course/pages/CourseLessons.jsx
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { selectCurrentCourse, selectCourseLoadingGet } from '../store/courseSlice';
-import { getAllLessonsAsync, selectLessonFilters } from '../../lesson/store/lessonSlice';
-import { getAllLessonLearningItemsAsync } from '../../lessonLearningitem/store/lessonLearningItemSlice';
+import { getAllLessonsAsync, selectLessonFilters, deleteLessonAsync, selectLessonLoadingDelete, selectLessons } from '../../lesson/store/lessonSlice';
+import { getAllLessonLearningItemsAsync, deleteLessonLearningItemAsync, selectLessonLearningItemLoadingDelete, selectLessonLearningItems } from '../../lessonLearningitem/store/lessonLearningItemSlice';
 import { LessonList } from '../components/LessonList';
 import { LessonDetail } from '../components/LessonDetail';
 import { LearningItemDetail } from '../components/LearningItemDetail';
-import { AddLesson } from '../../lesson/components';
-import { AddLearningItem } from '../../learningItem/components';
-import { Button, RightPanel } from '../../../shared/components';
-import { Plus } from 'lucide-react';
+import { AddLesson, EditLesson } from '../../lesson/components';
+import { AddLearningItem, EditLearningItem } from '../../learningItem/components';
+import { AddDocumentContent, EditDocumentContent } from '../../documentContent/components';
+import { AddVideoContent, EditVideoContent } from '../../videoContent/components';
+import { AddYoutubeContent, EditYoutubeContent } from '../../youtubeContent/components';
+import { AddHomeworkContent, EditHomeworkContent } from '../../homeworkContent/components';
+import { Button, RightPanel, PageLoading, ConfirmModal } from '../../../shared/components';
+import { Plus, BookOpen, FileText } from 'lucide-react';
+import { 
+    deleteDocumentContentAsync, 
+    selectDocumentContentLoadingDelete, 
+    getAllDocumentContentsAsync 
+} from '../../documentContent/store/documentContentSlice';
+import { 
+    deleteVideoContentAsync, 
+    selectVideoContentLoadingDelete, 
+    getAllVideoContentsAsync 
+} from '../../videoContent/store/videoContentSlice';
+import { 
+    deleteYoutubeContentAsync, 
+    selectYoutubeContentLoadingDelete, 
+    getAllYoutubeContentsAsync 
+} from '../../youtubeContent/store/youtubeContentSlice';
+import { 
+    deleteHomeworkContentAsync, 
+    selectHomeworkContentLoadingDelete, 
+    getAllHomeworkContentsAsync 
+} from '../../homeworkContent/store/homeworkContentSlice';
 
 export const CourseLessons = () => {
     const dispatch = useDispatch();
@@ -20,6 +44,13 @@ export const CourseLessons = () => {
     const course = useSelector(selectCurrentCourse);
     const loading = useSelector(selectCourseLoadingGet);
     const lessonFilters = useSelector(selectLessonFilters);
+    const loadingDeleteLesson = useSelector(selectLessonLoadingDelete);
+    const loadingDetachLearningItem = useSelector(selectLessonLearningItemLoadingDelete);
+    const lessons = useSelector(selectLessons);
+    const loadingDeleteDocumentContent = useSelector(selectDocumentContentLoadingDelete);
+    const loadingDeleteVideoContent = useSelector(selectVideoContentLoadingDelete);
+    const loadingDeleteYoutubeContent = useSelector(selectYoutubeContentLoadingDelete);
+    const loadingDeleteHomeworkContent = useSelector(selectHomeworkContentLoadingDelete);
 
     // Selection state
     const [selectedItem, setSelectedItem] = useState(null); // { type: 'lesson' | 'learningItem', data: {...} }
@@ -29,6 +60,31 @@ export const CourseLessons = () => {
     const [openAddLesson, setOpenAddLesson] = useState(false);
     const [openAddLearningItem, setOpenAddLearningItem] = useState(false);
     const [selectedLessonForLearningItem, setSelectedLessonForLearningItem] = useState(null);
+
+    // Edit modal state
+    const [openEditLesson, setOpenEditLesson] = useState(false);
+    const [openEditLearningItem, setOpenEditLearningItem] = useState(false);
+    const [editingLesson, setEditingLesson] = useState(null);
+    const [editingLearningItem, setEditingLearningItem] = useState(null);
+
+    // Add content modal state
+    const [openAddContent, setOpenAddContent] = useState(false);
+    const [contentType, setContentType] = useState(null); // 'DOCUMENT' | 'VIDEO' | 'YOUTUBE' | 'HOMEWORK'
+    const [selectedLearningItemForContent, setSelectedLearningItemForContent] = useState(null);
+
+    // Edit content modal state
+    const [openEditContent, setOpenEditContent] = useState(false);
+    const [editingContent, setEditingContent] = useState(null);
+    const [editingContentType, setEditingContentType] = useState(null);
+
+    // Delete/Detach confirm modal state
+    const [confirmDeleteLesson, setConfirmDeleteLesson] = useState(false);
+    const [lessonToDelete, setLessonToDelete] = useState(null);
+    const [confirmDetachLearningItem, setConfirmDetachLearningItem] = useState(false);
+    const [learningItemToDetach, setLearningItemToDetach] = useState(null);
+    const [confirmDeleteContent, setConfirmDeleteContent] = useState(false);
+    const [contentToDelete, setContentToDelete] = useState(null);
+    const [deleteContentType, setDeleteContentType] = useState(null);
 
     const handleSelectLesson = (lesson) => {
         setSelectedItem({ type: 'lesson', data: lesson });
@@ -58,6 +114,26 @@ export const CourseLessons = () => {
         setSelectedLessonForLearningItem(null);
     };
 
+    const handleEditLesson = (lesson) => {
+        setEditingLesson(lesson);
+        setOpenEditLesson(true);
+    };
+
+    const handleCloseEditLesson = () => {
+        setOpenEditLesson(false);
+        setEditingLesson(null);
+    };
+
+    const handleEditLearningItem = (learningItem) => {
+        setEditingLearningItem(learningItem.learningItem ? learningItem.learningItem : learningItem);
+        setOpenEditLearningItem(true);
+    };
+
+    const handleCloseEditLearningItem = () => {
+        setOpenEditLearningItem(false);
+        setEditingLearningItem(null);
+    };
+
     const loadLessons = useCallback(() => {
         if (courseId) {
             dispatch(
@@ -83,39 +159,246 @@ export const CourseLessons = () => {
         }
     }, [dispatch, selectedLessonForLearningItem]);
 
-    if (loading) {
-        return (
-            <div className="bg-white border border-border rounded-sm p-6">
-                <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                </div>
-            </div>
-        );
-    }
+    // Get current lesson from Redux store (reactive to updates)
+    const currentLesson = useMemo(() => {
+        if (selectedItem?.type === 'lesson') {
+            return lessons.find(l => l.lessonId === selectedItem.data.lessonId) || selectedItem.data;
+        }
+        if (selectedItem?.type === 'learningItem') {
+            return lessons.find(l => l.lessonId === selectedItem.lessonId) || lessonMap[selectedItem.lessonId];
+        }
+        return null;
+    }, [lessons, selectedItem, lessonMap]);
 
-    const currentLesson = selectedItem?.type === 'lesson'
-        ? selectedItem.data
-        : (selectedItem?.type === 'learningItem' ? lessonMap[selectedItem.lessonId] : null);
+    // Get current learning item from Redux store (reactive to updates)
+    const currentLearningItemsInLesson = useSelector(selectLessonLearningItems(selectedItem?.lessonId || 0));
+    const currentLearningItem = useMemo(() => {
+        if (selectedItem?.type !== 'learningItem') return null;
+        
+        const itemFromStore = currentLearningItemsInLesson.find(
+            item => item.learningItemId === selectedItem.data.learningItemId
+        );
+        
+        return itemFromStore || selectedItem.data;
+    }, [selectedItem, currentLearningItemsInLesson]);
+
+    // Handle content operations - defined after currentLearningItem
+    const handleAddContent = (type) => {
+        setContentType(type);
+        setSelectedLearningItemForContent(currentLearningItem?.learningItem);
+        setOpenAddContent(true);
+    };
+
+    const handleCloseAddContent = () => {
+        setOpenAddContent(false);
+        setContentType(null);
+        setSelectedLearningItemForContent(null);
+    };
+
+    const handleContentSuccess = () => {
+        // Reload content list based on type
+        const learningItemId = selectedLearningItemForContent?.learningItemId;
+        if (!learningItemId) return;
+
+        switch (contentType) {
+            case 'DOCUMENT':
+                dispatch(getAllDocumentContentsAsync({ learningItemId }));
+                break;
+            case 'VIDEO':
+                dispatch(getAllVideoContentsAsync({ learningItemId }));
+                break;
+            case 'YOUTUBE':
+                dispatch(getAllYoutubeContentsAsync({ learningItemId }));
+                break;
+            case 'HOMEWORK':
+                dispatch(getAllHomeworkContentsAsync({ learningItemId }));
+                break;
+            default:
+                break;
+        }
+    };
+
+    // Delete lesson handler
+    const handleDeleteLesson = (lesson) => {
+        setLessonToDelete(lesson);
+        setConfirmDeleteLesson(true);
+    };
+
+    const handleConfirmDeleteLesson = async () => {
+        if (!lessonToDelete) return;
+
+        try {
+            await dispatch(deleteLessonAsync(lessonToDelete.lessonId)).unwrap();
+            
+            // Clear selection if deleted lesson was selected
+            if (selectedItem?.type === 'lesson' && selectedItem.data.lessonId === lessonToDelete.lessonId) {
+                setSelectedItem(null);
+            }
+            if (selectedItem?.type === 'learningItem' && selectedItem.lessonId === lessonToDelete.lessonId) {
+                setSelectedItem(null);
+            }
+            
+            // Close modal
+            setConfirmDeleteLesson(false);
+            setLessonToDelete(null);
+        } catch (error) {
+            console.error('Error deleting lesson:', error);
+        }
+    };
+
+    const handleCancelDeleteLesson = () => {
+        setConfirmDeleteLesson(false);
+        setLessonToDelete(null);
+    };
+
+    // Detach learning item handler
+    const handleDetachLearningItem = (learningItem, lessonId) => {
+        setLearningItemToDetach({ learningItem, lessonId });
+        setConfirmDetachLearningItem(true);
+    };
+
+    const handleConfirmDetachLearningItem = async () => {
+        if (!learningItemToDetach) return;
+
+        try {
+            await dispatch(deleteLessonLearningItemAsync({
+                lessonId: learningItemToDetach.lessonId,
+                learningItemId: learningItemToDetach.learningItem.learningItem.learningItemId
+            })).unwrap();
+
+            // Clear selection if detached item was selected
+            if (selectedItem?.type === 'learningItem' && 
+                selectedItem.data.learningItem.learningItemId === learningItemToDetach.learningItem.learningItem.learningItemId) {
+                setSelectedItem({ type: 'lesson', data: lessonMap[learningItemToDetach.lessonId] });
+            }
+
+            // Close modal
+            setConfirmDetachLearningItem(false);
+            setLearningItemToDetach(null);
+        } catch (error) {
+            console.error('Error detaching learning item:', error);
+        }
+    };
+
+    const handleCancelDetachLearningItem = () => {
+        setConfirmDetachLearningItem(false);
+        setLearningItemToDetach(null);
+    };
+
+    // Edit content handlers
+    const handleEditContent = (type, content) => {
+        setEditingContentType(type);
+        setEditingContent(content);
+        setOpenEditContent(true);
+    };
+
+    const handleCloseEditContent = () => {
+        setOpenEditContent(false);
+        setEditingContent(null);
+        setEditingContentType(null);
+    };
+
+    const handleEditContentSuccess = () => {
+        // Reload content list based on type
+        const learningItemId = currentLearningItem?.learningItem?.learningItemId;
+        if (!learningItemId) return;
+
+        switch (editingContentType) {
+            case 'DOCUMENT':
+                dispatch(getAllDocumentContentsAsync({ learningItemId }));
+                break;
+            case 'VIDEO':
+                dispatch(getAllVideoContentsAsync({ learningItemId }));
+                break;
+            case 'YOUTUBE':
+                dispatch(getAllYoutubeContentsAsync({ learningItemId }));
+                break;
+            case 'HOMEWORK':
+                dispatch(getAllHomeworkContentsAsync({ learningItemId }));
+                break;
+            default:
+                break;
+        }
+    };
+
+    // Delete content handlers
+    const handleDeleteContent = (type, content) => {
+        setDeleteContentType(type);
+        setContentToDelete(content);
+        setConfirmDeleteContent(true);
+    };
+
+    const handleConfirmDeleteContent = async () => {
+        if (!contentToDelete || !deleteContentType) return;
+
+        try {
+            let deletePromise;
+            let contentId;
+
+            switch (deleteContentType) {
+                case 'DOCUMENT':
+                    contentId = contentToDelete.documentContentId;
+                    deletePromise = dispatch(deleteDocumentContentAsync(contentId));
+                    break;
+                case 'VIDEO':
+                    contentId = contentToDelete.videoContentId;
+                    deletePromise = dispatch(deleteVideoContentAsync(contentId));
+                    break;
+                case 'YOUTUBE':
+                    contentId = contentToDelete.youtubeContentId;
+                    deletePromise = dispatch(deleteYoutubeContentAsync(contentId));
+                    break;
+                case 'HOMEWORK':
+                    contentId = contentToDelete.homeworkContentId;
+                    deletePromise = dispatch(deleteHomeworkContentAsync(contentId));
+                    break;
+                default:
+                    return;
+            }
+
+            await deletePromise.unwrap();
+
+            // Close modal
+            setConfirmDeleteContent(false);
+            setContentToDelete(null);
+            setDeleteContentType(null);
+        } catch (error) {
+            console.error('Error deleting content:', error);
+        }
+    };
+
+    const handleCancelDeleteContent = () => {
+        setConfirmDeleteContent(false);
+        setContentToDelete(null);
+        setDeleteContentType(null);
+    };
+    
+    if (loading) {
+        return <PageLoading message="Đang tải danh sách bài học..." />;
+    }
 
     return (
         <>
-            <div className="bg-white border border-border rounded-sm">
-                {/* Header */}
-                <div className="p-6 border-b border-border">
+            <div className="bg-white border border-border rounded-lg shadow-sm overflow-hidden">
+                {/* Header with gradient background */}
+                <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-5 border-b border-border">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold text-foreground">
-                                Danh sách bài học
-                            </h2>
-                            <p className="text-sm text-muted-foreground mt-1">
-                                Quản lý bài học và tài liệu học tập
-                            </p>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <BookOpen className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold text-foreground">
+                                    Danh sách bài học
+                                </h2>
+                                <p className="text-sm text-foreground-light mt-0.5">
+                                    Quản lý bài học và tài liệu học tập
+                                </p>
+                            </div>
                         </div>
                         <Button
                             onClick={handleAddLesson}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 shadow-sm"
                         >
                             <Plus className="w-4 h-4" />
                             Thêm bài học
@@ -124,40 +407,53 @@ export const CourseLessons = () => {
                 </div>
 
                 {/* Two Column Layout */}
-                <div className="grid grid-cols-12 min-h-[600px]">
+                <div className="grid grid-cols-12 divide-x divide-border min-h-[650px]">
                     {/* Left Column - Lesson List */}
-                    <div className="col-span-5 border-r border-border">
+                    <div className="col-span-5 bg-primary">
                         <LessonList
                             courseId={courseId}
                             selectedItem={selectedItem}
                             onSelectLesson={handleSelectLesson}
                             onSelectLearningItem={handleSelectLearningItem}
                             onAddLearningItem={handleAddLearningItem}
+                            onEditLesson={handleEditLesson}
+                            onDeleteLesson={handleDeleteLesson}
+                            onEditLearningItem={handleEditLearningItem}
+                            onDetachLearningItem={handleDetachLearningItem}
                         />
-                    </div>
+                    </div> 
+                            
 
                     {/* Right Column - Detail View */}
-                    <div className="col-span-7">
+                    <div className="col-span-7 bg-white">
                         {selectedItem?.type === 'lesson' ? (
                             <LessonDetail
-                                lesson={selectedItem.data}
+                                lesson={currentLesson}
                                 onAddLearningItem={handleAddLearningItem}
-                                onEdit={() => { }} // TODO: implement edit
-                                onDelete={() => { }} // TODO: implement delete
+                                onEdit={() => handleEditLesson(currentLesson)}
+                                onDelete={() => handleDeleteLesson(currentLesson)}
                             />
                         ) : selectedItem?.type === 'learningItem' ? (
                             <LearningItemDetail
-                                learningItem={selectedItem.data}
+                                learningItem={currentLearningItem}
                                 lessonTitle={currentLesson?.title}
-                                onEdit={() => { }} // TODO: implement edit
-                                onDelete={() => { }} // TODO: implement delete
+                                onEdit={() => handleEditLearningItem(currentLearningItem)}
+                                onDelete={() => handleDetachLearningItem(currentLearningItem, selectedItem.lessonId)}
+                                onAddContent={handleAddContent}
+                                onEditContent={handleEditContent}
+                                onDeleteContent={handleDeleteContent}
                             />
                         ) : (
-                            <div className="flex items-center justify-center h-full text-muted-foreground">
-                                <div className="text-center">
-                                    <p className="text-lg">Chọn một bài học hoặc tài liệu để xem chi tiết</p>
-                                    <p className="text-sm mt-2">
-                                        Click vào mục bên trái để xem thông tin chi tiết
+                            <div className="flex items-center justify-center h-full">
+                                <div className="text-center max-w-md px-6">
+                                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <FileText className="w-10 h-10 text-primary/60" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                                        Chưa chọn bài học
+                                    </h3>
+                                    <p className="text-sm text-foreground-light leading-relaxed">
+                                        Chọn một bài học hoặc tài liệu bên trái để xem chi tiết và quản lý nội dung
                                     </p>
                                 </div>
                             </div>
@@ -171,6 +467,7 @@ export const CourseLessons = () => {
                 isOpen={openAddLesson}
                 onClose={handleCloseAddLesson}
                 title="Thêm bài học mới"
+                subtitle="Tạo bài học mới cho khóa học này"
             >
                 <AddLesson
                     onClose={handleCloseAddLesson}
@@ -186,6 +483,7 @@ export const CourseLessons = () => {
                 isOpen={openAddLearningItem}
                 onClose={handleCloseAddLearningItem}
                 title="Thêm tài liệu học tập"
+                subtitle={selectedLessonForLearningItem?.title ? `Cho bài học: ${selectedLessonForLearningItem.title}` : undefined}
             >
                 <AddLearningItem
                     onClose={handleCloseAddLearningItem}
@@ -194,6 +492,211 @@ export const CourseLessons = () => {
                     loadLearningItems={loadLearningItems}
                 />
             </RightPanel>
+
+            {/* Edit Lesson Panel */}
+            <RightPanel
+                isOpen={openEditLesson}
+                onClose={handleCloseEditLesson}
+                title="Chỉnh sửa bài học"
+                subtitle={editingLesson?.title}
+            >
+                <EditLesson
+                    onClose={handleCloseEditLesson}
+                    lesson={editingLesson}
+                    canSelectTeacher={true}
+                />
+            </RightPanel>
+
+            {/* Add Content Panels */}
+            <RightPanel
+                isOpen={openAddContent && contentType === 'DOCUMENT'}
+                onClose={handleCloseAddContent}
+                title="Thêm tài liệu mới"
+                subtitle={selectedLearningItemForContent?.title}
+            >
+                <AddDocumentContent
+                    onClose={handleCloseAddContent}
+                    learningItemId={selectedLearningItemForContent?.learningItemId}
+                    onSuccess={handleContentSuccess}
+                />
+            </RightPanel>
+
+            <RightPanel
+                isOpen={openAddContent && contentType === 'VIDEO'}
+                onClose={handleCloseAddContent}
+                title="Thêm video mới"
+                subtitle={selectedLearningItemForContent?.title}
+            >
+                <AddVideoContent
+                    onClose={handleCloseAddContent}
+                    learningItemId={selectedLearningItemForContent?.learningItemId}
+                    onSuccess={handleContentSuccess}
+                />
+            </RightPanel>
+
+            <RightPanel
+                isOpen={openAddContent && contentType === 'YOUTUBE'}
+                onClose={handleCloseAddContent}
+                title="Thêm video YouTube"
+                subtitle={selectedLearningItemForContent?.title}
+            >
+                <AddYoutubeContent
+                    onClose={handleCloseAddContent}
+                    learningItemId={selectedLearningItemForContent?.learningItemId}
+                    onSuccess={handleContentSuccess}
+                />
+            </RightPanel>
+
+            <RightPanel
+                isOpen={openAddContent && contentType === 'HOMEWORK'}
+                onClose={handleCloseAddContent}
+                title="Thêm bài tập mới"
+                subtitle={selectedLearningItemForContent?.title}
+            >
+                <AddHomeworkContent
+                    onClose={handleCloseAddContent}
+                    learningItemId={selectedLearningItemForContent?.learningItemId}
+                    onSuccess={handleContentSuccess}
+                />
+            </RightPanel>
+
+            {/* Edit Learning Item Panel */}
+            <RightPanel
+                isOpen={openEditLearningItem}
+                onClose={handleCloseEditLearningItem}
+                title="Chỉnh sửa tài liệu học tập"
+                subtitle={editingLearningItem?.title}
+            >
+                <EditLearningItem
+                    onClose={handleCloseEditLearningItem}
+                    learningItem={editingLearningItem}
+                    lessonTitle={currentLesson?.title}
+                />
+            </RightPanel>
+
+            {/* Edit Content Panels */}
+            <RightPanel
+                isOpen={openEditContent && editingContentType === 'DOCUMENT'}
+                onClose={handleCloseEditContent}
+                title="Chỉnh sửa tài liệu"
+                subtitle={`#${editingContent?.documentContentId}`}
+            >
+                <EditDocumentContent
+                    onClose={handleCloseEditContent}
+                    documentContent={editingContent}
+                    onSuccess={handleEditContentSuccess}
+                />
+            </RightPanel>
+
+            <RightPanel
+                isOpen={openEditContent && editingContentType === 'VIDEO'}
+                onClose={handleCloseEditContent}
+                title="Chỉnh sửa video"
+                subtitle={`#${editingContent?.videoContentId}`}
+            >
+                <EditVideoContent
+                    onClose={handleCloseEditContent}
+                    videoContent={editingContent}
+                    onSuccess={handleEditContentSuccess}
+                />
+            </RightPanel>
+
+            <RightPanel
+                isOpen={openEditContent && editingContentType === 'YOUTUBE'}
+                onClose={handleCloseEditContent}
+                title="Chỉnh sửa video YouTube"
+                subtitle={`#${editingContent?.youtubeContentId}`}
+            >
+                <EditYoutubeContent
+                    onClose={handleCloseEditContent}
+                    youtubeContent={editingContent}
+                    onSuccess={handleEditContentSuccess}
+                />
+            </RightPanel>
+
+            <RightPanel
+                isOpen={openEditContent && editingContentType === 'HOMEWORK'}
+                onClose={handleCloseEditContent}
+                title="Chỉnh sửa bài tập"
+                subtitle={`#${editingContent?.homeworkContentId}`}
+            >
+                <EditHomeworkContent
+                    onClose={handleCloseEditContent}
+                    homeworkContent={editingContent}
+                    onSuccess={handleEditContentSuccess}
+                />
+            </RightPanel>
+
+            {/* Delete Lesson Confirm Modal */}
+            <ConfirmModal
+                isOpen={confirmDeleteLesson}
+                onClose={handleCancelDeleteLesson}
+                onConfirm={handleConfirmDeleteLesson}
+                title="Xóa bài học?"
+                message={
+                    <div className="space-y-2">
+                        <p>
+                            Bạn có chắc chắn muốn xóa bài học <strong>"{lessonToDelete?.title}"</strong>?
+                        </p>
+                        <p className="text-warning">
+                            Tất cả tài liệu học tập trong bài học này sẽ bị gỡ khỏi bài học.
+                        </p>
+                    </div>
+                }
+                confirmText="Xóa bài học"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={loadingDeleteLesson}
+            />
+
+            {/* Detach Learning Item Confirm Modal */}
+            <ConfirmModal
+                isOpen={confirmDetachLearningItem}
+                onClose={handleCancelDetachLearningItem}
+                onConfirm={handleConfirmDetachLearningItem}
+                title="Gỡ tài liệu khỏi bài học?"
+                message={
+                    <div className="space-y-2">
+                        <p>
+                            Bạn có chắc chắn muốn gỡ tài liệu <strong>"{learningItemToDetach?.learningItem?.learningItem?.title}"</strong> khỏi bài học?
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                            Tài liệu sẽ không bị xóa và có thể thêm lại sau.
+                        </p>
+                    </div>
+                }
+                confirmText="Gỡ tài liệu"
+                cancelText="Hủy"
+                variant="warning"
+                isLoading={loadingDetachLearningItem}
+            />
+
+            {/* Delete Content Confirm Modal */}
+            <ConfirmModal
+                isOpen={confirmDeleteContent}
+                onClose={handleCancelDeleteContent}
+                onConfirm={handleConfirmDeleteContent}
+                title={`Xóa ${deleteContentType === 'DOCUMENT' ? 'tài liệu' : deleteContentType === 'VIDEO' ? 'video' : deleteContentType === 'YOUTUBE' ? 'video YouTube' : 'bài tập'}?`}
+                message={
+                    <div className="space-y-2">
+                        <p>
+                            Bạn có chắc chắn muốn xóa nội dung này?
+                        </p>
+                        <p className="text-warning">
+                            Hành động này không thể hoàn tác.
+                        </p>
+                    </div>
+                }
+                confirmText="Xóa"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={
+                    deleteContentType === 'DOCUMENT' ? loadingDeleteDocumentContent :
+                    deleteContentType === 'VIDEO' ? loadingDeleteVideoContent :
+                    deleteContentType === 'YOUTUBE' ? loadingDeleteYoutubeContent :
+                    loadingDeleteHomeworkContent
+                }
+            />
         </>
     );
 };

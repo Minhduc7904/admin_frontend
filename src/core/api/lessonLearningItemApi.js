@@ -48,4 +48,15 @@ export const lessonLearningItemApi = {
     delete: (lessonId, learningItemId) => {
         return axiosClient.delete(API_ENDPOINTS.LESSON_LEARNING_ITEMS.DELETE(lessonId, learningItemId));
     },
+
+    /**
+     * Reorder learning items in a lesson
+     * @param {Object} data - Reorder data
+     * @param {number} data.lessonId - Lesson ID
+     * @param {Array} data.items - Array of { learningItemId, order }
+     * @returns {Promise<Object>} Reorder result
+     */
+    reorder: (data) => {
+        return axiosClient.put(API_ENDPOINTS.LESSON_LEARNING_ITEMS.REORDER, data);
+    },
 };

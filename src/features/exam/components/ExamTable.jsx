@@ -1,7 +1,7 @@
 import { Eye, Edit, Trash2, FileText, Youtube } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
 
-export const ExamTable = ({ exams, onView, onEdit, onDelete, loading }) => {
+export const ExamTable = ({ exams, onView, onEdit, onDelete, loading, showSubject = true }) => {
     const getVisibilityBadge = (visibility) => {
         const badges = {
             DRAFT: {
@@ -46,7 +46,7 @@ export const ExamTable = ({ exams, onView, onEdit, onDelete, loading }) => {
                 </div>
             )
         },
-        {
+        ...(showSubject ? [{
             key: 'subject',
             label: 'Môn học',
             render: (exam) => (
@@ -54,7 +54,7 @@ export const ExamTable = ({ exams, onView, onEdit, onDelete, loading }) => {
                     {exam.subjectName || <span className="italic text-foreground-lighter">Chưa có</span>}
                 </div>
             )
-        },
+        }] : []),
         {
             key: 'grade',
             label: 'Khối',
@@ -99,7 +99,7 @@ export const ExamTable = ({ exams, onView, onEdit, onDelete, loading }) => {
             label: 'Tạo bởi',
             render: (exam) => (
                 <div className="text-sm text-foreground-light">
-                    {exam.createdByName || <span className="italic text-foreground-lighter">Chưa có</span>}
+                    {exam.createdByAdmin?.fullName || <span className="italic text-foreground-lighter">Chưa có</span>}
                 </div>
             )
         },

@@ -19,6 +19,8 @@ export const LessonItem = ({
     onAddLearningItem,
     selectedItem,
     onSelectLearningItem,
+    onEditLearningItem,
+    onDetachLearningItem,
     level = 0,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false)
@@ -113,8 +115,8 @@ export const LessonItem = ({
                         lessonId={lesson.lessonId}
                         lesson={lesson}
                         level={level + 1}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
+                        onEdit={onEditLearningItem}
+                        onDelete={(item) => onDetachLearningItem?.(item, lesson.lessonId)}
                         selectedItem={selectedItem}
                         onSelectLearningItem={onSelectLearningItem}
                     />

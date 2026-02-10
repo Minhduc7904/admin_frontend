@@ -20,7 +20,11 @@ export const LessonList = ({
     selectedItem, 
     onSelectLesson, 
     onSelectLearningItem,
-    onAddLearningItem 
+    onAddLearningItem,
+    onEditLesson,
+    onDeleteLesson,
+    onEditLearningItem,
+    onDetachLearningItem
 }) => {
     const dispatch = useDispatch();
     const lessons = useSelector(selectLessons);
@@ -135,8 +139,12 @@ export const LessonList = ({
                                             isSelected={selectedItem?.type === 'lesson' && selectedItem?.data?.lessonId === lesson.lessonId}
                                             onSelect={() => onSelectLesson(lesson)}
                                             onAddLearningItem={onAddLearningItem}
+                                            onEdit={onEditLesson}
+                                            onDelete={onDeleteLesson}
                                             selectedItem={selectedItem}
                                             onSelectLearningItem={onSelectLearningItem}
+                                            onEditLearningItem={onEditLearningItem}
+                                            onDetachLearningItem={onDetachLearningItem}
                                         />
                                     </div>
                                 );

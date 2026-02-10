@@ -17,7 +17,6 @@ export const AddLearningItem = ({
         type: '',
         title: '',
         description: '',
-        order: '',
         lessonId: lessonId || '',
     });
 
@@ -48,10 +47,6 @@ export const AddLearningItem = ({
             errors.description = 'Mô tả không được quá 1000 ký tự';
         }
 
-        if (formData.order && (parseInt(formData.order) < 1)) {
-            errors.order = 'Thứ tự phải lớn hơn 0';
-        }
-
         return errors;
     };
 
@@ -70,7 +65,6 @@ export const AddLearningItem = ({
             title: formData.title.trim(),
             description: formData.description?.trim() || undefined,
             lessonId: formData.lessonId ? parseInt(formData.lessonId) : undefined,
-            order: formData.order ? parseInt(formData.order) : undefined,
         };
 
         try {
@@ -139,21 +133,6 @@ export const AddLearningItem = ({
                         onChange={handleChange}
                         placeholder="Mô tả chi tiết về tài liệu học tập..."
                         rows={4}
-                    />
-                </div>
-
-                {/* Order */}
-                <div>
-                    <Input
-                        error={errors.order}
-                        name="order"
-                        label="Thứ tự hiển thị"
-                        type="number"
-                        value={formData.order}
-                        onChange={handleChange}
-                        placeholder="Để trống để tự động tính"
-                        min="1"
-                        helperText="Nếu để trống, hệ thống sẽ tự động đặt tài liệu vào cuối"
                     />
                 </div>
             </div>

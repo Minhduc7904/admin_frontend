@@ -2,7 +2,7 @@ import { Upload, Check } from 'lucide-react'
 import { Spinner } from '../../../../shared/components/loading'
 import { Button } from '../../../../shared/components'
 
-export const UploadTab = ({ state, handlers, meta }) => {
+export const UploadTab = ({ state, handlers, meta, multiple = false }) => {
     const {
         uploadSuccess,
         uploadedMediaData,
@@ -11,6 +11,8 @@ export const UploadTab = ({ state, handlers, meta }) => {
         uploadFile,
         uploadPreview,
         uploadProgress,
+        uploadedCount,
+        totalFiles,
     } = state
 
     const {
@@ -41,13 +43,15 @@ export const UploadTab = ({ state, handlers, meta }) => {
                             </p>
 
                             <p className="text-sm text-foreground-light">
-                                {uploadedMediaData.fileName ||
-                                    uploadedMediaData.originalName}
+                                {multiple && totalFiles > 1 
+                                    ? `Đã tải lên ${totalFiles} file`
+                                    : uploadedMediaData.fileName || uploadedMediaData.originalName
+                                }
                             </p>
                         </div>
 
                         {/* Preview ảnh */}
-                        {uploadPreview && (
+                        {uploadPreview && !multiple && (
                             <div className="border border-border rounded-lg p-4">
                                 <img
                                     src={uploadPreview}
@@ -95,16 +99,17 @@ export const UploadTab = ({ state, handlers, meta }) => {
                                 type="file"
                                 accept={accept}
                                 onChange={fileChange}
+                                multiple={multiple}
                                 className="hidden"
                             />
                             <span className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-info text-white rounded">
                                 <Upload size={18} />
-                                Chọn file từ máy tính
+                                Chọn file{multiple ? ' (nhiều file)' : ''} từ máy tính
                             </span>
                         </label>
 
                         <p className="text-xs text-foreground-light mt-4">
-                            Định dạng: {label}. Tối đa {maxSize}MB
+                            Định dạng: {label}. Tối đa {maxSize}MB{multiple ? ' mỗi file' : ''}
                         </p>
                     </div>
                 ) : (
@@ -113,7 +118,10 @@ export const UploadTab = ({ state, handlers, meta }) => {
                         <Spinner size="xl" className="mx-auto text-info" />
 
                         <p className="text-lg font-medium">
-                            Đang tải lên... {uploadProgress}%
+                            {multiple && totalFiles > 1
+                                ? `Đang tải lên... ${uploadedCount}/${totalFiles}`
+                                : `Đang tải lên... ${uploadProgress}%`
+                            }
                         </p>
 
                         {uploadFile && (

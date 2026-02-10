@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Input, Button, Dropdown, Textarea } from '../../../../shared/components/ui'
+import { Input, Button, Dropdown, Textarea, CurrencyInput } from '../../../../shared/components/ui'
 import { AdminSearchSelect } from '../../../admin/components/AdminSearchSelect'
 import { SubjectSearchSelect } from '../../../subject/components/SubjectSearchSelect'
+import { COURSE_VISIBILITIES } from '../../constanst/course-visibility.constants'
+import { GRADE_OPTIONS } from '../../../../core/constants/grade-constants'
+import { ACADEMIC_YEARS_OPTIONS } from '../../../../core/constants/academic-year.constants'
 import {
     updateCourseBasicInfoAsync,
     getCourseByIdAsync,
@@ -21,7 +24,9 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
         grade: '',
         subjectId: '',
         description: '',
-        visibility: 'DRAFT',
+        priceVND: '0',
+        compareAtVND: '',
+        visibility: COURSE_VISIBILITIES.DRAFT,
         teacherId: '',
     })
 
@@ -35,7 +40,9 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             grade: course.grade?.toString() || '',
             subjectId: course.subjectId?.toString() || '',
             description: course.description || '',
-            visibility: course.visibility || 'DRAFT',
+            priceVND: course.priceVND?.toString() || '0',
+            compareAtVND: course.compareAtVND?.toString() || '',
+            visibility: course.visibility || COURSE_VISIBILITIES.DRAFT,
             teacherId: course.teacherId?.toString() || '',
         })
     }, [course])
@@ -75,6 +82,20 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             errors.grade = 'Khối phải từ 1 đến 12'
         }
 
+        const price = parseFloat(formData.priceVND)
+        if (isNaN(price) || price < 0) {
+            errors.priceVND = 'Giá phải là số không âm'
+        }
+
+        if (formData.compareAtVND) {
+            const comparePrice = parseFloat(formData.compareAtVND)
+            if (isNaN(comparePrice) || comparePrice < 0) {
+                errors.compareAtVND = 'Giá gốc phải là số không âm'
+            } else if (comparePrice < price) {
+                errors.compareAtVND = 'Giá gốc phải lớn hơn giá bán'
+            }
+        }
+
         return errors
     }
 
@@ -94,6 +115,8 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             grade: formData.grade ? parseInt(formData.grade) : undefined,
             subjectId: formData.subjectId ? parseInt(formData.subjectId) : undefined,
             description: formData.description?.trim() || undefined,
+            priceVND: parseFloat(formData.priceVND),
+            compareAtVND: formData.compareAtVND ? parseFloat(formData.compareAtVND) : undefined,
             visibility: formData.visibility,
             teacherId: formData.teacherId ? parseInt(formData.teacherId) : undefined,
         }
@@ -110,29 +133,10 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
         }
     }
 
-    const gradeOptions = [
-        { value: '', label: 'Chọn khối' },
-        ...Array.from({ length: 12 }, (_, i) => ({
-            value: `${i + 1}`,
-            label: `Khối ${i + 1}`,
-        })),
-    ]
-
     const visibilityOptions = [
-        { value: 'DRAFT', label: 'Bản nháp' },
-        { value: 'PUBLISHED', label: 'Đã xuất bản' },
-        { value: 'PRIVATE', label: 'Riêng tư' },
-    ]
-
-    const currentYear = new Date().getFullYear()
-    const academicYearOptions = [
-        { value: '', label: 'Chọn năm học' },
-        ...Array.from({ length: 5 }, (_, i) => {
-            const startYear = currentYear - 2 + i
-            const endYear = startYear + 1
-            const value = `${startYear}-${endYear}`
-            return { value, label: value }
-        }),
+        { value: COURSE_VISIBILITIES.DRAFT, label: 'Bản nháp' },
+        { value: COURSE_VISIBILITIES.PUBLISHED, label: 'Đã xuất bản' },
+        { value: COURSE_VISIBILITIES.PRIVATE, label: 'Riêng tư' },
     ]
 
     return (
@@ -154,6 +158,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                     value={formData.subtitle}
                     onChange={handleChange}
                     error={errors.subtitle}
+                    placeholder="VD: Chương trình học nâng cao"
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -163,7 +168,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                         onChange={(value) =>
                             setFormData((prev) => ({ ...prev, grade: value }))
                         }
-                        options={gradeOptions}
+                        options={GRADE_OPTIONS}
                         error={errors.grade}
                     />
 
@@ -173,7 +178,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                         onChange={(value) =>
                             setFormData((prev) => ({ ...prev, academicYear: value }))
                         }
-                        options={academicYearOptions}
+                        options={ACADEMIC_YEARS_OPTIONS}
                         error={errors.academicYear}
                     />
                 </div>
@@ -183,8 +188,34 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                     label="Mô tả"
                     value={formData.description}
                     onChange={handleChange}
+                    placeholder="Mô tả chi tiết về khóa học..."
                     rows={4}
                 />
+
+                {/* Price and Compare At Price */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <CurrencyInput
+                            error={errors.priceVND}
+                            name="priceVND"
+                            label="Giá khóa học"
+                            required={true}
+                            value={formData.priceVND}
+                            onChange={handleChange}
+                            placeholder="0"
+                        />
+                    </div>
+                    <div>
+                        <CurrencyInput
+                            error={errors.compareAtVND}
+                            name="compareAtVND"
+                            label="Giá gốc"
+                            value={formData.compareAtVND}
+                            onChange={handleChange}
+                            placeholder="Để trống nếu không giảm giá"
+                        />
+                    </div>
+                </div>
 
                 <Dropdown
                     label="Trạng thái"

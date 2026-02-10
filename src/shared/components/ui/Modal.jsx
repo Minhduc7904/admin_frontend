@@ -9,6 +9,7 @@ export const Modal = ({
   children,
   size = 'md',
   showCloseButton = true,
+  customContent = false,
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -30,6 +31,10 @@ export const Modal = ({
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+    '6xl': 'max-w-6xl',
     max: 'max-w-full',
   }
 
@@ -69,9 +74,13 @@ export const Modal = ({
         )}
 
         {/* Content – SCROLL HERE */}
-        <div className="p-4 overflow-y-auto flex-1">
-          {children}
-        </div>
+        {customContent ? (
+          children
+        ) : (
+          <div className="p-4 overflow-y-auto flex-1">
+            {children}
+          </div>
+        )}
       </div>
     </div>
   )

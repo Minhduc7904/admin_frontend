@@ -1,6 +1,10 @@
 // src/features/course/components/LearningItemDetail.jsx
 import { Edit, Trash2, Calendar, FileText, Video, Youtube, FileCheck } from 'lucide-react'
 import { Button } from '../../../shared/components'
+import { DocumentContentList } from '../../documentContent/components/DocumentContentList'
+import { VideoContentList } from '../../videoContent/components/VideoContentList'
+import { YoutubeContentList } from '../../youtubeContent/components/YoutubeContentList'
+import { HomeworkContentList } from '../../homeworkContent/components/HomeworkContentList'
 
 const LEARNING_ITEM_TYPES = {
     VIDEO: { label: 'Video', icon: Video, color: 'text-blue-600' },
@@ -25,6 +29,9 @@ export const LearningItemDetail = ({
     lessonTitle,
     onEdit,
     onDelete,
+    onAddContent,
+    onEditContent,
+    onDeleteContent,
 }) => {
     if (!learningItem) {
         return (
@@ -141,38 +148,41 @@ export const LearningItemDetail = ({
                     </div>
                 )}
 
-                {/* Type-specific content */}
-                {learningItem.learningItem?.type === 'YOUTUBE' && learningItem.learningItem?.youtubeUrl && (
-                    <div className="space-y-2">
-                        <label className="text-xs font-semibold text-foreground-light uppercase">
-                            Link YouTube
-                        </label>
-                        <a
-                            href={learningItem.learningItem.youtubeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-info hover:underline break-all"
-                        >
-                            {learningItem.learningItem.youtubeUrl}
-                        </a>
-                    </div>
-                )}
-
-                {learningItem.learningItem?.type === 'VIDEO' && learningItem.learningItem?.videoUrl && (
-                    <div className="space-y-2">
-                        <label className="text-xs font-semibold text-foreground-light uppercase">
-                            Link Video
-                        </label>
-                        <a
-                            href={learningItem.learningItem.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-info hover:underline break-all"
-                        >
-                            {learningItem.learningItem.videoUrl}
-                        </a>
-                    </div>
-                )}
+                {/* Content List - Render based on type */}
+                <div className="pt-6 border-t border-gray-200">
+                    {learningItem.learningItem?.type === 'DOCUMENT' && (
+                        <DocumentContentList 
+                            learningItemId={learningItem.learningItem.learningItemId}
+                            onAdd={() => onAddContent?.('DOCUMENT')}
+                            onEdit={(doc) => onEditContent?.('DOCUMENT', doc)}
+                            onDelete={(doc) => onDeleteContent?.('DOCUMENT', doc)}
+                        />
+                    )}
+                    {learningItem.learningItem?.type === 'VIDEO' && (
+                        <VideoContentList 
+                            learningItemId={learningItem.learningItem.learningItemId}
+                            onAdd={() => onAddContent?.('VIDEO')}
+                            onEdit={(video) => onEditContent?.('VIDEO', video)}
+                            onDelete={(video) => onDeleteContent?.('VIDEO', video)}
+                        />
+                    )}
+                    {learningItem.learningItem?.type === 'YOUTUBE' && (
+                        <YoutubeContentList 
+                            learningItemId={learningItem.learningItem.learningItemId}
+                            onAdd={() => onAddContent?.('YOUTUBE')}
+                            onEdit={(video) => onEditContent?.('YOUTUBE', video)}
+                            onDelete={(video) => onDeleteContent?.('YOUTUBE', video)}
+                        />
+                    )}
+                    {learningItem.learningItem?.type === 'HOMEWORK' && (
+                        <HomeworkContentList 
+                            learningItemId={learningItem.learningItem.learningItemId}
+                            onAdd={() => onAddContent?.('HOMEWORK')}
+                            onEdit={(homework) => onEditContent?.('HOMEWORK', homework)}
+                            onDelete={(homework) => onDeleteContent?.('HOMEWORK', homework)}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     )

@@ -32,6 +32,10 @@ import questionReducer from "../../features/question/store/questionSlice";
 import statementReducer from "../../features/statement/store/statementSlice";
 import examReducer from "../../features/exam/store/examSlice";
 import sectionReducer from "../../features/exam/store/sectionSlice";
+import documentContentReducer from "../../features/documentContent/store/documentContentSlice";
+import videoContentReducer from "../../features/videoContent/store/videoContentSlice";
+import youtubeContentReducer from "../../features/youtubeContent/store/youtubeContentSlice";
+import homeworkContentReducer from "../../features/homeworkContent/store/homeworkContentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -68,5 +72,9 @@ export const store = configureStore({
     statement: statementReducer,
     exam: examReducer,
     section: sectionReducer,
+    documentContent: documentContentReducer,
+    videoContent: videoContentReducer,
+    youtubeContent: youtubeContentReducer,
+    homeworkContent: homeworkContentReducer,
   },
 });

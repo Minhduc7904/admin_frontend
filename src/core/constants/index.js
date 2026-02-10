@@ -283,6 +283,13 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/video-contents/${id}`,
     DELETE: (id) => `/video-contents/${id}`,
   },
+  DOCUMENT_CONTENTS: {
+    LIST: "/document-contents",
+    DETAIL: (id) => `/document-contents/${id}`,
+    CREATE: "/document-contents",
+    UPDATE: (id) => `/document-contents/${id}`,
+    DELETE: (id) => `/document-contents/${id}`,
+  },
   YOUTUBE_CONTENTS: {
     LIST: "/youtube-contents",
     DETAIL: (id) => `/youtube-contents/${id}`,
@@ -310,6 +317,7 @@ export const API_ENDPOINTS = {
     DETAIL: (lessonId, learningItemId) => `/lesson-learning-items/${lessonId}/${learningItemId}`,
     CREATE: "/lesson-learning-items",
     DELETE: (lessonId, learningItemId) => `/lesson-learning-items/${lessonId}/${learningItemId}`,
+    REORDER: "/lesson-learning-items/reorder",
   },
   NOTIFICATIONS: {
     MY: "/notifications/my",
