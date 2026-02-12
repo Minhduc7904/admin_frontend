@@ -65,7 +65,7 @@ export const StudentSearchSelect = ({
                     {student.fullName || student.name || 'N/A'}
                 </span>
                 <span className="text-xs text-foreground-light">
-                    {student.email || 'No email'}
+                    {student.username} / {student.studentPhone || 'N/A'} / {student.parentPhone || 'N/A'}
                 </span>
             </div>
         );

@@ -43,6 +43,7 @@ import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaym
 import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
 import { ExamListPage, MyExamListPage } from '../features/exam/pages';
+import { CompetitionListPage } from '../features/competition/pages';
 import { ExamDetail, ExamQuestions, ExamPreview } from '../features/exam/pages';
 import { ExamDetailLayout } from '../features/exam/layouts';
 import { ProtectedRoute } from '../shared/components';
@@ -261,6 +262,24 @@ export const adminRouter = [
                     {
                         path: ROUTES.MY_EXAMS,
                         element: <MyExamListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.COMPETITIONS} />,
+                children: [
+                    {
+                        path: ROUTES.COMPETITIONS,
+                        element: <CompetitionListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.MY_COMPETITIONS} />,
+                children: [
+                    {
+                        path: ROUTES.MY_COMPETITIONS,
+                        element: <CompetitionListPage />,
                     },
                 ],
             },

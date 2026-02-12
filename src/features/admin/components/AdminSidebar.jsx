@@ -13,6 +13,7 @@ import {
   Send,
   CreditCard,
   FileQuestion,
+  Trophy,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -189,6 +190,20 @@ export const AdminSidebar = () => {
           href: ROUTES.MY_EXAMS,
           icon: FileText,
           permission: PERMISSIONS.ADMIN_PAGE.MY_EXAMS,
+        },
+        {
+          key: 'competitions',
+          name: 'Danh sách cuộc thi',
+          href: ROUTES.COMPETITIONS,
+          icon: Trophy,
+          permission: PERMISSIONS.ADMIN_PAGE.COMPETITIONS,
+        },
+        {
+          key: 'myCompetitions',
+          name: 'Cuộc thi của tôi',
+          href: ROUTES.MY_COMPETITIONS,
+          icon: Trophy,
+          permission: PERMISSIONS.ADMIN_PAGE.MY_COMPETITIONS,
         },
       ],
     },

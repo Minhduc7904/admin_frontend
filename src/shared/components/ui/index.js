@@ -23,6 +23,8 @@ export { Textarea } from './Textarea'
 export { RightPanel } from './RightPanel';
 export { Slider } from './Slider';
 export { Tooltip } from './Tooltip';
+export { InfoTooltip } from './InfoTooltip';
+export { LabelWithTooltip } from './LabelWithTooltip';
 export { ViewModeToggle } from './ViewModeToggle';
 
 // Empty states

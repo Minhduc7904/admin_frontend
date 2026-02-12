@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
+import { LabelWithTooltip } from './LabelWithTooltip'
 
 export const Dropdown = ({
     label,
@@ -15,6 +16,8 @@ export const Dropdown = ({
     error,
     dropUp = false,
     className = '',
+    tooltipText,
+    tooltipPosition = 'top',
 }) => {
     const [isOpen, setIsOpen] = useState(false)
     const containerRef = useRef(null)
@@ -47,14 +50,13 @@ export const Dropdown = ({
     return (
         <div className={className}>
             {/* Label */}
-            {label && (
-                <label
-                    htmlFor={dropdownId}
-                    className="block text-sm font-medium text-foreground mb-1"
-                >
-                    {label} {required && <span className="text-red-500">*</span>}
-                </label>
-            )}
+            <LabelWithTooltip
+                label={label}
+                required={required}
+                tooltipText={tooltipText}
+                tooltipPosition={tooltipPosition}
+                htmlFor={dropdownId}
+            />
 
             <div ref={containerRef} className="relative">
                 {/* Trigger */}

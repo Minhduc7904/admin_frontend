@@ -81,6 +81,9 @@ export const ROUTES = {
   EXAM_DETAIL: (id = ':id') => `/exams/${id}`,
   EXAM_QUESTIONS: (id = ':id') => `/exams/${id}/questions`,
   EXAM_PREVIEW: (id = ':id') => `/exams/${id}/preview`,
+  COMPETITIONS: '/competitions',
+  MY_COMPETITIONS: '/my-competitions',
+  COMPETITION_DETAIL: (id = ':id') => `/competitions/${id}`,
 };
 
 // API Endpoints
@@ -405,11 +408,21 @@ export const API_ENDPOINTS = {
   EXAMS: {
     LIST: "/exams",
     MY_EXAMS: "/exams/my-exams",
+    SEARCH: "/exams/search",
     DETAIL: (id) => `/exams/${id}`,
     CREATE: "/exams",
     UPDATE: (id) => `/exams/${id}`,
     DELETE: (id) => `/exams/${id}`,
     SECTIONS: (examId) => `/exams/${examId}/sections`,
+  },
+  COMPETITIONS: {
+    LIST: "/competitions",
+    MY_COMPETITIONS: "/competitions/my-competitions",
+    SEARCH: "/competitions/search",
+    DETAIL: (id) => `/competitions/${id}`,
+    CREATE: "/competitions",
+    UPDATE: (id) => `/competitions/${id}`,
+    DELETE: (id) => `/competitions/${id}`,
   },
   SECTIONS: {
     LIST: "/sections",

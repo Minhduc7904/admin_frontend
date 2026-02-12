@@ -5,9 +5,19 @@ export const PERMISSIONS = {
     GET_MY_EXAMS: 'exam:get-my-exams',
     GET_ALL: 'exam:get-all',
     GET_BY_ID: 'exam:get-by-id',
+    SEARCH: 'exam:search',
     CREATE: 'exam:create',
     UPDATE: 'exam:update',
     DELETE: 'exam:delete',
+  },
+  COMPETITION: {
+    GET_MY_COMPETITIONS: 'competition:get-my-competitions',
+    GET_ALL: 'competition:get-all',
+    GET_BY_ID: 'competition:get-by-id',
+    SEARCH: 'competition:search',
+    CREATE: 'competition:create',
+    UPDATE: 'competition:update',
+    DELETE: 'competition:delete',
   },
   QUESTION: {
     GET_MY_QUESTIONS: 'question:get-my-questions',
@@ -47,6 +57,7 @@ export const PERMISSIONS = {
   },
   STUDENT: {
     GET_ALL: 'student:get-all',
+    SEARCH: 'student:search',
     GET_BY_ID: 'student:get-by-id',
     CREATE: 'student:create',
     UPDATE: 'student:update',
@@ -75,6 +86,7 @@ export const PERMISSIONS = {
   },
   ADMIN: {
     GET_ALL: 'admin:get-all',
+    SEARCH: 'admin:search',
     GET_BY_ID: 'admin:get-by-id',
     CREATE: 'admin:create',
   },
@@ -275,8 +287,10 @@ export const PERMISSIONS = {
     GET_ALL: 'lesson-learning-item:get-all',
     GET_BY_ID: 'lesson-learning-item:get-by-id',
     CREATE: 'lesson-learning-item:create',
+    UPDATE: 'lesson-learning-item:update',
     DELETE: 'lesson-learning-item:delete',
   },
+
 
   // ===================================
   // ADMIN PAGE PERMISSIONS
@@ -309,5 +323,7 @@ export const PERMISSIONS = {
     MY_QUESTIONS: 'admin:page:my-questions',
     EXAMS: 'admin:page:exams',
     MY_EXAMS: 'admin:page:my-exams',
+    COMPETITIONS: 'admin:page:competitions',
+    MY_COMPETITIONS: 'admin:page:my-competitions',
   },
 }

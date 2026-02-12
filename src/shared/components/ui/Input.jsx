@@ -1,3 +1,5 @@
+import { LabelWithTooltip } from './LabelWithTooltip';
+
 export const Input = ({
   label,
   type = 'text',
@@ -11,20 +13,21 @@ export const Input = ({
   helperText,
   error,
   className = '',
+  tooltipText,
+  tooltipPosition = 'top',
   ...props
 }) => {
   const inputId = id || name;
 
   return (
     <div>
-      {label && (
-        <label
-          htmlFor={inputId}
-          className="block text-sm font-medium text-foreground mb-1"
-        >
-          {label} {required && <span className="text-red-500">*</span>}
-        </label>
-      )}
+      <LabelWithTooltip
+        label={label}
+        required={required}
+        tooltipText={tooltipText}
+        tooltipPosition={tooltipPosition}
+        htmlFor={inputId}
+      />
       <input
         type={type}
         id={inputId}

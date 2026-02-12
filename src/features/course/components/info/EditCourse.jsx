@@ -24,8 +24,6 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
         grade: '',
         subjectId: '',
         description: '',
-        priceVND: '0',
-        compareAtVND: '',
         visibility: COURSE_VISIBILITIES.DRAFT,
         teacherId: '',
     })
@@ -40,8 +38,6 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             grade: course.grade?.toString() || '',
             subjectId: course.subjectId?.toString() || '',
             description: course.description || '',
-            priceVND: course.priceVND?.toString() || '0',
-            compareAtVND: course.compareAtVND?.toString() || '',
             visibility: course.visibility || COURSE_VISIBILITIES.DRAFT,
             teacherId: course.teacherId?.toString() || '',
         })
@@ -82,20 +78,6 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             errors.grade = 'Khối phải từ 1 đến 12'
         }
 
-        const price = parseFloat(formData.priceVND)
-        if (isNaN(price) || price < 0) {
-            errors.priceVND = 'Giá phải là số không âm'
-        }
-
-        if (formData.compareAtVND) {
-            const comparePrice = parseFloat(formData.compareAtVND)
-            if (isNaN(comparePrice) || comparePrice < 0) {
-                errors.compareAtVND = 'Giá gốc phải là số không âm'
-            } else if (comparePrice < price) {
-                errors.compareAtVND = 'Giá gốc phải lớn hơn giá bán'
-            }
-        }
-
         return errors
     }
 
@@ -115,8 +97,6 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             grade: formData.grade ? parseInt(formData.grade) : undefined,
             subjectId: formData.subjectId ? parseInt(formData.subjectId) : undefined,
             description: formData.description?.trim() || undefined,
-            priceVND: parseFloat(formData.priceVND),
-            compareAtVND: formData.compareAtVND ? parseFloat(formData.compareAtVND) : undefined,
             visibility: formData.visibility,
             teacherId: formData.teacherId ? parseInt(formData.teacherId) : undefined,
         }
@@ -192,30 +172,6 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                     rows={4}
                 />
 
-                {/* Price and Compare At Price */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <CurrencyInput
-                            error={errors.priceVND}
-                            name="priceVND"
-                            label="Giá khóa học"
-                            required={true}
-                            value={formData.priceVND}
-                            onChange={handleChange}
-                            placeholder="0"
-                        />
-                    </div>
-                    <div>
-                        <CurrencyInput
-                            error={errors.compareAtVND}
-                            name="compareAtVND"
-                            label="Giá gốc"
-                            value={formData.compareAtVND}
-                            onChange={handleChange}
-                            placeholder="Để trống nếu không giảm giá"
-                        />
-                    </div>
-                </div>
 
                 <Dropdown
                     label="Trạng thái"

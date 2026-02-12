@@ -81,7 +81,10 @@ export const ActionMenu = ({ items }) => {
                             <ActionMenuItem
                                 key={index}
                                 {...item}
-                                onClick={() => handleItemClick(item.onClick)}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleItemClick(item.onClick)
+                                }}
                             />
                         ))}
                     </div>

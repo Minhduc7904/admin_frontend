@@ -13,7 +13,19 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    // Search state (for SearchableSelect)
+    searchExams: [],
+    searchPagination: {
+        page: 1,
+        limit: 50,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    searchTerm: '',
     loadingGet: false,
+    loadingSearch: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
@@ -46,6 +58,16 @@ export const getMyExamsAsync = createAsyncThunk(
         return handleAsyncThunk(() => examApi.getMyExams(params), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tải danh sách đề thi của tôi",
+        });
+    }
+);
+
+export const searchExamsAsync = createAsyncThunk(
+    "exam/search",
+    async (params, thunkAPI) => {
+        return handleAsyncThunk(() => examApi.search(params), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tìm kiếm đề thi",
         });
     }
 );
@@ -112,6 +134,14 @@ const examSlice = createSlice({
         clearError: (state) => {
             state.error = null;
         },
+        setSearchTerm: (state, action) => {
+            state.searchTerm = action.payload;
+        },
+        clearSearchExams: (state) => {
+            state.searchExams = [];
+            state.searchPagination = initialState.searchPagination;
+            state.searchTerm = '';
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -143,6 +173,39 @@ const examSlice = createSlice({
             })
             .addCase(getMyExamsAsync.rejected, (state, action) => {
                 state.loadingGet = false;
+                state.error = action.payload;
+            })
+            // Search Exams
+            .addCase(searchExamsAsync.pending, (state) => {
+                state.loadingSearch = true;
+                state.error = null;
+            })
+            .addCase(searchExamsAsync.fulfilled, (state, action) => {
+                state.loadingSearch = false;
+                const { page } = action.meta.arg;
+                
+                if (page === 1) {
+                    // First page - replace
+                    state.searchExams = action.payload.data;
+                } else {
+                    // Subsequent pages - append and deduplicate
+                    const existing = state.searchExams;
+                    const newItems = action.payload.data;
+                    const merged = [...existing, ...newItems];
+                    const uniqueMap = new Map();
+                    merged.forEach(item => {
+                        if (!uniqueMap.has(item.examId)) {
+                            uniqueMap.set(item.examId, item);
+                        }
+                    });
+                    state.searchExams = Array.from(uniqueMap.values());
+                }
+                
+                state.searchPagination = action.payload.meta;
+                state.error = null;
+            })
+            .addCase(searchExamsAsync.rejected, (state, action) => {
+                state.loadingSearch = false;
                 state.error = action.payload;
             })
             // Get Exam By ID
@@ -220,8 +283,15 @@ const examSlice = createSlice({
     },
 });
 
-export const { setFilters, setPagination, resetFilters, clearCurrentExam, clearError } =
-    examSlice.actions;
+export const {
+    setFilters,
+    setPagination,
+    resetFilters,
+    clearCurrentExam,
+    clearError,
+    setSearchTerm,
+    clearSearchExams,
+} = examSlice.actions;
 
 // Selectors
 export const selectExams = (state) => state.exam.exams;
@@ -233,5 +303,10 @@ export const selectExamLoadingUpdate = (state) => state.exam.loadingUpdate;
 export const selectExamLoadingDelete = (state) => state.exam.loadingDelete;
 export const selectExamError = (state) => state.exam.error;
 export const selectExamFilters = (state) => state.exam.filters;
+// Search selectors
+export const selectSearchExams = (state) => state.exam.searchExams;
+export const selectSearchPagination = (state) => state.exam.searchPagination;
+export const selectSearchTerm = (state) => state.exam.searchTerm;
+export const selectExamLoadingSearch = (state) => state.exam.loadingSearch;
 
 export default examSlice.reducer;

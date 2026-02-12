@@ -6,3 +6,4 @@ export { ExamSectionTabs } from './ExamSectionTabs';
 export { ExamSectionDetail } from './ExamSectionDetail';
 export { ExamQuestionCard } from './ExamQuestionCard';
 export { ExamQuestionsList } from './ExamQuestionsList';
+export { ExamSearchSelect } from './ExamSearchSelect';

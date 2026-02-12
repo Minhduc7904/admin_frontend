@@ -31,4 +31,5 @@ export { tuitionPaymentApi } from './tuitionPaymentApi';
 export { questionApi } from './questionApi';
 export { statementApi } from './statementApi';
 export { examApi } from './examApi';
+export { competitionApi } from './competitionApi';
 export { sectionApi } from './sectionApi';
