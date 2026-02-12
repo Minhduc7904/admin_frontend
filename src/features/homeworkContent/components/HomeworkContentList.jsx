@@ -8,17 +8,7 @@ import {
     selectHomeworkContents,
     selectHomeworkContentLoadingGet,
 } from '../../homeworkContent/store/homeworkContentSlice'
-
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    })
-}
+import { formatDateTime } from '../../../shared/utils'
 
 export const HomeworkContentList = ({ learningItemId, onAdd, onEdit, onDelete }) => {
     const dispatch = useDispatch()
@@ -84,7 +74,7 @@ export const HomeworkContentList = ({ learningItemId, onAdd, onEdit, onDelete })
                                             <div className="flex items-center gap-2 text-sm">
                                                 <Clock className="w-4 h-4 text-muted-foreground" />
                                                 <span className="text-muted-foreground">
-                                                    Hạn nộp: {formatDate(homework.dueDate)}
+                                                    Hạn nộp: {formatDateTime(homework.dueDate)}
                                                 </span>
                                             </div>
                                         )}

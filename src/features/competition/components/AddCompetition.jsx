@@ -140,6 +140,7 @@ Có thể bỏ trống nếu không cần.`}
                     onSelect={(exam) => {
                         setSelectedExam(exam);
                         setFormData(prev => ({ ...prev, examId: exam?.examId || '' }));
+                        console.log(exam);
                     }}
                     visibility="PUBLISHED"
                     tooltipText={`Đề thi được dùng cho cuộc thi này.

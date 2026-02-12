@@ -27,11 +27,16 @@ export const formatTime = (time) => {
     const d = new Date(time);
     if (isNaN(d.getTime())) return '';
 
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
+    // Lấy giờ UTC
+    const hoursUTC = d.getUTCHours();
+    const minutes = d.getUTCMinutes();
 
-    return `${hours}:${minutes}`;
+    // Việt Nam = UTC +7
+    const hoursVN = (hoursUTC + 7) % 24;
+
+    return `${String(hoursVN).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 };
+
 
 /**
  * Format a date and time to Vietnamese datetime string

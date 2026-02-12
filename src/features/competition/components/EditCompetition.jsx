@@ -19,6 +19,7 @@ export const EditCompetition = ({ competitionId, onClose, onSuccess }) => {
     const competition = useSelector(selectCurrentCompetition);
 
     const [errors, setErrors] = useState({});
+    const [selectedExam, setSelectedExam] = useState(null);
 
     const [formData, setFormData] = useState({
         examId: '',
@@ -195,8 +196,13 @@ Có thể bỏ trống nếu không cần.`}
                             <ExamSearchSelect
                                 label="Đề thi"
                                 required
-                                value={formData.examId}
-                                onChange={(examId) => setFormData(prev => ({ ...prev, examId }))}
+                                placeholder="Tìm và chọn đề thi..."
+                                value={selectedExam}
+                                onSelect={(exam) => {
+                                    setSelectedExam(exam);
+                                    setFormData(prev => ({ ...prev, examId: exam?.examId || '' }));
+                                }}
+                                visibility="PUBLISHED"
                                 error={errors.examId}
                                 tooltipText={`Chọn đề thi cho cuộc thi.
 ⚠️ Đề thi không thể thay đổi sau khi được gán.`}

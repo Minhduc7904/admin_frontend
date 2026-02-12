@@ -43,14 +43,6 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
             errors.content = 'Nội dung phải có ít nhất 10 ký tự'
         }
 
-        if (formData.dueDate) {
-            const dueDate = new Date(formData.dueDate)
-            const now = new Date()
-            if (dueDate < now) {
-                errors.dueDate = 'Hạn nộp phải là thời điểm trong tương lai'
-            }
-        }
-
         if (formData.competitionId) {
             const compId = parseInt(formData.competitionId)
             if (isNaN(compId) || compId < 1) {

@@ -14,9 +14,23 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
 
     const formatDateForInput = (dateString) => {
         if (!dateString) return ''
+
         const date = new Date(dateString)
-        return date.toISOString().slice(0, 16)
+
+        // Format datetime-local input theo giờ Việt Nam
+        // Sử dụng locale 'sv-SE' để có format YYYY-MM-DD HH:mm
+        const vnDateStr = date.toLocaleString('sv-SE', { 
+            timeZone: 'Asia/Ho_Chi_Minh',
+            year: 'numeric',
+            month: '2-digit', 
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(' ', 'T')
+
+        return vnDateStr
     }
+
 
     const [formData, setFormData] = useState({
         content: homeworkContent?.content || '',
@@ -47,14 +61,6 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
             errors.content = 'Nội dung không được để trống'
         } else if (formData.content.trim().length < 10) {
             errors.content = 'Nội dung phải có ít nhất 10 ký tự'
-        }
-
-        if (formData.dueDate) {
-            const dueDate = new Date(formData.dueDate)
-            const now = new Date()
-            if (dueDate < now) {
-                errors.dueDate = 'Hạn nộp phải là thời điểm trong tương lai'
-            }
         }
 
         if (formData.competitionId) {

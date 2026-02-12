@@ -1,6 +1,6 @@
 import { Edit2, Trash2, Clock } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
-
+import { formatDate, formatTime } from '../../../shared/utils';
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
     past: 'bg-gray-100 text-gray-700',
@@ -20,20 +20,6 @@ export const ClassSessionTable = ({
     onDelete,
     loading,
 }) => {
-    const formatDate = (date) => {
-        return new Date(date).toLocaleDateString('vi-VN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        });
-    };
-
-    const formatTime = (time) => {
-        return new Date(time).toLocaleTimeString('vi-VN', {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
 
     const columns = [
         {

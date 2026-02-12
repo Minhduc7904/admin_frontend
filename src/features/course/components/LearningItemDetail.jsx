@@ -5,23 +5,12 @@ import { DocumentContentList } from '../../documentContent/components/DocumentCo
 import { VideoContentList } from '../../videoContent/components/VideoContentList'
 import { YoutubeContentList } from '../../youtubeContent/components/YoutubeContentList'
 import { HomeworkContentList } from '../../homeworkContent/components/HomeworkContentList'
-
+import { formatDateTime } from '../../../shared/utils'
 const LEARNING_ITEM_TYPES = {
     VIDEO: { label: 'Video', icon: Video, color: 'text-blue-600' },
     DOCUMENT: { label: 'Tài liệu', icon: FileText, color: 'text-green-600' },
     HOMEWORK: { label: 'Bài tập', icon: FileCheck, color: 'text-orange-600' },
     YOUTUBE: { label: 'YouTube', icon: Youtube, color: 'text-red-600' },
-}
-
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    })
 }
 
 export const LearningItemDetail = ({
@@ -122,7 +111,7 @@ export const LearningItemDetail = ({
                         </label>
                         <div className="flex items-center gap-2 text-sm text-foreground">
                             <Calendar className="w-4 h-4 text-muted-foreground" />
-                            {formatDate(learningItem.learningItem?.createdAt)}
+                            {formatDateTime(learningItem.learningItem?.createdAt)}
                         </div>
                     </div>
 
