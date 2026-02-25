@@ -27,7 +27,9 @@ class SocketService {
             return
         }
 
-        const serverUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
+        // Use API base URL without /api suffix for socket connection
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+        const serverUrl = apiBaseUrl.replace('/api', '')
 
         console.log('🔌 Connecting to Socket.IO server:', serverUrl)
 
