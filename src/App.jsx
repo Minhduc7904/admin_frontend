@@ -36,7 +36,7 @@ const renderRoutes = (routes, { protect = false, parentKey = 'route' } = {}) =>
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/admin">
       <SocketProvider>
         <NotificationContainer />
         <Routes>
