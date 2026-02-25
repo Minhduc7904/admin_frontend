@@ -28,6 +28,8 @@ export const AddCompetition = ({ onClose, loadCompetitions }) => {
         allowViewScore: true,
         allowViewAnswer: false,
         enableAntiCheating: false,
+        allowViewSolutionYoutubeUrl: false,
+        allowViewExamContent: false,
     });
 
     const handleChange = (e) => {
@@ -50,8 +52,6 @@ export const AddCompetition = ({ onClose, loadCompetitions }) => {
 
         if (!data.title?.trim()) errors.title = 'Tên cuộc thi không được để trống';
         if (data.subtitle && data.subtitle.length > 255) errors.subtitle = 'Phụ đề không được quá 255 ký tự';
-        if (!data.startDate) errors.startDate = 'Vui lòng chọn ngày bắt đầu';
-        if (!data.endDate) errors.endDate = 'Vui lòng chọn ngày kết thúc';
 
         if (data.startDate && data.endDate) {
             if (new Date(data.endDate) <= new Date(data.startDate)) {
@@ -86,8 +86,8 @@ export const AddCompetition = ({ onClose, loadCompetitions }) => {
             subtitle: formData.subtitle?.trim() || undefined,
             examId: formData.examId ? Number(formData.examId) : undefined,
             policies: formData.policies?.trim() || undefined,
-            startDate: new Date(formData.startDate).toISOString(),
-            endDate: new Date(formData.endDate).toISOString(),
+            startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
+            endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
             durationMinutes: formData.durationMinutes ? Number(formData.durationMinutes) : undefined,
             maxAttempts: formData.maxAttempts ? Number(formData.maxAttempts) : undefined,
             visibility: formData.visibility,
@@ -96,6 +96,8 @@ export const AddCompetition = ({ onClose, loadCompetitions }) => {
             allowViewScore: formData.allowViewScore,
             allowViewAnswer: formData.allowViewAnswer,
             enableAntiCheating: formData.enableAntiCheating,
+            allowViewSolutionYoutubeUrl: formData.allowViewSolutionYoutubeUrl,
+            allowViewExamContent: formData.allowViewExamContent,
         };
 
         await dispatch(createCompetitionAsync(payload)).unwrap();
@@ -152,25 +154,25 @@ Chỉ các đề đã công khai mới có thể chọn.`}
                     <Input
                         label="Ngày bắt đầu"
                         type="datetime-local"
-                        required
                         name="startDate"
                         value={formData.startDate}
                         onChange={handleChange}
                         error={errors.startDate}
                         tooltipText={`Thời điểm cuộc thi bắt đầu.
-Học sinh chỉ có thể truy cập sau thời gian này.`}
+Học sinh chỉ có thể truy cập sau thời gian này.
+Để trống nếu không giới hạn.`}
                     />
 
                     <Input
                         label="Ngày kết thúc"
                         type="datetime-local"
-                        required
                         name="endDate"
                         value={formData.endDate}
                         onChange={handleChange}
                         error={errors.endDate}
                         tooltipText={`Thời điểm cuộc thi kết thúc.
-Sau thời gian này học sinh không thể làm bài.`}
+Sau thời gian này học sinh không thể làm bài.
+Để trống nếu không giới hạn.`}
                     />
                 </div>
 
@@ -263,6 +265,20 @@ Ví dụ: cách tính điểm, xử lý gian lận, khiếu nại.`}
                         checked={formData.enableAntiCheating}
                         onChange={(v) => handleCheckboxChange('enableAntiCheating', v)}
                         tooltipText="Kích hoạt các biện pháp hạn chế gian lận như chuyển tab, copy."
+                    />
+
+                    <Checkbox
+                        label="Cho phép xem video giải chi tiết"
+                        checked={formData.allowViewSolutionYoutubeUrl}
+                        onChange={(v) => handleCheckboxChange('allowViewSolutionYoutubeUrl', v)}
+                        tooltipText="Học sinh được xem video hướng dẫn giải chi tiết trên YouTube."
+                    />
+
+                    <Checkbox
+                        label="Cho phép xem nội dung đề thi trước"
+                        checked={formData.allowViewExamContent}
+                        onChange={(v) => handleCheckboxChange('allowViewExamContent', v)}
+                        tooltipText="Học sinh có thể xem nội dung đề thi trước khi bắt đầu làm bài."
                     />
                 </div>
             </div>

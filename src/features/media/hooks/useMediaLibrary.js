@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-    getAllMediaAsync,
+    getMyMediaAsync,
     selectMedia,
     selectMediaLoadingGet,
 } from '../store/mediaSlice'
@@ -14,7 +14,7 @@ export const useMediaLibrary = ({ isOpen, activeTab, folderId, type }) => {
 
     const loadMedia = useCallback(() => {
         dispatch(
-            getAllMediaAsync({
+            getMyMediaAsync({
                 page: 1,
                 limit: 100,
                 folderId: folderId || undefined,
