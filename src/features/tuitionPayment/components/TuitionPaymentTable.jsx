@@ -49,7 +49,7 @@ export const TuitionPaymentTable = ({
             label: 'Học sinh',
             render: (payment) => (
                 <div className="flex flex-col">
-                    <Link to={ROUTES.STUDENT_DETAIL(attendance.studentId)} className="hover:underline cursor-pointer">
+                    <Link to={ROUTES.STUDENT_DETAIL(payment.studentId)} className="hover:underline cursor-pointer">
 
                         <span className="text-sm font-semibold text-foreground">
                             {payment.student?.fullName || '—'}

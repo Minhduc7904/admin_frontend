@@ -6,7 +6,8 @@ import {
     Button,
     Checkbox,
     Dropdown,
-    Input,
+    SearchInput,
+    CurrencyInput,
 } from '../../../shared/components/ui'
 
 import {
@@ -14,6 +15,7 @@ import {
     setTuitionPaymentExportExcelOptions,
 } from '../store/tuitionPaymentSlice'
 import { TUITION_PAYMENT_STATUS_OPTIONS } from '../constants/tuition-payment.constant'
+import { GRADE_OPTIONS } from '../../../core/constants/grade-constants'
 
 const STATUS_OPTIONS_WITH_DEFAULT = [
     { value: '', label: 'Tất cả trạng thái' },
@@ -81,7 +83,32 @@ export const ExportTuitionPaymentListModal = ({
                             Bộ lọc dữ liệu
                         </p>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Row 1: Search */}
+                        <SearchInput
+                            value={exportOptions.search}
+                            onChange={(value) => updateOption('search')(value)}
+                            placeholder="Tên học sinh, ghi chú..."
+                        />
+
+                        {/* Row 2: Status + Grade */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <Dropdown
+                                value={exportOptions.status}
+                                onChange={updateOption('status')}
+                                options={STATUS_OPTIONS_WITH_DEFAULT}
+                                placeholder="Trạng thái"
+                            />
+
+                            <Dropdown
+                                value={exportOptions.grade}
+                                onChange={updateOption('grade')}
+                                options={GRADE_OPTIONS}
+                                placeholder="Khối"
+                            />
+                        </div>
+
+                        {/* Row 3: Month + Year */}
+                        <div className="grid grid-cols-2 gap-4">
                             <Dropdown
                                 value={exportOptions.month}
                                 onChange={updateOption('month')}
@@ -97,12 +124,22 @@ export const ExportTuitionPaymentListModal = ({
                             />
                         </div>
 
-                        <div>
-                            <Dropdown
-                                value={exportOptions.status}
-                                onChange={updateOption('status')}
-                                options={STATUS_OPTIONS_WITH_DEFAULT}
-                                placeholder="Trạng thái"
+                        {/* Row 4: Amount range */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <CurrencyInput
+                                label="Số tiền từ"
+                                name="minAmount"
+                                value={exportOptions.minAmount}
+                                onChange={(e) => updateOption('minAmount')(e.target.value)}
+                                placeholder="0"
+                            />
+
+                            <CurrencyInput
+                                label="Số tiền đến"
+                                name="maxAmount"
+                                value={exportOptions.maxAmount}
+                                onChange={(e) => updateOption('maxAmount')(e.target.value)}
+                                placeholder="0"
                             />
                         </div>
                     </div>

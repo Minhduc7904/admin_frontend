@@ -83,9 +83,13 @@ const initialState = {
 
     studentId: "",
     courseId: "",
+    search: "",
+    grade: "",
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
     status: "",
+    minAmount: "",
+    maxAmount: "",
   },
 
   importPreview: null,

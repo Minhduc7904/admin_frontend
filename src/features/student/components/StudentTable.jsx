@@ -182,6 +182,7 @@ export const StudentTable = ({
             emptyIcon="users"
             emptyActionLabel="Tải lại"
             onEmptyAction={() => window.location.reload()}
+            onRowClick={(student) => onView(student)}
         />
     );
 };
