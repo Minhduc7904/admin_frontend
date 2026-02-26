@@ -1,5 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../core/constants';
 
 export const ClassStudentTable = ({
     classStudents,
@@ -21,10 +23,12 @@ export const ClassStudentTable = ({
             label: 'Học sinh',
             render: (classStudent) => (
                 <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-foreground">
-                        {classStudent.student?.fullName ||
-                            `Học sinh #${classStudent.studentId}`}
-                    </span>
+                    <Link to={ROUTES.STUDENT_DETAIL(classStudent.studentId)} className="hover:underline cursor-pointer">
+                        <span className="text-sm font-semibold text-foreground">
+                            {classStudent.student?.fullName ||
+                                `Học sinh #${classStudent.studentId}`}
+                        </span>
+                    </Link>
                     {classStudent.student?.email && (
                         <span className="text-xs text-foreground-light">
                             {classStudent.student.email}

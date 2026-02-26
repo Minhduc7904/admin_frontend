@@ -1,6 +1,7 @@
 import { Edit2, Trash2 } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
-
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../core/constants';
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
     ACTIVE: 'bg-blue-100 text-blue-700',
@@ -35,10 +36,12 @@ export const EnrollmentTable = ({
             label: 'Học viên',
             render: (enrollment) => (
                 <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-foreground">
-                        {enrollment.student?.fullName ||
-                            `Học viên #${enrollment.studentId}`}
-                    </span>
+                    <Link to={ROUTES.STUDENT_DETAIL(enrollment.studentId)} className="hover:underline cursor-pointer">
+                        <span className="text-sm font-semibold text-foreground">
+                            {enrollment.student?.fullName ||
+                                `Học viên #${enrollment.studentId}`}
+                        </span>
+                    </Link>
                     {enrollment.student?.email && (
                         <span className="text-xs text-foreground-light">
                             {enrollment.student.email}
