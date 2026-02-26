@@ -54,13 +54,11 @@ export const QuickAttendance = ({ student, onClose }) => {
         dispatch(setQuickAttendanceClassesSelection(
             classesSelection.filter((cls) => courseIds.includes(cls.courseId))
         ));
-        dispatch(setQuickAttendanceSessionsSelection([]));
         setErrors((e) => ({ ...e, courses: '' }));
     };
 
     const handleClassChange = (classes) => {
         dispatch(setQuickAttendanceClassesSelection(classes));
-        dispatch(setQuickAttendanceSessionsSelection([]));
         setErrors((e) => ({ ...e, classes: '' }));
     };
 
@@ -183,17 +181,11 @@ export const QuickAttendance = ({ student, onClose }) => {
                     <ClassSessionSearchMultiSelect
                         label="Chọn buổi học"
                         required
-                        disabled={classesSelection.length === 0}
                         value={sessionsSelection}
                         classIds={classesSelection.map((c) => c.classId)}
                         onChange={handleSessionChange}
                         error={errors.sessions}
                     />
-                    {classesSelection.length === 0 && (
-                        <p className="text-xs text-foreground-light mt-1">
-                            Vui lòng chọn lớp học trước
-                        </p>
-                    )}
                 </div>
 
                 {/* ===== STATUS ===== */}
