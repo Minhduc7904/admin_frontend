@@ -1,7 +1,8 @@
 import { Eye, Edit, Trash2 } from 'lucide-react'
 import { Table, Checkbox } from '../../../shared/components/ui'
 import { TuitionPaymentStatus } from '../constants/tuition-payment.constant'
-
+import { Link } from 'react-router-dom'
+import { ROUTES } from '../../../core/constants'
 /* ===================== CONFIG ===================== */
 const STATUS_CONFIG = {
     PAID: {
@@ -48,9 +49,12 @@ export const TuitionPaymentTable = ({
             label: 'Học sinh',
             render: (payment) => (
                 <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-foreground">
-                        {payment.student?.fullName || '—'}
-                    </span>
+                    <Link to={ROUTES.STUDENT_DETAIL(attendance.studentId)} className="hover:underline cursor-pointer">
+
+                        <span className="text-sm font-semibold text-foreground">
+                            {payment.student?.fullName || '—'}
+                        </span>
+                    </Link>
                     <span className="text-xs text-foreground-lighter">
                         #{payment.studentId}
                     </span>
