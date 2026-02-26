@@ -16,13 +16,26 @@ const STATUS_LABEL = {
     MAKEUP: 'Học bù',
 };
 
+/* ===================== TUITION STATUS BADGE ===================== */
+const TUITION_BADGE = {
+    PAID: 'bg-green-100 text-green-700',
+    UNPAID: 'bg-red-100 text-red-700',
+};
+const TUITION_LABEL = {
+    PAID: 'Đã đóng',
+    UNPAID: 'Chưa đóng',
+};
+
 export const AttendanceTable = ({
     attendances,
     onEdit,
     onDelete,
     onView,
     loading,
+    tuitionMonth,
+    tuitionYear,
 }) => {
+    const showTuitionCol = !!tuitionMonth && !!tuitionYear;
     const formatDateTime = (date) => {
         return new Date(date).toLocaleString('vi-VN', {
             year: 'numeric',
@@ -123,6 +136,34 @@ export const AttendanceTable = ({
                 </span>
             ),
         },
+        ...(showTuitionCol
+            ? [
+                {
+                    key: 'tuition',
+                    label: `Học phí T${tuitionMonth}/${tuitionYear}`,
+                    render: (attendance) => {
+                        const tp = attendance.tuitionPayment;
+                        if (!tp) {
+                            return (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                                    Không có học phí T{tuitionMonth}/{tuitionYear}
+                                </span>
+                            );
+                        }
+                        return (
+                            <div className="flex flex-col gap-0.5">
+                                <span
+                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${TUITION_BADGE[tp.status] ?? 'bg-gray-100 text-gray-700'
+                                        }`}
+                                >
+                                    {tp.statusLabel ?? tp.status}
+                                </span>
+                            </div>
+                        );
+                    },
+                },
+            ]
+            : []),
         {
             key: 'actions',
             label: 'Thao tác',
@@ -179,6 +220,7 @@ export const AttendanceTable = ({
             data={attendances}
             loading={loading}
             emptyMessage="Chưa có điểm danh nào"
+            onRowClick={onView}
         />
     );
 };

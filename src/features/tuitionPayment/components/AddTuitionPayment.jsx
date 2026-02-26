@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import { Button } from '../../../shared/components'
-import { Input, Dropdown } from '../../../shared/components/ui'
+import { Input, Dropdown, CurrencyInput } from '../../../shared/components/ui'
 import {
     createTuitionPaymentAsync,
     selectTuitionPaymentLoadingCreate,
@@ -100,14 +100,13 @@ export const AddTuitionPayment = ({ onClose, onSuccess }) => {
                     required
                 />
 
-                <Input
+                <CurrencyInput
                     label="Số tiền học phí (VND)"
                     name="amount"
-                    type="number"
                     value={formData.amount}
                     onChange={handleChange}
                     error={errors.amount}
-                    placeholder="VD: 500000"
+                    placeholder="VD: 500.000"
                     required
                 />
 

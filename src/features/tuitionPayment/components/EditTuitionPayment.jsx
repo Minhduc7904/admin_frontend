@@ -1,24 +1,29 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Input, Dropdown, Textarea } from '../../../shared/components/ui'
+import { Button, Input, Dropdown, Textarea, CurrencyInput } from '../../../shared/components/ui'
 import { TUITION_PAYMENT_STATUS_OPTIONS, MONTH_OPTIONS, YEAR_OPTIONS } from '../constants/tuition-payment.constant'
 import {
     updateTuitionPaymentAsync,
     selectTuitionPaymentLoadingUpdate,
 } from '../store/tuitionPaymentSlice'
-
+import { formatDate } from '../../../shared/utils/dateTime'
 export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
     const dispatch = useDispatch()
     const loading = useSelector(selectTuitionPaymentLoadingUpdate)
-
+    // console.log('Payment data in EditTuitionPayment:', payment)
     const [formData, setFormData] = useState({
         amount: payment.amount,
         month: payment.month,
         year: payment.year,
         status: payment.status,
-        paidAt: payment.paidAt ? new Date(payment.paidAt).toISOString().split('T')[0] : '',
+        paidAt: payment.paidAt
+            ? new Date(payment.paidAt).toLocaleDateString('en-CA', {
+                timeZone: 'Asia/Ho_Chi_Minh'
+            })
+            : '',
         notes: payment.notes || '',
     })
+    // console.log('Initial formData:', formData)
 
     const [errors, setErrors] = useState({})
 
@@ -122,24 +127,16 @@ export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
                 </div>
 
                 {/* Amount */}
-                <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                        Số tiền <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                        type="number"
-                        name="amount"
-                        value={formData.amount}
-                        onChange={handleChange}
-                        placeholder="Nhập số tiền học phí..."
-                        error={errors.amount}
-                        min={0}
-                        step={1000}
-                    />
-                    <p className="text-xs text-foreground-light mt-1">
-                        Số tiền học phí cần thu (VNĐ)
-                    </p>
-                </div>
+                <CurrencyInput
+                    label="Số tiền"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleChange}
+                    placeholder="Nhập số tiền học phí..."
+                    error={errors.amount}
+                    helperText="Số tiền học phí cần thu (VNĐ)"
+                    required
+                />
 
                 {/* Month & Year */}
                 <div className="grid grid-cols-2 gap-4">

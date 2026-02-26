@@ -16,6 +16,15 @@ import {
 import { StudentBasicInfoStep } from './StudentBasicInfoStep';
 import { StudentEnrollmentStep } from './StudentEnrollmentStep';
 
+/* ===================== HELPERS ===================== */
+const toSlug = (str) =>
+    str
+        .replace(/[đĐ]/g, 'd')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
 /* ===================== STEP PROGRESS ===================== */
 const StepProgress = ({ currentStep }) => {
     return (
@@ -63,6 +72,7 @@ export const AddStudent = ({ onClose, loadStudents }) => {
 
     const [currentStep, setCurrentStep] = useState(1);
     const [errors, setErrors] = useState({});
+    const [autoGenCredentials, setAutoGenCredentials] = useState(false);
     const formData = useSelector(selectAddStudentFormData);
 
     const coursesSelection = useSelector(selectCoursesSelection);
@@ -72,7 +82,33 @@ export const AddStudent = ({ onClose, loadStudents }) => {
     /* ===================== HANDLERS ===================== */
     const handleChange = (e) => {
         const { name, value } = e.target;
-        dispatch(setAddStudentFormData({ [name]: value }));
+        const updated = { [name]: value };
+
+        // Auto-generate credentials when relevant fields change
+        if (autoGenCredentials) {
+            const firstName = name === 'firstName' ? value : formData.firstName;
+            const studentPhone = name === 'studentPhone' ? value : formData.studentPhone;
+            if (firstName && studentPhone) {
+                const generated = toSlug(firstName) + studentPhone.trim();
+                updated.username = generated;
+                updated.password = generated;
+                updated.confirmPassword = generated;
+            }
+        }
+
+        dispatch(setAddStudentFormData(updated));
+    };
+
+    const handleAutoGenChange = (checked) => {
+        setAutoGenCredentials(checked);
+        if (checked && formData.firstName && formData.studentPhone) {
+            const generated = toSlug(formData.firstName) + formData.studentPhone.trim();
+            dispatch(setAddStudentFormData({
+                username: generated,
+                password: generated,
+                confirmPassword: generated,
+            }));
+        }
     };
 
     const validateStep1 = () => {
@@ -176,6 +212,8 @@ export const AddStudent = ({ onClose, loadStudents }) => {
                         errors={errors}
                         onChange={handleChange}
                         onGradeChange={onGradeChange}
+                        autoGenCredentials={autoGenCredentials}
+                        onAutoGenChange={handleAutoGenChange}
                     />
                 )}
 

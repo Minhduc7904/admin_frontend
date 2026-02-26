@@ -6,6 +6,7 @@ export const PasswordInput = ({
   onChange,
   placeholder,
   required = false,
+  disabled = false,
   showPassword = false,
   onToggleVisibility,
   error,
@@ -20,7 +21,7 @@ export const PasswordInput = ({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-foreground mb-1"
+          className={`block text-sm font-medium mb-1 ${disabled ? 'text-foreground-light' : 'text-foreground'}`}
         >
           {label} {required && <span className="text-red-500">*</span>}
         </label>
@@ -34,18 +35,28 @@ export const PasswordInput = ({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
           className={`w-full px-3 py-2 pr-10 text-sm border rounded-sm focus:outline-none ${
             error
               ? 'border-red-500 focus:border-red-500'
               : 'border-border focus:border-foreground'
-          } bg-primary ${className}`}
+          } ${
+            disabled
+              ? 'bg-gray-50 text-foreground-light cursor-not-allowed opacity-60'
+              : 'bg-primary'
+          } ${className}`}
           {...props}
         />
         {onToggleVisibility && (
           <button
             type="button"
             onClick={onToggleVisibility}
-            className="absolute right-2 bg-primary top-2 p-1 text-foreground-light hover:text-foreground"
+            disabled={disabled}
+            className={`absolute right-2 top-2 p-1 transition-colors ${
+              disabled
+                ? 'text-foreground-lighter cursor-not-allowed'
+                : 'bg-primary text-foreground-light hover:text-foreground'
+            }`}
           >
             {showPassword ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

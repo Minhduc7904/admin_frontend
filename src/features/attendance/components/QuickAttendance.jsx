@@ -67,10 +67,17 @@ export const QuickAttendance = ({ student, onClose }) => {
         setErrors((e) => ({ ...e, sessions: '' }));
     };
 
+    /* ===================== ADD MODE ===================== */
+    // Add-only mode: no sessions selected but user wants to auto-enroll in courses
+    const isAddMode =
+        sessionsSelection.length === 0 &&
+        coursesSelection.length > 0 &&
+        autoAddToCourse;
+
     /* ===================== VALIDATE ===================== */
     const validate = () => {
         const errs = {};
-        if (sessionsSelection.length === 0)
+        if (!isAddMode && sessionsSelection.length === 0)
             errs.sessions = 'Vui lòng chọn ít nhất một buổi học';
         return errs;
     };
@@ -113,18 +120,20 @@ export const QuickAttendance = ({ student, onClose }) => {
                 );
             }
 
-            // 3. Create attendance for each session
-            await Promise.allSettled(
-                sessionsSelection.map((session) =>
-                    dispatch(
-                        createAttendanceAsync({
-                            studentId: student.studentId,
-                            sessionId: session.sessionId,
-                            status,
-                        }),
+            // 3. Create attendance for each session (skip in add-only mode)
+            if (!isAddMode && sessionsSelection.length > 0) {
+                await Promise.allSettled(
+                    sessionsSelection.map((session) =>
+                        dispatch(
+                            createAttendanceAsync({
+                                studentId: student.studentId,
+                                sessionId: session.sessionId,
+                                status,
+                            }),
+                        ),
                     ),
-                ),
-            );
+                );
+            }
 
             onClose();
         } catch (err) {
@@ -261,9 +270,11 @@ export const QuickAttendance = ({ student, onClose }) => {
                 <Button
                     onClick={handleSubmit}
                     loading={loading}
-                    disabled={loading || sessionsSelection.length === 0}
+                    disabled={loading || (!isAddMode && sessionsSelection.length === 0)}
                 >
-                    Điểm danh ({sessionsSelection.length} buổi)
+                    {isAddMode
+                        ? `Thêm vào ${coursesSelection.length} khóa học${autoAddToClass && classesSelection.length > 0 ? ` & ${classesSelection.length} lớp` : ''}`
+                        : `Điểm danh (${sessionsSelection.length} buổi)`}
                 </Button>
             </div>
         </div>

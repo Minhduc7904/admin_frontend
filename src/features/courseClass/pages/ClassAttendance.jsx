@@ -94,10 +94,22 @@ export const ClassAttendance = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedSession, setSelectedSession] = useState(null);
 
+    /* tuition filter */
+    const [showTuition, setShowTuition] = useState(false);
+    const [tuitionMonth, setTuitionMonth] = useState(new Date().getMonth() + 1);
+    const [tuitionYear, setTuitionYear] = useState(new Date().getFullYear());
+
+    // Stable key: non-empty only when both month AND year are selected
+    const tuitionFilterKey = (showTuition && tuitionMonth && tuitionYear)
+        ? `${tuitionMonth}-${tuitionYear}`
+        : '';
+
     /* ===================== LOAD DATA ===================== */
     useEffect(() => {
         loadAttendances();
-    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession]);
+    // Only re-fetch for tuition when BOTH month and year are chosen (or both cleared)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey]);
 
     useEffect(() => {
         if (selectedSession?.sessionId) {
@@ -114,6 +126,8 @@ export const ClassAttendance = () => {
                 search: debouncedSearch || undefined,
                 status: statusFilter || undefined,
                 sessionId: selectedSession?.sessionId || undefined,
+                month: showTuition ? tuitionMonth : undefined,
+                year: showTuition ? tuitionYear : undefined,
             })
         );
     };
@@ -134,6 +148,16 @@ export const ClassAttendance = () => {
         setSelectedSession(session);
         setCurrentPage(1);
     };
+
+    const handleShowTuitionChange = (val) => {
+        setShowTuition(val);
+        if (!val) {
+            setTuitionMonth(new Date().getMonth() + 1);
+            setTuitionYear(new Date().getFullYear());
+        }
+    };
+    const handleTuitionMonthChange = (val) => { setTuitionMonth(val); setCurrentPage(1); };
+    const handleTuitionYearChange  = (val) => { setTuitionYear(val);  setCurrentPage(1); };
 
     /* ===================== FORM ===================== */
     const handleFormChange = (e) => {
@@ -361,6 +385,12 @@ export const ClassAttendance = () => {
                     selectedSession={selectedSession}
                     onSessionChange={handleSessionChange}
                     classId={classId}
+                    showTuition={showTuition}
+                    onShowTuitionChange={handleShowTuitionChange}
+                    tuitionMonth={tuitionMonth}
+                    tuitionYear={tuitionYear}
+                    onTuitionMonthChange={handleTuitionMonthChange}
+                    onTuitionYearChange={handleTuitionYearChange}
                 />
             </div>
 
@@ -405,6 +435,8 @@ export const ClassAttendance = () => {
                     onView={handleView}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
+                    tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
                 />
 
                 <div className="p-4 border-t border-border">

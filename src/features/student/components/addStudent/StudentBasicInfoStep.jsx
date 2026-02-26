@@ -1,4 +1,5 @@
 import { Input, PasswordInput, Dropdown } from '../../../../shared/components';
+import { Checkbox } from '../../../../shared/components/ui';
 import { GRADE_OPTIONS } from '../../../../core/constants/grade-constants';
 
 export const StudentBasicInfoStep = ({
@@ -6,9 +7,33 @@ export const StudentBasicInfoStep = ({
     errors,
     onChange,
     onGradeChange,
+    autoGenCredentials = false,
+    onAutoGenChange,
 }) => {
     return (
         <div className="space-y-6">
+            {/* Auto-gen toggle */}
+            <div className="bg-blue-50 border border-blue-100 rounded-sm px-4 py-3">
+                <Checkbox
+                    id="auto-gen-credentials"
+                    checked={autoGenCredentials}
+                    onChange={onAutoGenChange}
+                    label="Tự động tạo tài khoản & mật khẩu"
+                    tooltipText="Tài khoản và mật khẩu sẽ được tạo tự động từ tên + SĐT học sinh (VD: Đức 0392923661 → duc0392923661)"
+                />
+                {autoGenCredentials && formData.firstName && formData.studentPhone && (
+                    <p className="text-xs text-blue-600 mt-2 ml-6">
+                        Tài khoản được tạo:{' '}
+                        <span className="font-semibold">{formData.username}</span>
+                    </p>
+                )}
+                {autoGenCredentials && (!formData.firstName || !formData.studentPhone) && (
+                    <p className="text-xs text-foreground-light mt-2 ml-6">
+                        Nhập tên và SĐT học sinh để tự động tạo tài khoản
+                    </p>
+                )}
+            </div>
+
             {/* Username */}
             <Input
                 error={errors.username}
@@ -18,6 +43,7 @@ export const StudentBasicInfoStep = ({
                 value={formData.username}
                 onChange={onChange}
                 placeholder="VD: student123"
+                disabled={autoGenCredentials}
             />
 
             {/* Password */}
@@ -29,6 +55,7 @@ export const StudentBasicInfoStep = ({
                 value={formData.password}
                 onChange={onChange}
                 placeholder="Nhập mật khẩu"
+                disabled={autoGenCredentials}
             />
 
             {/* Confirm Password */}
@@ -40,6 +67,7 @@ export const StudentBasicInfoStep = ({
                 value={formData.confirmPassword}
                 onChange={onChange}
                 placeholder="Xác nhận mật khẩu"
+                disabled={autoGenCredentials}
             />
 
             {/* Name */}
