@@ -119,6 +119,8 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
         { value: COURSE_VISIBILITIES.PRIVATE, label: 'Riêng tư' },
     ]
 
+    if (!course) return null
+
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <div className="flex-1 px-6 py-4 space-y-6 overflow-y-auto">
@@ -186,7 +188,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <SubjectSearchSelect
                         label="Môn học"
-                        value={formData.subjectId}
+                        value={course.subject}
                         onSelect={(subject) =>
                             setFormData((prev) => ({
                                 ...prev,
@@ -198,7 +200,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
 
                     <AdminSearchSelect
                         label="Giáo viên"
-                        value={formData.teacherId}
+                        value={course.teacher}
                         disabled={disableTeacherEdit}
                         onSelect={(admin) => {
                             if (!disableTeacherEdit) {

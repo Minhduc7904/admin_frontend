@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentCourse, selectCourseLoadingGet } from '../store/courseSlice';
+import { ROUTES } from '../../../core/constants';
 import {
     getAllCourseClassesAsync,
     deleteCourseClassAsync,
@@ -102,9 +103,7 @@ export const CourseClasses = () => {
         navigate(ROUTES.CLASS_DETAIL(classItem.classId) + queryString);
     };
 
-    const handleEdit = (classItem) => {
-        // navigate(ROUTES.CLASS_EDIT(classItem.classId));
-    };
+    const handleEdit = () => {};
 
     const handleDelete = async (classItem) => {
         if (!window.confirm(`Bạn có chắc muốn xóa lớp học "${classItem.className}"?`)) {

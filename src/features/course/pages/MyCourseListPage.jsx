@@ -114,9 +114,7 @@ export const MyCourseListPage = ({
         navigate(path + query)
     }
 
-    const handleEdit = (course) => {
-        // navigate(ROUTES.COURSE_EDIT(course.courseId))
-    }
+    const handleEdit = () => {}
 
     const handleDelete = async (course) => {
         if (!window.confirm(`Bạn có chắc muốn xóa khóa học "${course.title}"?`)) {

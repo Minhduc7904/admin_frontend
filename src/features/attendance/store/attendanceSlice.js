@@ -64,6 +64,14 @@ const initialState = {
         includeMakeupNote: false,
         includeMarkerName: true,
     },
+    quickAttendance: {
+        coursesSelection: [],
+        classesSelection: [],
+        sessionsSelection: [],
+        autoAddToCourse: false,
+        autoAddToClass: false,
+        status: 'PRESENT',
+    },
 };
 
 // ======================
@@ -265,6 +273,27 @@ export const attendanceSlice = createSlice({
         resetExportExcelOptions: (state) => {
             state.exportExcelOptions = initialState.exportExcelOptions;
         },
+        setQuickAttendanceCoursesSelection: (state, action) => {
+            state.quickAttendance.coursesSelection = action.payload;
+        },
+        setQuickAttendanceClassesSelection: (state, action) => {
+            state.quickAttendance.classesSelection = action.payload;
+        },
+        setQuickAttendanceSessionsSelection: (state, action) => {
+            state.quickAttendance.sessionsSelection = action.payload;
+        },
+        setQuickAttendanceAutoAddToCourse: (state, action) => {
+            state.quickAttendance.autoAddToCourse = action.payload;
+        },
+        setQuickAttendanceAutoAddToClass: (state, action) => {
+            state.quickAttendance.autoAddToClass = action.payload;
+        },
+        setQuickAttendanceStatus: (state, action) => {
+            state.quickAttendance.status = action.payload;
+        },
+        resetQuickAttendanceSelection: (state) => {
+            state.quickAttendance = initialState.quickAttendance;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -428,6 +457,13 @@ export const {
     resetExportOptions,
     setExportExcelOptions,
     resetExportExcelOptions,
+    setQuickAttendanceCoursesSelection,
+    setQuickAttendanceClassesSelection,
+    setQuickAttendanceSessionsSelection,
+    setQuickAttendanceAutoAddToCourse,
+    setQuickAttendanceAutoAddToClass,
+    setQuickAttendanceStatus,
+    resetQuickAttendanceSelection,
 } = attendanceSlice.actions;
 
 export const selectAttendances = (state) => state.attendance.attendances;
@@ -446,5 +482,11 @@ export const selectAttendanceError = (state) => state.attendance.error;
 export const selectAttendanceFilters = (state) => state.attendance.filters;
 export const selectAttendanceExportOptions = (state) => state.attendance.exportOptions;
 export const selectAttendanceExportExcelOptions = (state) => state.attendance.exportExcelOptions;
+export const selectQuickAttendanceCoursesSelection = (state) => state.attendance.quickAttendance.coursesSelection;
+export const selectQuickAttendanceClassesSelection = (state) => state.attendance.quickAttendance.classesSelection;
+export const selectQuickAttendanceSessionsSelection = (state) => state.attendance.quickAttendance.sessionsSelection;
+export const selectQuickAttendanceAutoAddToCourse = (state) => state.attendance.quickAttendance.autoAddToCourse;
+export const selectQuickAttendanceAutoAddToClass = (state) => state.attendance.quickAttendance.autoAddToClass;
+export const selectQuickAttendanceStatus = (state) => state.attendance.quickAttendance.status;
 
 export default attendanceSlice.reducer;

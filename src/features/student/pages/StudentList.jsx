@@ -29,6 +29,7 @@ import {
     AddStudent,
     ExportStudentListModal
 } from '../components'
+import { QuickAttendance } from '../../attendance/components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
 import { ROUTES, PERMISSIONS } from '../../../core/constants'
 import { toggleUserActivationAsync } from '../../user/store/userSlice'
@@ -94,6 +95,7 @@ export const StudentList = () => {
     })
 
     const [openAddStudentRightPanel, setOpenAddStudentRightPanel] = useState(false)
+    const [quickAttendanceStudent, setQuickAttendanceStudent] = useState(null)
 
     /* ===================== PERMISSIONS ===================== */
     const canCreateStudent = useHasPermission(PERMISSIONS.STUDENT.CREATE)
@@ -311,6 +313,7 @@ export const StudentList = () => {
                     onSortChange={handleSortChange}
                     onView={handleView}
                     onToggleActivation={handleToggleActivation}
+                    onQuickAttendance={(student) => setQuickAttendanceStudent(student)}
                     canViewStudent={canViewStudent}
                     canToggleActivation={canToggleActivation}
                 />
@@ -325,6 +328,17 @@ export const StudentList = () => {
                         <AddStudent
                             onClose={() => setOpenAddStudentRightPanel(false)}
                             loadStudents={loadStudents}
+                        />
+                    </RightPanel>
+
+                    <RightPanel
+                        isOpen={!!quickAttendanceStudent}
+                        onClose={() => setQuickAttendanceStudent(null)}
+                        title="Điểm danh nhanh"
+                    >
+                        <QuickAttendance
+                            student={quickAttendanceStudent}
+                            onClose={() => setQuickAttendanceStudent(null)}
                         />
                     </RightPanel>
 

@@ -82,7 +82,17 @@ export const SearchableSelect = ({
 
     // Update selected item when value changes
     useEffect(() => {
-        if (value && options.length > 0) {
+        if (value === null || value === undefined) {
+            setSelectedItem(null);
+            return;
+        }
+        // value is a full object — set directly
+        if (typeof value === 'object') {
+            setSelectedItem(value);
+            return;
+        }
+        // value is a primitive (ID) — find in loaded options
+        if (options.length > 0) {
             const item = options.find(opt => getOptionValue(opt) === value);
             if (item) {
                 setSelectedItem(item);

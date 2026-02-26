@@ -102,9 +102,7 @@ export const ClassListPage = ({
         navigate(ROUTES.CLASS_DETAIL(classItem.classId) + queryString)
     }
 
-    const handleEdit = (classItem) => {
-        // navigate(ROUTES.CLASS_EDIT(classItem.classId))
-    }
+    const handleEdit = () => {}
 
     const handleDelete = async (classItem) => {
         if (!window.confirm(`Bạn có chắc muốn xóa lớp học "${classItem.className}"?`)) {
@@ -158,6 +156,7 @@ export const ClassListPage = ({
             onItemsPerPageChange={handleItemsPerPageChange}
             onView={handleView}
             onEdit={handleEdit}
+
             onDelete={handleDelete}
             onOpenAddClass={openAdd}
             onCloseAddClass={closeAdd}

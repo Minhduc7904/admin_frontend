@@ -1,4 +1,4 @@
-import { Eye, UserX, UserCheck } from 'lucide-react';
+import { Eye, UserX, UserCheck, ClipboardCheck } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
 import { COURSE_ENROLLMENT_STATUS_CONFIG } from '../../courseEnrollment/constants/course-enrollment.constant';
 
@@ -7,6 +7,7 @@ export const StudentTable = ({
     students,
     onView,
     onToggleActivation,
+    onQuickAttendance,
     loading,
     sort,
     onSortChange,
@@ -141,6 +142,16 @@ export const StudentTable = ({
                         title="Xem chi tiết"
                     >
                         <Eye size={16} className="text-info" />
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onQuickAttendance?.(student)
+                        }}
+                        className="p-1 rounded hover:bg-gray-200 transition-colors"
+                        title="Điểm danh nhanh"
+                    >
+                        <ClipboardCheck size={16} className="text-success" />
                     </button>
                     <button
                         onClick={(e) => {

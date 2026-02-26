@@ -19,6 +19,7 @@ import {
 import { ROUTES } from '../../../core/constants';
 import { Sidebar } from '../../../shared/components/sidebar';
 import { PERMISSIONS } from '../../../core/constants/permission/permission.codes';
+
 export const AdminSidebar = () => {
   const sections = [
     {

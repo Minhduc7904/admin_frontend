@@ -19,6 +19,10 @@ export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
                 label: 'Đã xuất bản',
                 className: 'bg-green-100 text-green-700'
             },
+            PRIVATE: {
+                label: 'Riêng tư',
+                className: 'bg-yellow-100 text-yellow-700'
+            }
         };
 
         const badge = badges[visibility] || badges.DRAFT;
@@ -163,6 +167,7 @@ export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
             emptyIcon="book-open"
             emptyActionLabel="Tải lại"
             onEmptyAction={() => window.location.reload()}
+            onRowClick={(course) => onView(course)}
         />
     );
 }

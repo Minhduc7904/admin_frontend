@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { Button, StatsCard, StatsGrid, RightPanel } from '../../../shared/components';
-import { ClassFilters, ClassTable, AddClass } from '../components';
+import { Button, RightPanel } from '../../../shared/components';
+import { ClassFilters, ClassTable, AddClass, EditClass } from '../components';
 import { Pagination } from '../../../shared/components/ui/Pagination';
 
 /**
@@ -35,7 +36,6 @@ export const ClassList = ({
     onPageChange,
     onItemsPerPageChange,
     onView,
-    onEdit,
     onDelete,
     onOpenAddClass,
     onCloseAddClass,
@@ -47,6 +47,19 @@ export const ClassList = ({
     defaultCourseId = null,
     canSelectCourse = true,
 }) => {
+    const [editClass, setEditClass] = useState(null)
+    const [openEditClass, setOpenEditClass] = useState(false)
+
+    const handleEditOpen = (classItem) => {
+        setEditClass(classItem)
+        setOpenEditClass(true)
+    }
+
+    const handleEditClose = () => {
+        setOpenEditClass(false)
+        setEditClass(null)
+        loadClasses()
+    }
     // Calculate stats
     const now = new Date();
     const activeCount = classes.filter(c => {
@@ -94,7 +107,7 @@ export const ClassList = ({
                 <ClassTable
                     classes={classes}
                     onView={onView}
-                    onEdit={onEdit}
+                    onEdit={handleEditOpen}
                     onDelete={onDelete}
                     loading={loading}
                 />
@@ -128,6 +141,18 @@ export const ClassList = ({
                     defaultCourseId={defaultCourseId}
                     canSelectCourse={canSelectCourse}
                     loadClasses={loadClasses}
+                />
+            </RightPanel>
+
+            {/* Edit Class Right Panel */}
+            <RightPanel
+                isOpen={openEditClass}
+                onClose={handleEditClose}
+                title="Chỉnh sửa lớp học"
+            >
+                <EditClass
+                    courseClass={editClass}
+                    onClose={handleEditClose}
                 />
             </RightPanel>
         </>

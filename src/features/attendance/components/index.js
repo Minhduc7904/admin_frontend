@@ -7,3 +7,4 @@ export { ExportAttendanceModal } from './ExportAttendanceModal';
 export { AttendanceDetail } from './AttendanceDetail';
 export { AttendanceDetailInfo } from './AttendanceDetailInfo';
 export { AttendanceExport } from './AttendanceExport';
+export { QuickAttendance } from './QuickAttendance';

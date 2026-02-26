@@ -14,15 +14,17 @@ export const hasPermission = (
 
     // 2️⃣ Không yêu cầu permission
     if (!required) return true;
-
+    // console.log('Checking permission:', { userPermissions, required, userRoles });
     // 3️⃣ Không có permission list
     if (!Array.isArray(userPermissions)) return false;
 
+    const permissionCodes = userPermissions.map(p => p.code);
+
     // 4️⃣ Required là mảng → phải có đủ
     if (Array.isArray(required)) {
-        return required.every((p) => userPermissions.includes(p));
+        return required.every(p => permissionCodes.includes(p));
     }
 
     // 5️⃣ Required là string
-    return userPermissions.includes(required);
+    return permissionCodes.includes(required);
 };

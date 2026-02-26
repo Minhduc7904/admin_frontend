@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button, RightPanel } from '../../../shared/components'
-import { CourseFilters, CourseTable, AddCourse } from '../components'
+import { CourseFilters, CourseTable, AddCourse, EditCourse } from '../components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
 
 export const CourseList = ({
@@ -36,7 +37,6 @@ export const CourseList = ({
     onPageChange,
     onItemsPerPageChange,
     onView,
-    onEdit,
     onDelete,
     onOpenAddCourse,
     onCloseAddCourse,
@@ -45,6 +45,30 @@ export const CourseList = ({
     teacherId,
     canSelectTeacher = true,
 }) => {
+    const [editCourse, setEditCourse] = useState(null)
+    const [openEditCourse, setOpenEditCourse] = useState(false)
+
+    const handleEditOpen = (course) => {
+        // Enrich list item with nested subject/teacher objects for SearchSelect display
+        const enriched = {
+            ...course,
+            subject: course.subjectId
+                ? { subjectId: course.subjectId, name: course.subjectName }
+                : null,
+            teacher: course.teacherId
+                ? { adminId: course.teacherId, fullName: course.teacherName }
+                : null,
+        }
+        setEditCourse(enriched)
+        setOpenEditCourse(true)
+    }
+
+    const handleEditClose = () => {
+        setOpenEditCourse(false)
+        setEditCourse(null)
+        loadCourses()
+    }
+
     return (
         <>
             {/* Header */}
@@ -83,7 +107,7 @@ export const CourseList = ({
                     courses={courses}
                     loading={loading}
                     onView={onView}
-                    onEdit={onEdit}
+                    onEdit={handleEditOpen}
                     onDelete={onDelete}
                 />
 
@@ -113,6 +137,19 @@ export const CourseList = ({
                     defaultTeacherId={teacherId}
                     canSelectTeacher={canSelectTeacher}
                     loadCourses={loadCourses}
+                />
+            </RightPanel>
+
+            {/* Edit Course */}
+            <RightPanel
+                isOpen={openEditCourse}
+                onClose={handleEditClose}
+                title="Chỉnh sửa khóa học"
+            >
+                <EditCourse
+                    course={editCourse}
+                    onClose={handleEditClose}
+                    disableTeacherEdit={isMyCourses}
                 />
             </RightPanel>
         </>

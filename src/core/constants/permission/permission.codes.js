@@ -323,7 +323,5 @@ export const PERMISSIONS = {
     MY_QUESTIONS: 'admin:page:my-questions',
     EXAMS: 'admin:page:exams',
     MY_EXAMS: 'admin:page:my-exams',
-    COMPETITIONS: 'admin:page:competitions',
-    MY_COMPETITIONS: 'admin:page:my-competitions',
   },
 }

@@ -151,6 +151,7 @@ export const ClassTable = ({ classes, onView, onEdit, onDelete, loading }) => {
             emptyIcon="users"
             emptyActionLabel="Tải lại"
             onEmptyAction={() => window.location.reload()}
+            onRowClick={(classItem) => onView(classItem)}
         />
     );
 }
