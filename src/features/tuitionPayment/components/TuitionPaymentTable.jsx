@@ -76,11 +76,20 @@ export const TuitionPaymentTable = ({
             ),
         },
         {
+            key: 'grade',
+            label: 'Khối',
+            render: (payment) => (
+                <span className="text-sm text-foreground-light">
+                    {payment.student?.grade ? `Khối ${payment.student.grade}` : '—'}
+                </span>
+            ),
+        },
+        {
             key: 'school',
             label: 'Trường',
             render: (payment) => (
                 <span className="text-sm text-foreground-light">
-                    {payment.student?.school?.schoolName || '—'}
+                    {payment.student?.schoolName || payment.student?.school || '—'}
                 </span>
             ),
         },

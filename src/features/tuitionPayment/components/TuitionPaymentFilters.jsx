@@ -1,6 +1,7 @@
-import { SearchInput, Dropdown } from '../../../shared/components/ui'
+import { SearchInput, Dropdown, CurrencyInput } from '../../../shared/components/ui'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { TuitionPaymentStatus, STATUS_OPTIONS } from '../constants/tuition-payment.constant'
+import { STATUS_OPTIONS } from '../constants/tuition-payment.constant'
+import { GRADE_OPTIONS } from '../../../core/constants/grade-constants'
 
 const STATUS_OPTIONS_WITH_DEFAULT = [
     { value: '', label: 'Tất cả trạng thái' },
@@ -30,20 +31,29 @@ export const TuitionPaymentFilters = ({
     status,
     onStatusChange,
 
+    grade,
+    onGradeChange,
+
     month,
     onMonthChange,
 
     year,
     onYearChange,
 
+    minAmount,
+    onMinAmountChange,
+
+    maxAmount,
+    onMaxAmountChange,
+
     showStats,
     onToggleStats,
 }) => {
     return (
         <div className="mb-4 bg-white border border-border rounded-sm p-4 space-y-4">
-            {/* ===== Row 1: Search + Filters ===== */}
+            {/* ===== Row 1: Search + Status + Grade + Month + Year ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-6">
+                <div className="lg:col-span-4">
                     <SearchInput
                         value={search}
                         onChange={onSearchChange}
@@ -57,6 +67,15 @@ export const TuitionPaymentFilters = ({
                         onChange={onStatusChange}
                         options={STATUS_OPTIONS_WITH_DEFAULT}
                         placeholder="Trạng thái"
+                    />
+                </div>
+
+                <div className="lg:col-span-2">
+                    <Dropdown
+                        value={grade}
+                        onChange={onGradeChange}
+                        options={GRADE_OPTIONS}
+                        placeholder="Khối"
                     />
                 </div>
 
@@ -79,7 +98,30 @@ export const TuitionPaymentFilters = ({
                 </div>
             </div>
 
-            {/* ===== Row 2: Toggle Stats ===== */}
+            {/* ===== Row 2: Amount range ===== */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="lg:col-span-3">
+                    <CurrencyInput
+                        label="Số tiền từ"
+                        name="minAmount"
+                        value={minAmount}
+                        onChange={(e) => onMinAmountChange(e.target.value)}
+                        placeholder="0"
+                    />
+                </div>
+
+                <div className="lg:col-span-3">
+                    <CurrencyInput
+                        label="Số tiền đến"
+                        name="maxAmount"
+                        value={maxAmount}
+                        onChange={(e) => onMaxAmountChange(e.target.value)}
+                        placeholder="0"
+                    />
+                </div>
+            </div>
+
+            {/* ===== Row 3: Toggle Stats ===== */}
             <div className="flex items-center justify-center pt-2 border-t border-border">
                 <button
                     type="button"

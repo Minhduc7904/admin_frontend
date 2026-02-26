@@ -4,7 +4,7 @@ import { Plus, Download } from 'lucide-react'
 
 import { Button, RightPanel } from '../../../shared/components'
 import { Pagination, Modal } from '../../../shared/components/ui'
-import { useSearch } from '../../../shared/hooks'
+import { useSearch, useDebounce } from '../../../shared/hooks'
 
 import {
     getTuitionPaymentsAsync,
@@ -56,8 +56,13 @@ export const TuitionPaymentList = () => {
     const [itemsPerPage, setItemsPerPage] = useState(pagination.limit || 10)
 
     const [status, setStatus] = useState(filters.status || '')
+    const [grade, setGrade] = useState(filters.grade || '')
     const [month, setMonth] = useState(filters.month || new Date().getMonth() + 1)
     const [year, setYear] = useState(filters.year || new Date().getFullYear())
+    const [minAmount, setMinAmount] = useState(filters.minAmount || '')
+    const [maxAmount, setMaxAmount] = useState(filters.maxAmount || '')
+    const debouncedMinAmount = useDebounce(minAmount, 500)
+    const debouncedMaxAmount = useDebounce(maxAmount, 500)
 
     const [sort, setSort] = useState({
         field: filters.sortBy || 'createdAt',
@@ -81,8 +86,11 @@ export const TuitionPaymentList = () => {
         itemsPerPage,
         debouncedSearch,
         status,
+        grade,
         month,
         year,
+        debouncedMinAmount,
+        debouncedMaxAmount,
         sort.field,
         sort.direction,
     ])
@@ -105,8 +113,11 @@ export const TuitionPaymentList = () => {
                 limit: itemsPerPage,
                 search: debouncedSearch || undefined,
                 status: status || undefined,
+                grade: grade || undefined,
                 month: month || undefined,
                 year: year || undefined,
+                minAmount: debouncedMinAmount || undefined,
+                maxAmount: debouncedMaxAmount || undefined,
                 sortBy: sort.field,
                 sortOrder: sort.direction,
             }),
@@ -153,6 +164,21 @@ export const TuitionPaymentList = () => {
     const handleStatusChange = (value) => {
         setStatus(value)
         resetPageAndFilter({ status: value })
+    }
+
+    const handleGradeChange = (value) => {
+        setGrade(value)
+        resetPageAndFilter({ grade: value })
+    }
+
+    const handleMinAmountChange = (value) => {
+        setMinAmount(value)
+        resetPageAndFilter({ minAmount: value })
+    }
+
+    const handleMaxAmountChange = (value) => {
+        setMaxAmount(value)
+        resetPageAndFilter({ maxAmount: value })
     }
 
     const handleMonthChange = (value) => {
@@ -288,10 +314,16 @@ export const TuitionPaymentList = () => {
                     onSearchChange={handleSearchChangeWrapper}
                     status={status}
                     onStatusChange={handleStatusChange}
+                    grade={grade}
+                    onGradeChange={handleGradeChange}
                     month={month}
                     onMonthChange={handleMonthChange}
                     year={year}
                     onYearChange={handleYearChange}
+                    minAmount={minAmount}
+                    onMinAmountChange={handleMinAmountChange}
+                    maxAmount={maxAmount}
+                    onMaxAmountChange={handleMaxAmountChange}
                     showStats={showStats}
                     onToggleStats={() => setShowStats(!showStats)}
                 />

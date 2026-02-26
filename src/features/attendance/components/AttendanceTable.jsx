@@ -1,6 +1,7 @@
 import { Edit2, Trash2, User, Calendar, Eye } from 'lucide-react';
 import { Table } from '../../../shared/components/ui';
-
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../core/constants';
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
     PRESENT: 'bg-green-100 text-green-700',
@@ -63,9 +64,11 @@ export const AttendanceTable = ({
                 <div className="flex items-center gap-2">
                     <User size={14} className="text-foreground-light" />
                     <div>
-                        <span className="text-sm font-medium text-foreground">
-                            {attendance.student.fullName || 'N/A'}
-                        </span>
+                        <Link to={ROUTES.STUDENT_DETAIL(attendance.studentId)} className="hover:underline cursor-pointer">
+                            <span className="text-sm font-medium text-foreground">
+                                {attendance.student.fullName || 'N/A'}
+                            </span>
+                        </Link>
                         {attendance.student.studentId && (
                             <>
                                 <p className="text-xs text-foreground-light">
