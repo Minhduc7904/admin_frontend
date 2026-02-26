@@ -7,15 +7,24 @@ export const NotificationItem = ({ notification, index }) => {
   const dispatch = useDispatch();
   const [isVisible, setIsVisible] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [appearDelay, setAppearDelay] = useState(50 + index * 100);
   const duration = notification.duration || 4000;
 
+  // Set appear delay only once on mount
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50 + index * 100);
+    setAppearDelay(50 + index * 100);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), appearDelay);
 
     if (notification.autoHide) {
       const removeTimer = setTimeout(() => {
-        handleRemove();
-      }, duration);
+        setIsRemoving(true);
+        setTimeout(() => {
+          dispatch(removeNotification(notification.id));
+        }, 300);
+      }, duration + appearDelay);
 
       return () => {
         clearTimeout(timer);
@@ -24,10 +33,11 @@ export const NotificationItem = ({ notification, index }) => {
     }
 
     return () => clearTimeout(timer);
-  }, [notification.autoHide, duration, index]);
+  }, [notification.autoHide, duration, appearDelay, dispatch, notification.id]);
 
   const handleRemove = () => {
     setIsRemoving(true);
+    // Remove immediately after animation completes (300ms)
     setTimeout(() => {
       dispatch(removeNotification(notification.id));
     }, 300);
