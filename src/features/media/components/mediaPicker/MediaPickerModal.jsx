@@ -8,6 +8,7 @@ import { Spinner, InlineLoading } from '../../../../shared/components/loading'
 
 import { SimpleFolderTree } from './SimpleFolderTree'
 import { MediaGridItem } from './MediaGridItem'
+import { useInfiniteScroll } from '../../../../shared/hooks/useInfiniteScroll'
 
 import { useMediaFolders } from '../../hooks/useMediaFolders'
 import { useMediaLibrary } from '../../hooks/useMediaLibrary'
@@ -44,6 +45,12 @@ export const MediaPickerModal = ({
     })
 
     const selection = useMediaSelection(selectedMediaId, multiple)
+
+    const lastElementRef = useInfiniteScroll(
+        library.loadMore,
+        library.hasMore,
+        library.loadingMedia
+    )
 
     const upload = useMediaUpload({
         type,
@@ -200,6 +207,18 @@ export const MediaPickerModal = ({
                                                 multiple={multiple}
                                             />
                                         ))}
+                                        
+                                        {/* Infinite Scroll Trigger */}
+                                        {library.hasMore && (
+                                            <div 
+                                                ref={lastElementRef}
+                                                className="col-span-4 flex justify-center py-8"
+                                            >
+                                                {library.loadingMedia && (
+                                                    <Spinner size="md" />
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
