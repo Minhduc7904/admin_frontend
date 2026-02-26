@@ -18,15 +18,20 @@ export const LoadingRedirect = () => {
             return;
         }
 
-        // Load profile
-        dispatch(getProfileAsync());
+        // Load profile with error handling
+        dispatch(getProfileAsync())
+            .unwrap()
+            .catch((error) => {
+                // On any error (network, server, etc.), redirect to login
+                console.error('Failed to load profile:', error);
+                navigate(ROUTES.LOGIN, { replace: true });
+            });
     }, [isAuthenticated]);
 
     useEffect(() => {
         if (profile && !loading) {
             // Get the previous page from location state
             const from = location.state?.from?.pathname;
-            console.log('Previous page:', from);
 
             // const rolePath = rolePathMap[profile.roleId];
             if (from) {
