@@ -357,6 +357,7 @@ export const API_ENDPOINTS = {
     SPLIT_FROM_RAW_CONTENT: (sessionId) => `/exam-import-sessions/${sessionId}/split-question/raw-content`,
     CLASSIFY_CHAPTERS: (sessionId) => `/exam-import-sessions/${sessionId}/classify-chapters/my`,
     MIGRATE: (sessionId) => `/exam-import-sessions/${sessionId}/migrate/my`,
+    MANUAL_SPLIT: (sessionId) => `/exam-import-sessions/${sessionId}/manual-split/my`,
   },
   TEMP_EXAM: {
     BY_SESSION: (sessionId) => `/temp-exams/session/${sessionId}`,

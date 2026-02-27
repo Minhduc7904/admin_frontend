@@ -23,8 +23,8 @@ import {
     clearTempQuestions,
 } from '../../tempQuestion/store/tempQuestionSlice';
 import { ProcessQuestionsSidebar, QuestionsList, SplitConfirmationModal } from '../components';
-import { EditQuestionModal } from '../components/EditQuestionModal';
-import { EditStatementModal } from '../components/EditStatementModal';
+import { EditTempQuestionPanel } from '../components/EditTempQuestionPanel';
+import { EditTempStatementPanel } from '../components/EditTempStatementPanel';
 import { CreateQuestionModal } from '../components/CreateQuestionModal';
 import { CreateStatementModal } from '../components/CreateStatementModal';
 import { deleteTempStatementAsync, reorderTempStatementsAsync, selectTempStatementLoadingDelete } from '../../tempStatement/store/tempStatementSlice';
@@ -228,6 +228,13 @@ export const ProcessQuestions = () => {
         }
     };
 
+    // Called by ManualSplitTab after a successful (no-error) manual split
+    const handleManualSplitSuccess = () => {
+        if (id) {
+            dispatch(getTempQuestionsBySessionAsync(id));
+        }
+    };
+
     return (
         <>
             <div className="grid grid-cols-2 gap-6 h-full">
@@ -241,6 +248,7 @@ export const ProcessQuestions = () => {
                         loading={splitLoading}
                         splitResult={splitResult}
                         onRefreshSessionContent={handleRefreshSessionContent}
+                        onSplitSuccess={handleManualSplitSuccess}
                     />
                 </div>
 
@@ -272,16 +280,16 @@ export const ProcessQuestions = () => {
                 loading={splitLoading}
             />
 
-            {/* Edit Question Modal */}
-            <EditQuestionModal
+            {/* Edit Question Panel */}
+            <EditTempQuestionPanel
                 isOpen={isEditQuestionModalOpen}
                 onClose={handleCloseEditQuestionModal}
                 question={currentEditingQuestion}
                 onSuccess={handleEditSuccess}
             />
 
-            {/* Edit Statement Modal */}
-            <EditStatementModal
+            {/* Edit Statement Panel */}
+            <EditTempStatementPanel
                 isOpen={isEditStatementModalOpen}
                 onClose={handleCloseEditStatementModal}
                 statement={currentEditingStatement}

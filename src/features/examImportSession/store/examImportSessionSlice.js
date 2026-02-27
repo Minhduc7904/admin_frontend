@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { examImportSessionApi } from "../../../core/api/examImportSessionApi";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
+import { addNotification } from "../../notification/store/notificationSlice";
 
 /* =========================
    Initial State
@@ -28,6 +29,8 @@ const initialState = {
     loadingSplit: false, // Loading cho việc tách câu hỏi
     loadingClassifyChapters: false, // Loading cho việc phân loại chương
     loadingMigrate: false, // Loading cho việc migrate đề thi
+    loadingManualSplit: false, // Loading cho việc tách câu hỏi thủ công
+    manualSplitResult: null, // Kết quả tách câu hỏi thủ công (có thể chứa parseErrors)
 
     error: null,
 
@@ -163,6 +166,46 @@ export const classifyChaptersAsync = createAsyncThunk(
     }
 );
 
+// ===== MANUAL SPLIT =====
+export const manualSplitAsync = createAsyncThunk(
+    "examImportSession/manualSplit",
+    async ({ sessionId, rawContent, questionType, answers }, thunkAPI) => {
+        const { dispatch, rejectWithValue } = thunkAPI;
+        try {
+            const response = await examImportSessionApi.manualSplit(sessionId, { rawContent, questionType, answers });
+            const body = response.data ? response.data : response;
+
+            if (body.success === false) {
+                // Parse errors: hiển thị warning, trả về data để UI hiển thị lỗi
+                dispatch(addNotification({
+                    type: 'warning',
+                    title: 'Tách câu hỏi có lỗi',
+                    message: body.message || 'Có lỗi trong quá trình tách câu hỏi, vui lòng kiểm tra lại.',
+                    autoHide: false,
+                }));
+                return body;
+            }
+
+            // Thành công hoàn toàn
+            dispatch(addNotification({
+                type: 'success',
+                title: 'Tách câu hỏi thủ công thành công',
+                message: body.message || '',
+                autoHide: true,
+            }));
+            return body;
+        } catch (error) {
+            dispatch(addNotification({
+                type: 'error',
+                title: 'Lỗi tách câu hỏi thủ công',
+                message: error.message || 'Có lỗi xảy ra',
+                autoHide: false,
+            }));
+            return rejectWithValue(error.message || 'Có lỗi xảy ra');
+        }
+    }
+);
+
 // ===== MIGRATE TO FINAL EXAM =====
 export const migrateExamAsync = createAsyncThunk(
     "examImportSession/migrate",
@@ -204,6 +247,9 @@ export const examImportSessionSlice = createSlice({
         },
         clearMigrateResult: (state) => {
             state.migrateResult = null;
+        },
+        clearManualSplitResult: (state) => {
+            state.manualSplitResult = null;
         },
         setPagination: (state, action) => {
             state.pagination = { ...state.pagination, ...action.payload };
@@ -330,6 +376,21 @@ export const examImportSessionSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // ===== MANUAL SPLIT =====
+            .addCase(manualSplitAsync.pending, (state) => {
+                state.loadingManualSplit = true;
+                state.error = null;
+                state.manualSplitResult = null;
+            })
+            .addCase(manualSplitAsync.fulfilled, (state, action) => {
+                state.loadingManualSplit = false;
+                state.manualSplitResult = action.payload.data ?? null;
+            })
+            .addCase(manualSplitAsync.rejected, (state, action) => {
+                state.loadingManualSplit = false;
+                state.error = action.payload;
+            })
+
             // ===== MIGRATE TO FINAL EXAM =====
             .addCase(migrateExamAsync.pending, (state) => {
                 state.loadingMigrate = true;
@@ -363,6 +424,7 @@ export const {
     resetPagination,
     clearSplitResult,
     clearMigrateResult,
+    clearManualSplitResult,
 } = examImportSessionSlice.actions;
 
 export const selectExamImportSessions = (state) => state.examImportSession.sessions;
@@ -380,6 +442,7 @@ export const selectExamImportSessionLoadingSplit = (state) => state.examImportSe
 export const selectExamImportSessionLoadingClassifyChapters = (state) => state.examImportSession.loadingClassifyChapters;
 export const selectExamImportSessionMigrateResult = (state) => state.examImportSession.migrateResult;
 export const selectExamImportSessionLoadingMigrate = (state) => state.examImportSession.loadingMigrate;
-
+export const selectExamImportSessionManualSplitResult = (state) => state.examImportSession.manualSplitResult;
+export const selectExamImportSessionLoadingManualSplit = (state) => state.examImportSession.loadingManualSplit;
 
 export default examImportSessionSlice.reducer;

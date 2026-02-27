@@ -181,7 +181,7 @@ export const MediaPickerModal = ({
 
                             {/* Media Grid */}
                             <div className="flex-1 overflow-y-auto p-4">
-                                {library.loadingMedia ? (
+                                {library.loadingMedia && library.media.length === 0 ? (
                                     <div className="flex justify-center py-12">
                                         <InlineLoading message="Đang tải media..." />
                                     </div>
@@ -207,14 +207,14 @@ export const MediaPickerModal = ({
                                                 multiple={multiple}
                                             />
                                         ))}
-                                        
+
                                         {/* Infinite Scroll Trigger */}
                                         {library.hasMore && (
-                                            <div 
+                                            <div
                                                 ref={lastElementRef}
                                                 className="col-span-4 flex justify-center py-8"
                                             >
-                                                {library.loadingMedia && (
+                                                {library.isLoadingMore && (
                                                     <Spinner size="md" />
                                                 )}
                                             </div>

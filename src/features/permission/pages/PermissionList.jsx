@@ -101,8 +101,6 @@ export const PermissionList = () => {
 
         if (!formData.code.trim()) {
             errors.code = 'Mã quyền không được để trống';
-        } else if (!/^[A-Z_]+$/.test(formData.code)) {
-            errors.code = 'Mã quyền chỉ được chứa chữ hoa và gạch dưới';
         }
 
         if (!formData.name.trim()) {

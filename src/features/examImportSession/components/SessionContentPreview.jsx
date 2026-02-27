@@ -10,7 +10,7 @@ export const SessionContentPreview = ({
     rawContentData,
     isLoading = false
 }) => {
-    const [viewMode, setViewMode] = useState('preview');
+    const [viewMode, setViewMode] = useState('text');
 
     return (
         <div className="space-y-3">

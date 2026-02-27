@@ -1,13 +1,28 @@
 import { useState, useRef } from "react";
+import { useDispatch } from "react-redux";
+import axios from "axios";
+import {
+  getPresignedUploadUrlAsync,
+  postUploadCompleteAsync,
+  updateMediaAsync,
+} from "../store/mediaSlice";
 import { getMediaType } from "../utils/media.utils";
 
-export const useMediaUploadModal = ({ onUpload, onClose }) => {
+export const useMediaUploadModal = ({ folderId = null, onUploaded, onClose }) => {
+  const dispatch = useDispatch();
+
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [description, setDescription] = useState("");
   const [alt, setAlt] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState(null);
+
+  // Upload progress state
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadedMedia, setUploadedMedia] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -25,11 +40,12 @@ export const useMediaUploadModal = ({ onUpload, onClose }) => {
     if (!validateFile(file)) return;
 
     setFile(file);
+    setUploadSuccess(false);
+    setUploadedMedia(null);
+    setUploadProgress(0);
 
     if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
+      setPreview(URL.createObjectURL(file));
     } else {
       setPreview(null);
     }
@@ -41,13 +57,72 @@ export const useMediaUploadModal = ({ onUpload, onClose }) => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    if (description) formData.append("description", description);
-    if (alt && file.type.startsWith("image/")) formData.append("alt", alt);
+    setIsUploading(true);
+    setError(null);
+    setUploadProgress(0);
 
-    await onUpload(formData);
-    handleClose();
+    try {
+      const mediaType = getMediaType(file.type);
+
+      // 1️⃣ Lấy presigned URL
+      const presigned = await dispatch(
+        getPresignedUploadUrlAsync({
+          originalFilename: file.name,
+          mimeType: file.type,
+          fileSize: file.size,
+          type: mediaType,
+          folderId: folderId || null,
+        })
+      ).unwrap();
+
+      // 2️⃣ Upload thẳng lên MinIO với progress
+      await axios.put(presigned.data.uploadUrl, file, {
+        headers: { "Content-Type": file.type },
+        onUploadProgress: (event) => {
+          if (!event.total) return;
+          const percent = Math.round((event.loaded * 100) / event.total);
+          setUploadProgress(percent);
+        },
+      });
+
+      // 3️⃣ Thông báo backend upload hoàn tất
+      const completed = await dispatch(
+        postUploadCompleteAsync({
+          mediaId: presigned.data.mediaId,
+          uploadedSize: file.size,
+        })
+      ).unwrap();
+
+      let result = completed.data;
+
+      // 4️⃣ Cập nhật description / alt nếu có
+      if (description.trim() || (alt.trim() && mediaType === "IMAGE")) {
+        const updatePayload = {};
+        if (description.trim()) updatePayload.description = description.trim();
+        if (alt.trim() && mediaType === "IMAGE") updatePayload.alt = alt.trim();
+
+        try {
+          const updated = await dispatch(
+            updateMediaAsync({ id: result.mediaId, data: updatePayload })
+          ).unwrap();
+          if (updated?.data) result = updated.data;
+        } catch (_) {
+          // Non-critical, continue
+        }
+      }
+
+      // Attach local preview for immediate display
+      if (preview) result = { ...result, _localPreview: preview };
+
+      setUploadedMedia(result);
+      setUploadSuccess(true);
+      onUploaded?.(result);
+    } catch (err) {
+      console.error("Upload thất bại:", err);
+      setError("Tải lên thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleClose = () => {
@@ -57,8 +132,24 @@ export const useMediaUploadModal = ({ onUpload, onClose }) => {
     setAlt("");
     setError(null);
     setDragActive(false);
+    setIsUploading(false);
+    setUploadProgress(0);
+    setUploadSuccess(false);
+    setUploadedMedia(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onClose();
+  };
+
+  const handleReset = () => {
+    setFile(null);
+    setPreview(null);
+    setDescription("");
+    setAlt("");
+    setError(null);
+    setUploadProgress(0);
+    setUploadSuccess(false);
+    setUploadedMedia(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return {
@@ -70,10 +161,12 @@ export const useMediaUploadModal = ({ onUpload, onClose }) => {
       dragActive,
       error,
       fileType: file ? getMediaType(file.type) : null,
+      isUploading,
+      uploadProgress,
+      uploadSuccess,
+      uploadedMedia,
     },
-    refs: {
-      fileInputRef,
-    },
+    refs: { fileInputRef },
     handlers: {
       setDescription,
       setAlt,
@@ -81,6 +174,7 @@ export const useMediaUploadModal = ({ onUpload, onClose }) => {
       handleFile,
       handleSubmit,
       handleClose,
+      handleReset,
     },
   };
 };

@@ -4,6 +4,7 @@ import {
     getMyMediaAsync,
     selectMedia,
     selectMediaLoadingGet,
+    selectMediaPagination,
 } from '../store/mediaSlice'
 
 const LIMIT_PER_PAGE = 20
@@ -13,14 +14,19 @@ export const useMediaLibrary = ({ isOpen, activeTab, folderId, type }) => {
 
     const allMedia = useSelector(selectMedia)
     const loadingMedia = useSelector(selectMediaLoadingGet)
+    const pagination = useSelector(selectMediaPagination)
 
     const [currentPage, setCurrentPage] = useState(1)
     const [hasMore, setHasMore] = useState(true)
     const [paginatedMedia, setPaginatedMedia] = useState([])
+    const [isLoadingMore, setIsLoadingMore] = useState(false)
     const prevFolderIdRef = useRef(folderId)
     const prevTypeRef = useRef(type)
+    // Track the last fulfilled page to avoid processing stale pending resets
+    const lastFulfilledPageRef = useRef(0)
 
     const loadMedia = useCallback((page = 1) => {
+        if (page > 1) setIsLoadingMore(true)
         dispatch(
             getMyMediaAsync({
                 page: page,
@@ -31,13 +37,34 @@ export const useMediaLibrary = ({ isOpen, activeTab, folderId, type }) => {
                 sortBy: 'createdAt',
                 sortOrder: 'desc',
             })
-        )
+        ).then((action) => {
+            if (action.meta?.requestStatus !== 'fulfilled') return
+            const meta = action.payload?.meta
+            const data = action.payload?.data ?? []
+
+            if (page === 1) {
+                setPaginatedMedia(data)
+            } else {
+                setPaginatedMedia(prev => [...prev, ...data])
+            }
+
+            // Use server-provided hasNext; fallback to count check
+            if (meta) {
+                setHasMore(meta.hasNext ?? false)
+            } else {
+                setHasMore(data.length >= LIMIT_PER_PAGE)
+            }
+
+            lastFulfilledPageRef.current = page
+            setIsLoadingMore(false)
+        })
     }, [dispatch, folderId, type])
 
     const loadMore = useCallback(() => {
         if (!loadingMedia && hasMore) {
-            loadMedia(currentPage + 1)
-            setCurrentPage(prev => prev + 1)
+            const nextPage = currentPage + 1
+            setCurrentPage(nextPage)
+            loadMedia(nextPage)
         }
     }, [loadMedia, loadingMedia, hasMore, currentPage])
 
@@ -47,6 +74,7 @@ export const useMediaLibrary = ({ isOpen, activeTab, folderId, type }) => {
             setCurrentPage(1)
             setHasMore(true)
             setPaginatedMedia([])
+            lastFulfilledPageRef.current = 0
             prevFolderIdRef.current = folderId
             prevTypeRef.current = type
         }
@@ -55,35 +83,26 @@ export const useMediaLibrary = ({ isOpen, activeTab, folderId, type }) => {
     // Load initial media when modal opens
     useEffect(() => {
         if (isOpen && activeTab === 'library') {
-            loadMedia(1)
             setCurrentPage(1)
+            setHasMore(true)
+            setPaginatedMedia([])
+            lastFulfilledPageRef.current = 0
+            loadMedia(1)
         }
     }, [isOpen, activeTab, loadMedia])
-
-    // Update paginated media when allMedia changes
-    useEffect(() => {
-        if (currentPage === 1) {
-            setPaginatedMedia(allMedia)
-        } else {
-            setPaginatedMedia(prev => [...prev, ...allMedia])
-        }
-        
-        // Check if we should load more (if less items returned than limit)
-        if (allMedia.length < LIMIT_PER_PAGE) {
-            setHasMore(false)
-        }
-    }, [allMedia])
 
     const reload = useCallback(() => {
         setCurrentPage(1)
         setHasMore(true)
         setPaginatedMedia([])
+        lastFulfilledPageRef.current = 0
         loadMedia(1)
     }, [loadMedia])
 
     return {
         media: paginatedMedia,
         loadingMedia,
+        isLoadingMore,
         reload,
         loadMore,
         hasMore,

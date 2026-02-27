@@ -64,6 +64,7 @@ export const TempExamForm = ({
 
                     <div>
                         <SubjectSearchSelect
+                            required={true}
                             label="Môn học"
                             placeholder="Tìm kiếm môn học..."
                             value={formData.subjectId}

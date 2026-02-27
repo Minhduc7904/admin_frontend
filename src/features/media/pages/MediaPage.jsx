@@ -8,12 +8,10 @@ import {
     getAllMediaAsync,
     getBucketsAsync,
     getMediaByIdAsync,
-    uploadMediaAsync,
     hardDeleteMediaAsync,
     selectMedia,
     selectMediaPagination,
     selectMediaLoadingGet,
-    selectMediaLoadingUpload,
     selectMediaLoadingSoftDelete,
     setFilters,
     selectMediaFilters,
@@ -40,7 +38,6 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
     const pagination = useSelector(selectMediaPagination);
     const filters = useSelector(selectMediaFilters);
     const loadingGet = useSelector(selectMediaLoadingGet);
-    const loadingUpload = useSelector(selectMediaLoadingUpload);
     const loadingDelete = useSelector(selectMediaLoadingSoftDelete);
     const loadingViewUrl = useSelector(selectMediaLoadingViewUrl);
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
@@ -166,14 +163,8 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
         loadMedia(1, true);
     };
 
-    const handleUpload = async (formData) => {
-        try {
-            await dispatch(uploadMediaAsync(formData)).unwrap();
-            setIsUploadModalOpen(false);
-            loadMedia(1, true);
-        } catch (error) {
-            console.error('Error uploading media:', error);
-        }
+    const handleUploaded = () => {
+        loadMedia(1, true);
     };
 
     const loadViewUrl = async (media) => {
@@ -321,8 +312,7 @@ export const MediaPage = ({ userId = null, userType = null, loading: parentLoadi
                 <MediaUploadModal
                     isOpen={isUploadModalOpen}
                     onClose={() => setIsUploadModalOpen(false)}
-                    onUpload={handleUpload}
-                    loading={loadingUpload}
+                    onUploaded={handleUploaded}
                 />
             )}
         </div>

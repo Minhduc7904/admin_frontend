@@ -21,13 +21,11 @@ import {
 import {
     getMyMediaAsync,
     getMediaByIdAsync,
-    uploadMediaAsync,
     updateMediaAsync,
     softDeleteMediaByUserAsync,
     selectMedia,
     selectMediaPagination,
     selectMediaLoadingGet,
-    selectMediaLoadingUpload,
     selectMediaLoadingUpdate,
     selectMediaLoadingSoftDelete,
     setFilters as setMediaFilters,
@@ -52,7 +50,6 @@ export const MediaFolderPage = () => {
     const pagination = useSelector(selectMediaPagination);
     const filters = useSelector(selectMediaFilters);
     const loadingGet = useSelector(selectMediaLoadingGet);
-    const loadingUpload = useSelector(selectMediaLoadingUpload);
     const loadingUpdateMedia = useSelector(selectMediaLoadingUpdate);
     const loadingDelete = useSelector(selectMediaLoadingSoftDelete);
     const loadingViewUrl = useSelector(selectMediaLoadingViewUrl);
@@ -391,45 +388,33 @@ export const MediaFolderPage = () => {
         dispatch(getRootMediaFoldersAsync());
     };
 
-    const handleUpload = async (formData) => {
-        try {
-            // Add folderId to formData if a folder is selected
-            if (selectedFolderId) {
-                formData.append('folderId', selectedFolderId);
-            }
+    const handleUploaded = () => {
+        setIsMediaUploadModalOpen(false);
+        loadMedia(1, true);
 
-            await dispatch(uploadMediaAsync(formData)).unwrap();
-            setIsMediaUploadModalOpen(false);
-            loadMedia(1, true);
-
-            // Update mediaCount of the folder
-            if (selectedFolderId) {
-                // Update in rootFolders
-                const rootFolderIndex = rootFolders.findIndex(f => f.folderId === selectedFolderId);
-                if (rootFolderIndex !== -1) {
-                    dispatch(getRootMediaFoldersAsync());
-                } else {
-                    // Update in childrenMap
-                    setChildrenMap(prev => {
-                        const newMap = { ...prev };
-                        for (const [parentId, children] of Object.entries(newMap)) {
-                            const folderIndex = children.findIndex(f => f.folderId === selectedFolderId);
-                            if (folderIndex !== -1) {
-                                const updatedChildren = [...children];
-                                updatedChildren[folderIndex] = {
-                                    ...updatedChildren[folderIndex],
-                                    mediaCount: (updatedChildren[folderIndex].mediaCount || 0) + 1
-                                };
-                                newMap[parentId] = updatedChildren;
-                                break;
-                            }
+        // Update mediaCount of the folder
+        if (selectedFolderId) {
+            const rootFolderIndex = rootFolders.findIndex(f => f.folderId === selectedFolderId);
+            if (rootFolderIndex !== -1) {
+                dispatch(getRootMediaFoldersAsync());
+            } else {
+                setChildrenMap(prev => {
+                    const newMap = { ...prev };
+                    for (const [parentId, children] of Object.entries(newMap)) {
+                        const folderIndex = children.findIndex(f => f.folderId === selectedFolderId);
+                        if (folderIndex !== -1) {
+                            const updatedChildren = [...children];
+                            updatedChildren[folderIndex] = {
+                                ...updatedChildren[folderIndex],
+                                mediaCount: (updatedChildren[folderIndex].mediaCount || 0) + 1
+                            };
+                            newMap[parentId] = updatedChildren;
+                            break;
                         }
-                        return newMap;
-                    });
-                }
+                    }
+                    return newMap;
+                });
             }
-        } catch (error) {
-            console.error('Error uploading media:', error);
         }
     };
 
@@ -779,8 +764,8 @@ export const MediaFolderPage = () => {
             <MediaUploadModal
                 isOpen={isMediaUploadModalOpen}
                 onClose={() => setIsMediaUploadModalOpen(false)}
-                onUpload={handleUpload}
-                loading={loadingUpload}
+                onUploaded={handleUploaded}
+                folderId={selectedFolderId}
             />
 
             {/* Move Media Confirmation Modal */}

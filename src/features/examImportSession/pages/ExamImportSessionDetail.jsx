@@ -102,6 +102,10 @@ export const ExamImportSessionDetail = () => {
             newErrors.grade = 'Khối phải từ 1 đến 12';
         }
 
+        if (!data.subjectId) {
+            newErrors.subjectId = 'Môn học không được để trống';
+        }
+
         return newErrors;
     };
 

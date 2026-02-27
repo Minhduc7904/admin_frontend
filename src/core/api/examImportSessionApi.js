@@ -91,4 +91,24 @@ export const examImportSessionApi = {
   migrate(sessionId) {
     return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.MIGRATE(sessionId));
   },
+
+  /**
+   * Tách câu hỏi thủ công từ nội dung thô theo loại câu hỏi chỉ định.
+   * Chỉ người tạo session mới được sử dụng.
+   * Nếu có lỗi parse, trả về success: false nhưng vẫn kèm data (parseErrors[]) để người dùng sửa.
+   * Khi có lỗi parse sẽ KHÔNG lưu DB.
+   *
+   * @param {string|number} sessionId  - ID của ExamImportSession
+   * @param {string} rawContent        - Văn bản thô chứa danh sách câu hỏi
+   * @param {string} questionType      - SINGLE_CHOICE | TRUE_FALSE | SHORT_ANSWER
+   * @param {string} [answers]         - Chuỗi đáp án cách nhau bởi dấu cách (tuỳ chọn)
+   * @returns {Promise<ManualSplitQuestionsResponseDto>}
+   */
+  manualSplit(sessionId, { rawContent, questionType, answers }) {
+    return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.MANUAL_SPLIT(sessionId), {
+      rawContent,
+      questionType,
+      ...(answers !== undefined && answers !== '' ? { answers } : {}),
+    });
+  },
 };

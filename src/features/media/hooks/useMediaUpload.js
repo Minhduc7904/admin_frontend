@@ -11,69 +11,74 @@ import {
 export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false }) => {
   const dispatch = useDispatch();
 
-  // Loading từ redux
   const loadingPresignedUrl = useSelector(selectMediaLoadingGetPresignedUrl);
   const loadingCompleteUpload = useSelector(selectMediaLoadingCompleteUpload);
   const loadingUpload = loadingPresignedUrl || loadingCompleteUpload;
 
-  // State local
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploadPreview, setUploadPreview] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  // --- Pending (selected but not yet uploaded) ---
+  const [pendingFiles, setPendingFiles] = useState([]);   // File[]
+  const [pendingPreviews, setPendingPreviews] = useState([]); // string[] (objectURLs)
   const [isDragging, setIsDragging] = useState(false);
+
+  // --- Upload progress ---
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedCount, setUploadedCount] = useState(0);
+
+  // --- Result ---
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadedMediaData, setUploadedMediaData] = useState(null);
-  
-  // Multiple upload state
-  const [uploadedCount, setUploadedCount] = useState(0);
-  const [totalFiles, setTotalFiles] = useState(0);
   const [uploadedMediaList, setUploadedMediaList] = useState([]);
 
-  /**
-   * Cấu hình loại file được phép upload
-   */
   const acceptedTypes = useMemo(() => {
     switch (type) {
-      case "IMAGE":
-        return { accept: "image/*", maxSize: 5, label: "ảnh" };
-      case "VIDEO":
-        return { accept: "video/*", maxSize: 100, label: "video" };
-      case "AUDIO":
-        return { accept: "audio/*", maxSize: 20, label: "audio" };
-      case "DOCUMENT":
-        return {
-          accept: ".pdf,.doc,.docx,.xls,.xlsx",
-          maxSize: 10,
-          label: "tài liệu",
-        };
-      default:
-        return { accept: "*/*", maxSize: 100, label: "tất cả" };
+      case "IMAGE":    return { accept: "image/*", maxSize: 5, label: "ảnh" };
+      case "VIDEO":    return { accept: "video/*", maxSize: 100, label: "video" };
+      case "AUDIO":    return { accept: "audio/*", maxSize: 20, label: "audio" };
+      case "DOCUMENT": return { accept: ".pdf,.doc,.docx,.xls,.xlsx", maxSize: 10, label: "tài liệu" };
+      default:         return { accept: "*/*", maxSize: 100, label: "tất cả" };
     }
   }, [type]);
 
+  // Build object-URL previews for an array of File objects
+  const buildPreviews = (files) =>
+    files.map(f => f.type.startsWith("image/") ? URL.createObjectURL(f) : null);
+
+  // Revoke pending previews to free memory
+  const revokePreviews = (previews) =>
+    previews.forEach(p => { if (p) URL.revokeObjectURL(p); });
+
   /**
-   * Xử lý upload 1 file
+   * Validate + set pending files (no upload yet)
    */
-  const processFile = async (file) => {
-    // Validate dung lượng
-    if (file.size > acceptedTypes.maxSize * 1024 * 1024) {
-      alert(`File vượt quá ${acceptedTypes.maxSize}MB`);
-      return null;
-    }
+  const setPending = (fileList) => {
+    const files = Array.from(fileList).filter(f => {
+      if (f.size > acceptedTypes.maxSize * 1024 * 1024) {
+        alert(`File "${f.name}" vượt quá ${acceptedTypes.maxSize}MB`);
+        return false;
+      }
+      return true;
+    });
+    if (!files.length) return;
 
-    setUploadFile(file);
+    revokePreviews(pendingPreviews);
+    const chosen = multiple ? files : [files[0]];
+    setPendingFiles(chosen);
+    setPendingPreviews(buildPreviews(chosen));
 
-    // Preview ảnh
-    if (file.type.startsWith("image/") && !multiple) {
-      const reader = new FileReader();
-      reader.onload = () => setUploadPreview(reader.result);
-      reader.readAsDataURL(file);
-    }
+    // Reset result state
+    setUploadSuccess(false);
+    setUploadedMediaData(null);
+    setUploadedMediaList([]);
+    setUploadProgress(0);
+    setUploadedCount(0);
+  };
 
+  /**
+   * Upload a single File, returns media result or null
+   */
+  const processFile = async (file, localPreview) => {
     try {
-      /**
-       * 1️⃣ Lấy presigned URL
-       */
       const presigned = await dispatch(
         getPresignedUploadUrlAsync({
           originalFilename: file.name,
@@ -84,24 +89,14 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
         })
       ).unwrap();
 
-      /**
-       * 2️⃣ Upload trực tiếp lên MinIO (CÓ PROGRESS)
-       * ⚠️ KHÔNG dùng axiosClient
-       */
       await axios.put(presigned.data.uploadUrl, file, {
-        headers: {
-          "Content-Type": file.type,
-        },
+        headers: { "Content-Type": file.type },
         onUploadProgress: (event) => {
           if (!event.total) return;
-          const percent = Math.round((event.loaded * 100) / event.total);
-          setUploadProgress(percent);
+          setUploadProgress(Math.round((event.loaded * 100) / event.total));
         },
       });
 
-      /**
-       * 3️⃣ Thông báo backend upload hoàn tất
-       */
       const completed = await dispatch(
         postUploadCompleteAsync({
           mediaId: presigned.data.mediaId,
@@ -109,132 +104,101 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
         })
       ).unwrap();
 
-      return completed.data;
+      return localPreview
+        ? { ...completed.data, _localPreview: localPreview }
+        : completed.data;
     } catch (error) {
       console.error("Upload thất bại:", error);
-      setUploadProgress(0);
       return null;
     }
   };
 
   /**
-   * Xử lý upload nhiều files (tuần tự)
+   * Trigger actual upload of pending files
    */
-  const processFiles = async (files) => {
-    const fileArray = Array.from(files);
-    setTotalFiles(fileArray.length);
-    setUploadedCount(0);
-    setUploadedMediaList([]);
+  const handleUpload = async () => {
+    if (!pendingFiles.length || isUploading) return;
+
+    setIsUploading(true);
     setUploadProgress(0);
+    setUploadedCount(0);
 
     const uploadedList = [];
 
-    for (let i = 0; i < fileArray.length; i++) {
-      const file = fileArray[i];
-      const result = await processFile(file);
-      
+    for (let i = 0; i < pendingFiles.length; i++) {
+      const result = await processFile(pendingFiles[i], pendingPreviews[i]);
       if (result) {
         uploadedList.push(result);
         setUploadedCount(i + 1);
-        
-        // Call onUploaded for each file if in multiple mode
-        if (multiple) {
-          onUploaded?.(result);
-        }
+        if (multiple) onUploaded?.(result);
       }
-      
-      // Update overall progress
-      const overallProgress = Math.round(((i + 1) / fileArray.length) * 100);
-      setUploadProgress(overallProgress);
+      if (pendingFiles.length > 1) {
+        setUploadProgress(Math.round(((i + 1) / pendingFiles.length) * 100));
+      }
     }
 
     setUploadedMediaList(uploadedList);
-    
+    setIsUploading(false);
+
     if (uploadedList.length > 0) {
       setUploadSuccess(true);
-      setUploadedMediaData(uploadedList[uploadedList.length - 1]); // Last uploaded
-      
-      // Call onUploaded with last item if single mode
-      if (!multiple) {
-        onUploaded?.(uploadedList[0]);
-      }
+      setUploadedMediaData(uploadedList[uploadedList.length - 1]);
+      if (!multiple) onUploaded?.(uploadedList[0]);
     }
   };
 
   /**
-   * Reset toàn bộ state upload
+   * Reset all state
    */
   const reset = () => {
-    setUploadFile(null);
-    setUploadPreview(null);
+    revokePreviews(pendingPreviews);
+    setPendingFiles([]);
+    setPendingPreviews([]);
+    setIsUploading(false);
     setUploadProgress(0);
+    setUploadedCount(0);
     setUploadSuccess(false);
     setUploadedMediaData(null);
-    setUploadedCount(0);
-    setTotalFiles(0);
     setUploadedMediaList([]);
   };
 
   const handleFileChange = (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    // Reset state first
-    setUploadProgress(0);
-    setUploadSuccess(false);
-    setUploadedMediaData(null);
-
-    if (multiple && files.length > 1) {
-      processFiles(files);
-    } else {
-      processFile(files[0]);
-    }
+    if (e.target.files?.length) setPending(e.target.files);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
-    const files = e.dataTransfer.files;
-    if (!files || files.length === 0) return;
-
-    // Reset state first
-    setUploadProgress(0);
-    setUploadSuccess(false);
-    setUploadedMediaData(null);
-
-    if (multiple && files.length > 1) {
-      processFiles(files);
-    } else {
-      processFile(files[0]);
-    }
+    if (e.dataTransfer.files?.length) setPending(e.dataTransfer.files);
   };
 
   return {
     state: {
-      uploadFile,
-      uploadPreview,
+      // pending
+      pendingFiles,
+      pendingPreviews,
+      isDragging,
+      // progress
+      isUploading,
+      loadingUpload,
       uploadProgress,
+      uploadedCount,
+      totalFiles: pendingFiles.length,
+      // result
       uploadSuccess,
       uploadedMediaData,
-      isDragging,
-      loadingUpload,
-      uploadedCount,
-      totalFiles,
       uploadedMediaList,
+      // legacy aliases kept for UploadTab
+      uploadFile: pendingFiles[0] ?? null,
+      uploadPreview: pendingPreviews[0] ?? null,
     },
     handlers: {
       fileChange: handleFileChange,
-      dragEnter: (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-      },
-      dragLeave: (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-      },
-      dragOver: (e) => e.preventDefault(),
+      dragEnter: (e) => { e.preventDefault(); setIsDragging(true); },
+      dragLeave: (e) => { e.preventDefault(); setIsDragging(false); },
+      dragOver:  (e) => e.preventDefault(),
       drop: handleDrop,
+      upload: handleUpload,
       reset,
     },
     acceptedTypes,
