@@ -1,5 +1,6 @@
 import { SearchInput, Dropdown, Checkbox } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
+import { HomeworkContentSearchSelect } from '../../homeworkContent/components/HomeworkContentSearchSelect';
 import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
 
 /* ===================== STATUS OPTIONS ===================== */
@@ -39,102 +40,99 @@ export const AttendanceFilters = ({
     hasClass = false,
     showHomework = false,
     onShowHomeworkChange,
-    homeworkOptions = [],
-    selectedHomeworkId,
+    homeworkContents = [],
+    selectedHomework,
     onHomeworkChange,
     loadingHomework = false,
 }) => {
-    const homeworkDropdownOptions = [
-        { value: '', label: 'Tất cả bài tập' },
-        ...homeworkOptions,
-    ];
-
     return (
         <div className="mb-4 space-y-3">
             {/* ===== ROW 1: search / session / status ===== */}
             <div className="flex items-center gap-4">
-                {/* Search */}
-                <div className="flex-1">
-                    <SearchInput
-                        value={search}
-                        onChange={onSearchChange}
-                        placeholder="Tìm kiếm theo tên học sinh, ghi chú..."
-                    />
-                </div>
-
-                {/* Session filter */}
-                <div className="w-64">
-                    <ClassSessionSearchSelect
-                        placeholder="Chọn buổi học..."
-                        onSelect={onSessionChange}
-                        value={selectedSession}
-                        classId={classId}
-                        label=''
-                    />
-                </div>
-
-                {/* Status filter */}
-                <div className="w-48">
-                    <Dropdown
-                        value={status}
-                        onChange={onStatusChange}
-                        options={STATUS_OPTIONS_WITH_ALL}
-                        placeholder="Chọn trạng thái"
-                    />
-                </div>
+            {/* Search */}
+            <div className="flex-1">
+                <SearchInput
+                    value={search}
+                    onChange={onSearchChange}
+                    placeholder="Tìm kiếm theo tên học sinh, ghi chú..."
+                />
             </div>
 
-            {/* ===== ROW 2: tuition toggle ===== */}
-            <div className="flex items-center gap-4">
-                <Checkbox
-                    id="show-tuition"
-                    label="Hiển thị học phí"
-                    checked={showTuition}
-                    onChange={onShowTuitionChange}
+            {/* Session filter */}
+            <div className="w-64">
+                <ClassSessionSearchSelect
+                    placeholder="Chọn buổi học..."
+                    onSelect={onSessionChange}
+                    value={selectedSession}
+                    classId={classId}
+                    label=''
                 />
-
-                {showTuition && (
-                    <>
-                        <div className="w-40">
-                            <Dropdown
-                                value={tuitionMonth}
-                                onChange={onTuitionMonthChange}
-                                options={MONTH_OPTIONS}
-                            />
-                        </div>
-                        <div className="w-36">
-                            <Dropdown
-                                value={tuitionYear}
-                                onChange={onTuitionYearChange}
-                                options={YEAR_OPTIONS}
-                            />
-                        </div>
-                    </>
-                )}
             </div>
 
-            {/* ===== ROW 3: homework toggle ===== */}
-            <div className="flex items-center gap-4">
-                <Checkbox
-                    id="show-homework"
-                    label="Hiển thị bài tập về nhà"
-                    checked={showHomework}
-                    onChange={onShowHomeworkChange}
-                    disabled={!hasClass}
+            {/* Status filter */}
+            <div className="w-48">
+                <Dropdown
+                    value={status}
+                    onChange={onStatusChange}
+                    options={STATUS_OPTIONS_WITH_ALL}
+                    placeholder="Chọn trạng thái"
                 />
-
-                {showHomework && (
-                    <div className="w-64">
-                        <Dropdown
-                            value={selectedHomeworkId ?? ''}
-                            onChange={(val) => onHomeworkChange(val || null)}
-                            options={homeworkDropdownOptions}
-                            placeholder={loadingHomework ? 'Đang tải...' : 'Chọn bài tập'}
-                            disabled={loadingHomework}
-                        />
-                    </div>
-                )}
             </div>
         </div>
+
+        {/* ===== ROW 2: tuition toggle ===== */}
+        <div className="flex items-center gap-4">
+            <Checkbox
+                id="show-tuition"
+                label="Hiển thị học phí"
+                checked={showTuition}
+                onChange={onShowTuitionChange}
+            />
+
+            {showTuition && (
+                <>
+                    <div className="w-40">
+                        <Dropdown
+                            value={tuitionMonth}
+                            onChange={onTuitionMonthChange}
+                            options={MONTH_OPTIONS}
+                        />
+                    </div>
+                    <div className="w-36">
+                        <Dropdown
+                            value={tuitionYear}
+                            onChange={onTuitionYearChange}
+                            options={YEAR_OPTIONS}
+                        />
+                    </div>
+                </>
+            )}
+        </div>
+
+        {/* ===== ROW 3: homework toggle ===== */}
+        <div className="flex items-center gap-4">
+            <Checkbox
+                id="show-homework"
+                label="Hiển thị bài tập về nhà"
+                checked={showHomework}
+                onChange={onShowHomeworkChange}
+                disabled={!hasClass}
+            />
+
+            {showHomework && (
+                <div className="w-96">
+                    <HomeworkContentSearchSelect
+                        placeholder="Tìm kiếm bài tập..."
+                        onSelect={onHomeworkChange}
+                        value={selectedHomework}
+                        homeworkContents={homeworkContents}
+                        loading={loadingHomework}
+                        disabled={loadingHomework}
+                        label=""
+                    />
+                </div>
+            )}
+        </div>
+    </div>
     );
 };

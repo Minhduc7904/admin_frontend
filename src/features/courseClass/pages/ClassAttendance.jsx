@@ -115,6 +115,11 @@ export const ClassAttendance = () => {
     const showHomework = filters.showHomework;
     const selectedHomeworkId = filters.selectedHomeworkId;
 
+    // Find selected homework object from ID for SearchableSelect
+    const selectedHomework = selectedHomeworkId
+        ? byCourseHomeworkContents.find(hw => hw.homeworkContentId === selectedHomeworkId)
+        : null;
+
     // Stable key: non-empty only when both month AND year are selected
     const tuitionFilterKey = (showTuition && tuitionMonth && tuitionYear)
         ? `${tuitionMonth}-${tuitionYear}`
@@ -194,7 +199,10 @@ export const ClassAttendance = () => {
         }
         setCurrentPage(1);
     };
-    const handleHomeworkChange = (val) => { dispatch(setFilters({ selectedHomeworkId: val })); setCurrentPage(1); };
+    const handleHomeworkChange = (homeworkObject) => {
+        dispatch(setFilters({ selectedHomeworkId: homeworkObject?.homeworkContentId || null }));
+        setCurrentPage(1);
+    };
 
     /* ===================== FORM ===================== */
     const handleFormChange = (e) => {
@@ -413,7 +421,7 @@ export const ClassAttendance = () => {
                         </Button>
                     </div>
                 </div>
-
+                
                 <AttendanceFilters
                     search={search}
                     onSearchChange={handleSearchChangeWrapper}
@@ -432,11 +440,8 @@ export const ClassAttendance = () => {
                     hasClass={!!courseClass}
                     showHomework={showHomework}
                     onShowHomeworkChange={handleShowHomeworkChange}
-                    homeworkOptions={byCourseHomeworkContents.map((hw) => ({
-                        value: hw.homeworkContentId,
-                        label: hw.title,
-                    }))}
-                    selectedHomeworkId={selectedHomeworkId}
+                    homeworkContents={byCourseHomeworkContents}
+                    selectedHomework={selectedHomework}
                     onHomeworkChange={handleHomeworkChange}
                     loadingHomework={loadingGetByCourse}
                 />
