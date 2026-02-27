@@ -306,6 +306,7 @@ export const API_ENDPOINTS = {
     CREATE: "/homework-contents",
     UPDATE: (id) => `/homework-contents/${id}`,
     DELETE: (id) => `/homework-contents/${id}`,
+    BY_COURSE: (courseId) => `/homework-contents/by-course/${courseId}`,
   },
   HOMEWORK_SUBMITS: {
     LIST: "/homework-submits",
@@ -437,6 +438,9 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/sections/${id}`,
     DELETE: (id) => `/sections/${id}`,
     BY_EXAM: (examId) => `/sections?examId=${examId}`,
+  },
+  MARKDOWN: {
+    FIX_SPELLING: '/markdown/fix-spelling',
   },
 };
 

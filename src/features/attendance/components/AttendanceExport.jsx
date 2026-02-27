@@ -1,12 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Download, Eye, Image as ImageIcon } from 'lucide-react';
+import { Download, Eye, Image as ImageIcon, Copy, Check, Phone } from 'lucide-react';
 import { Button, Dropdown, Checkbox, Slider } from '../../../shared/components/ui';
 import { LoadingOverlay } from '../../../shared/components/loading/Loading';
 import { exportAttendanceImageAsync, setExportOptions, selectAttendanceExportOptions } from '../store/attendanceSlice';
 import { attendanceApi } from '../../../core/api';
 import PDDExample from '../../../assets/PhieuDiemDanh_example.png'
 import { useDebounce } from '../../../shared/hooks/useDebounce';
+import { selectCurrentCourseClass } from '../../courseClass/store/courseClassSlice';
+import {
+    getHomeworkContentsByCourseAsync,
+    clearByCourseHomeworkContents,
+    selectByCourseHomeworkContents,
+    selectHomeworkContentLoadingGetByCourse,
+} from '../../homeworkContent/store/homeworkContentSlice';
+
 const FORMAT_OPTIONS = [
     { label: 'PNG (Chất lượng cao)', value: 'png' },
     { label: 'JPEG (Kích thước nhỏ)', value: 'jpeg' },
@@ -19,17 +27,67 @@ const WIDTH_OPTIONS = [
     { label: '2000px (Rất lớn)', value: 2000 },
 ];
 
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
+    value: i + 1,
+    label: `Tháng ${i + 1}`,
+}));
+
+const currentYear = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => ({
+    value: currentYear - 2 + i,
+    label: `${currentYear - 2 + i}`,
+}));
+
 
 export const AttendanceExport = ({ attendance }) => {
     const dispatch = useDispatch();
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+    const [previewBlocked, setPreviewBlocked] = useState(null); // null = not blocked, string = reason
+    const [copied, setCopied] = useState(false);
+    const previewBlobRef = useRef(null);
     const options = useSelector(selectAttendanceExportOptions);
     const debouncedQuality = useDebounce(options.quality, 400);
+
+    const courseClass = useSelector(selectCurrentCourseClass);
+    const byCourseHomeworkContents = useSelector(selectByCourseHomeworkContents);
+    const loadingGetByCourse = useSelector(selectHomeworkContentLoadingGetByCourse);
+
+    const homeworkDropdownOptions = [
+        { value: '', label: '-- Chọn bài tập --' },
+        ...byCourseHomeworkContents.map((hw) => ({
+            value: hw.homeworkContentId,
+            label: hw.title,
+        })),
+    ];
+
+    // Fetch homework list when includeHomework is toggled on
+    useEffect(() => {
+        if (options.includeHomework && courseClass?.courseId && byCourseHomeworkContents.length === 0) {
+            dispatch(getHomeworkContentsByCourseAsync(courseClass.courseId));
+        }
+        if (!options.includeHomework) {
+            dispatch(clearByCourseHomeworkContents());
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [options.includeHomework, courseClass?.courseId]);
 
     // Load preview whenever options change
     useEffect(() => {
         if (attendance?.attendanceId) {
+            // Block preview if includeTuition but no month/year
+            if (options.includeTuition && (!options.tuitionMonth || !options.tuitionYear)) {
+                setPreviewBlocked('Vui lòng chọn tháng và năm để hiển thị thông tin học phí.');
+                setPreviewUrl(null);
+                return;
+            }
+            // Block preview if includeHomework but no homeworkContentId
+            if (options.includeHomework && !options.homeworkContentId) {
+                setPreviewBlocked('Vui lòng chọn bài tập về nhà để hiển thị phiếu.');
+                setPreviewUrl(null);
+                return;
+            }
+            setPreviewBlocked(null);
             loadPreview();
         }
         // Cleanup previous preview URL
@@ -55,10 +113,14 @@ export const AttendanceExport = ({ attendance }) => {
         options.includeMarkedAt,
         options.includeNotes,
         options.includeTuition,
+        options.tuitionMonth,
+        options.tuitionYear,
+        options.includeHomework,
+        options.homeworkContentId,
         options.includeTeacherName,
         options.includeMarkerName,
         options.includeQRCode,
-        debouncedQuality, // 🔥 chỉ debounce mỗi cái này
+        debouncedQuality,
     ]);
 
     const loadPreview = async () => {
@@ -73,6 +135,7 @@ export const AttendanceExport = ({ attendance }) => {
 
             const blob = response.data || response;
             const url = URL.createObjectURL(blob);
+            previewBlobRef.current = blob;
 
             // Revoke previous URL if exists
             if (previewUrl) {
@@ -102,6 +165,30 @@ export const AttendanceExport = ({ attendance }) => {
             id: attendance.attendanceId,
             options: { ...options, mode: 'view' },
         }));
+    };
+
+    const handleCopyImage = async () => {
+        if (!previewBlobRef.current) return;
+        try {
+            const mimeType = options.format === 'png' ? 'image/png' : 'image/jpeg';
+            // Chrome only supports image/png for ClipboardItem; convert via canvas if needed
+            let blobToCopy = previewBlobRef.current;
+            if (mimeType !== 'image/png') {
+                const bitmap = await createImageBitmap(blobToCopy);
+                const canvas = document.createElement('canvas');
+                canvas.width = bitmap.width;
+                canvas.height = bitmap.height;
+                canvas.getContext('2d').drawImage(bitmap, 0, 0);
+                blobToCopy = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+            }
+            await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blobToCopy }),
+            ]);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Copy image failed:', err);
+        }
     };
 
     if (!attendance) {
@@ -142,7 +229,6 @@ export const AttendanceExport = ({ attendance }) => {
                             />
                         )}
 
-
                         {/* Width */}
                         <Dropdown
                             label="Độ rộng (px)"
@@ -150,7 +236,6 @@ export const AttendanceExport = ({ attendance }) => {
                             options={WIDTH_OPTIONS}
                             onChange={(value) => handleOptionChange('width', value)}
                         />
-
                     </div>
 
                     {/* Checkboxes */}
@@ -228,11 +313,58 @@ export const AttendanceExport = ({ attendance }) => {
                             label="Ghi chú & Nhận xét"
                         />
 
-                        <Checkbox
-                            checked={options.includeTuition}
-                            onChange={(v) => handleOptionChange('includeTuition', v)}
-                            label="Thông tin học phí"
-                        />
+                        {/* ===== TUITION ===== */}
+                        <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+                            <Checkbox
+                                checked={options.includeTuition}
+                                onChange={(v) => handleOptionChange('includeTuition', v)}
+                                label="Thông tin học phí"
+                            />
+                            {options.includeTuition && (
+                                <>
+                                    <div className="w-36">
+                                        <Dropdown
+                                            value={options.tuitionMonth}
+                                            onChange={(v) => handleOptionChange('tuitionMonth', v)}
+                                            options={MONTH_OPTIONS}
+                                            placeholder="Chọn tháng"
+                                        />
+                                    </div>
+                                    <div className="w-32">
+                                        <Dropdown
+                                            value={options.tuitionYear}
+                                            onChange={(v) => handleOptionChange('tuitionYear', v)}
+                                            options={YEAR_OPTIONS}
+                                            placeholder="Chọn năm"
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* ===== HOMEWORK ===== */}
+                        <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+                            <Checkbox
+                                checked={options.includeHomework}
+                                onChange={(v) => {
+                                    handleOptionChange('includeHomework', v);
+                                    if (!v) handleOptionChange('homeworkContentId', null);
+                                }}
+                                label="Thông tin bài tập về nhà"
+                                disabled={!courseClass}
+                            />
+                            {options.includeHomework && (
+                                <div className="w-64">
+                                    <Dropdown
+                                        value={options.homeworkContentId ?? ''}
+                                        onChange={(v) => handleOptionChange('homeworkContentId', v || null)}
+                                        options={homeworkDropdownOptions}
+                                        placeholder={loadingGetByCourse ? 'Đang tải...' : 'Chọn bài tập'}
+                                        disabled={loadingGetByCourse}
+                                    />
+                                </div>
+                            )}
+                        </div>
 
                         <Checkbox
                             checked={options.includeTeacherName}
@@ -272,22 +404,59 @@ export const AttendanceExport = ({ attendance }) => {
                         >
                             Xem tab mới
                         </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCopyImage}
+                            disabled={!previewUrl || isLoadingPreview}
+                            icon={copied ? Check : Copy}
+                            className={copied ? 'text-green-600 border-green-600' : ''}
+                        >
+                            {copied ? 'Đã copy!' : 'Copy ảnh'}
+                        </Button>
                     </div>
                 </div>
 
                 {/* ===== PREVIEW SECTION ===== */}
                 <div className="px-6 py-4 relative">
-                    <h3 className="font-semibold text-foreground mb-4">
+                    <h3 className="font-semibold text-foreground mb-3">
                         Xem trước phiếu điểm danh
                     </h3>
 
+                    {/* Phone numbers for quick copy */}
+                    {(attendance.student?.studentPhone || attendance.student?.parentPhone) && (
+                        <div className="mb-4 flex flex-wrap gap-3">
+                            {attendance.student?.studentPhone && (
+                                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded px-3 py-1.5">
+                                    <Phone className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                    <span className="text-xs text-foreground-light">HS:</span>
+                                    <span
+                                        className="text-sm font-medium text-blue-700 cursor-pointer select-all"
+                                        title="Click để chọn"
+                                    >
+                                        {attendance.student.studentPhone}
+                                    </span>
+                                </div>
+                            )}
+                            {attendance.student?.parentPhone && (
+                                <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded px-3 py-1.5">
+                                    <Phone className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                                    <span className="text-xs text-foreground-light">PH:</span>
+                                    <span
+                                        className="text-sm font-medium text-green-700 cursor-pointer select-all"
+                                        title="Click để chọn"
+                                    >
+                                        {attendance.student.parentPhone}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div className="relative bg-gray-50 rounded-sm border border-border overflow-hidden min-h-[600px] flex items-center justify-center">
 
-                        {/* Ảnh example nền (luôn luôn có) */}
-
-
                         {/* Ảnh preview thật */}
-                        {previewUrl && !isLoadingPreview && (
+                        {previewUrl && !isLoadingPreview && !previewBlocked && (
                             <img
                                 src={previewUrl}
                                 alt="Preview phiếu điểm danh"
@@ -307,8 +476,15 @@ export const AttendanceExport = ({ attendance }) => {
                             </>
                         )}
 
+                        {/* Blocked: cần chọn thêm thông tin */}
+                        {!isLoadingPreview && previewBlocked && (
+                            <p className="relative z-10 text-sm text-amber-600 font-medium px-6 text-center">
+                                ⚠️ {previewBlocked}
+                            </p>
+                        )}
+
                         {/* Fallback khi không có preview */}
-                        {!isLoadingPreview && !previewUrl && (
+                        {!isLoadingPreview && !previewBlocked && !previewUrl && (
                             <p className="relative z-10 text-foreground-light">
                                 Không thể tải xem trước
                             </p>

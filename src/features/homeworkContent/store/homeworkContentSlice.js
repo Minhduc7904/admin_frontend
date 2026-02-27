@@ -13,6 +13,10 @@ const initialState = {
         hasPrevious: false,
         hasNext: false,
     },
+    // By-course state (no pagination)
+    byCourseHomeworkContents: [],
+    byCourseTotal: 0,
+    loadingGetByCourse: false,
     loadingGet: false,
     loadingCreate: false,
     loadingUpdate: false,
@@ -80,6 +84,16 @@ export const deleteHomeworkContentAsync = createAsyncThunk(
     }
 );
 
+export const getHomeworkContentsByCourseAsync = createAsyncThunk(
+    "homeworkContent/getByCourse",
+    async (courseId, thunkAPI) => {
+        return handleAsyncThunk(() => homeworkContentApi.getByCourse(courseId), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải bài tập theo khoá học",
+        });
+    }
+);
+
 export const searchHomeworkContentsAsync = createAsyncThunk(
     "homeworkContent/search",
     async (params, thunkAPI) => {
@@ -99,6 +113,10 @@ export const homeworkContentSlice = createSlice({
         },
         clearCurrentHomeworkContent: (state) => {
             state.currentHomeworkContent = null;
+        },
+        clearByCourseHomeworkContents: (state) => {
+            state.byCourseHomeworkContents = [];
+            state.byCourseTotal = 0;
         },
         resetFilters: (state) => {
             state.filters = initialState.filters;
@@ -205,6 +223,24 @@ export const homeworkContentSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // Get homework contents by course
+            .addCase(getHomeworkContentsByCourseAsync.pending, (state) => {
+                state.byCourseHomeworkContents = [];
+                state.byCourseTotal = 0;
+                state.loadingGetByCourse = true;
+                state.error = null;
+            })
+            .addCase(getHomeworkContentsByCourseAsync.fulfilled, (state, action) => {
+                state.loadingGetByCourse = false;
+                state.byCourseHomeworkContents = action.payload.data.homeworkContents;
+                state.byCourseTotal = action.payload.data.total;
+                state.error = null;
+            })
+            .addCase(getHomeworkContentsByCourseAsync.rejected, (state, action) => {
+                state.loadingGetByCourse = false;
+                state.error = action.payload;
+            })
+
             // Search homework contents
             .addCase(searchHomeworkContentsAsync.pending, (state) => {
                 state.loadingGet = true;
@@ -226,6 +262,7 @@ export const homeworkContentSlice = createSlice({
 export const {
     setFilters,
     clearCurrentHomeworkContent,
+    clearByCourseHomeworkContents,
     resetFilters,
     setPagination,
     resetPagination,
@@ -233,6 +270,9 @@ export const {
 
 // Selectors
 export const selectHomeworkContents = (state) => state.homeworkContent.homeworkContents;
+export const selectByCourseHomeworkContents = (state) => state.homeworkContent.byCourseHomeworkContents;
+export const selectByCourseHomeworkTotal = (state) => state.homeworkContent.byCourseTotal;
+export const selectHomeworkContentLoadingGetByCourse = (state) => state.homeworkContent.loadingGetByCourse;
 export const selectCurrentHomeworkContent = (state) => state.homeworkContent.currentHomeworkContent;
 export const selectHomeworkContentPagination = (state) => state.homeworkContent.pagination;
 export const selectHomeworkContentFilters = (state) => state.homeworkContent.filters;

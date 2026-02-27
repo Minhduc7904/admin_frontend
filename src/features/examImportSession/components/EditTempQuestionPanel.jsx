@@ -61,8 +61,8 @@ export const EditTempQuestionPanel = ({
     useEffect(() => {
         if (question && isOpen) {
             setFormData({
-                content: question.content || '',
-                solution: question.solution || '',
+                content: question.processedContent || '',
+                solution: question.processedSolution || '',
                 type: question.type || '',
                 difficulty: question.difficulty || '',
                 grade: question.grade?.toString() || '',

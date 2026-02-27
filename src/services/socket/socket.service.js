@@ -14,6 +14,7 @@ class SocketService {
         this.socket = null
         this.isConnected = false
         this.listeners = new Map() // Store event listeners
+        this.authFailed = false   // True after an auth error — stops reconnection loop
     }
 
     /**
@@ -26,6 +27,9 @@ class SocketService {
             console.log('✅ Socket already connected')
             return
         }
+
+        // Reset auth-failure guard each time we get a fresh token
+        this.authFailed = false
 
         // Use API base URL without /api suffix for socket connection
         const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
@@ -69,6 +73,26 @@ class SocketService {
         this.socket.on('connect_error', (error) => {
             console.error('❌ Socket connection error:', error.message)
             this.isConnected = false
+
+            // If the error is authentication-related, stop reconnecting immediately
+            const msg = (error.message || '').toLowerCase()
+            const isAuthError = msg.includes('jwt') ||
+                msg.includes('expired') ||
+                msg.includes('unauthorized') ||
+                msg.includes('authentication') ||
+                msg.includes('unauthenticated') ||
+                msg.includes('invalid') ||
+                error.type === 'UnauthorizedException'
+
+            if (isAuthError) {
+                console.warn('🔒 Socket auth error — stopping reconnection:', error.message)
+                this.authFailed = true
+                // Disable built-in reconnection then cleanly disconnect
+                if (this.socket) {
+                    this.socket.io.reconnection(false)
+                    this.socket.disconnect()
+                }
+            }
         })
 
         // Disconnected
@@ -76,8 +100,8 @@ class SocketService {
             this.isConnected = false
             console.log('❌ Socket disconnected:', reason)
 
-            if (reason === 'io server disconnect') {
-                // Server disconnected us, try to reconnect
+            if (reason === 'io server disconnect' && !this.authFailed) {
+                // Server disconnected us for a non-auth reason, try to reconnect
                 console.log('🔄 Attempting to reconnect...')
                 this.socket.connect()
             }
@@ -209,6 +233,14 @@ class SocketService {
      */
     getConnectionStatus() {
         return this.isConnected && this.socket?.connected
+    }
+
+    /**
+     * Check if connection was stopped due to an auth error
+     * @returns {boolean}
+     */
+    getAuthFailed() {
+        return this.authFailed
     }
 
     /**

@@ -11,7 +11,7 @@ import { useSocketEvent } from '../../hooks/socket/useSocketEvent'
  * Automatically connects when user is authenticated and disconnects on logout.
  */
 export const SocketProvider = ({ children }) => {
-    const { isConnected, socketId } = useSocket({
+    const { isConnected, socketId, authFailed } = useSocket({
         autoConnect: false, // Auto connect when user is authenticated
     })
 
@@ -22,26 +22,23 @@ export const SocketProvider = ({ children }) => {
 
     useSocketEvent('error', (error) => {
         console.error('❌ Socket error:', error)
-        // You can dispatch notification action here
-        // dispatch(addNotification({ type: 'error', message: error.message }))
     }, [])
 
     // Listen for new notifications (example)
     useSocketEvent('new-notification', (notification) => {
         console.log('🔔 New notification:', notification)
-
-        // You can dispatch Redux action here to update notification state
-        // dispatch(addNotification(notification.data))
     }, [])
 
     // Log connection status changes
     useEffect(() => {
         if (isConnected) {
             console.log(`✅ Socket connected with ID: ${socketId}`)
+        } else if (authFailed) {
+            console.warn('🔒 Socket stopped — authentication failed (token expired). Will retry on next login.')
         } else {
             console.log('❌ Socket disconnected')
         }
-    }, [isConnected, socketId])
+    }, [isConnected, socketId, authFailed])
 
     return children
 }

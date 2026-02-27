@@ -6,18 +6,11 @@ import { ViewModeToggle, MarkdownRenderer } from '../../../shared/components'
 // Lược bỏ các ký hiệu markdown không cần thiết:
 //   - Tiêu đề (#, ##, ###…)
 //   - Đường kẻ ngang (---)
-//   - Bảng (các dòng bắt đầu bằng |)
 const stripMarkdown = (text) => {
     return text
         .split('\n')
         .filter(line => {
             const trimmed = line.trim()
-            // Bỏ dòng bảng bắt đầu bằng |
-            if (trimmed.startsWith('|')) return false
-            // Bỏ dòng tiếp nối của ô bảng đa dòng (kết thúc bằng |)
-            if (trimmed.endsWith('|')) return false
-            // Bỏ dòng chứa nhiều | (fragment bảng bị vỡ)
-            if ((trimmed.match(/\|/g) || []).length >= 2) return false
             // Bỏ đường kẻ ngang thuần (---, ***, ___)
             if (/^[-*_]{3,}$/.test(trimmed)) return false
             return true
@@ -34,6 +27,10 @@ const stripMarkdown = (text) => {
         // Bỏ nhiều dòng trắng liên tiếp (>2) thành 1 dòng trống
         .join('\n')
         .replace(/\n{3,}/g, '\n\n')
+        // Giải mã HTML entities phổ biến
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
         .trimEnd()
 }
 

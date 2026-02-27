@@ -36,7 +36,7 @@ export const EditTempStatementPanel = ({
     useEffect(() => {
         if (statement && isOpen) {
             setFormData({
-                content: statement.content || '',
+                content: statement.processedContent || '',
                 isCorrect: !!statement.isCorrect,
                 difficulty: statement.difficulty || '',
             });

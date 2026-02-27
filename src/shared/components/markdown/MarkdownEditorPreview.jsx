@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback, memo } from 'react'
+import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import { useDispatch } from 'react-redux'
-import { Edit, Eye, Image as ImageIcon } from 'lucide-react'
+import { Edit, Eye, Image as ImageIcon, Upload, Loader2, SpellCheck2 } from 'lucide-react'
 import { MarkdownEditor } from './MarkdownEditor'
 import { MarkdownRenderer } from './MarkdownRenderer'
 import { useDebounce } from '../../hooks/useDebounce'
 import { MediaPickerModal } from '../../../features/media/components/mediaPicker/MediaPickerModal'
-import { getMyViewUrlAsync } from '../../../features/media/store/mediaSlice'
+import { getMyViewUrlAsync, uploadMediaAsync } from '../../../features/media/store/mediaSlice'
+import { fixMarkdownSpellingAsync } from '../../../features/markdown/store/markdownSlice'
 
 /* ------------------------------------------------------------
  * Preview Pane (memoized)
@@ -33,6 +34,10 @@ export const MarkdownEditorPreview = ({
     const [isTyping, setIsTyping] = useState(false)
     const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false)
     const [cursorPosition, setCursorPosition] = useState(null)
+    const [isUploading, setIsUploading] = useState(false)
+    const [isFixingSpelling, setIsFixingSpelling] = useState(false)
+    const [isDragging, setIsDragging] = useState(false)
+    const dragCounterRef = useRef(0)
 
     /* ----------------------------------------------------------
      * Sync controlled value
@@ -59,6 +64,57 @@ export const MarkdownEditorPreview = ({
     }, [value])
 
     /* ----------------------------------------------------------
+     * Helpers
+     * ---------------------------------------------------------- */
+    const getTextarea = () => document.querySelector('.w-md-editor-text-input')
+
+    const insertMarkdown = useCallback(
+        (imageMarkdown, insertAt) => {
+            setValue(prev => {
+                const base = prev || ''
+                const next = insertAt !== null && insertAt !== undefined
+                    ? base.slice(0, insertAt) + imageMarkdown + base.slice(insertAt)
+                    : base + '\n' + imageMarkdown
+                onChange?.(next)
+                return next
+            })
+        },
+        [onChange],
+    )
+
+    /* ----------------------------------------------------------
+     * Upload a File and insert markdown at cursor / end
+     * ---------------------------------------------------------- */
+    const uploadImageFile = useCallback(
+        async (file, insertAt) => {
+            if (!file || !file.type.startsWith('image/')) return
+
+            setIsUploading(true)
+            try {
+                const formData = new FormData()
+                formData.append('file', file)
+                formData.append('type', 'IMAGE')
+
+                const uploadResult = await dispatch(uploadMediaAsync(formData)).unwrap()
+                const mediaId = uploadResult.data.mediaId
+
+                const viewResult = await dispatch(
+                    getMyViewUrlAsync({ id: mediaId, expiry: 3600 }),
+                ).unwrap()
+
+                const viewUrl = viewResult.data.viewUrl
+                const imageMarkdown = `![media:${mediaId}](${viewUrl})`
+                insertMarkdown(imageMarkdown, insertAt)
+            } catch {
+                // errors handled by thunk toast
+            } finally {
+                setIsUploading(false)
+            }
+        },
+        [dispatch, insertMarkdown],
+    )
+
+    /* ----------------------------------------------------------
      * Handlers
      * ---------------------------------------------------------- */
     const handleChange = useCallback(
@@ -69,8 +125,23 @@ export const MarkdownEditorPreview = ({
         [onChange],
     )
 
+    const handleFixSpelling = useCallback(async () => {
+        if (!value || !editable) return
+        setIsFixingSpelling(true)
+        try {
+            const result = await dispatch(fixMarkdownSpellingAsync(value)).unwrap()
+            const fixed = result.data.fixedContent
+            setValue(fixed)
+            onChange?.(fixed)
+        } catch {
+            // errors handled by thunk toast
+        } finally {
+            setIsFixingSpelling(false)
+        }
+    }, [dispatch, value, editable, onChange])
+
     const handleOpenMediaPicker = useCallback(() => {
-        const textarea = document.querySelector('.w-md-editor-text-input')
+        const textarea = getTextarea()
         if (textarea) {
             setCursorPosition(textarea.selectionStart)
         }
@@ -100,6 +171,63 @@ export const MarkdownEditorPreview = ({
     )
 
     /* ----------------------------------------------------------
+     * Paste (Ctrl+V) — only intercept image files
+     * ---------------------------------------------------------- */
+    const handlePaste = useCallback(
+        (e) => {
+            if (!editable) return
+            const items = Array.from(e.clipboardData?.items ?? [])
+            const imageItem = items.find(i => i.kind === 'file' && i.type.startsWith('image/'))
+            if (!imageItem) return
+
+            e.preventDefault()
+            const file = imageItem.getAsFile()
+            const textarea = getTextarea()
+            const insertAt = textarea ? textarea.selectionStart : null
+            uploadImageFile(file, insertAt)
+        },
+        [editable, uploadImageFile],
+    )
+
+    /* ----------------------------------------------------------
+     * Drag & Drop
+     * ---------------------------------------------------------- */
+    const handleDragEnter = useCallback((e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        dragCounterRef.current += 1
+        if (dragCounterRef.current === 1) setIsDragging(true)
+    }, [])
+
+    const handleDragLeave = useCallback((e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        dragCounterRef.current -= 1
+        if (dragCounterRef.current === 0) setIsDragging(false)
+    }, [])
+
+    const handleDragOver = useCallback((e) => {
+        e.preventDefault()
+        e.stopPropagation()
+    }, [])
+
+    const handleDrop = useCallback(
+        (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            dragCounterRef.current = 0
+            setIsDragging(false)
+
+            if (!editable) return
+            const files = Array.from(e.dataTransfer?.files ?? [])
+            const imageFile = files.find(f => f.type.startsWith('image/'))
+            if (!imageFile) return
+            uploadImageFile(imageFile, null)
+        },
+        [editable, uploadImageFile],
+    )
+
+    /* ----------------------------------------------------------
      * Calculate character count (excluding media markdown)
      * ---------------------------------------------------------- */
     const getCharCountWithoutMedia = useCallback((text) => {
@@ -117,7 +245,33 @@ export const MarkdownEditorPreview = ({
     const isOverLimit = maxLength && charCount > maxLength
 
     return (
-        <div className="flex flex-col" style={{ height }}>
+        <div
+            className="flex flex-col relative"
+            style={{ height }}
+            onPaste={handlePaste}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+        >
+            {/* Drag overlay */}
+            {isDragging && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3
+                                bg-blue-50/90 border-2 border-dashed border-blue-400 rounded-lg pointer-events-none">
+                    <Upload className="w-10 h-10 text-blue-500" />
+                    <p className="text-sm font-semibold text-blue-600">Thả ảnh để tải lên</p>
+                </div>
+            )}
+
+            {/* Upload overlay */}
+            {isUploading && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3
+                                bg-white/80 rounded-lg pointer-events-none">
+                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                    <p className="text-sm font-medium text-blue-600">Đang tải ảnh lên…</p>
+                </div>
+            )}
+
             <div className="flex-1 grid grid-cols-2 gap-4 overflow-hidden">
                 {/* ================= Editor ================= */}
                 <div className="flex flex-col border rounded overflow-hidden">
@@ -142,14 +296,28 @@ export const MarkdownEditorPreview = ({
                                 )}
                             </div>
                             {editable && (
-                                <button
-                                    type='button'
-                                    onClick={handleOpenMediaPicker}
-                                    className="ml-auto p-1.5 hover:bg-gray-200 rounded text-blue-600 hover:text-blue-700"
-                                    title="Chèn hình ảnh"
-                                >
-                                    <ImageIcon className="w-4 h-4" />
-                                </button>
+                                <div className="ml-auto flex items-center gap-1">
+                                    <button
+                                        type='button'
+                                        onClick={handleFixSpelling}
+                                        disabled={isFixingSpelling || !value}
+                                        className="p-1.5 hover:bg-gray-200 rounded text-violet-600 hover:text-violet-700
+                                                   disabled:opacity-40 disabled:cursor-not-allowed"
+                                        title="Sửa lỗi chính tả"
+                                    >
+                                        {isFixingSpelling
+                                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                                            : <SpellCheck2 className="w-4 h-4" />}
+                                    </button>
+                                    <button
+                                        type='button'
+                                        onClick={handleOpenMediaPicker}
+                                        className="p-1.5 hover:bg-gray-200 rounded text-blue-600 hover:text-blue-700"
+                                        title="Chèn hình ảnh"
+                                    >
+                                        <ImageIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
                             )}
                         </h4>
                     </div>
@@ -160,7 +328,7 @@ export const MarkdownEditorPreview = ({
                             onChange={handleChange}
                             editable={editable}
                             height="100%"
-                            placeholder="Nhập nội dung markdown..."
+                            placeholder="Nhập nội dung markdown…"
                         />
                     </div>
                 </div>

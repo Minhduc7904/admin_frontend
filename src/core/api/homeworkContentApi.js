@@ -55,4 +55,14 @@ export const homeworkContentApi = {
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.HOMEWORK_CONTENTS.DELETE(id));
     },
+
+    /**
+     * Get all HomeworkContents belonging to a course
+     * Course → Lessons → LearningItems (type=HOMEWORK) → HomeworkContents
+     * @param {number} courseId - Course ID
+     * @returns {Promise<{ homeworkContents: HomeworkContentResponseDto[]; total: number }>}
+     */
+    getByCourse: (courseId) => {
+        return axiosClient.get(API_ENDPOINTS.HOMEWORK_CONTENTS.BY_COURSE(courseId));
+    },
 };

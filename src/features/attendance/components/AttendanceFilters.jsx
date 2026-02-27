@@ -35,7 +35,20 @@ export const AttendanceFilters = ({
     tuitionYear,
     onTuitionMonthChange,
     onTuitionYearChange,
+    /* homework */
+    hasClass = false,
+    showHomework = false,
+    onShowHomeworkChange,
+    homeworkOptions = [],
+    selectedHomeworkId,
+    onHomeworkChange,
+    loadingHomework = false,
 }) => {
+    const homeworkDropdownOptions = [
+        { value: '', label: 'Tất cả bài tập' },
+        ...homeworkOptions,
+    ];
+
     return (
         <div className="mb-4 space-y-3">
             {/* ===== ROW 1: search / session / status ===== */}
@@ -97,6 +110,29 @@ export const AttendanceFilters = ({
                             />
                         </div>
                     </>
+                )}
+            </div>
+
+            {/* ===== ROW 3: homework toggle ===== */}
+            <div className="flex items-center gap-4">
+                <Checkbox
+                    id="show-homework"
+                    label="Hiển thị bài tập về nhà"
+                    checked={showHomework}
+                    onChange={onShowHomeworkChange}
+                    disabled={!hasClass}
+                />
+
+                {showHomework && (
+                    <div className="w-64">
+                        <Dropdown
+                            value={selectedHomeworkId ?? ''}
+                            onChange={(val) => onHomeworkChange(val || null)}
+                            options={homeworkDropdownOptions}
+                            placeholder={loadingHomework ? 'Đang tải...' : 'Chọn bài tập'}
+                            disabled={loadingHomework}
+                        />
+                    </div>
                 )}
             </div>
         </div>

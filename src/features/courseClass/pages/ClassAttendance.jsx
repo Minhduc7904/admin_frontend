@@ -45,6 +45,15 @@ import {
     setFilters,
 } from '../../attendance/store/attendanceSlice';
 import { ROUTES } from '../../../core/constants';
+import {
+    selectCurrentCourseClass,
+} from '../store/courseClassSlice';
+import {
+    getHomeworkContentsByCourseAsync,
+    clearByCourseHomeworkContents,
+    selectByCourseHomeworkContents,
+    selectHomeworkContentLoadingGetByCourse,
+} from '../../homeworkContent/store/homeworkContentSlice';
 /**
  * ClassAttendance - Điểm danh của một lớp
  */
@@ -66,6 +75,11 @@ export const ClassAttendance = () => {
     const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
     const loadingStatistics = useSelector(selectAttendanceLoadingStatistics);
     const loadingExport = useSelector(selectAttendanceLoadingExport);
+
+    /* homework filter */
+    const courseClass = useSelector(selectCurrentCourseClass);
+    const byCourseHomeworkContents = useSelector(selectByCourseHomeworkContents);
+    const loadingGetByCourse = useSelector(selectHomeworkContentLoadingGetByCourse);
 
     /* ===================== LOCAL STATE ===================== */
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
@@ -94,10 +108,12 @@ export const ClassAttendance = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedSession, setSelectedSession] = useState(null);
 
-    /* tuition filter */
-    const [showTuition, setShowTuition] = useState(false);
-    const [tuitionMonth, setTuitionMonth] = useState(new Date().getMonth() + 1);
-    const [tuitionYear, setTuitionYear] = useState(new Date().getFullYear());
+    /* tuition / homework filter — persisted in slice */
+    const showTuition = filters.showTuition;
+    const tuitionMonth = filters.tuitionMonth;
+    const tuitionYear = filters.tuitionYear;
+    const showHomework = filters.showHomework;
+    const selectedHomeworkId = filters.selectedHomeworkId;
 
     // Stable key: non-empty only when both month AND year are selected
     const tuitionFilterKey = (showTuition && tuitionMonth && tuitionYear)
@@ -109,7 +125,15 @@ export const ClassAttendance = () => {
         loadAttendances();
     // Only re-fetch for tuition when BOTH month and year are chosen (or both cleared)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey]);
+    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey, selectedHomeworkId]);
+
+    // Fetch homework list when showHomework is toggled on and list is not yet loaded
+    useEffect(() => {
+        if (showHomework && courseClass?.courseId && byCourseHomeworkContents.length === 0) {
+            dispatch(getHomeworkContentsByCourseAsync(courseClass.courseId));
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showHomework, courseClass?.courseId]);
 
     useEffect(() => {
         if (selectedSession?.sessionId) {
@@ -128,6 +152,7 @@ export const ClassAttendance = () => {
                 sessionId: selectedSession?.sessionId || undefined,
                 month: showTuition ? tuitionMonth : undefined,
                 year: showTuition ? tuitionYear : undefined,
+                homeworkContentId: (showHomework && selectedHomeworkId) ? selectedHomeworkId : undefined,
             })
         );
     };
@@ -150,14 +175,26 @@ export const ClassAttendance = () => {
     };
 
     const handleShowTuitionChange = (val) => {
-        setShowTuition(val);
+        dispatch(setFilters({ showTuition: val }));
         if (!val) {
-            setTuitionMonth(new Date().getMonth() + 1);
-            setTuitionYear(new Date().getFullYear());
+            dispatch(setFilters({
+                tuitionMonth: new Date().getMonth() + 1,
+                tuitionYear: new Date().getFullYear(),
+            }));
         }
     };
-    const handleTuitionMonthChange = (val) => { setTuitionMonth(val); setCurrentPage(1); };
-    const handleTuitionYearChange  = (val) => { setTuitionYear(val);  setCurrentPage(1); };
+    const handleTuitionMonthChange = (val) => { dispatch(setFilters({ tuitionMonth: val })); setCurrentPage(1); };
+    const handleTuitionYearChange  = (val) => { dispatch(setFilters({ tuitionYear: val }));  setCurrentPage(1); };
+
+    const handleShowHomeworkChange = (val) => {
+        dispatch(setFilters({ showHomework: val }));
+        if (!val) {
+            dispatch(setFilters({ selectedHomeworkId: null }));
+            dispatch(clearByCourseHomeworkContents());
+        }
+        setCurrentPage(1);
+    };
+    const handleHomeworkChange = (val) => { dispatch(setFilters({ selectedHomeworkId: val })); setCurrentPage(1); };
 
     /* ===================== FORM ===================== */
     const handleFormChange = (e) => {
@@ -391,6 +428,17 @@ export const ClassAttendance = () => {
                     tuitionYear={tuitionYear}
                     onTuitionMonthChange={handleTuitionMonthChange}
                     onTuitionYearChange={handleTuitionYearChange}
+                    /* homework */
+                    hasClass={!!courseClass}
+                    showHomework={showHomework}
+                    onShowHomeworkChange={handleShowHomeworkChange}
+                    homeworkOptions={byCourseHomeworkContents.map((hw) => ({
+                        value: hw.homeworkContentId,
+                        label: hw.title,
+                    }))}
+                    selectedHomeworkId={selectedHomeworkId}
+                    onHomeworkChange={handleHomeworkChange}
+                    loadingHomework={loadingGetByCourse}
                 />
             </div>
 

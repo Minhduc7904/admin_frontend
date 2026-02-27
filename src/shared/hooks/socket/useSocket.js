@@ -24,6 +24,7 @@ export const useSocket = (options = {}) => {
     const isAuthenticated = useSelector(selectIsAuthenticated)
     const [isConnected, setIsConnected] = useState(false)
     const [socketId, setSocketId] = useState(null)
+    const [authFailed, setAuthFailed] = useState(false)
 
     // Connect to socket
     const connect = useCallback(() => {
@@ -35,6 +36,7 @@ export const useSocket = (options = {}) => {
         socketService.connect(accessToken)
         setIsConnected(socketService.getConnectionStatus())
         setSocketId(socketService.getSocketId())
+        setAuthFailed(false)
     }, [accessToken])
 
     // Disconnect from socket
@@ -79,11 +81,20 @@ export const useSocket = (options = {}) => {
             socketService.on('connect', () => {
                 setIsConnected(true)
                 setSocketId(socketService.getSocketId())
+                setAuthFailed(false)
             })
 
             socketService.on('disconnect', () => {
                 setIsConnected(false)
                 setSocketId(null)
+            })
+
+            socketService.on('connect_error', () => {
+                if (socketService.getAuthFailed()) {
+                    setAuthFailed(true)
+                    setIsConnected(false)
+                    setSocketId(null)
+                }
             })
         }
 
@@ -94,11 +105,12 @@ export const useSocket = (options = {}) => {
                 disconnect()
             }
         }
-    }, [isAuthenticated, accessToken, autoConnect, connect, disconnect])
+    }, [isAuthenticated, accessToken, autoConnect])
 
     return {
         isConnected,
         socketId,
+        authFailed,
         connect,
         disconnect,
         joinRoom,
