@@ -41,6 +41,7 @@ export const CourseListPage = ({
     )
 
     const [openAddCourse, setOpenAddCourse] = useState(false)
+    const [deleteTarget, setDeleteTarget] = useState(null)
 
     // Lấy từ slice thay vì state local
     const grade = filters.grade || ''
@@ -116,18 +117,23 @@ export const CourseListPage = ({
 
     const handleEdit = () => {}
 
-    const handleDelete = async (course) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa khóa học "${course.title}"?`)) {
-            return
-        }
+    const handleDelete = (course) => {
+        setDeleteTarget(course)
+    }
 
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return
         try {
-            await dispatch(deleteCourseAsync(course.courseId)).unwrap()
+            await dispatch(deleteCourseAsync(deleteTarget.courseId)).unwrap()
             loadCourses()
         } catch (error) {
             console.error('Delete course failed:', error)
+        } finally {
+            setDeleteTarget(null)
         }
     }
+
+    const handleCloseDeleteModal = () => setDeleteTarget(null)
 
     /* ===================== ADD COURSE ===================== */
     const openAdd = () => setOpenAddCourse(true)
@@ -178,6 +184,10 @@ export const CourseListPage = ({
             onDelete={handleDelete}
             onOpenAddCourse={openAdd}
             onCloseAddCourse={closeAdd}
+            deleteTarget={deleteTarget}
+            openDeleteModal={!!deleteTarget}
+            onCloseDeleteModal={handleCloseDeleteModal}
+            onConfirmDelete={handleConfirmDelete}
         />
     )
 }

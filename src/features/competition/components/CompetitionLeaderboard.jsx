@@ -1,121 +1,258 @@
-import { Trophy, Medal, Award, User } from 'lucide-react'
-import { Table } from '../../../shared/components/ui'
+import { useEffect, useState, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { User, Trophy, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import {
+    getAllCompetitionSubmitsAsync,
+    selectCompetitionSubmits,
+    selectCompetitionSubmitPagination,
+    selectCompetitionSubmitLoadingGet,
+} from '../../competitionSubmit/store/competitionSubmitSlice';
+import { Dropdown, Table } from '../../../shared/components/ui';
+import { Pagination } from '../../../shared/components/ui/Pagination';
+
+/* ── Constants ──────────────────────────────────────────────────── */
+
+const STATUS_CONFIG = {
+    IN_PROGRESS: { label: 'Đang làm',       cls: 'bg-blue-100 text-blue-700' },
+    SUBMITTED:   { label: 'Đã nộp',         cls: 'bg-green-100 text-green-700' },
+    GRADED:      { label: 'Đã chấm',        cls: 'bg-purple-100 text-purple-700' },
+    ABANDONED:   { label: 'Bỏ giữa chừng', cls: 'bg-gray-100 text-gray-600' },
+};
+
+const STATUS_OPTIONS = [
+    { value: '',            label: 'Tất cả trạng thái' },
+    { value: 'IN_PROGRESS', label: 'Đang làm' },
+    { value: 'SUBMITTED',   label: 'Đã nộp' },
+    { value: 'GRADED',      label: 'Đã chấm' },
+    { value: 'ABANDONED',   label: 'Bỏ giữa chừng' },
+];
+
+const IS_GRADED_OPTIONS = [
+    { value: '',      label: 'Tất cả' },
+    { value: 'true',  label: 'Đã chấm' },
+    { value: 'false', label: 'Chưa chấm' },
+];
+
+/* ── Helpers ────────────────────────────────────────────────────── */
+
+const formatDateTime = (d) => {
+    if (!d) return '-';
+    return new Date(d).toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+    });
+};
+
+const StatusBadge = ({ status }) => {
+    const cfg = STATUS_CONFIG[status] ?? { label: status, cls: 'bg-gray-100 text-gray-600' };
+    return (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${cfg.cls}`}>
+            {cfg.label}
+        </span>
+    );
+};
+
+const ScoreCell = ({ score, totalScore }) => {
+    if (score == null) return <span className="text-xs text-foreground-lighter italic">–</span>;
+    const pct = totalScore ? Math.round((score / totalScore) * 100) : null;
+    const color =
+        pct == null    ? 'bg-gray-100 text-gray-700' :
+        pct >= 80      ? 'bg-green-100 text-green-700' :
+        pct >= 50      ? 'bg-yellow-100 text-yellow-700' :
+                         'bg-red-100 text-red-700';
+    return (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${color}`}>
+            {score}{totalScore ? `/${totalScore}` : ''}
+        </span>
+    );
+};
+
+/* ── Component ──────────────────────────────────────────────────── */
 
 export const CompetitionLeaderboard = ({ competition }) => {
-    const leaderboardData = [
-        { rank: 1, fullName: 'Nguyễn Văn An', email: 'nguyenvanan@example.com', score: 95.5, completedAt: '2024-02-10T10:30:00', duration: 45, attemptCount: 1 },
-        { rank: 2, fullName: 'Trần Thị Bình', email: 'tranthibinh@example.com', score: 92.0, completedAt: '2024-02-10T11:15:00', duration: 50, attemptCount: 2 },
-        { rank: 3, fullName: 'Lê Hoàng Cường', email: 'lehoangcuong@example.com', score: 89.5, completedAt: '2024-02-10T09:45:00', duration: 48, attemptCount: 1 },
-        { rank: 4, fullName: 'Phạm Thị Dung', email: 'phamthidung@example.com', score: 87.0, completedAt: '2024-02-10T14:20:00', duration: 52, attemptCount: 3 },
-    ]
+    const dispatch   = useDispatch();
+    const submits    = useSelector(selectCompetitionSubmits);
+    const pagination = useSelector(selectCompetitionSubmitPagination);
+    const loading    = useSelector(selectCompetitionSubmitLoadingGet);
 
-    const formatDate = (d) =>
-        new Date(d).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
+    const [status,      setStatus]      = useState('');
+    const [isGraded,    setIsGraded]    = useState('');
+    const [startedFrom, setStartedFrom] = useState('');
+    const [startedTo,   setStartedTo]   = useState('');
+    const [page,  setPage]  = useState(1);
+    const [limit, setLimit] = useState(10);
 
-    const rankBadge = (rank) => {
-        if (rank === 1) return <Trophy size={12} className="text-yellow-500" />
-        if (rank === 2) return <Medal size={12} className="text-gray-400" />
-        if (rank === 3) return <Award size={12} className="text-orange-500" />
-        return <span className="text-[11px] font-semibold">#{rank}</span>
-    }
+    const load = useCallback(() => {
+        if (!competition?.competitionId) return;
+        dispatch(getAllCompetitionSubmitsAsync({
+            competitionId: competition.competitionId,
+            status:      status      || undefined,
+            isGraded:    isGraded    !== '' ? isGraded : undefined,
+            startedFrom: startedFrom || undefined,
+            startedTo:   startedTo   || undefined,
+            page,
+            limit,
+            sortBy:    'startedAt',
+            sortOrder: 'desc',
+        }));
+    }, [dispatch, competition?.competitionId, status, isGraded, startedFrom, startedTo, page, limit]);
 
-    const scoreBadge = (score) => {
-        const color =
-            score >= 90
-                ? 'bg-green-100 text-green-700'
-                : score >= 80
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-100 text-gray-700'
+    useEffect(() => { load(); }, [load]);
 
-        return (
-            <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${color}`}>
-                {score.toFixed(1)}
-            </span>
-        )
-    }
+    const applyFilter = (setter) => (val) => { setter(val); setPage(1); };
 
+    /* ── Columns ──────────────────────────────────────────────── */
     const columns = [
         {
-            key: 'rank',
-            label: '#',
-            render: (i) => rankBadge(i.rank),
+            key: 'submitId',
+            label: 'ID',
+            render: (s) => <span className="text-xs text-foreground-lighter">#{s.submitId}</span>,
         },
         {
             key: 'student',
-            label: 'Thí sinh',
-            render: (i) => (
+            label: 'Học sinh',
+            render: (s) => (
                 <div className="flex items-center gap-1.5 min-w-0">
-                    <User size={12} className="text-primary-600" />
+                    <User size={12} className="text-foreground-lighter flex-shrink-0" />
                     <div className="min-w-0">
-                        <div className="text-[11px] font-medium truncate">{i.fullName}</div>
-                        <div className="text-[10px] text-muted-foreground truncate">{i.email}</div>
+                        <div className="text-xs font-medium text-foreground truncate max-w-[140px]">
+                            {s.student?.fullName ?? `#${s.studentId}`}
+                        </div>
+                        {s.student?.email && (
+                            <div className="text-[10px] text-foreground-lighter truncate max-w-[140px]">
+                                {s.student.email}
+                            </div>
+                        )}
                     </div>
                 </div>
             ),
         },
         {
+            key: 'attempt',
+            label: 'Lần',
+            render: (s) => (
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-100 text-xs font-semibold text-gray-700">
+                    {s.attemptNumber ?? 1}
+                </span>
+            ),
+        },
+        {
             key: 'score',
             label: 'Điểm',
-            render: (i) => scoreBadge(i.score),
+            render: (s) => <ScoreCell score={s.totalPoints} totalScore={s.maxPoints} />,
         },
         {
-            key: 'duration',
-            label: 'TG',
-            render: (i) => <span className="text-[11px]">{i.duration}'</span>,
+            key: 'status',
+            label: 'Trạng thái',
+            render: (s) => <StatusBadge status={s.status} />,
         },
         {
-            key: 'attemptCount',
-            label: 'Lần',
-            render: (i) => <span className="text-[11px]">{i.attemptCount}</span>,
+            key: 'graded',
+            label: 'Chấm',
+            render: (s) => s.isGraded
+                ? <CheckCircle2 size={14} className="text-green-500" />
+                : <XCircle size={14} className="text-gray-300" />,
         },
         {
-            key: 'completedAt',
-            label: 'Xong',
-            render: (i) => <span className="text-[10px]">{formatDate(i.completedAt)}</span>,
+            key: 'startedAt',
+            label: 'Bắt đầu',
+            render: (s) => <span className="text-[10px] text-foreground-lighter">{formatDateTime(s.startedAt)}</span>,
         },
-    ]
+    ];
 
+    /* ── Render ───────────────────────────────────────────────── */
     return (
-        <div className="flex flex-col h-full border rounded-md overflow-hidden">
-
+        <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="px-3 py-2 border-b">
-                <div className="flex items-center gap-1">
-                    <Trophy size={14} className="text-primary-600" />
-                    <span className="text-sm font-semibold">Bảng xếp hạng</span>
+            <div className="px-4 py-3 border-b border-border bg-white flex items-center justify-between gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2 min-w-0">
+                    <Trophy size={15} className="text-yellow-500 flex-shrink-0" />
+                    <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">
+                            {competition?.title ?? 'Cuộc thi'}
+                        </p>
+                        <p className="text-xs text-foreground-lighter">
+                            {loading ? '...' : `${pagination?.total ?? 0} lượt nộp bài`}
+                        </p>
+                    </div>
                 </div>
-                <div className="text-[11px] text-muted-foreground truncate">
-                    {competition?.title || 'Cuộc thi'}
-                </div>
+                <button
+                    onClick={load}
+                    disabled={loading}
+                    title="Tải lại"
+                    className="p-1.5 rounded hover:bg-gray-100 text-foreground-light transition-colors disabled:opacity-50"
+                >
+                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                </button>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 text-center border-b bg-muted px-2 py-1">
-                <div>
-                    <div className="text-sm font-bold">{leaderboardData.length}</div>
-                    <div className="text-[10px] text-muted-foreground">Thí sinh</div>
+            {/* Filters */}
+            <div className="px-4 py-3 border-b border-border bg-gray-50 flex-shrink-0 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                    <Dropdown
+                        value={status}
+                        onChange={applyFilter(setStatus)}
+                        options={STATUS_OPTIONS}
+                        placeholder="Trạng thái"
+                        size="sm"
+                    />
+                    <Dropdown
+                        value={isGraded}
+                        onChange={applyFilter(setIsGraded)}
+                        options={IS_GRADED_OPTIONS}
+                        placeholder="Chấm điểm"
+                        size="sm"
+                    />
                 </div>
-                <div>
-                    <div className="text-sm font-bold">{Math.max(...leaderboardData.map(d => d.score)).toFixed(1)}</div>
-                    <div className="text-[10px] text-muted-foreground">Cao nhất</div>
-                </div>
-                <div>
-                    <div className="text-sm font-bold">
-                        {(leaderboardData.reduce((s, d) => s + d.score, 0) / leaderboardData.length).toFixed(1)}
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col gap-0.5">
+                        <label className="text-[10px] text-foreground-lighter uppercase tracking-wide">Từ ngày</label>
+                        <input
+                            type="date"
+                            value={startedFrom}
+                            onChange={(e) => { setStartedFrom(e.target.value); setPage(1); }}
+                            className="w-full text-xs border border-border rounded px-2 py-1.5 bg-white text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
                     </div>
-                    <div className="text-[10px] text-muted-foreground">TB</div>
+                    <div className="flex flex-col gap-0.5">
+                        <label className="text-[10px] text-foreground-lighter uppercase tracking-wide">Đến ngày</label>
+                        <input
+                            type="date"
+                            value={startedTo}
+                            onChange={(e) => { setStartedTo(e.target.value); setPage(1); }}
+                            className="w-full text-xs border border-border rounded px-2 py-1.5 bg-white text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                    </div>
                 </div>
             </div>
 
             {/* Table */}
             <div className="flex-1 overflow-auto">
                 <Table
-                    dense
                     columns={columns}
-                    data={leaderboardData}
-                    loading={false}
+                    data={submits}
+                    loading={loading}
+                    dense
+                    emptyMessage="Không có lượt nộp bài nào"
                 />
             </div>
+
+            {/* Pagination */}
+            {(pagination?.totalPages ?? 0) > 0 && (
+                <div className="px-4 py-3 border-t border-border bg-white flex-shrink-0">
+                    <Pagination
+                        currentPage={page}
+                        totalPages={pagination.totalPages}
+                        totalItems={pagination.total}
+                        hasNext={pagination.hasNext}
+                        hasPrevious={pagination.hasPrevious}
+                        itemsPerPage={limit}
+                        onPageChange={setPage}
+                        onItemsPerPageChange={(v) => { setLimit(v); setPage(1); }}
+                    />
+                </div>
+            )}
         </div>
-    )
-}
+    );
+};
+

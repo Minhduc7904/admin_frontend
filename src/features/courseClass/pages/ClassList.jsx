@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { Button, RightPanel } from '../../../shared/components';
+import { Button, RightPanel, ConfirmModal } from '../../../shared/components';
 import { ClassFilters, ClassTable, AddClass, EditClass } from '../components';
 import { Pagination } from '../../../shared/components/ui/Pagination';
 
@@ -46,6 +46,11 @@ export const ClassList = ({
     filterCourseTeacherId = null,
     defaultCourseId = null,
     canSelectCourse = true,
+    // delete modal props
+    deleteTarget,
+    openDeleteModal,
+    onCloseDeleteModal,
+    onConfirmDelete,
 }) => {
     const [editClass, setEditClass] = useState(null)
     const [openEditClass, setOpenEditClass] = useState(false)
@@ -155,6 +160,19 @@ export const ClassList = ({
                     onClose={handleEditClose}
                 />
             </RightPanel>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={openDeleteModal}
+                onClose={onCloseDeleteModal}
+                onConfirm={onConfirmDelete}
+                title="Xóa lớp học"
+                message={`Bạn có chắc chắn muốn xóa lớp học "${deleteTarget?.className}"? Thao tác này không thể hoàn tác.`}
+                confirmText="Xóa"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={loading}
+            />
         </>
     );
 };

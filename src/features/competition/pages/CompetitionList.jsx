@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react'
-import { Button, RightPanel } from '../../../shared/components'
-import { CompetitionFilters, CompetitionTable, AddCompetition, EditCompetition, CompetitionLeaderboard } from '../components'
+import { Button, RightPanel, ConfirmModal } from '../../../shared/components'
+import { CompetitionFilters, CompetitionTable, AddCompetition, EditCompetition, CompetitionLeaderboard, CompetitionDetail } from '../components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
 
 export const CompetitionList = ({
@@ -44,6 +44,16 @@ export const CompetitionList = ({
     onCloseAddCompetition,
     onCloseEditCompetition,
     onCloseLeaderboard,
+    // detail panel
+    openDetailPanel,
+    selectedCompetitionForDetail,
+    onCloseDetailPanel,
+    onEditFromDetail,
+    // delete modal props
+    deleteTarget,
+    openDeleteModal,
+    onCloseDeleteModal,
+    onConfirmDelete,
 }) => {
     return (
         <>
@@ -101,6 +111,21 @@ export const CompetitionList = ({
                 </div>
             </div>
 
+            {/* Detail Panel */}
+            <RightPanel
+                isOpen={openDetailPanel}
+                onClose={onCloseDetailPanel}
+                title="Chi tiết cuộc thi"
+                width="w-[600px]"
+            >
+                {selectedCompetitionForDetail && (
+                    <CompetitionDetail
+                        competitionId={selectedCompetitionForDetail.competitionId}
+                        onEdit={onEditFromDetail}
+                    />
+                )}
+            </RightPanel>
+
             {/* Add Competition */}
             <RightPanel
                 isOpen={openAddCompetition}
@@ -132,7 +157,8 @@ export const CompetitionList = ({
             <RightPanel
                 isOpen={openLeaderboard}
                 onClose={onCloseLeaderboard}
-                title="Bảng xếp hạng"
+                title="Lượt nộp bài"
+                width="w-[700px]"
             >
                 {selectedCompetitionForLeaderboard && (
                     <CompetitionLeaderboard
@@ -140,6 +166,19 @@ export const CompetitionList = ({
                     />
                 )}
             </RightPanel>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={openDeleteModal}
+                onClose={onCloseDeleteModal}
+                onConfirm={onConfirmDelete}
+                title="Xóa cuộc thi"
+                message={`Bạn có chắc chắn muốn xóa cuộc thi "${deleteTarget?.title}"? Thao tác này không thể hoàn tác.`}
+                confirmText="Xóa"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={loading}
+            />
         </>
     )
 }

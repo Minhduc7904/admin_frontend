@@ -32,6 +32,7 @@ import questionReducer from "../../features/question/store/questionSlice";
 import statementReducer from "../../features/statement/store/statementSlice";
 import examReducer from "../../features/exam/store/examSlice";
 import competitionReducer from "../../features/competition/store/competitionSlice";
+import competitionSubmitReducer from "../../features/competitionSubmit/store/competitionSubmitSlice";
 import sectionReducer from "../../features/exam/store/sectionSlice";
 import documentContentReducer from "../../features/documentContent/store/documentContentSlice";
 import videoContentReducer from "../../features/videoContent/store/videoContentSlice";
@@ -73,6 +74,7 @@ export const store = configureStore({
     statement: statementReducer,
     exam: examReducer,
     competition: competitionReducer,
+    competitionSubmit: competitionSubmitReducer,
     section: sectionReducer,
     documentContent: documentContentReducer,
     videoContent: videoContentReducer,

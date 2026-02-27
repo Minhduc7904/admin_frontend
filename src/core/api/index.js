@@ -32,4 +32,5 @@ export { questionApi } from './questionApi';
 export { statementApi } from './statementApi';
 export { examApi } from './examApi';
 export { competitionApi } from './competitionApi';
+export { competitionSubmitApi } from './competitionSubmitApi';
 export { sectionApi } from './sectionApi';

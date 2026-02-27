@@ -36,9 +36,12 @@ export const CompetitionListPage = () => {
 
     const [openAddCompetition, setOpenAddCompetition] = useState(false)
     const [openEditCompetition, setOpenEditCompetition] = useState(false)
+    const [openDetailPanel, setOpenDetailPanel] = useState(false)
+    const [deleteTarget, setDeleteTarget] = useState(null)
     const [openLeaderboard, setOpenLeaderboard] = useState(false)
     const [selectedCompetitionId, setSelectedCompetitionId] = useState(null)
     const [selectedCompetitionForLeaderboard, setSelectedCompetitionForLeaderboard] = useState(null)
+    const [selectedCompetitionForDetail, setSelectedCompetitionForDetail] = useState(null)
 
     // Lấy từ filters và pagination
     const visibility = filters.visibility || ''
@@ -99,8 +102,20 @@ export const CompetitionListPage = () => {
     }
 
     const handleView = (competition) => {
-        // TODO: Navigate to competition detail page
-        console.log('View competition:', competition)
+        setSelectedCompetitionForDetail(competition)
+        setOpenDetailPanel(true)
+    }
+
+    const handleEditFromDetail = () => {
+        if (!selectedCompetitionForDetail) return
+        setOpenDetailPanel(false)
+        setSelectedCompetitionId(selectedCompetitionForDetail.competitionId)
+        setOpenEditCompetition(true)
+    }
+
+    const closeDetail = () => {
+        setOpenDetailPanel(false)
+        setSelectedCompetitionForDetail(null)
     }
 
     const handleEdit = (competition) => {
@@ -113,18 +128,23 @@ export const CompetitionListPage = () => {
         setOpenLeaderboard(true)
     }
 
-    const handleDelete = async (competition) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa cuộc thi "${competition.title}"?`)) {
-            return
-        }
+    const handleDelete = (competition) => {
+        setDeleteTarget(competition)
+    }
 
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return
         try {
-            await dispatch(deleteCompetitionAsync(competition.competitionId)).unwrap()
+            await dispatch(deleteCompetitionAsync(deleteTarget.competitionId)).unwrap()
             loadCompetitions()
         } catch (error) {
             console.error('Delete competition failed:', error)
+        } finally {
+            setDeleteTarget(null)
         }
     }
+
+    const handleCloseDeleteModal = () => setDeleteTarget(null)
 
     /* ===================== ADD COMPETITION ===================== */
     const openAdd = () => setOpenAddCompetition(true)
@@ -185,6 +205,14 @@ export const CompetitionListPage = () => {
             onCloseAddCompetition={closeAdd}
             onCloseEditCompetition={closeEdit}
             onCloseLeaderboard={closeLeaderboard}
+            openDetailPanel={openDetailPanel}
+            selectedCompetitionForDetail={selectedCompetitionForDetail}
+            onCloseDetailPanel={closeDetail}
+            onEditFromDetail={handleEditFromDetail}
+            deleteTarget={deleteTarget}
+            openDeleteModal={!!deleteTarget}
+            onCloseDeleteModal={handleCloseDeleteModal}
+            onConfirmDelete={handleConfirmDelete}
         />
     )
 }

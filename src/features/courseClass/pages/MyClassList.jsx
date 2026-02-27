@@ -42,6 +42,7 @@ export const MyClassList = () => {
 
     const [isActive, setIsActive] = useState('');
     const [openAddClass, setOpenAddClass] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     // Lấy từ slice thay vì state local
     const currentPage = pagination.page;
@@ -102,18 +103,23 @@ export const MyClassList = () => {
         // navigate(ROUTES.CLASS_EDIT(classItem.classId));
     };
 
-    const handleDelete = async (classItem) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa lớp học "${classItem.className}"?`)) {
-            return;
-        }
+    const handleDelete = (classItem) => {
+        setDeleteTarget(classItem);
+    };
 
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await dispatch(deleteCourseClassAsync(classItem.classId)).unwrap();
+            await dispatch(deleteCourseClassAsync(deleteTarget.classId)).unwrap();
             loadClasses();
         } catch (error) {
             console.error('Delete class failed:', error);
+        } finally {
+            setDeleteTarget(null);
         }
     };
+
+    const handleCloseDeleteModal = () => setDeleteTarget(null);
 
     /* ===================== ADD CLASS ===================== */
     const openAdd = () => setOpenAddClass(true);
@@ -161,6 +167,10 @@ export const MyClassList = () => {
             filterCourseTeacherId={teacherId}
             defaultCourseId={null}
             canSelectCourse={true}
+            deleteTarget={deleteTarget}
+            openDeleteModal={!!deleteTarget}
+            onCloseDeleteModal={handleCloseDeleteModal}
+            onConfirmDelete={handleConfirmDelete}
         />
     );
 };

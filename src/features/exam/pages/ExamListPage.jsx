@@ -35,6 +35,7 @@ export const ExamListPage = () => {
     )
 
     const [openAddExam, setOpenAddExam] = useState(false)
+    const [deleteTarget, setDeleteTarget] = useState(null)
 
     // Lấy từ filters và pagination
     const grade = filters.grade || ''
@@ -111,18 +112,23 @@ export const ExamListPage = () => {
         console.log('Edit exam:', exam)
     }
 
-    const handleDelete = async (exam) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa đề thi "${exam.title}"?`)) {
-            return
-        }
+    const handleDelete = (exam) => {
+        setDeleteTarget(exam)
+    }
 
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return
         try {
-            await dispatch(deleteExamAsync(exam.examId)).unwrap()
+            await dispatch(deleteExamAsync(deleteTarget.examId)).unwrap()
             loadExams()
         } catch (error) {
             console.error('Delete exam failed:', error)
+        } finally {
+            setDeleteTarget(null)
         }
     }
+
+    const handleCloseDeleteModal = () => setDeleteTarget(null)
 
     /* ===================== ADD EXAM ===================== */
     const openAdd = () => setOpenAddExam(true)
@@ -167,6 +173,10 @@ export const ExamListPage = () => {
             onDelete={handleDelete}
             onOpenAddExam={openAdd}
             onCloseAddExam={closeAdd}
+            deleteTarget={deleteTarget}
+            openDeleteModal={!!deleteTarget}
+            onCloseDeleteModal={handleCloseDeleteModal}
+            onConfirmDelete={handleConfirmDelete}
         />
     )
 }

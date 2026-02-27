@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react'
-import { Button, RightPanel } from '../../../shared/components'
+import { Button, RightPanel, ConfirmModal } from '../../../shared/components'
 import { ExamFilters, ExamTable, AddExam } from '../components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
 
@@ -40,6 +40,11 @@ export const ExamList = ({
     onDelete,
     onOpenAddExam,
     onCloseAddExam,
+    // delete modal props
+    deleteTarget,
+    openDeleteModal,
+    onCloseDeleteModal,
+    onConfirmDelete,
 }) => {
     return (
         <>
@@ -110,6 +115,19 @@ export const ExamList = ({
                     loadExams={loadExams}
                 />
             </RightPanel>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={openDeleteModal}
+                onClose={onCloseDeleteModal}
+                onConfirm={onConfirmDelete}
+                title="Xóa đề thi"
+                message={`Bạn có chắc chắn muốn xóa đề thi "${deleteTarget?.title}"? Thao tác này không thể hoàn tác.`}
+                confirmText="Xóa"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={loading}
+            />
         </>
     )
 }
