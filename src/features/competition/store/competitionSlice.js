@@ -18,7 +18,18 @@ const initialState = {
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
+    loadingSearch: false,
     error: null,
+    searchCompetitions: [],
+    searchPagination: {
+        page: 1,
+        limit: 50,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    searchTerm: '',
     filters: {
         search: "",
         examId: "",
@@ -124,6 +135,14 @@ const competitionSlice = createSlice({
         clearError: (state) => {
             state.error = null;
         },
+        setSearchTerm: (state, action) => {
+            state.searchTerm = action.payload;
+        },
+        clearSearchCompetitions: (state) => {
+            state.searchCompetitions = [];
+            state.searchPagination = initialState.searchPagination;
+            state.searchTerm = '';
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -159,17 +178,17 @@ const competitionSlice = createSlice({
             })
             // Search Competitions
             .addCase(searchCompetitionsAsync.pending, (state) => {
-                state.loadingGet = true;
+                state.loadingSearch = true;
                 state.error = null;
             })
             .addCase(searchCompetitionsAsync.fulfilled, (state, action) => {
-                state.loadingGet = false;
-                state.competitions = action.payload.data;
-                state.pagination = action.payload.meta;
+                state.loadingSearch = false;
+                state.searchCompetitions = action.payload.data;
+                state.searchPagination = action.payload.meta;
                 state.error = null;
             })
             .addCase(searchCompetitionsAsync.rejected, (state, action) => {
-                state.loadingGet = false;
+                state.loadingSearch = false;
                 state.error = action.payload;
             })
             // Get Competition By ID
@@ -247,7 +266,7 @@ const competitionSlice = createSlice({
     },
 });
 
-export const { setFilters, setPagination, resetFilters, clearCurrentCompetition, clearError } =
+export const { setFilters, setPagination, resetFilters, clearCurrentCompetition, clearError, setSearchTerm, clearSearchCompetitions } =
     competitionSlice.actions;
 
 // Selectors
@@ -261,5 +280,9 @@ export const selectCompetitionLoadingDelete = (state) => state.competition.loadi
 export const selectCompetitionError = (state) => state.competition.error;
 export const selectCompetitionFilters = (state) => state.competition.filters;
 export const selectCompetitionLoadingGetById = (state) => state.competition.loadingGetById;
+export const selectSearchCompetitions = (state) => state.competition.searchCompetitions;
+export const selectCompetitionSearchPagination = (state) => state.competition.searchPagination;
+export const selectCompetitionSearchTerm = (state) => state.competition.searchTerm;
+export const selectCompetitionLoadingSearch = (state) => state.competition.loadingSearch;
 
 export default competitionSlice.reducer;

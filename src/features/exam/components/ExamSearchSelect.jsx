@@ -62,9 +62,8 @@ export const ExamSearchSelect = ({
                 limit: 50,
                 subjectId: subjectId || undefined,
                 grade: grade || undefined,
-                visibility: visibility || undefined,
-                sortBy: 'title',
-                sortOrder: 'asc'
+                sortBy: 'createdAt',
+                sortOrder: 'desc'
             })).unwrap();
 
             return result;
@@ -99,9 +98,8 @@ export const ExamSearchSelect = ({
                 limit: 50,
                 subjectId: subjectId || undefined,
                 grade: grade || undefined,
-                visibility: visibility || undefined,
-                sortBy: 'title',
-                sortOrder: 'asc'
+                sortBy: 'createdAt',
+                sortOrder: 'desc'
             })).unwrap();
 
             return result;

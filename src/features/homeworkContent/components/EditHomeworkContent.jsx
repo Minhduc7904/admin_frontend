@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Input, Textarea, Checkbox } from '../../../shared/components'
+import { CompetitionSearchSelect } from '../../competition/components'
 import {
     updateHomeworkContentAsync,
     selectHomeworkContentLoadingUpdate,
@@ -32,11 +33,25 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
     }
 
 
+    const getInitialCompetition = () => {
+        if (homeworkContent?.competition) return homeworkContent.competition
+        if (homeworkContent?.competitionId) {
+            return {
+                competitionId: homeworkContent.competitionId,
+                title: homeworkContent.competitionTitle || `#${homeworkContent.competitionId}`,
+            }
+        }
+        return null
+    }
+
     const [formData, setFormData] = useState({
         content: homeworkContent?.content || '',
         dueDate: formatDateForInput(homeworkContent?.dueDate) || '',
-        competitionId: homeworkContent?.competitionId?.toString() || '',
+        competition: getInitialCompetition(),
         allowLateSubmit: homeworkContent?.allowLateSubmit || false,
+        maxPoints: homeworkContent?.maxPoints ?? '',
+        pointsOnReSubmit: homeworkContent?.pointsOnReSubmit ?? '',
+        pointsOnLateSubmit: homeworkContent?.pointsOnLateSubmit ?? '',
     })
 
     const handleChange = (e) => {
@@ -54,6 +69,14 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
         }))
     }
 
+    const validatePointField = (value, fieldName, errors) => {
+        if (value === '' || value === null || value === undefined) return
+        const num = Number(value)
+        if (isNaN(num) || num < 0) {
+            errors[fieldName] = 'Điểm phải là số không âm'
+        }
+    }
+
     const validateForm = (formData) => {
         const errors = {}
 
@@ -63,12 +86,9 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
             errors.content = 'Nội dung phải có ít nhất 10 ký tự'
         }
 
-        if (formData.competitionId) {
-            const compId = parseInt(formData.competitionId)
-            if (isNaN(compId) || compId < 1) {
-                errors.competitionId = 'ID cuộc thi phải là số nguyên dương'
-            }
-        }
+        validatePointField(formData.maxPoints, 'maxPoints', errors)
+        validatePointField(formData.pointsOnReSubmit, 'pointsOnReSubmit', errors)
+        validatePointField(formData.pointsOnLateSubmit, 'pointsOnLateSubmit', errors)
 
         return errors
     }
@@ -86,8 +106,11 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
         const data = {
             content: formData.content.trim(),
             ...(formData.dueDate && { dueDate: new Date(formData.dueDate).toISOString() }),
-            ...(formData.competitionId && { competitionId: Number(formData.competitionId) }),
+            ...(formData.competition && { competitionId: formData.competition.competitionId }),
             allowLateSubmit: formData.allowLateSubmit,
+            ...(formData.maxPoints !== '' && { maxPoints: Number(formData.maxPoints) }),
+            ...(formData.pointsOnReSubmit !== '' && { pointsOnReSubmit: Number(formData.pointsOnReSubmit) }),
+            ...(formData.pointsOnLateSubmit !== '' && { pointsOnLateSubmit: Number(formData.pointsOnLateSubmit) }),
         }
 
         try {
@@ -125,15 +148,49 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
                     onChange={handleChange}
                 />
 
-                <Input
-                    error={errors.competitionId}
-                    type="number"
-                    label="ID Cuộc thi (tùy chọn)"
-                    name="competitionId"
-                    value={formData.competitionId}
-                    onChange={handleChange}
-                    placeholder="Nhập ID cuộc thi nếu có..."
+                <CompetitionSearchSelect
+                    label="Cuộc thi (tùy chọn)"
+                    placeholder="Tìm kiếm cuộc thi..."
+                    value={formData.competition}
+                    onSelect={(competition) => setFormData(prev => ({ ...prev, competition }))}
+                    error={errors.competition}
                 />
+
+                <div className="grid grid-cols-3 gap-4">
+                    <Input
+                        error={errors.maxPoints}
+                        label="Điểm tối đa"
+                        name="maxPoints"
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={formData.maxPoints}
+                        onChange={handleChange}
+                        placeholder="VD: 10"
+                    />
+                    <Input
+                        error={errors.pointsOnReSubmit}
+                        label="Điểm khi nộp lại"
+                        name="pointsOnReSubmit"
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={formData.pointsOnReSubmit}
+                        onChange={handleChange}
+                        placeholder="VD: 8"
+                    />
+                    <Input
+                        error={errors.pointsOnLateSubmit}
+                        label="Điểm khi nộp muộn"
+                        name="pointsOnLateSubmit"
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={formData.pointsOnLateSubmit}
+                        onChange={handleChange}
+                        placeholder="VD: 5"
+                    />
+                </div>
 
                 <Checkbox
                     label="Cho phép nộp muộn"
