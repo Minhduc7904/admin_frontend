@@ -34,6 +34,7 @@ const initialState = {
         showTuition: false,
         tuitionMonth: new Date().getMonth() + 1,
         tuitionYear: new Date().getFullYear(),
+        tuitionStatus: '',
         showHomework: false,
         selectedHomeworkId: null,
     },

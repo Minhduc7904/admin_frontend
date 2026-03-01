@@ -21,6 +21,14 @@ const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => ({
     label: `${currentYear - 2 + i}`,
 }));
 
+/* ===================== TUITION STATUS OPTIONS ===================== */
+const TUITION_STATUS_OPTIONS = [
+    { value: '', label: 'Tất cả học phí' },
+    { value: 'PAID', label: 'Đã đóng' },
+    { value: 'UNPAID', label: 'Chưa đóng' },
+    { value: 'NO_TUITION', label: 'Chưa có học phí' },
+];
+
 export const AttendanceFilters = ({
     search,
     onSearchChange,
@@ -36,6 +44,8 @@ export const AttendanceFilters = ({
     tuitionYear,
     onTuitionMonthChange,
     onTuitionYearChange,
+    tuitionStatus,
+    onTuitionStatusChange,
     /* homework */
     hasClass = false,
     showHomework = false,
@@ -103,6 +113,14 @@ export const AttendanceFilters = ({
                             value={tuitionYear}
                             onChange={onTuitionYearChange}
                             options={YEAR_OPTIONS}
+                        />
+                    </div>
+                    <div className="w-48">
+                        <Dropdown
+                            value={tuitionStatus}
+                            onChange={onTuitionStatusChange}
+                            options={TUITION_STATUS_OPTIONS}
+                            placeholder="Lọc trạng thái học phí"
                         />
                     </div>
                 </>

@@ -1,4 +1,5 @@
 import { SearchInput, Dropdown } from '../../../shared/components/ui';
+import { GRADE_OPTIONS } from '../../../core/constants/grade-constants';
 
 export const ClassFilters = ({
     search,
@@ -8,12 +9,19 @@ export const ClassFilters = ({
     instructorId,
     onInstructorChange,
     isActive,
-    onIsActiveChange
+    onIsActiveChange,
+    grade,
+    onGradeChange,
 }) => {
     const statusOptions = [
         { value: '', label: 'Tất cả trạng thái' },
         { value: 'true', label: 'Đang hoạt động' },
         { value: 'false', label: 'Chưa bắt đầu/Đã kết thúc' },
+    ];
+
+    const gradeOptions = [
+        { value: '', label: 'Tất cả khối' },
+        ...GRADE_OPTIONS.filter(o => o.value !== ''),
     ];
 
     return (
@@ -26,7 +34,15 @@ export const ClassFilters = ({
                         placeholder="Tìm kiếm lớp học (tên lớp, phòng học)..."
                     />
                 </div>
-                <div className="w-48">
+                <div className="w-40">
+                    <Dropdown
+                        value={grade}
+                        onChange={onGradeChange}
+                        options={gradeOptions}
+                        placeholder="Chọn khối"
+                    />
+                </div>
+                <div className="w-52">
                     <Dropdown
                         value={isActive}
                         onChange={onIsActiveChange}

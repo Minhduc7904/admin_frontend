@@ -42,6 +42,7 @@ export const ClassListPage = ({
     )
 
     const [isActive, setIsActive] = useState('')
+    const [grade, setGrade] = useState('')
     const [openAddClass, setOpenAddClass] = useState(false)
     const [deleteTarget, setDeleteTarget] = useState(null)
 
@@ -58,6 +59,7 @@ export const ClassListPage = ({
         itemsPerPage,
         debouncedSearch,
         isActive,
+        grade,
         courseId,
     ])
 
@@ -70,6 +72,7 @@ export const ClassListPage = ({
                 search: debouncedSearch || undefined,
                 isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
                 courseId: courseId || undefined,
+                grade: grade || undefined,
             }),
         )
     }
@@ -83,6 +86,11 @@ export const ClassListPage = ({
 
     const handleIsActiveChange = (value) => {
         setIsActive(value)
+        dispatch(setPagination({ page: 1 }))
+    }
+
+    const handleGradeChange = (value) => {
+        setGrade(value)
         dispatch(setPagination({ page: 1 }))
     }
 
@@ -147,6 +155,7 @@ export const ClassListPage = ({
             /* filters */
             search={search}
             isActive={isActive}
+            grade={grade}
 
             /* pagination */
             currentPage={currentPage}
@@ -158,6 +167,7 @@ export const ClassListPage = ({
             /* handlers */
             onSearchChange={handleSearch}
             onIsActiveChange={handleIsActiveChange}
+            onGradeChange={handleGradeChange}
             onPageChange={handlePageChange}
             onItemsPerPageChange={handleItemsPerPageChange}
             onView={handleView}

@@ -12,6 +12,10 @@ export const ExamTable = ({ exams, onView, onEdit, onDelete, loading, showSubjec
                 label: 'Đã xuất bản',
                 className: 'bg-green-100 text-green-700'
             },
+            PRIVATE: {
+                label: 'Riêng tư',
+                className: 'bg-yellow-100 text-yellow-700'
+            }
         };
 
         const badge = badges[visibility] || badges.DRAFT;

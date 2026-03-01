@@ -22,6 +22,7 @@ export const ClassList = ({
     // filter state
     search,
     isActive,
+    grade,
 
     // pagination state
     currentPage,
@@ -33,6 +34,7 @@ export const ClassList = ({
     // handlers
     onSearchChange,
     onIsActiveChange,
+    onGradeChange,
     onPageChange,
     onItemsPerPageChange,
     onView,
@@ -104,6 +106,8 @@ export const ClassList = ({
                     onSearchChange={onSearchChange}
                     isActive={isActive}
                     onIsActiveChange={onIsActiveChange}
+                    grade={grade}
+                    onGradeChange={onGradeChange}
                 />
             </div>
 

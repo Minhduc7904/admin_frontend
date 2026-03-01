@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Plus, Users, Download } from 'lucide-react';
+import { Plus, Users, Download, Calendar } from 'lucide-react';
 
 import {
     Button,
@@ -112,6 +112,7 @@ export const ClassAttendance = () => {
     const showTuition = filters.showTuition;
     const tuitionMonth = filters.tuitionMonth;
     const tuitionYear = filters.tuitionYear;
+    const tuitionStatus = filters.tuitionStatus || '';
     const showHomework = filters.showHomework;
     const selectedHomeworkId = filters.selectedHomeworkId;
 
@@ -130,7 +131,7 @@ export const ClassAttendance = () => {
         loadAttendances();
     // Only re-fetch for tuition when BOTH month and year are chosen (or both cleared)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey, selectedHomeworkId]);
+    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey, tuitionStatus, selectedHomeworkId]);
 
     // Fetch homework list when showHomework is toggled on and list is not yet loaded
     useEffect(() => {
@@ -147,6 +148,7 @@ export const ClassAttendance = () => {
     }, [selectedSession?.sessionId]);
 
     const loadAttendances = () => {
+        if (!selectedSession) return;
         dispatch(
             getAllAttendancesAsync({
                 classId,
@@ -157,6 +159,7 @@ export const ClassAttendance = () => {
                 sessionId: selectedSession?.sessionId || undefined,
                 month: showTuition ? tuitionMonth : undefined,
                 year: showTuition ? tuitionYear : undefined,
+                tuitionStatus: (showTuition && tuitionStatus) ? tuitionStatus : undefined,
                 homeworkContentId: (showHomework && selectedHomeworkId) ? selectedHomeworkId : undefined,
             })
         );
@@ -185,11 +188,13 @@ export const ClassAttendance = () => {
             dispatch(setFilters({
                 tuitionMonth: new Date().getMonth() + 1,
                 tuitionYear: new Date().getFullYear(),
+                tuitionStatus: '',
             }));
         }
     };
     const handleTuitionMonthChange = (val) => { dispatch(setFilters({ tuitionMonth: val })); setCurrentPage(1); };
     const handleTuitionYearChange  = (val) => { dispatch(setFilters({ tuitionYear: val }));  setCurrentPage(1); };
+    const handleTuitionStatusChange = (val) => { dispatch(setFilters({ tuitionStatus: val })); setCurrentPage(1); };
 
     const handleShowHomeworkChange = (val) => {
         dispatch(setFilters({ showHomework: val }));
@@ -436,6 +441,8 @@ export const ClassAttendance = () => {
                     tuitionYear={tuitionYear}
                     onTuitionMonthChange={handleTuitionMonthChange}
                     onTuitionYearChange={handleTuitionYearChange}
+                    tuitionStatus={tuitionStatus}
+                    onTuitionStatusChange={handleTuitionStatusChange}
                     /* homework */
                     hasClass={!!courseClass}
                     showHomework={showHomework}
@@ -482,28 +489,38 @@ export const ClassAttendance = () => {
 
             {/* ===== TABLE ===== */}
             <div className="bg-white border border-border rounded-sm">
-                <AttendanceTable
-                    attendances={attendances}
-                    loading={loadingGet}
-                    onView={handleView}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
-                    tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
-                />
+                {!selectedSession ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-foreground-light">
+                        <Calendar size={48} className="mb-3 text-gray-300" />
+                        <p className="text-base font-medium">Vui lòng chọn buổi học</p>
+                        <p className="text-sm mt-1">Chọn một buổi học ở bộ lọc phía trên để xem điểm danh.</p>
+                    </div>
+                ) : (
+                    <>
+                        <AttendanceTable
+                            attendances={attendances}
+                            loading={loadingGet}
+                            onView={handleView}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
+                            tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
+                        />
 
-                <div className="p-4 border-t border-border">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={pagination.totalPages}
-                        totalItems={pagination.total}
-                        hasNext={pagination.hasNext}
-                        hasPrevious={pagination.hasPrevious}
-                        itemsPerPage={itemsPerPage}
-                        onPageChange={handlePageChange}
-                        onItemsPerPageChange={handleItemsPerPageChange}
-                    />
-                </div>
+                        <div className="p-4 border-t border-border">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={pagination.totalPages}
+                                totalItems={pagination.total}
+                                hasNext={pagination.hasNext}
+                                hasPrevious={pagination.hasPrevious}
+                                itemsPerPage={itemsPerPage}
+                                onPageChange={handlePageChange}
+                                onItemsPerPageChange={handleItemsPerPageChange}
+                            />
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* ===== DELETE MODAL ===== */}
