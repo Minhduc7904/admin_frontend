@@ -42,7 +42,7 @@ export const UnchangedPaymentsTable = ({ data }) => {
                             </td>
 
                             <td>{row.payment.month}/{row.payment.year}</td>
-                            <td>{row.payment.amount.toLocaleString()}</td>
+                            <td>{row.payment.amount != null ? row.payment.amount.toLocaleString() : '—'}</td>
 
                             <td className="text-gray-500">
                                 {row.payment.status}
