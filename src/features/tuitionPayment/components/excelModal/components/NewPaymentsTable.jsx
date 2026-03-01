@@ -138,7 +138,7 @@ export const NewPaymentsTable = ({ data, onAdd, loading = false }) => {
                                 <StudentInfoCell student={r.student} />
                             </td>
                             <td>{r.payment.month}/{r.payment.year}</td>
-                            <td>{r.payment.amount.toLocaleString()}</td>
+                            <td>{r.payment.amount != null ? r.payment.amount.toLocaleString() : '—'}</td>
                             <td className="text-blue-600">
                                 {r.payment.status}
                             </td>
