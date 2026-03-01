@@ -132,7 +132,7 @@ export const ExistingPaymentsTable = ({ data, onUpdate, loading = false }) => {
                             <td className="text-xs space-y-1 text-gray-600">
                                 <div className="flex items-center gap-1">
                                     <Wallet size={14} />
-                                    {row.oldPayment.amount.toLocaleString()}
+                                    {row.oldPayment.amount != null ? row.oldPayment.amount.toLocaleString() : '—'}
                                 </div>
 
                                 <div className="flex items-center gap-1">
@@ -158,7 +158,7 @@ export const ExistingPaymentsTable = ({ data, onUpdate, loading = false }) => {
                             <td className="text-xs space-y-1 text-blue-700">
                                 <div className="flex items-center gap-1">
                                     <Wallet size={14} />
-                                    {row.newPayment.amount.toLocaleString()}
+                                    {row.newPayment.amount != null ? row.newPayment.amount.toLocaleString() : '—'}
                                 </div>
 
                                 <div className="flex items-center gap-1">
