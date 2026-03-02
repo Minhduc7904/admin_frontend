@@ -94,7 +94,7 @@ export const LessonList = ({
     if (loading && currentPage === 1) {
         return (
             <div className="p-6 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
             </div>
         );
     }
@@ -102,39 +102,38 @@ export const LessonList = ({
     return (
         <div className="flex flex-col h-full">
             {/* Search */}
-            <div className="p-4 border-b border-border">
+            <div className="p-3 border-b border-border bg-white shrink-0">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <Input
                         type="text"
                         placeholder="Tìm kiếm bài học..."
                         value={filters.search}
                         onChange={handleSearch}
-                        className="pl-9"
+                        className="pl-8 h-8 text-sm"
                     />
                 </div>
             </div>
 
             {/* Lesson Items */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
                 {allLessons.length === 0 ? (
                     <div className="p-6 text-center text-muted-foreground">
                         <p className="text-sm">Chưa có bài học nào</p>
-                        <p className="text-xs mt-1">
-                            Nhấn "Thêm bài học" để tạo bài học mới
+                        <p className="text-xs mt-1 text-muted-foreground/70">
+                            Nhấn "Thêm" để tạo bài học mới
                         </p>
                     </div>
                 ) : (
                     <>
-                        <div className="divide-y divide-border">
-                            {allLessons.map((lesson, index) => {
-                                const isLastItem = index === allLessons.length - 1;
-                                return (
-                                    <div
-                                        key={lesson.lessonId}
-                                        ref={isLastItem ? lastElementRef : null}
-                                    >
-                                        <LessonItem
+                        {allLessons.map((lesson, index) => {
+                            const isLastItem = index === allLessons.length - 1;
+                            return (
+                                <div
+                                    key={lesson.lessonId}
+                                    ref={isLastItem ? lastElementRef : null}
+                                >
+                                    <LessonItem
                                             lesson={lesson}
                                             isSelected={selectedItem?.type === 'lesson' && selectedItem?.data?.lessonId === lesson.lessonId}
                                             onSelect={() => onSelectLesson(lesson)}
@@ -149,21 +148,20 @@ export const LessonList = ({
                                     </div>
                                 );
                             })}
-                        </div>
 
                         {/* Loading more indicator */}
                         {loading && currentPage > 1 && (
-                            <div className="flex items-center justify-center py-4 border-t border-border">
-                                <LoaderCircle className="animate-spin text-primary mr-2" size={20} />
-                                <span className="text-sm text-muted-foreground">Đang tải thêm...</span>
+                            <div className="flex items-center justify-center py-3">
+                                <LoaderCircle className="animate-spin text-primary mr-2" size={16} />
+                                <span className="text-xs text-muted-foreground">Đang tải thêm...</span>
                             </div>
                         )}
 
                         {/* End of list */}
                         {!pagination.hasNext && allLessons.length > 0 && (
-                            <div className="text-center py-4 border-t border-border">
-                                <span className="text-sm text-muted-foreground">
-                                    Đã hiển thị tất cả {pagination.total} bài học
+                            <div className="text-center py-3">
+                                <span className="text-xs text-muted-foreground">
+                                    {pagination.total} bài học
                                 </span>
                             </div>
                         )}

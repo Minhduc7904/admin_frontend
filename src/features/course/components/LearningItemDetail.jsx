@@ -1,16 +1,17 @@
 // src/features/course/components/LearningItemDetail.jsx
-import { Edit, Trash2, Calendar, FileText, Video, Youtube, FileCheck } from 'lucide-react'
+import { Edit, Trash2, Calendar, FileText, Video, Youtube, FileCheck, Hash, Info } from 'lucide-react'
 import { Button } from '../../../shared/components'
 import { DocumentContentList } from '../../documentContent/components/DocumentContentList'
 import { VideoContentList } from '../../videoContent/components/VideoContentList'
 import { YoutubeContentList } from '../../youtubeContent/components/YoutubeContentList'
 import { HomeworkContentList } from '../../homeworkContent/components/HomeworkContentList'
 import { formatDateTime } from '../../../shared/utils'
+
 const LEARNING_ITEM_TYPES = {
-    VIDEO: { label: 'Video', icon: Video, color: 'text-blue-600' },
-    DOCUMENT: { label: 'Tài liệu', icon: FileText, color: 'text-green-600' },
-    HOMEWORK: { label: 'Bài tập', icon: FileCheck, color: 'text-orange-600' },
-    YOUTUBE: { label: 'YouTube', icon: Youtube, color: 'text-red-600' },
+    VIDEO: { label: 'Video', icon: Video, color: 'text-blue-600', bg: 'bg-blue-50' },
+    DOCUMENT: { label: 'Tài liệu', icon: FileText, color: 'text-green-600', bg: 'bg-green-50' },
+    HOMEWORK: { label: 'Bài tập', icon: FileCheck, color: 'text-orange-600', bg: 'bg-orange-50' },
+    YOUTUBE: { label: 'YouTube', icon: Youtube, color: 'text-red-600', bg: 'bg-red-50' },
 }
 
 export const LearningItemDetail = ({
@@ -34,103 +35,75 @@ export const LearningItemDetail = ({
         label: 'Khác',
         icon: FileText,
         color: 'text-gray-600',
+        bg: 'bg-gray-50',
     }
     const TypeIcon = typeInfo.icon
 
     return (
-        <div className="h-full overflow-y-auto">
+        <div className="h-full flex flex-col">
             {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-border p-6">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className={`${typeInfo.color}`}>
-                                <TypeIcon className="w-6 h-6" />
+            <div className="shrink-0 border-b border-border px-6 py-4 bg-white">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${typeInfo.bg}`}>
+                                <TypeIcon className={`w-4 h-4 ${typeInfo.color}`} />
                             </div>
-                            <div>
-                                <p className="text-xs font-semibold text-foreground-light uppercase">
-                                    {typeInfo.label}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                    #{learningItem.order ?? '?'}
-                                </p>
-                            </div>
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeInfo.bg} ${typeInfo.color}`}>
+                                {typeInfo.label}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                #{learningItem.order ?? '?'}
+                            </span>
                         </div>
-                        <h2 className="text-2xl font-bold text-foreground mb-1">
+                        <h2 className="text-lg font-bold text-foreground truncate">
                             {learningItem.learningItem?.title || 'Untitled'}
                         </h2>
-                        <p className="text-sm text-muted-foreground">
-                            Bài: {lessonTitle}
-                        </p>
+                        {lessonTitle && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                Bài: {lessonTitle}
+                            </p>
+                        )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 shrink-0">
                         <Button
                             size="sm"
                             variant="outline"
                             onClick={() => onEdit?.(learningItem)}
+                            className=""
                         >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-3.5 h-3.5" />
                         </Button>
                         <Button
                             size="sm"
                             variant="outline"
-                            className="text-red-600 hover:bg-red-50"
+                            className=" text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
                             onClick={() => onDelete?.(learningItem)}
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                     </div>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
-                {/* Metadata */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-foreground-light uppercase">
-                            Loại
-                        </label>
-                        <p className="text-sm text-foreground font-medium">
-                            {typeInfo.label}
-                        </p>
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+                {/* Info Row */}
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{formatDateTime(learningItem.learningItem?.createdAt)}</span>
                     </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-foreground-light uppercase">
-                            Thứ tự
-                        </label>
-                        <p className="text-sm text-foreground font-medium">
-                            #{learningItem.order ?? '?'}
-                        </p>
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-foreground-light uppercase">
-                            Tạo lúc
-                        </label>
-                        <div className="flex items-center gap-2 text-sm text-foreground">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            {formatDateTime(learningItem.learningItem?.createdAt)}
-                        </div>
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-foreground-light uppercase">
-                            Trạng thái
-                        </label>
-                        <div className="inline-block px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                            Hoạt động
-                        </div>
+                    <div className="flex items-center gap-1.5">
+                        <Hash className="w-3.5 h-3.5" />
+                        <span>Thứ tự: {learningItem.order ?? '?'}</span>
                     </div>
                 </div>
 
                 {/* Description */}
                 {learningItem.learningItem?.description && (
-                    <div className="space-y-2">
-                        <label className="text-xs font-semibold text-foreground-light uppercase">
-                            Mô tả
-                        </label>
+                    <div className="flex gap-2 p-3 bg-gray-50 rounded-lg">
+                        <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                         <p className="text-sm text-foreground leading-relaxed">
                             {learningItem.learningItem.description}
                         </p>
@@ -138,9 +111,9 @@ export const LearningItemDetail = ({
                 )}
 
                 {/* Content List - Render based on type */}
-                <div className="pt-6 border-t border-gray-200">
+                <div className="pt-4 border-t border-gray-100">
                     {learningItem.learningItem?.type === 'DOCUMENT' && (
-                        <DocumentContentList 
+                        <DocumentContentList
                             learningItemId={learningItem.learningItem.learningItemId}
                             onAdd={() => onAddContent?.('DOCUMENT')}
                             onEdit={(doc) => onEditContent?.('DOCUMENT', doc)}
@@ -148,7 +121,7 @@ export const LearningItemDetail = ({
                         />
                     )}
                     {learningItem.learningItem?.type === 'VIDEO' && (
-                        <VideoContentList 
+                        <VideoContentList
                             learningItemId={learningItem.learningItem.learningItemId}
                             onAdd={() => onAddContent?.('VIDEO')}
                             onEdit={(video) => onEditContent?.('VIDEO', video)}
@@ -156,7 +129,7 @@ export const LearningItemDetail = ({
                         />
                     )}
                     {learningItem.learningItem?.type === 'YOUTUBE' && (
-                        <YoutubeContentList 
+                        <YoutubeContentList
                             learningItemId={learningItem.learningItem.learningItemId}
                             onAdd={() => onAddContent?.('YOUTUBE')}
                             onEdit={(video) => onEditContent?.('YOUTUBE', video)}
@@ -164,7 +137,7 @@ export const LearningItemDetail = ({
                         />
                     )}
                     {learningItem.learningItem?.type === 'HOMEWORK' && (
-                        <HomeworkContentList 
+                        <HomeworkContentList
                             learningItemId={learningItem.learningItem.learningItemId}
                             onAdd={() => onAddContent?.('HOMEWORK')}
                             onEdit={(homework) => onEditContent?.('HOMEWORK', homework)}

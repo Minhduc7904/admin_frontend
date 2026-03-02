@@ -379,37 +379,27 @@ export const CourseLessons = () => {
 
     return (
         <>
-            <div className="bg-white border border-border rounded-lg shadow-sm overflow-hidden">
-                {/* Header with gradient background */}
-                <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-5 border-b border-border">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                                <BookOpen className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-semibold text-foreground">
-                                    Danh sách bài học
-                                </h2>
-                                <p className="text-sm text-foreground-light mt-0.5">
-                                    Quản lý bài học và tài liệu học tập
-                                </p>
-                            </div>
+            <div className="flex h-[calc(100vh-10rem)] bg-white border border-border rounded-lg shadow-sm overflow-hidden">
+                {/* Left Sidebar - Lesson List */}
+                <div className="w-80 min-w-[20rem] flex flex-col border-r border-border bg-gray-50/50">
+                    {/* Sidebar Header */}
+                    <div className="px-4 py-3 border-b border-border bg-white flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-primary" />
+                            <h2 className="text-sm font-semibold text-foreground">Bài học</h2>
                         </div>
                         <Button
+                            size="sm"
                             onClick={handleAddLesson}
-                            className="flex items-center gap-2 shadow-sm"
+                            className="h-7 px-2 text-xs"
                         >
-                            <Plus className="w-4 h-4" />
-                            Thêm bài học
+                            <Plus className="w-3.5 h-3.5 mr-1" />
+                            Thêm
                         </Button>
                     </div>
-                </div>
 
-                {/* Two Column Layout */}
-                <div className="grid grid-cols-12 divide-x divide-border min-h-[650px]">
-                    {/* Left Column - Lesson List */}
-                    <div className="col-span-5 bg-primary">
+                    {/* Sidebar Content - Scrollable */}
+                    <div className="flex-1 overflow-y-auto">
                         <LessonList
                             courseId={courseId}
                             selectedItem={selectedItem}
@@ -421,44 +411,43 @@ export const CourseLessons = () => {
                             onEditLearningItem={handleEditLearningItem}
                             onDetachLearningItem={handleDetachLearningItem}
                         />
-                    </div> 
-                            
-
-                    {/* Right Column - Detail View */}
-                    <div className="col-span-7 bg-white">
-                        {selectedItem?.type === 'lesson' ? (
-                            <LessonDetail
-                                lesson={currentLesson}
-                                onAddLearningItem={handleAddLearningItem}
-                                onEdit={() => handleEditLesson(currentLesson)}
-                                onDelete={() => handleDeleteLesson(currentLesson)}
-                            />
-                        ) : selectedItem?.type === 'learningItem' ? (
-                            <LearningItemDetail
-                                learningItem={currentLearningItem}
-                                lessonTitle={currentLesson?.title}
-                                onEdit={() => handleEditLearningItem(currentLearningItem)}
-                                onDelete={() => handleDetachLearningItem(currentLearningItem, selectedItem.lessonId)}
-                                onAddContent={handleAddContent}
-                                onEditContent={handleEditContent}
-                                onDeleteContent={handleDeleteContent}
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full">
-                                <div className="text-center max-w-md px-6">
-                                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <FileText className="w-10 h-10 text-primary/60" />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                                        Chưa chọn bài học
-                                    </h3>
-                                    <p className="text-sm text-foreground-light leading-relaxed">
-                                        Chọn một bài học hoặc tài liệu bên trái để xem chi tiết và quản lý nội dung
-                                    </p>
-                                </div>
-                            </div>
-                        )}
                     </div>
+                </div>
+
+                {/* Right Content - Detail View */}
+                <div className="flex-1 overflow-y-auto bg-white">
+                    {selectedItem?.type === 'lesson' ? (
+                        <LessonDetail
+                            lesson={currentLesson}
+                            onAddLearningItem={handleAddLearningItem}
+                            onEdit={() => handleEditLesson(currentLesson)}
+                            onDelete={() => handleDeleteLesson(currentLesson)}
+                        />
+                    ) : selectedItem?.type === 'learningItem' ? (
+                        <LearningItemDetail
+                            learningItem={currentLearningItem}
+                            lessonTitle={currentLesson?.title}
+                            onEdit={() => handleEditLearningItem(currentLearningItem)}
+                            onDelete={() => handleDetachLearningItem(currentLearningItem, selectedItem.lessonId)}
+                            onAddContent={handleAddContent}
+                            onEditContent={handleEditContent}
+                            onDeleteContent={handleDeleteContent}
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center h-full">
+                            <div className="text-center max-w-sm px-6">
+                                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <FileText className="w-8 h-8 text-gray-400" />
+                                </div>
+                                <h3 className="text-base font-semibold text-foreground mb-1">
+                                    Chưa chọn bài học
+                                </h3>
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                    Chọn một bài học hoặc tài liệu bên trái để xem chi tiết
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
