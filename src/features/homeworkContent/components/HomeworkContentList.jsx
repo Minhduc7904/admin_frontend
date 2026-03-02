@@ -61,7 +61,7 @@ export const HomeworkContentList = ({ learningItemId, onAdd, onEdit, onDelete })
                                     <div className="flex items-center gap-2 mb-2">
                                         <FileCheck className="w-4 h-4 text-orange-600" />
                                         <h4 className="font-medium text-foreground">
-                                            {homework.title || 'Untitled Homework'}
+                                            {homework.content || 'Untitled Homework'}
                                         </h4>
                                     </div>
                                     {homework.description && (
