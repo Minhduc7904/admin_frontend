@@ -57,7 +57,7 @@ export const ClassSessionSearchMultiSelect = ({
         return (
             <div className="flex flex-col">
                 <span className="font-medium">
-                    {session.sessionName ||
+                    {session.name ||
                         `Buổi ${new Date(session.sessionDate).toLocaleDateString('vi-VN')}`}
                 </span>
 
@@ -92,7 +92,7 @@ export const ClassSessionSearchMultiSelect = ({
             searchFunction={handleSearch}
             fetchDefaultItems={fetchDefaultSessions}
             getOptionLabel={(s) =>
-                s?.sessionName ||
+                s?.name ||
                 `Buổi ${new Date(s.sessionDate).toLocaleDateString('vi-VN')}`
             }
             getOptionValue={(s) => s?.sessionId}

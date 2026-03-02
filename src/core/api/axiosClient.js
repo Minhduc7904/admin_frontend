@@ -105,7 +105,10 @@ axiosClient.interceptors.response.use(
         localStorage.removeItem(STORAGE_KEYS.USER_INFO);
 
         if (typeof window !== "undefined") {
-          window.location.href = ROUTES.LOGIN;
+          // Use import.meta.env.BASE_URL to respect Vite base path (e.g. /admin/)
+          // so we navigate to /admin/login instead of /login
+          const base = import.meta.env.BASE_URL || '/';
+          window.location.href = base.replace(/\/$/, '') + ROUTES.LOGIN;
         }
 
         return Promise.reject(refreshError);
