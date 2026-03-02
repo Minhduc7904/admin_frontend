@@ -18,9 +18,9 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
         dueDate: '',
         competition: null,
         allowLateSubmit: false,
-        maxPoints: '',
-        pointsOnReSubmit: '',
-        pointsOnLateSubmit: '',
+        updatePointsOnLateSubmit: false,
+        updatePointsOnReSubmit: false,
+        updateMaxPoints: false,
     })
 
     const handleChange = (e) => {
@@ -38,14 +38,6 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
         }))
     }
 
-    const validatePointField = (value, fieldName, errors) => {
-        if (value === '' || value === null || value === undefined) return
-        const num = Number(value)
-        if (isNaN(num) || num < 0) {
-            errors[fieldName] = 'Điểm phải là số không âm'
-        }
-    }
-
     const validateForm = (formData) => {
         const errors = {}
 
@@ -54,10 +46,6 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
         } else if (formData.content.trim().length < 10) {
             errors.content = 'Nội dung phải có ít nhất 10 ký tự'
         }
-
-        validatePointField(formData.maxPoints, 'maxPoints', errors)
-        validatePointField(formData.pointsOnReSubmit, 'pointsOnReSubmit', errors)
-        validatePointField(formData.pointsOnLateSubmit, 'pointsOnLateSubmit', errors)
 
         return errors
     }
@@ -78,9 +66,9 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
             ...(formData.dueDate && { dueDate: new Date(formData.dueDate).toISOString() }),
             ...(formData.competition && { competitionId: formData.competition.competitionId }),
             allowLateSubmit: formData.allowLateSubmit,
-            ...(formData.maxPoints !== '' && { maxPoints: Number(formData.maxPoints) }),
-            ...(formData.pointsOnReSubmit !== '' && { pointsOnReSubmit: Number(formData.pointsOnReSubmit) }),
-            ...(formData.pointsOnLateSubmit !== '' && { pointsOnLateSubmit: Number(formData.pointsOnLateSubmit) }),
+            updatePointsOnLateSubmit: formData.updatePointsOnLateSubmit,
+            updatePointsOnReSubmit: formData.updatePointsOnReSubmit,
+            updateMaxPoints: formData.updateMaxPoints,
         }
 
         try {
@@ -123,57 +111,74 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
                     error={errors.competition}
                 />
 
-                <div className="grid grid-cols-3 gap-4">
-                    <Input
-                        error={errors.maxPoints}
-                        label="Điểm tối đa"
-                        name="maxPoints"
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        value={formData.maxPoints}
-                        onChange={handleChange}
-                        placeholder="VD: 10"
-                    />
-                    <Input
-                        error={errors.pointsOnReSubmit}
-                        label="Điểm khi nộp lại"
-                        name="pointsOnReSubmit"
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        value={formData.pointsOnReSubmit}
-                        onChange={handleChange}
-                        placeholder="VD: 8"
-                    />
-                    <Input
-                        error={errors.pointsOnLateSubmit}
-                        label="Điểm khi nộp muộn"
-                        name="pointsOnLateSubmit"
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        value={formData.pointsOnLateSubmit}
-                        onChange={handleChange}
-                        placeholder="VD: 5"
-                    />
-                </div>
+                <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-start gap-3">
+                        <Checkbox
+                            id="allowLateSubmit"
+                            name="allowLateSubmit"
+                            checked={formData.allowLateSubmit}
+                            onChange={(checked) => handleCheckboxChange('allowLateSubmit', checked)}
+                        />
+                        <label htmlFor="allowLateSubmit" className="flex-1 cursor-pointer">
+                            <span className="text-sm font-medium text-foreground block mb-1">
+                                Cho phép nộp muộn
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                Học sinh có thể nộp bài sau thời hạn
+                            </span>
+                        </label>
+                    </div>
 
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                    <Checkbox
-                        id="allowLateSubmit"
-                        name="allowLateSubmit"
-                        checked={formData.allowLateSubmit}
-                        onChange={(checked) => handleCheckboxChange('allowLateSubmit', checked)}
-                    />
-                    <label htmlFor="allowLateSubmit" className="flex-1 cursor-pointer">
-                        <span className="text-sm font-medium text-foreground block mb-1">
-                            Cho phép nộp muộn
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                            Học sinh có thể nộp bài sau thời hạn
-                        </span>
-                    </label>
+                    <div className="flex items-start gap-3">
+                        <Checkbox
+                            id="updatePointsOnLateSubmit"
+                            name="updatePointsOnLateSubmit"
+                            checked={formData.updatePointsOnLateSubmit}
+                            onChange={(checked) => handleCheckboxChange('updatePointsOnLateSubmit', checked)}
+                        />
+                        <label htmlFor="updatePointsOnLateSubmit" className="flex-1 cursor-pointer">
+                            <span className="text-sm font-medium text-foreground block mb-1">
+                                Cập nhật điểm khi nộp muộn
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                Có cập nhật điểm nếu học sinh nộp muộn không
+                            </span>
+                        </label>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <Checkbox
+                            id="updatePointsOnReSubmit"
+                            name="updatePointsOnReSubmit"
+                            checked={formData.updatePointsOnReSubmit}
+                            onChange={(checked) => handleCheckboxChange('updatePointsOnReSubmit', checked)}
+                        />
+                        <label htmlFor="updatePointsOnReSubmit" className="flex-1 cursor-pointer">
+                            <span className="text-sm font-medium text-foreground block mb-1">
+                                Cập nhật điểm khi nộp lại
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                Có cập nhật điểm nếu học sinh nộp lại bài không
+                            </span>
+                        </label>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <Checkbox
+                            id="updateMaxPoints"
+                            name="updateMaxPoints"
+                            checked={formData.updateMaxPoints}
+                            onChange={(checked) => handleCheckboxChange('updateMaxPoints', checked)}
+                        />
+                        <label htmlFor="updateMaxPoints" className="flex-1 cursor-pointer">
+                            <span className="text-sm font-medium text-foreground block mb-1">
+                                Chỉ cập nhật khi điểm cao hơn
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                Nếu cập nhật điểm thì chỉ cập nhật khi điểm mới cao hơn điểm cũ
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
