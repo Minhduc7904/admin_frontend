@@ -91,9 +91,12 @@ export const ClassSessionSearchMultiSelect = ({
             onChange={onChange}
             searchFunction={handleSearch}
             fetchDefaultItems={fetchDefaultSessions}
-            getOptionLabel={(s) =>
-                s?.name ||
-                `Buổi ${new Date(s.sessionDate).toLocaleDateString('vi-VN')}`
+            getOptionLabel={(s) => {
+                const courseClassName = s.courseClass?.className
+                return ((s.name ||
+                    `Buổi ${new Date(s.sessionDate).toLocaleDateString('vi-VN')}`) + (courseClassName ? ` - ${courseClassName}` : '')
+                );
+            }
             }
             getOptionValue={(s) => s?.sessionId}
             renderOption={renderSessionOption}

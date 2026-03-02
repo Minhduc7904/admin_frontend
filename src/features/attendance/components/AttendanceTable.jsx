@@ -27,6 +27,12 @@ const TUITION_LABEL = {
     UNPAID: 'Chưa đóng',
 };
 
+/* ===================== HOMEWORK SUBMIT STATUS ===================== */
+const HOMEWORK_BADGE = {
+    submitted: 'bg-green-100 text-green-700',
+    none: 'bg-red-100 text-red-700',
+};
+
 export const AttendanceTable = ({
     attendances,
     onEdit,
@@ -35,8 +41,11 @@ export const AttendanceTable = ({
     loading,
     tuitionMonth,
     tuitionYear,
+    showHomework = false,
+    homeworkTitle,
 }) => {
     const showTuitionCol = !!tuitionMonth && !!tuitionYear;
+    const showHomeworkCol = showHomework;
     const formatDateTime = (date) => {
         return new Date(date).toLocaleString('vi-VN', {
             year: 'numeric',
@@ -139,6 +148,36 @@ export const AttendanceTable = ({
                 </span>
             ),
         },
+        ...(showHomeworkCol
+            ? [
+                {
+                    key: 'homework',
+                    label: homeworkTitle ? `BT: ${homeworkTitle}` : 'Bài tập về nhà',
+                    render: (attendance) => {
+                        const hs = attendance.homeworkSubmit;
+                        if (!hs) {
+                            return (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${HOMEWORK_BADGE.none}`}>
+                                    Không có
+                                </span>
+                            );
+                        }
+                        return (
+                            <div className="flex flex-col gap-0.5">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${HOMEWORK_BADGE.submitted}`}>
+                                    Đã nộp
+                                </span>
+                                {hs.points != null && (
+                                    <span className="text-xs text-foreground-light">
+                                        {hs.points} điểm
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    },
+                },
+            ]
+            : []),
         ...(showTuitionCol
             ? [
                 {

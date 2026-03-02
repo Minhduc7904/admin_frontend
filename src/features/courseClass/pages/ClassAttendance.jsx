@@ -505,6 +505,8 @@ export const ClassAttendance = () => {
                             onDelete={handleDelete}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
+                            showHomework={showHomework && !!selectedHomeworkId}
+                            homeworkTitle={selectedHomework?.content}
                         />
 
                         <div className="p-4 border-t border-border">

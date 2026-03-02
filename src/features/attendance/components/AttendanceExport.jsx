@@ -14,6 +14,7 @@ import {
     selectByCourseHomeworkContents,
     selectHomeworkContentLoadingGetByCourse,
 } from '../../homeworkContent/store/homeworkContentSlice';
+import { HomeworkContentSearchSelect } from '../../homeworkContent/components/HomeworkContentSearchSelect';
 
 const FORMAT_OPTIONS = [
     { label: 'PNG (Chất lượng cao)', value: 'png' },
@@ -53,13 +54,6 @@ export const AttendanceExport = ({ attendance }) => {
     const byCourseHomeworkContents = useSelector(selectByCourseHomeworkContents);
     const loadingGetByCourse = useSelector(selectHomeworkContentLoadingGetByCourse);
 
-    const homeworkDropdownOptions = [
-        { value: '', label: '-- Chọn bài tập --' },
-        ...byCourseHomeworkContents.map((hw) => ({
-            value: hw.homeworkContentId,
-            label: hw.title,
-        })),
-    ];
 
     // Fetch homework list when includeHomework is toggled on
     useEffect(() => {
@@ -354,12 +348,12 @@ export const AttendanceExport = ({ attendance }) => {
                                 disabled={!courseClass}
                             />
                             {options.includeHomework && (
-                                <div className="w-64">
-                                    <Dropdown
-                                        value={options.homeworkContentId ?? ''}
-                                        onChange={(v) => handleOptionChange('homeworkContentId', v || null)}
-                                        options={homeworkDropdownOptions}
-                                        placeholder={loadingGetByCourse ? 'Đang tải...' : 'Chọn bài tập'}
+                                <div className="w-80">
+                                    <HomeworkContentSearchSelect
+                                        value={options.homeworkContentId}
+                                        onSelect={(hw) => handleOptionChange('homeworkContentId', hw ? hw.homeworkContentId : null)}
+                                        homeworkContents={byCourseHomeworkContents}
+                                        loading={loadingGetByCourse}
                                         disabled={loadingGetByCourse}
                                     />
                                 </div>

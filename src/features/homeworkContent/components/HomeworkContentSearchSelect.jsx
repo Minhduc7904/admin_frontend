@@ -18,7 +18,9 @@ export const HomeworkContentSearchSelect = ({
 }) => {
     // Search function - filter local array
     const handleSearch = async (keyword) => {
+        console.log('Searching for:', keyword);
         if (!keyword || keyword.trim() === '') {
+            console.log('No keyword entered, returning all items');
             return homeworkContents;
         }
         
