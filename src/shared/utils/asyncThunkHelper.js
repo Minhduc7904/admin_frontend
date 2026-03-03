@@ -43,7 +43,7 @@ export const handleAsyncThunk = async (asyncFn, thunkAPI, messages = {}) => {
       type: 'error',
       title: errorTitle,
       message: errorMessage,
-      autoHide: false
+      autoHide: true
     }));
     return rejectWithValue(errorMessage);
   }

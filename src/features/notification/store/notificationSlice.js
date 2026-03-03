@@ -251,7 +251,7 @@ const notificationSlice = createSlice({
       .addCase(markNotificationReadAsync.fulfilled, (state, action) => {
         state.loadingMarkRead = false;
         const updatedNotification = action.payload.data;
-        
+
         // Update in myNotifications
         const index = state.myNotifications.findIndex(
           (n) => n.notificationId === updatedNotification.notificationId
@@ -301,10 +301,10 @@ const notificationSlice = createSlice({
       .addCase(deleteNotificationAsync.fulfilled, (state, action) => {
         state.loadingDelete = false;
         const deletedId = action.meta.arg;
-        
+
         // Find the notification before removing
         const notification = state.myNotifications.find(n => n.notificationId === deletedId);
-        
+
         // Remove from myNotifications
         state.myNotifications = state.myNotifications.filter(
           (n) => n.notificationId !== deletedId
