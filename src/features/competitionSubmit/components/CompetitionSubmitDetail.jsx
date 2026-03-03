@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPortal } from 'react-dom';
 import {
     X, User, Trophy, CheckCircle2, XCircle, MinusCircle,
-    Clock, Hash, BarChart2, FileQuestion,
+    Clock, Hash, BarChart2, FileQuestion, Pencil,
 } from 'lucide-react';
 import {
     getCompetitionSubmitDetailAsync,
@@ -12,6 +12,7 @@ import {
     clearCurrentSubmitDetail,
 } from '../store/competitionSubmitSlice';
 import { InlineLoading, MarkdownRenderer } from '../../../shared/components';
+import { EditQuestion } from '../../question/components';
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 
@@ -44,7 +45,7 @@ const StatBadge = ({ icon: Icon, label, value, color = 'bg-gray-100 text-gray-70
     </div>
 );
 
-const AnswerItem = ({ answer, index }) => {
+const AnswerItem = ({ answer, index, onEdit }) => {
     const q = answer.question;
     if (!q) return null;
 
@@ -102,6 +103,15 @@ const AnswerItem = ({ answer, index }) => {
                         <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
                             {answer.points} đ
                         </span>
+                    )}
+                    {onEdit && q.questionId && (
+                        <button
+                            title="Chỉnh sửa câu hỏi"
+                            onClick={() => onEdit(q.questionId)}
+                            className="p-1 rounded hover:bg-gray-200 text-foreground-lighter hover:text-foreground transition-colors"
+                        >
+                            <Pencil size={12} />
+                        </button>
                     )}
                 </div>
             </div>
@@ -224,6 +234,7 @@ export const CompetitionSubmitDetail = ({ submitId, isOpen, onClose }) => {
     const dispatch = useDispatch();
     const detail  = useSelector(selectCurrentCompetitionSubmitDetail);
     const loading = useSelector(selectCompetitionSubmitLoadingGetDetail);
+    const [editQuestionId, setEditQuestionId] = useState(null);
 
     useEffect(() => {
         if (isOpen && submitId) {
@@ -356,7 +367,7 @@ export const CompetitionSubmitDetail = ({ submitId, isOpen, onClose }) => {
                                 </div>
                             ) : (
                                 answers.map((ans, i) => (
-                                    <AnswerItem key={ans.answerId ?? i} answer={ans} index={i} />
+                                    <AnswerItem key={ans.answerId ?? i} answer={ans} index={i} onEdit={setEditQuestionId} />
                                 ))
                             )}
                         </div>
@@ -364,6 +375,40 @@ export const CompetitionSubmitDetail = ({ submitId, isOpen, onClose }) => {
                     );
                 })()}
             </div>
+
+            {/* Edit Question – stacked above this panel */}
+            {editQuestionId && createPortal(
+                <>
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-30 z-[80]"
+                        onClick={() => setEditQuestionId(null)}
+                    />
+                    <div className="fixed right-0 top-0 bottom-0 w-[800px] bg-white shadow-2xl z-[90] flex flex-col">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white flex-shrink-0">
+                            <div className="flex items-center gap-2">
+                                <Pencil size={16} className="text-foreground-lighter" />
+                                <h2 className="text-base font-semibold text-foreground">Chỉnh sửa câu hỏi</h2>
+                            </div>
+                            <button
+                                onClick={() => setEditQuestionId(null)}
+                                className="p-2 hover:bg-gray-100 rounded-sm transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                            <EditQuestion
+                                questionId={editQuestionId}
+                                onClose={() => setEditQuestionId(null)}
+                                loadQuestions={() => {
+                                    if (submitId) dispatch(getCompetitionSubmitDetailAsync(submitId));
+                                }}
+                            />
+                        </div>
+                    </div>
+                </>,
+                document.body
+            )}
         </>,
         document.body
     );
