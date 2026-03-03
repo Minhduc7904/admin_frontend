@@ -7,6 +7,7 @@ export const EditStudentForm = ({ student, onClose }) => {
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [originalData, setOriginalData] = useState({});
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -16,11 +17,13 @@ export const EditStudentForm = ({ student, onClose }) => {
         school: '',
         studentPhone: '',
         parentPhone: '',
+        password: '',
+        confirmPassword: '',
     });
 
     useEffect(() => {
         if (student) {
-            setFormData({
+            const initial = {
                 firstName: student.firstName || '',
                 lastName: student.lastName || '',
                 email: student.email || '',
@@ -28,7 +31,11 @@ export const EditStudentForm = ({ student, onClose }) => {
                 school: student.school || '',
                 studentPhone: student.studentPhone || '',
                 parentPhone: student.parentPhone || '',
-            });
+                password: '',
+                confirmPassword: '',
+            };
+            setFormData(initial);
+            setOriginalData(initial);
         }
     }, [student]);
 
@@ -71,6 +78,17 @@ export const EditStudentForm = ({ student, onClose }) => {
             newErrors.parentPhone = 'Số điện thoại không hợp lệ (10-11 số)';
         }
 
+        if (formData.password) {
+            if (formData.password.length < 6) {
+                newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+            }
+            if (!formData.confirmPassword) {
+                newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
+            } else if (formData.password !== formData.confirmPassword) {
+                newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+            }
+        }
+
         return newErrors;
     };
 
@@ -85,24 +103,46 @@ export const EditStudentForm = ({ student, onClose }) => {
 
         setLoading(true);
         try {
-            const updateData = {
-                firstName: formData.firstName.trim(),
-                lastName: formData.lastName.trim(),
-                email: formData.email?.trim() || undefined,
-                grade: parseInt(formData.grade),
-                school: formData.school?.trim() || undefined,
-                studentPhone: formData.studentPhone?.trim() || undefined,
-                parentPhone: formData.parentPhone?.trim() || undefined,
-            };
+            const updateData = {};
 
-            await dispatch(updateStudentAsync({ 
-                id: student.studentId, 
-                data: updateData 
+            if (formData.firstName.trim() !== originalData.firstName) {
+                updateData.firstName = formData.firstName.trim();
+            }
+            if (formData.lastName.trim() !== originalData.lastName) {
+                updateData.lastName = formData.lastName.trim();
+            }
+            if ((formData.email?.trim() || '') !== (originalData.email || '')) {
+                updateData.email = formData.email?.trim() || undefined;
+            }
+            if (formData.grade !== originalData.grade) {
+                updateData.grade = parseInt(formData.grade);
+            }
+            if ((formData.school?.trim() || '') !== (originalData.school || '')) {
+                updateData.school = formData.school?.trim() || undefined;
+            }
+            if ((formData.studentPhone?.trim() || '') !== (originalData.studentPhone || '')) {
+                updateData.studentPhone = formData.studentPhone?.trim() || undefined;
+            }
+            if ((formData.parentPhone?.trim() || '') !== (originalData.parentPhone || '')) {
+                updateData.parentPhone = formData.parentPhone?.trim() || undefined;
+            }
+            if (formData.password) {
+                updateData.password = formData.password;
+            }
+
+            if (Object.keys(updateData).length === 0) {
+                onClose();
+                return;
+            }
+
+            await dispatch(updateStudentAsync({
+                id: student.studentId,
+                data: updateData
             })).unwrap();
 
             // Refresh student data
             await dispatch(getStudentByIdAsync(student.studentId));
-            
+
             onClose();
         } catch (error) {
             console.error('Error updating student:', error);
@@ -208,6 +248,32 @@ export const EditStudentForm = ({ student, onClose }) => {
                             value={formData.parentPhone}
                             onChange={handleChange}
                             placeholder="VD: 0987654321"
+                        />
+                    </div>
+                </div>
+
+                {/* Password */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <Input
+                            error={errors.password}
+                            name="password"
+                            label="Mật khẩu mới"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="Để trống nếu không đổi"
+                        />
+                    </div>
+                    <div>
+                        <Input
+                            error={errors.confirmPassword}
+                            name="confirmPassword"
+                            label="Xác nhận mật khẩu"
+                            type="password"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            placeholder="Nhập lại mật khẩu mới"
                         />
                     </div>
                 </div>
