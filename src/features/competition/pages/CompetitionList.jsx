@@ -160,7 +160,7 @@ export const CompetitionList = ({
                 isOpen={openLeaderboard}
                 onClose={onCloseLeaderboard}
                 title="Lượt nộp bài"
-                width="w-[700px]"
+                width="w-[1050px]"
             >
                 {selectedCompetitionForLeaderboard && (
                     <CompetitionLeaderboard

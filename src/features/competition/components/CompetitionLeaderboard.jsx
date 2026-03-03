@@ -96,8 +96,14 @@ export const CompetitionLeaderboard = ({ competition }) => {
     const [page,  setPage]  = useState(1);
     const [limit, setLimit] = useState(10);
     const [selectedSubmitId, setSelectedSubmitId] = useState(null);
+    const [sort, setSort] = useState({ field: 'startedAt', direction: 'desc' });
     // Track whether stats have been fetched at least once to avoid re-fetching on tab switch
     const [statsFetched, setStatsFetched] = useState(false);
+
+    const handleSortChange = (field, direction) => {
+        setSort({ field, direction });
+        setPage(1);
+    };
 
     const loadSubmits = useCallback(() => {
         if (!competition?.competitionId) return;
@@ -109,10 +115,10 @@ export const CompetitionLeaderboard = ({ competition }) => {
             startedTo:   startedTo   || undefined,
             page,
             limit,
-            sortBy:    'startedAt',
-            sortOrder: 'desc',
+            sortBy:    sort.field,
+            sortOrder: sort.direction,
         }));
-    }, [dispatch, competition?.competitionId, status, isGraded, startedFrom, startedTo, page, limit]);
+    }, [dispatch, competition?.competitionId, status, isGraded, startedFrom, startedTo, page, limit, sort]);
 
     const loadStats = useCallback(() => {
         if (!competition?.competitionId) return;
@@ -172,6 +178,8 @@ export const CompetitionLeaderboard = ({ competition }) => {
         {
             key: 'score',
             label: 'Điểm',
+            sortDirection: sort.field === 'totalPoints' ? sort.direction : null,
+            onSort: (direction) => handleSortChange('totalPoints', direction),
             render: (s) => <ScoreCell score={s.totalPoints} totalScore={s.maxPoints} />,
         },
         {
@@ -182,7 +190,25 @@ export const CompetitionLeaderboard = ({ competition }) => {
         {
             key: 'startedAt',
             label: 'Bắt đầu',
+            sortDirection: sort.field === 'startedAt' ? sort.direction : null,
+            onSort: (direction) => handleSortChange('startedAt', direction),
             render: (s) => <span className="text-[10px] text-foreground-lighter">{formatDateTime(s.startedAt)}</span>,
+        },
+        {
+            key: 'submittedAt',
+            label: 'Nộp bài',
+            sortDirection: sort.field === 'submittedAt' ? sort.direction : null,
+            onSort: (direction) => handleSortChange('submittedAt', direction),
+            render: (s) => <span className="text-[10px] text-foreground-lighter">{formatDateTime(s.submittedAt)}</span>,
+        },
+        {
+            key: 'timeSpent',
+            label: 'Thời gian làm',
+            render: (s) => (
+                s.timeSpentDisplay
+                    ? <span className="text-[10px] text-foreground-lighter whitespace-nowrap">{s.timeSpentDisplay}</span>
+                    : <span className="text-xs text-foreground-lighter italic">–</span>
+            ),
         },
         {
             key: 'actions',
