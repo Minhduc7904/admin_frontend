@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Input, Textarea, Checkbox } from '../../../shared/components'
 import { CompetitionSearchSelect } from '../../competition/components'
+import { toVNDateTimeLocal, vnDateTimeLocalToISO } from '../../../shared/utils'
 import {
     updateHomeworkContentAsync,
     selectHomeworkContentLoadingUpdate,
@@ -12,25 +13,6 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
     const dispatch = useDispatch()
     const loadingUpdate = useSelector(selectHomeworkContentLoadingUpdate)
     const [errors, setErrors] = useState({})
-
-    const formatDateForInput = (dateString) => {
-        if (!dateString) return ''
-
-        const date = new Date(dateString)
-
-        // Format datetime-local input theo giờ Việt Nam
-        // Sử dụng locale 'sv-SE' để có format YYYY-MM-DD HH:mm
-        const vnDateStr = date.toLocaleString('sv-SE', { 
-            timeZone: 'Asia/Ho_Chi_Minh',
-            year: 'numeric',
-            month: '2-digit', 
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).replace(' ', 'T')
-
-        return vnDateStr
-    }
 
 
     const getInitialCompetition = () => {
@@ -46,7 +28,7 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
 
     const [formData, setFormData] = useState({
         content: homeworkContent?.content || '',
-        dueDate: formatDateForInput(homeworkContent?.dueDate) || '',
+        dueDate: toVNDateTimeLocal(homeworkContent?.dueDate),
         competition: getInitialCompetition(),
         allowLateSubmit: homeworkContent?.allowLateSubmit || false,
         updatePointsOnLateSubmit: homeworkContent?.updatePointsOnLateSubmit || false,
@@ -93,7 +75,7 @@ export const EditHomeworkContent = ({ onClose, homeworkContent, onSuccess }) => 
 
         const data = {
             content: formData.content.trim(),
-            ...(formData.dueDate && { dueDate: new Date(formData.dueDate).toISOString() }),
+            ...(formData.dueDate && { dueDate: vnDateTimeLocalToISO(formData.dueDate) }),
             ...(formData.competition && { competitionId: formData.competition.competitionId }),
             allowLateSubmit: formData.allowLateSubmit,
             updatePointsOnLateSubmit: formData.updatePointsOnLateSubmit,

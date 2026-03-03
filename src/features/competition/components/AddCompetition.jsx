@@ -5,6 +5,7 @@ import { Input, Button, Dropdown, Checkbox } from "../../../shared/components/ui
 import { ExamSearchSelect } from "../../exam/components/ExamSearchSelect";
 import { VISIBILITY_OPTIONS, VISIBILITY } from "../../../core/constants";
 import { MarkdownEditorWithLabel } from "../../../shared/components/markdown";
+import { vnDateTimeLocalToISO } from "../../../shared/utils";
 
 export const AddCompetition = ({ onClose, loadCompetitions }) => {
     const dispatch = useDispatch();
@@ -86,8 +87,8 @@ export const AddCompetition = ({ onClose, loadCompetitions }) => {
             subtitle: formData.subtitle?.trim() || undefined,
             examId: formData.examId ? Number(formData.examId) : undefined,
             policies: formData.policies?.trim() || undefined,
-            startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
-            endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
+            startDate: vnDateTimeLocalToISO(formData.startDate),
+            endDate: vnDateTimeLocalToISO(formData.endDate),
             durationMinutes: formData.durationMinutes ? Number(formData.durationMinutes) : undefined,
             maxAttempts: formData.maxAttempts ? Number(formData.maxAttempts) : undefined,
             visibility: formData.visibility,

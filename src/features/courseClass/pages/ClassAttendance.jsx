@@ -19,6 +19,7 @@ import {
     BulkAttendanceModal,
     ExportAttendanceModal,
     AttendanceDetail,
+    AttendanceExport,
 } from '../../attendance/components';
 
 import { useSearch } from '../../../shared/hooks';
@@ -90,6 +91,7 @@ export const ClassAttendance = () => {
     const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(false);
     const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
     const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
+    const [isExportPanelOpen, setIsExportPanelOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -302,6 +304,11 @@ export const ClassAttendance = () => {
         setIsDetailPanelOpen(true);
     };
 
+    const handleExportAttendance = (attendance) => {
+        setSelectedAttendance(attendance);
+        setIsExportPanelOpen(true);
+    };
+
     const handleEdit = (attendance) => {
         setSelectedAttendance(attendance);
 
@@ -503,6 +510,7 @@ export const ClassAttendance = () => {
                             onView={handleView}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            onExport={handleExportAttendance}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
                             showHomework={showHomework && !!selectedHomeworkId}
@@ -597,6 +605,16 @@ export const ClassAttendance = () => {
                 onClose={() => setIsDetailPanelOpen(false)}
             >
                 <AttendanceDetail attendance={selectedAttendance} />
+            </RightPanel>
+
+            {/* ===== EXPORT PANEL ===== */}
+            <RightPanel
+                isOpen={isExportPanelOpen}
+                title="Xuất phiếu điểm danh"
+                onClose={() => setIsExportPanelOpen(false)}
+                width="w-[700px]"
+            >
+                <AttendanceExport attendance={selectedAttendance} />
             </RightPanel>
         </>
     );

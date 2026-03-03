@@ -1,6 +1,6 @@
 import { Eye, Edit, Trash2, Calendar, Trophy, FileText } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
-
+import { formatDateTime } from '../../../shared/utils';
 export const CompetitionTable = ({ competitions, onView, onEdit, onDelete, onViewLeaderboard, loading }) => {
     const getVisibilityBadge = (visibility) => {
         const badges = {
@@ -26,17 +26,7 @@ export const CompetitionTable = ({ competitions, onView, onEdit, onDelete, onVie
         );
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+
 
     const getStatusBadge = (competition) => {
         const now = new Date();
@@ -133,11 +123,11 @@ export const CompetitionTable = ({ competitions, onView, onEdit, onDelete, onVie
                 <div className="flex flex-col text-xs">
                     <div className="flex items-center gap-1 text-foreground-light">
                         <Calendar size={12} />
-                        <span>Bắt đầu: {formatDate(competition.startDate)}</span>
+                        <span>Bắt đầu: {formatDateTime(competition.startDate)}</span>
                     </div>
                     <div className="flex items-center gap-1 text-foreground-light">
                         <Calendar size={12} />
-                        <span>Kết thúc: {formatDate(competition.endDate)}</span>
+                        <span>Kết thúc: {formatDateTime(competition.endDate)}</span>
                     </div>
                 </div>
             )

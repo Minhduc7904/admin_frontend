@@ -1,4 +1,4 @@
-import { Edit2, Trash2, User, Calendar, Eye } from 'lucide-react';
+import { Edit2, Trash2, User, Calendar, Eye, FileImage } from 'lucide-react';
 import { Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
@@ -38,6 +38,7 @@ export const AttendanceTable = ({
     onEdit,
     onDelete,
     onView,
+    onExport,
     loading,
     tuitionMonth,
     tuitionYear,
@@ -224,6 +225,20 @@ export const AttendanceTable = ({
                     >
                         <Eye size={16} className="text-blue-600" />
                     </button>
+                    {/* Export */}
+                    {onExport && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onExport(attendance);
+                            }}
+                            className="p-1 rounded hover:bg-purple-100 transition-colors"
+                            title="Xuất phiếu"
+                        >
+                            <FileImage size={16} className="text-purple-600" />
+                        </button>
+                    )}
                     {/* Edit */}
                     <button
                         type="button"

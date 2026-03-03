@@ -11,6 +11,7 @@ import { Input, Button, Dropdown, Checkbox } from "../../../shared/components/ui
 import { VISIBILITY_OPTIONS } from "../../../core/constants";
 import { MarkdownEditorWithLabel } from "../../../shared/components/markdown";
 import { ExamSearchSelect } from "../../exam/components/ExamSearchSelect";
+import { toVNDateTimeLocal, vnDateTimeLocalToISO } from "../../../shared/utils";
 
 export const EditCompetition = ({ competitionId, onClose, onSuccess }) => {
     const dispatch = useDispatch();
@@ -55,8 +56,8 @@ export const EditCompetition = ({ competitionId, onClose, onSuccess }) => {
                 title: competition.title || '',
                 subtitle: competition.subtitle || '',
                 policies: competition.processedPolicies || competition.policies || '',
-                startDate: competition.startDate ? new Date(competition.startDate).toISOString().slice(0, 16) : '',
-                endDate: competition.endDate ? new Date(competition.endDate).toISOString().slice(0, 16) : '',
+                startDate: toVNDateTimeLocal(competition.startDate),
+                endDate: toVNDateTimeLocal(competition.endDate),
                 durationMinutes: competition.durationMinutes || '',
                 maxAttempts: competition.maxAttempts || '',
                 visibility: competition.visibility || 'DRAFT',
@@ -129,8 +130,8 @@ export const EditCompetition = ({ competitionId, onClose, onSuccess }) => {
             title: formData.title.trim(),
             subtitle: formData.subtitle?.trim() || undefined,
             policies: formData.policies?.trim() || undefined,
-            startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
-            endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
+            startDate: vnDateTimeLocalToISO(formData.startDate),
+            endDate: vnDateTimeLocalToISO(formData.endDate),
             durationMinutes: formData.durationMinutes ? Number(formData.durationMinutes) : undefined,
             maxAttempts: formData.maxAttempts ? Number(formData.maxAttempts) : undefined,
             visibility: formData.visibility,

@@ -44,12 +44,18 @@ export const formatTime = (time) => {
  * @returns {string} Formatted datetime string (dd/MM/yyyy HH:mm)
  */
 export const formatDateTime = (dateTime) => {
-    if (!dateTime) return '';
+    if (!dateTime) return '-';
 
-    const d = new Date(dateTime);
-    if (isNaN(d.getTime())) return '';
+    const date = new Date(dateTime);
+    if (isNaN(date.getTime())) return '-';
 
-    return `${formatDate(d)} ${formatTime(d)}`;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
 /**
@@ -219,6 +225,86 @@ export const toISODate = (date) => {
     const day = String(d.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+};
+
+/**
+ * Convert a UTC date to Vietnam datetime string (UTC+7) for input[type="datetime-local"]
+ * @param {string | Date} date - UTC date to convert
+ * @returns {string} Formatted string (YYYY-MM-DDTHH:mm) in Vietnam time
+ */
+export const toVNDateTimeLocal = (date) => {
+    if (!date) return '';
+
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+
+    // Shift to UTC+7
+    const vnMs = d.getTime() + 7 * 60 * 60 * 1000;
+    const vnDate = new Date(vnMs);
+
+    const year = vnDate.getUTCFullYear();
+    const month = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(vnDate.getUTCDate()).padStart(2, '0');
+    const hours = String(vnDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(vnDate.getUTCMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+/**
+ * Convert a Vietnam datetime-local input value (UTC+7) to UTC ISO string for API
+ * @param {string} localStr - Datetime string from input[type="datetime-local"] (treated as UTC+7)
+ * @returns {string | undefined} UTC ISO string, or undefined if empty
+ */
+export const vnDateTimeLocalToISO = (localStr) => {
+    if (!localStr) return undefined;
+
+    // Append VN offset so Date parses it as UTC+7
+    const d = new Date(localStr + ':00+07:00');
+    if (isNaN(d.getTime())) return undefined;
+
+    return d.toISOString();
+};
+
+/**
+ * Convert a UTC date to Vietnam date string (UTC+7) for input[type="date"]
+ * @param {string | Date} date - UTC date to convert
+ * @returns {string} Formatted string (YYYY-MM-DD) in Vietnam time
+ */
+export const toVNDateLocal = (date) => {
+    if (!date) return '';
+
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+
+    const vnMs = d.getTime() + 7 * 60 * 60 * 1000;
+    const vnDate = new Date(vnMs);
+
+    const year = vnDate.getUTCFullYear();
+    const month = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(vnDate.getUTCDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
+/**
+ * Convert a UTC date to Vietnam time string (UTC+7) for input[type="time"]
+ * @param {string | Date} date - UTC date to convert
+ * @returns {string} Formatted string (HH:mm) in Vietnam time
+ */
+export const toVNTimeLocal = (date) => {
+    if (!date) return '';
+
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+
+    const vnMs = d.getTime() + 7 * 60 * 60 * 1000;
+    const vnDate = new Date(vnMs);
+
+    const hours = String(vnDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(vnDate.getUTCMinutes()).padStart(2, '0');
+
+    return `${hours}:${minutes}`;
 };
 
 /**

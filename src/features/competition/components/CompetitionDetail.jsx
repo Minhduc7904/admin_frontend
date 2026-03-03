@@ -1,17 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Calendar, Trophy, FileText, Clock, RefreshCw,
-    Edit2, CheckCircle, XCircle, Eye, EyeOff,
-    Settings, AlertCircle, Users
+    Edit2, CheckCircle, XCircle, Eye,
+    AlertCircle, Users, BookOpen, Edit
 } from 'lucide-react';
 import {
     getCompetitionByIdAsync,
     selectCurrentCompetition,
     selectCompetitionLoadingGetById
 } from '../store/competitionSlice';
-import { Button } from '../../../shared/components/ui';
+import { Button, RightPanel } from '../../../shared/components/ui';
 import { InlineLoading, MarkdownRenderer } from '../../../shared/components';
+import { EditHomeworkContent } from '../../homeworkContent/components';
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 
@@ -79,6 +80,7 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
     const dispatch = useDispatch();
     const competition = useSelector(selectCurrentCompetition);
     const loading = useSelector(selectCompetitionLoadingGetById);
+    const [editingHomework, setEditingHomework] = useState(null);
 
     useEffect(() => {
         if (competitionId) {
@@ -95,6 +97,7 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
     }
 
     return (
+        <>
         <div className="flex flex-col h-full overflow-y-auto">
             {/* ── Header ─────────────────────────────────────────────── */}
             <div className="px-6 py-4 border-b border-border bg-white sticky top-0 z-10">
@@ -246,6 +249,63 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
                     </section>
                 )}
 
+                {/* ── Bài tập về nhà ─────────────────────────────────── */}
+                {competition.homeworkContents?.length > 0 && (
+                    <section>
+                        <h3 className="text-xs font-semibold text-foreground-lighter uppercase tracking-widest mb-3">
+                            Bài tập về nhà ({competition.homeworkContents.length})
+                        </h3>
+                        <div className="space-y-2">
+                            {competition.homeworkContents.map((hw) => (
+                                <div
+                                    key={hw.homeworkContentId}
+                                    className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-border"
+                                >
+                                    <div className="flex-shrink-0 mt-0.5 w-7 h-7 rounded-md bg-white border border-border flex items-center justify-center">
+                                        <BookOpen size={13} className="text-gray-500" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-foreground truncate">
+                                            {hw.learningItem?.title || `#${hw.homeworkContentId}`}
+                                        </p>
+                                        {hw.content && (
+                                            <p className="text-xs text-foreground-light mt-0.5 truncate">
+                                                {hw.content}
+                                            </p>
+                                        )}
+                                        <div className="flex items-center gap-3 mt-1 flex-wrap">
+                                            {hw.dueDate && (
+                                                <span className="flex items-center gap-1 text-xs text-foreground-lighter">
+                                                    <Calendar size={11} />
+                                                    Hạn nộp: {formatDate(hw.dueDate)}
+                                                </span>
+                                            )}
+                                            {hw.learningItem?.admin?.fullName && (
+                                                <span className="text-xs text-foreground-lighter">
+                                                    {hw.learningItem.admin.fullName}
+                                                </span>
+                                            )}
+                                            {hw.allowLateSubmit && (
+                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
+                                                    Nộp muộn
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditingHomework(hw)}
+                                        className="flex-shrink-0 p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors"
+                                        title="Chỉnh sửa"
+                                    >
+                                        <Edit size={13} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
                 {/* ── Cài đặt hiển thị ───────────────────────────────── */}
                 <section>
                     <h3 className="text-xs font-semibold text-foreground-lighter uppercase tracking-widest mb-3">
@@ -291,5 +351,24 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
                 </section>
             </div>
         </div>
+
+        {/* ── Edit Homework Content Panel ──────────────────────── */}
+        <RightPanel
+            isOpen={!!editingHomework}
+            onClose={() => setEditingHomework(null)}
+            title={`Chỉnh sửa bài tập #${editingHomework?.homeworkContentId ?? ''}`}
+        >
+            {editingHomework && (
+                <EditHomeworkContent
+                    homeworkContent={editingHomework}
+                    onClose={() => setEditingHomework(null)}
+                    onSuccess={() => {
+                        setEditingHomework(null);
+                        dispatch(getCompetitionByIdAsync(competitionId));
+                    }}
+                />
+            )}
+        </RightPanel>
+        </>
     );
 };
