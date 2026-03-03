@@ -67,10 +67,16 @@ export const ExamDetailLayout = () => {
         return <Navigate to={ROUTES.NOT_FOUND} replace />;
     }
 
+    const fromCompetition = location.state?.fromCompetition;
+
     // 5. Render
     return (
         <div className="space-y-6 flex-1">
-            <ExamDetailBreadcrumb examName="Đề thi mẫu" />
+            <ExamDetailBreadcrumb
+                examName="Đề thi mẫu"
+                backLabel={fromCompetition ? 'Danh sách cuộc thi' : undefined}
+                backTo={fromCompetition ? '/competitions' : undefined}
+            />
             <Tabs tabs={tabs} />
 
             {/* 🔑 Chỉ phần này thay đổi khi chuyển tab */}

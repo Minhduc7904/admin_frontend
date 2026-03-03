@@ -102,4 +102,14 @@ export const competitionApi = {
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.COMPETITIONS.DELETE(id));
     },
+
+    /**
+     * [Admin] Thống kê đúng/sai theo từng câu hỏi của cuộc thi.
+     * Chỉ tính trên các bài nộp có status = GRADED.
+     * @param {number} id - Competition ID
+     * @returns {Promise<Object>} Danh sách câu hỏi kèm correctCount, wrongCount, correctRate, wrongRate
+     */
+    getQuestionStats: (id) => {
+        return axiosClient.get(API_ENDPOINTS.COMPETITIONS.QUESTION_STATS(id));
+    },
 };

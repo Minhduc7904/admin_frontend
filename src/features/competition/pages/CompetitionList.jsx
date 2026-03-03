@@ -49,6 +49,7 @@ export const CompetitionList = ({
     selectedCompetitionForDetail,
     onCloseDetailPanel,
     onEditFromDetail,
+    onExamClick,
     // delete modal props
     deleteTarget,
     openDeleteModal,
@@ -122,6 +123,7 @@ export const CompetitionList = ({
                     <CompetitionDetail
                         competitionId={selectedCompetitionForDetail.competitionId}
                         onEdit={onEditFromDetail}
+                        onExamClick={onExamClick}
                     />
                 )}
             </RightPanel>

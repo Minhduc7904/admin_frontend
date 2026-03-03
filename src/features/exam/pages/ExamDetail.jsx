@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { FileText, Edit2, X, File, Video, Youtube } from 'lucide-react';
+import { FileText, Edit2, X, File, Video, Youtube, Eye, Edit, Trophy, Calendar } from 'lucide-react';
 import { Button, RightPanel, InlineLoading } from '../../../shared/components';
 import { ENTITY_TYPES, EXAM_FIELDS } from '../../../shared/constants';
 import { MediaPickerModal } from '../../media/components/mediaPicker/MediaPickerModal';
 import { MediaPreviewModal } from '../../media/components/MediaPreviewModal';
 import { MediaUploadSection } from '../../examImportSession/components/MediaUploadSection';
 import { EditExam } from '../components';
+import { EditCompetition, CompetitionLeaderboard, CompetitionDetail } from '../../competition/components';
 import {
     getMediaUsagesByEntityAsync,
     attachMediaAsync,
@@ -46,6 +47,14 @@ export const ExamDetail = () => {
     });
 
     const [openEditExam, setOpenEditExam] = useState(false);
+
+    // Competition panel states
+    const [openDetailPanel, setOpenDetailPanel] = useState(false);
+    const [selectedCompetitionForDetail, setSelectedCompetitionForDetail] = useState(null);
+    const [openEditCompetition, setOpenEditCompetition] = useState(false);
+    const [selectedCompetitionId, setSelectedCompetitionId] = useState(null);
+    const [openLeaderboard, setOpenLeaderboard] = useState(false);
+    const [selectedCompetitionForLeaderboard, setSelectedCompetitionForLeaderboard] = useState(null);
 
     const exam = useSelector(selectCurrentExam);
     const loadingExam = useSelector(selectExamLoadingGet);
@@ -140,6 +149,44 @@ export const ExamDetail = () => {
         if (examId) {
             dispatch(getExamByIdAsync(examId));
         }
+    };
+
+    // Competition handlers
+    const handleViewCompetition = (competition) => {
+        setSelectedCompetitionForDetail(competition);
+        setOpenDetailPanel(true);
+    };
+
+    const handleEditCompetition = (competition) => {
+        setSelectedCompetitionId(competition.competitionId);
+        setOpenEditCompetition(true);
+    };
+
+    const handleViewLeaderboard = (competition) => {
+        setSelectedCompetitionForLeaderboard(competition);
+        setOpenLeaderboard(true);
+    };
+
+    const handleEditFromDetail = () => {
+        if (!selectedCompetitionForDetail) return;
+        setOpenDetailPanel(false);
+        setSelectedCompetitionId(selectedCompetitionForDetail.competitionId);
+        setOpenEditCompetition(true);
+    };
+
+    const closeCompetitionDetail = () => {
+        setOpenDetailPanel(false);
+        setSelectedCompetitionForDetail(null);
+    };
+
+    const closeEditCompetition = () => {
+        setOpenEditCompetition(false);
+        setSelectedCompetitionId(null);
+    };
+
+    const closeLeaderboard = () => {
+        setOpenLeaderboard(false);
+        setSelectedCompetitionForLeaderboard(null);
     };
 
     const handleMediaClick = async (media) => {
@@ -435,6 +482,105 @@ export const ExamDetail = () => {
                         renderItem={renderVideoItem}
                     />
                 </div>
+
+                {/* Competitions Section */}
+                {Array.isArray(exam.competitions) && exam.competitions.length > 0 && (
+                    <div className="pt-4 border-t border-border">
+                        <h3 className="text-xs font-semibold text-foreground-lighter uppercase tracking-widest mb-3">
+                            Cuộc thi liên kết ({exam.competitions.length})
+                        </h3>
+                        <div className="rounded-lg border border-border overflow-hidden">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-border">
+                                        <th className="px-3 py-2 text-left text-xs font-semibold text-foreground-lighter uppercase tracking-wide">ID</th>
+                                        <th className="px-3 py-2 text-left text-xs font-semibold text-foreground-lighter uppercase tracking-wide">Tiêu đề</th>
+                                        <th className="px-3 py-2 text-left text-xs font-semibold text-foreground-lighter uppercase tracking-wide">Thời gian diễn ra</th>
+                                        <th className="px-3 py-2 text-left text-xs font-semibold text-foreground-lighter uppercase tracking-wide">Trạng thái</th>
+                                        <th className="px-3 py-2 text-left text-xs font-semibold text-foreground-lighter uppercase tracking-wide">Hiển thị</th>
+                                        <th className="px-3 py-2 text-right text-xs font-semibold text-foreground-lighter uppercase tracking-wide">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {exam.competitions.map((comp) => {
+                                        const now = new Date();
+                                        const start = comp.startDate ? new Date(comp.startDate) : null;
+                                        const end = comp.endDate ? new Date(comp.endDate) : null;
+                                        let statusBadge;
+                                        if (!start || !end) {
+                                            statusBadge = <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Chưa đặt lịch</span>;
+                                        } else if (now < start) {
+                                            statusBadge = <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Sắp diễn ra</span>;
+                                        } else if (now <= end) {
+                                            statusBadge = <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Đang diễn ra</span>;
+                                        } else {
+                                            statusBadge = <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Đã kết thúc</span>;
+                                        }
+                                        const visibilityMap = {
+                                            DRAFT:     { label: 'Bản nháp',    cls: 'bg-gray-100 text-gray-700' },
+                                            PUBLISHED: { label: 'Đã xuất bản', cls: 'bg-green-100 text-green-700' },
+                                            PRIVATE:   { label: 'Riêng tư',    cls: 'bg-yellow-100 text-yellow-700' },
+                                        };
+                                        const vis = visibilityMap[comp.visibility] || visibilityMap.DRAFT;
+                                        const fmt = (d) => d ? new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+                                        return (
+                                            <tr
+                                                key={comp.competitionId}
+                                                className="border-b border-border last:border-0 hover:bg-gray-50 cursor-pointer transition-colors"
+                                                onClick={() => handleViewCompetition(comp)}
+                                            >
+                                                <td className="px-3 py-2.5">
+                                                    <span className="text-xs text-foreground-light">#{comp.competitionId}</span>
+                                                </td>
+                                                <td className="px-3 py-2.5">
+                                                    <div className="flex flex-col max-w-xs">
+                                                        <span className="text-sm font-medium text-foreground truncate">{comp.title}</span>
+                                                        {comp.subtitle && <span className="text-xs text-foreground-lighter truncate">{comp.subtitle}</span>}
+                                                    </div>
+                                                </td>
+                                                <td className="px-3 py-2.5">
+                                                    <div className="flex flex-col text-xs text-foreground-light">
+                                                        <div className="flex items-center gap-1"><Calendar size={11} /><span>{fmt(comp.startDate)}</span></div>
+                                                        <div className="flex items-center gap-1"><Calendar size={11} /><span>{fmt(comp.endDate)}</span></div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-3 py-2.5">{statusBadge}</td>
+                                                <td className="px-3 py-2.5">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${vis.cls}`}>{vis.label}</span>
+                                                </td>
+                                                <td className="px-3 py-2.5">
+                                                    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                                                        <button
+                                                            title="Xem chi tiết"
+                                                            onClick={() => handleViewCompetition(comp)}
+                                                            className="p-1.5 rounded hover:bg-gray-100 text-foreground-light hover:text-foreground transition-colors"
+                                                        >
+                                                            <Eye size={14} />
+                                                        </button>
+                                                        <button
+                                                            title="Bảng xếp hạng"
+                                                            onClick={() => handleViewLeaderboard(comp)}
+                                                            className="p-1.5 rounded hover:bg-gray-100 text-foreground-light hover:text-yellow-600 transition-colors"
+                                                        >
+                                                            <Trophy size={14} />
+                                                        </button>
+                                                        <button
+                                                            title="Chỉnh sửa"
+                                                            onClick={() => handleEditCompetition(comp)}
+                                                            className="p-1.5 rounded hover:bg-gray-100 text-foreground-light hover:text-foreground transition-colors"
+                                                        >
+                                                            <Edit size={14} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Media Picker Modal */}
@@ -471,6 +617,50 @@ export const ExamDetail = () => {
                     onClose={handleCloseEditExam}
                     onSuccess={handleEditSuccess}
                 />
+            </RightPanel>
+
+            {/* Competition Detail Panel */}
+            <RightPanel
+                isOpen={openDetailPanel}
+                onClose={closeCompetitionDetail}
+                title="Chi tiết cuộc thi"
+                width="w-[600px]"
+            >
+                {selectedCompetitionForDetail && (
+                    <CompetitionDetail
+                        competitionId={selectedCompetitionForDetail.competitionId}
+                        onEdit={handleEditFromDetail}
+                    />
+                )}
+            </RightPanel>
+
+            {/* Edit Competition Right Panel */}
+            <RightPanel
+                isOpen={openEditCompetition}
+                onClose={closeEditCompetition}
+                title="Chỉnh sửa cuộc thi"
+            >
+                {selectedCompetitionId && (
+                    <EditCompetition
+                        competitionId={selectedCompetitionId}
+                        onClose={closeEditCompetition}
+                        onSuccess={() => dispatch(getExamByIdAsync(examId))}
+                    />
+                )}
+            </RightPanel>
+
+            {/* Competition Leaderboard Panel */}
+            <RightPanel
+                isOpen={openLeaderboard}
+                onClose={closeLeaderboard}
+                title="Lượt nộp bài"
+                width="w-[700px]"
+            >
+                {selectedCompetitionForLeaderboard && (
+                    <CompetitionLeaderboard
+                        competition={selectedCompetitionForLeaderboard}
+                    />
+                )}
             </RightPanel>
         </div>
     );

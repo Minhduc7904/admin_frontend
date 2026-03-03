@@ -34,8 +34,30 @@ export const competitionSubmitApi = {
         return axiosClient.get(API_ENDPOINTS.COMPETITION_SUBMITS.DETAIL(id));
     },
 
+    /**     * GET /competition-submits/:id/detail
+     * [Admin] Lấy chi tiết đầy đủ bài nộp cuộc thi:
+     * - Thông tin bài nộp (status, điểm, thời gian…)
+     * - student, competition
+     * - answers[]: câu trả lời kèm question, statements, isCorrect, points
+     * - totalAnswers, correctAnswers, incorrectAnswers, unansweredQuestions
+     * @param {number} id - Competition submit ID
+     * @returns {Promise<AdminCompetitionSubmitDetailResponseDto>}
+     */
+    getDetail: (id) => {
+        return axiosClient.get(API_ENDPOINTS.COMPETITION_SUBMITS.FULL_DETAIL(id));
+    },
+
     /**
-     * DELETE /competition-submits/:id
+     * POST /competition-submits/:id/regrade
+     * [Admin] Chấm điểm lại bài nộp cuộc thi.
+     * @param {number} id - Competition submit ID
+     * @returns {Promise}
+     */
+    regrade: (id) => {
+        return axiosClient.post(API_ENDPOINTS.COMPETITION_SUBMITS.REGRADE(id));
+    },
+
+    /**     * DELETE /competition-submits/:id
      * Xoá bài nộp (admin only, ghi audit log)
      * @param {number} id - Competition submit ID
      * @returns {Promise}

@@ -35,6 +35,8 @@ export const ExamListPage = () => {
     )
 
     const [openAddExam, setOpenAddExam] = useState(false)
+    const [openEditExam, setOpenEditExam] = useState(false)
+    const [selectedExam, setSelectedExam] = useState(null)
     const [deleteTarget, setDeleteTarget] = useState(null)
 
     // Lấy từ filters và pagination
@@ -108,8 +110,8 @@ export const ExamListPage = () => {
     }
 
     const handleEdit = (exam) => {
-        // TODO: Navigate to exam edit page or open edit modal
-        console.log('Edit exam:', exam)
+        setSelectedExam(exam)
+        setOpenEditExam(true)
     }
 
     const handleDelete = (exam) => {
@@ -133,6 +135,12 @@ export const ExamListPage = () => {
     /* ===================== ADD EXAM ===================== */
     const openAdd = () => setOpenAddExam(true)
     const closeAdd = () => setOpenAddExam(false)
+
+    /* ===================== EDIT EXAM ===================== */
+    const closeEdit = () => {
+        setOpenEditExam(false)
+        setSelectedExam(null)
+    }
 
     /* ===================== RENDER ===================== */
     return (
@@ -159,6 +167,8 @@ export const ExamListPage = () => {
 
             /* ui */
             openAddExam={openAddExam}
+            openEditExam={openEditExam}
+            selectedExam={selectedExam}
             showSubject={true}
 
             /* handlers */
@@ -173,6 +183,7 @@ export const ExamListPage = () => {
             onDelete={handleDelete}
             onOpenAddExam={openAdd}
             onCloseAddExam={closeAdd}
+            onCloseEditExam={closeEdit}
             deleteTarget={deleteTarget}
             openDeleteModal={!!deleteTarget}
             onCloseDeleteModal={handleCloseDeleteModal}

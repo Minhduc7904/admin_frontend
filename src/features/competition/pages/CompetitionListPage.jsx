@@ -162,6 +162,13 @@ export const CompetitionListPage = () => {
         setSelectedCompetitionForLeaderboard(null)
     }
 
+    const handleExamClick = (exam) => {
+        if (!exam?.examId) return
+        navigate(ROUTES.EXAM_DETAIL(exam.examId), {
+            state: { fromCompetition: true },
+        })
+    }
+
     /* ===================== RENDER ===================== */
     return (
         <CompetitionList
@@ -209,6 +216,7 @@ export const CompetitionListPage = () => {
             selectedCompetitionForDetail={selectedCompetitionForDetail}
             onCloseDetailPanel={closeDetail}
             onEditFromDetail={handleEditFromDetail}
+            onExamClick={handleExamClick}
             deleteTarget={deleteTarget}
             openDeleteModal={!!deleteTarget}
             onCloseDeleteModal={handleCloseDeleteModal}

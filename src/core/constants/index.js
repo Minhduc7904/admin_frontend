@@ -425,10 +425,13 @@ export const API_ENDPOINTS = {
     CREATE: "/competitions",
     UPDATE: (id) => `/competitions/${id}`,
     DELETE: (id) => `/competitions/${id}`,
+    QUESTION_STATS: (id) => `/competitions/${id}/question-stats`,
   },
   COMPETITION_SUBMITS: {
     LIST: "/competition-submits",
     DETAIL: (id) => `/competition-submits/${id}`,
+    FULL_DETAIL: (id) => `/competition-submits/${id}/detail`,
+    REGRADE: (id) => `/competition-submits/${id}/regrade`,
     DELETE: (id) => `/competition-submits/${id}`,
   },
   SECTIONS: {

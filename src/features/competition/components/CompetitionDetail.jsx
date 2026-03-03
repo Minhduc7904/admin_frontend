@@ -75,7 +75,7 @@ const SettingRow = ({ label, enabled, tooltip }) => (
 
 /* ── component ───────────────────────────────────────────────────── */
 
-export const CompetitionDetail = ({ competitionId, onEdit }) => {
+export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
     const dispatch = useDispatch();
     const competition = useSelector(selectCurrentCompetition);
     const loading = useSelector(selectCompetitionLoadingGetById);
@@ -137,7 +137,7 @@ export const CompetitionDetail = ({ competitionId, onEdit }) => {
                             value={
                                 <div className="flex items-center gap-1.5">
                                     <Users size={13} className="text-foreground-lighter" />
-                                    <span>{competition.participantCount ?? 0} lượt</span>
+                                    <span>{competition.totalSubmissions ?? 0} lượt</span>
                                 </div>
                             }
                         />
@@ -162,7 +162,12 @@ export const CompetitionDetail = ({ competitionId, onEdit }) => {
                         Đề thi liên kết
                     </h3>
                     {competition.exam ? (
-                        <div className="p-4 bg-gray-50 rounded-lg border border-border space-y-2">
+                        <div
+                            className={`p-4 bg-gray-50 rounded-lg border border-border space-y-2 ${
+                                onExamClick ? 'cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition-colors' : ''
+                            }`}
+                            onClick={onExamClick ? () => onExamClick(competition.exam) : undefined}
+                        >
                             <div className="flex items-start gap-2">
                                 <FileText size={15} className="text-foreground-lighter mt-0.5 flex-shrink-0" />
                                 <span className="text-sm font-medium text-foreground leading-snug">

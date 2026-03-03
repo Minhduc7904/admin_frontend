@@ -19,6 +19,8 @@ const initialState = {
     loadingUpdate: false,
     loadingDelete: false,
     loadingSearch: false,
+    loadingQuestionStats: false,
+    questionStats: null,
     error: null,
     searchCompetitions: [],
     searchPagination: {
@@ -112,6 +114,16 @@ export const deleteCompetitionAsync = createAsyncThunk(
             successTitle: "Xóa cuộc thi thành công",
             successMessage: "Cuộc thi đã được xóa khỏi hệ thống",
             errorTitle: "Xóa cuộc thi thất bại",
+        });
+    }
+);
+
+export const getCompetitionQuestionStatsAsync = createAsyncThunk(
+    "competition/getQuestionStats",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => competitionApi.getQuestionStats(id), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải thống kê câu hỏi",
         });
     }
 );
@@ -262,6 +274,20 @@ const competitionSlice = createSlice({
             .addCase(deleteCompetitionAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+            // Get Question Stats
+            .addCase(getCompetitionQuestionStatsAsync.pending, (state) => {
+                state.loadingQuestionStats = true;
+                state.error = null;
+            })
+            .addCase(getCompetitionQuestionStatsAsync.fulfilled, (state, action) => {
+                state.loadingQuestionStats = false;
+                state.questionStats = action.payload.data;
+                state.error = null;
+            })
+            .addCase(getCompetitionQuestionStatsAsync.rejected, (state, action) => {
+                state.loadingQuestionStats = false;
+                state.error = action.payload;
             });
     },
 });
@@ -284,5 +310,7 @@ export const selectSearchCompetitions = (state) => state.competition.searchCompe
 export const selectCompetitionSearchPagination = (state) => state.competition.searchPagination;
 export const selectCompetitionSearchTerm = (state) => state.competition.searchTerm;
 export const selectCompetitionLoadingSearch = (state) => state.competition.loadingSearch;
+export const selectCompetitionQuestionStats = (state) => state.competition.questionStats;
+export const selectCompetitionLoadingQuestionStats = (state) => state.competition.loadingQuestionStats;
 
 export default competitionSlice.reducer;

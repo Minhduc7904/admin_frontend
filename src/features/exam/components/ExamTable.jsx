@@ -118,26 +118,28 @@ export const ExamTable = ({ exams, onView, onEdit, onDelete, loading, showSubjec
             align: 'right',
             className: 'relative',
             render: (exam) => (
-                <ActionMenu
-                    items={[
-                        {
-                            label: 'Xem chi tiết',
-                            icon: <Eye size={14} />,
-                            onClick: () => onView(exam),
-                        },
-                        {
-                            label: 'Chỉnh sửa',
-                            icon: <Edit size={14} />,
-                            onClick: () => onEdit(exam),
-                        },
-                        {
-                            label: 'Xóa đề thi',
-                            icon: <Trash2 size={14} />,
-                            variant: 'danger',
-                            onClick: () => onDelete(exam),
-                        },
-                    ]}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                    <ActionMenu
+                        items={[
+                            {
+                                label: 'Xem chi tiết',
+                                icon: <Eye size={14} />,
+                                onClick: () => onView(exam),
+                            },
+                            {
+                                label: 'Chỉnh sửa',
+                                icon: <Edit size={14} />,
+                                onClick: () => onEdit(exam),
+                            },
+                            {
+                                label: 'Xóa đề thi',
+                                icon: <Trash2 size={14} />,
+                                variant: 'danger',
+                                onClick: () => onDelete(exam),
+                            },
+                        ]}
+                    />
+                </div>
             )
         }
     ];

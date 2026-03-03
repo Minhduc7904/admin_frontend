@@ -1,11 +1,11 @@
 import { PageHeader } from '../../../shared/components';
 
-export const ExamDetailBreadcrumb = ({ examName }) => {
+export const ExamDetailBreadcrumb = ({ examName, backLabel, backTo }) => {
     return (
         <PageHeader
             breadcrumb={[
                 { label: 'Bảng điều khiển', to: '/dashboard' },
-                { label: 'Đề thi', to: '/exams' },
+                { label: backLabel || 'Đề thi', to: backTo || '/exams' },
                 { label: examName || 'Chi tiết' },
             ]}
             badge="Chi tiết đề thi"

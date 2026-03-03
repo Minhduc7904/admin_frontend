@@ -5,6 +5,7 @@ import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 const initialState = {
     submits: [],
     currentSubmit: null,
+    currentSubmitDetail: null,
     pagination: {
         page: 1,
         limit: 10,
@@ -15,6 +16,8 @@ const initialState = {
     },
     loadingGet: false,
     loadingGetById: false,
+    loadingGetDetail: false,
+    loadingRegrade: false,
     loadingDelete: false,
     error: null,
     filters: {
@@ -60,6 +63,35 @@ export const getCompetitionSubmitByIdAsync = createAsyncThunk(
     }
 );
 
+export const getCompetitionSubmitDetailAsync = createAsyncThunk(
+    'competitionSubmit/getDetail',
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(
+            () => competitionSubmitApi.getDetail(id),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: 'Lỗi tải chi tiết bài nộp',
+            }
+        );
+    }
+);
+
+export const regradeCompetitionSubmitAsync = createAsyncThunk(
+    'competitionSubmit/regrade',
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(
+            () => competitionSubmitApi.regrade(id),
+            thunkAPI,
+            {
+                successTitle: 'Chấm lại thành công',
+                successMessage: 'Bài nộp đã được chấm điểm lại',
+                errorTitle: 'Chấm lại thất bại',
+            }
+        );
+    }
+);
+
 export const deleteCompetitionSubmitAsync = createAsyncThunk(
     'competitionSubmit/delete',
     async (id, thunkAPI) => {
@@ -92,6 +124,9 @@ const competitionSubmitSlice = createSlice({
         },
         clearCurrentSubmit: (state) => {
             state.currentSubmit = null;
+        },
+        clearCurrentSubmitDetail: (state) => {
+            state.currentSubmitDetail = null;
         },
         clearError: (state) => {
             state.error = null;
@@ -135,7 +170,47 @@ const competitionSubmitSlice = createSlice({
                 state.loadingGetById = false;
                 state.error = action.payload;
             })
-
+            /* ── Get Detail (admin full) ─────────────────────────── */
+            .addCase(getCompetitionSubmitDetailAsync.pending, (state) => {
+                state.loadingGetDetail = true;
+                state.error = null;
+            })
+            .addCase(getCompetitionSubmitDetailAsync.fulfilled, (state, action) => {
+                state.loadingGetDetail = false;
+                state.currentSubmitDetail = action.payload.data;
+                state.error = null;
+            })
+            .addCase(getCompetitionSubmitDetailAsync.rejected, (state, action) => {
+                state.loadingGetDetail = false;
+                state.error = action.payload;
+            })
+            /* ── Regrade ──────────────────────────────────────────── */
+            .addCase(regradeCompetitionSubmitAsync.pending, (state) => {
+                state.loadingRegrade = true;
+                state.error = null;
+            })
+            .addCase(regradeCompetitionSubmitAsync.fulfilled, (state, action) => {
+                state.loadingRegrade = false;
+                // Update currentSubmitDetail if it matches the regraded submit
+                if (state.currentSubmitDetail?.competitionSubmitId === action.payload.data?.competitionSubmitId) {
+                    state.currentSubmitDetail = {
+                        ...state.currentSubmitDetail,
+                        ...action.payload.data,
+                    };
+                }
+                // Update in list if present
+                const idx = state.submits.findIndex(
+                    (s) => s.competitionSubmitId === action.payload.data?.competitionSubmitId
+                );
+                if (idx !== -1) {
+                    state.submits[idx] = { ...state.submits[idx], ...action.payload.data };
+                }
+                state.error = null;
+            })
+            .addCase(regradeCompetitionSubmitAsync.rejected, (state, action) => {
+                state.loadingRegrade = false;
+                state.error = action.payload;
+            })
             /* ── Delete ───────────────────────────────────────────── */
             .addCase(deleteCompetitionSubmitAsync.pending, (state) => {
                 state.loadingDelete = true;
@@ -163,6 +238,7 @@ export const {
     setPagination,
     resetFilters,
     clearCurrentSubmit,
+    clearCurrentSubmitDetail,
     clearError,
 } = competitionSubmitSlice.actions;
 
@@ -174,6 +250,9 @@ export const selectCompetitionSubmitPagination = (state) => state.competitionSub
 export const selectCompetitionSubmitFilters = (state) => state.competitionSubmit.filters;
 export const selectCompetitionSubmitLoadingGet = (state) => state.competitionSubmit.loadingGet;
 export const selectCompetitionSubmitLoadingGetById = (state) => state.competitionSubmit.loadingGetById;
+export const selectCompetitionSubmitLoadingGetDetail = (state) => state.competitionSubmit.loadingGetDetail;
+export const selectCurrentCompetitionSubmitDetail = (state) => state.competitionSubmit.currentSubmitDetail;
+export const selectCompetitionSubmitLoadingRegrade = (state) => state.competitionSubmit.loadingRegrade;
 export const selectCompetitionSubmitLoadingDelete = (state) => state.competitionSubmit.loadingDelete;
 export const selectCompetitionSubmitError = (state) => state.competitionSubmit.error;
 

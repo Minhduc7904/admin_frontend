@@ -154,7 +154,7 @@ export const CompetitionTable = ({ competitions, onView, onEdit, onDelete, onVie
                 <div className="flex items-center gap-2">
                     <Trophy size={14} className="text-yellow-600" />
                     <span className="text-sm text-foreground">
-                        {competition.participantCount || 0}
+                        {competition.totalSubmissions || 0}
                     </span>
                 </div>
             )

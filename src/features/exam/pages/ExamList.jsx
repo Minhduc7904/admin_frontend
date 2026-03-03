@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react'
 import { Button, RightPanel, ConfirmModal } from '../../../shared/components'
-import { ExamFilters, ExamTable, AddExam } from '../components'
+import { ExamFilters, ExamTable, AddExam, EditExam } from '../components'
 import { Pagination } from '../../../shared/components/ui/Pagination'
 
 export const ExamList = ({
@@ -26,6 +26,8 @@ export const ExamList = ({
 
     // ui state
     openAddExam,
+    openEditExam,
+    selectedExam,
     showSubject = true,
 
     // handlers
@@ -40,6 +42,7 @@ export const ExamList = ({
     onDelete,
     onOpenAddExam,
     onCloseAddExam,
+    onCloseEditExam,
     // delete modal props
     deleteTarget,
     openDeleteModal,
@@ -114,6 +117,21 @@ export const ExamList = ({
                     onClose={onCloseAddExam}
                     loadExams={loadExams}
                 />
+            </RightPanel>
+
+            {/* Edit Exam */}
+            <RightPanel
+                isOpen={openEditExam}
+                onClose={onCloseEditExam}
+                title="Chỉnh sửa đề thi"
+            >
+                {selectedExam && (
+                    <EditExam
+                        exam={selectedExam}
+                        onClose={onCloseEditExam}
+                        onSuccess={loadExams}
+                    />
+                )}
             </RightPanel>
 
             {/* Delete Confirmation Modal */}
