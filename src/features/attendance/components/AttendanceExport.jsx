@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Download, Eye, Image as ImageIcon, Copy, Check, Phone } from 'lucide-react';
+import { Download, Eye, Copy, Check, Phone, Settings, ChevronDown } from 'lucide-react';
 import { Button, Dropdown, Checkbox, Slider } from '../../../shared/components/ui';
 import { LoadingOverlay } from '../../../shared/components/loading/Loading';
-import { exportAttendanceImageAsync, setExportOptions, selectAttendanceExportOptions } from '../store/attendanceSlice';
+import {
+    exportAttendanceImageAsync,
+    setExportOptions,
+    selectAttendanceExportOptions,
+    toggleShowExportSettings,
+    selectShowExportSettings,
+} from '../store/attendanceSlice';
 import { attendanceApi } from '../../../core/api';
 import PDDExample from '../../../assets/PhieuDiemDanh_example.png'
 import { useDebounce } from '../../../shared/hooks/useDebounce';
@@ -44,10 +50,11 @@ export const AttendanceExport = ({ attendance }) => {
     const dispatch = useDispatch();
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-    const [previewBlocked, setPreviewBlocked] = useState(null); // null = not blocked, string = reason
+    const [previewBlocked, setPreviewBlocked] = useState(null);
     const [copied, setCopied] = useState(false);
     const previewBlobRef = useRef(null);
     const options = useSelector(selectAttendanceExportOptions);
+    const showSettings = useSelector(selectShowExportSettings);
     const debouncedQuality = useDebounce(options.quality, 400);
 
     const courseClass = useSelector(selectCurrentCourseClass);
@@ -197,191 +204,205 @@ export const AttendanceExport = ({ attendance }) => {
         <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto">
                 {/* ===== OPTIONS SECTION ===== */}
-                <div className="px-6 py-4 border-b border-border bg-primary-light">
-                    <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4" />
-                        Tùy chọn xuất phiếu
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Format */}
-                        <Dropdown
-                            label="Định dạng ảnh"
-                            value={options.format}
-                            options={FORMAT_OPTIONS}
-                            onChange={(value) => handleOptionChange('format', value)}
+                <div className="border-b border-border">
+                    {/* Header - luôn hiển thị */}
+                    <button
+                        type="button"
+                        onClick={() => dispatch(toggleShowExportSettings())}
+                        className="w-full px-6 py-3 flex items-center justify-between hover:bg-primary-light transition-colors"
+                    >
+                        <span className="font-semibold text-foreground flex items-center gap-2">
+                            <Settings className="w-4 h-4" />
+                            Tùy chọn xuất phiếu
+                        </span>
+                        <ChevronDown
+                            className={`w-4 h-4 text-foreground-light transition-transform duration-200 ${showSettings ? 'rotate-180' : ''}`}
                         />
+                    </button>
 
-                        {/* Quality */}
-                        {options.format === 'jpeg' && (
-                            <Slider
-                                label="Chất lượng"
-                                value={options.quality}
-                                min={50}
-                                max={100}
-                                onChange={(v) => handleOptionChange('quality', v)}
-                            />
-                        )}
+                    {/* Collapsible body */}
+                    {showSettings && (
+                        <div className="px-6 pb-4 pt-2 bg-primary-light">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Format */}
+                                <Dropdown
+                                    label="Định dạng ảnh"
+                                    value={options.format}
+                                    options={FORMAT_OPTIONS}
+                                    onChange={(value) => handleOptionChange('format', value)}
+                                />
 
-                        {/* Width */}
-                        <Dropdown
-                            label="Độ rộng (px)"
-                            value={options.width}
-                            options={WIDTH_OPTIONS}
-                            onChange={(value) => handleOptionChange('width', value)}
-                        />
-                    </div>
-
-                    {/* Checkboxes */}
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-
-                        <Checkbox
-                            checked={options.includeCourseName}
-                            onChange={(v) => handleOptionChange('includeCourseName', v)}
-                            label="Tên khóa học"
-                        />
-
-                        <Checkbox
-                            checked={options.includeClassName}
-                            onChange={(v) => handleOptionChange('includeClassName', v)}
-                            label="Tên lớp"
-                        />
-
-                        <Checkbox
-                            checked={options.includeStartTime}
-                            onChange={(v) => handleOptionChange('includeStartTime', v)}
-                            label="Giờ bắt đầu"
-                        />
-
-                        <Checkbox
-                            checked={options.includeEndTime}
-                            onChange={(v) => handleOptionChange('includeEndTime', v)}
-                            label="Giờ kết thúc"
-                        />
-
-                        <Checkbox
-                            checked={options.includePhoto}
-                            onChange={(v) => handleOptionChange('includePhoto', v)}
-                            label="Ảnh học sinh"
-                        />
-
-                        <Checkbox
-                            checked={options.includeStudentId}
-                            onChange={(v) => handleOptionChange('includeStudentId', v)}
-                            label="Mã học sinh"
-                        />
-
-                        <Checkbox
-                            checked={options.includeEmail}
-                            onChange={(v) => handleOptionChange('includeEmail', v)}
-                            label="Email"
-                        />
-
-                        <Checkbox
-                            checked={options.includeParentPhone}
-                            onChange={(v) => handleOptionChange('includeParentPhone', v)}
-                            label="SĐT phụ huynh"
-                        />
-
-                        <Checkbox
-                            checked={options.includeStudentPhone}
-                            onChange={(v) => handleOptionChange('includeStudentPhone', v)}
-                            label="SĐT học sinh"
-                        />
-
-                        <Checkbox
-                            checked={options.includeGradeSchool}
-                            onChange={(v) => handleOptionChange('includeGradeSchool', v)}
-                            label="Khối & Trường"
-                        />
-
-                        <Checkbox
-                            checked={options.includeMarkedAt}
-                            onChange={(v) => handleOptionChange('includeMarkedAt', v)}
-                            label="Thời gian đến lớp"
-                        />
-
-                        <Checkbox
-                            checked={options.includeNotes}
-                            onChange={(v) => handleOptionChange('includeNotes', v)}
-                            label="Ghi chú & Nhận xét"
-                        />
-
-                        {/* ===== TUITION ===== */}
-                        <div className="md:col-span-2 flex flex-wrap items-center gap-3">
-                            <Checkbox
-                                checked={options.includeTuition}
-                                onChange={(v) => handleOptionChange('includeTuition', v)}
-                                label="Thông tin học phí"
-                            />
-                            {options.includeTuition && (
-                                <>
-                                    <div className="w-36">
-                                        <Dropdown
-                                            value={options.tuitionMonth}
-                                            onChange={(v) => handleOptionChange('tuitionMonth', v)}
-                                            options={MONTH_OPTIONS}
-                                            placeholder="Chọn tháng"
-                                        />
-                                    </div>
-                                    <div className="w-32">
-                                        <Dropdown
-                                            value={options.tuitionYear}
-                                            onChange={(v) => handleOptionChange('tuitionYear', v)}
-                                            options={YEAR_OPTIONS}
-                                            placeholder="Chọn năm"
-                                        />
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        {/* ===== HOMEWORK ===== */}
-                        <div className="md:col-span-2 flex flex-wrap items-center gap-3">
-                            <Checkbox
-                                checked={options.includeHomework}
-                                onChange={(v) => {
-                                    handleOptionChange('includeHomework', v);
-                                    if (!v) handleOptionChange('homeworkContentId', null);
-                                }}
-                                label="Thông tin bài tập về nhà"
-                                disabled={!courseClass}
-                            />
-                            {options.includeHomework && (
-                                <div className="w-80">
-                                    <HomeworkContentSearchSelect
-                                        value={options.homeworkContentId}
-                                        onSelect={(hw) => handleOptionChange('homeworkContentId', hw ? hw.homeworkContentId : null)}
-                                        homeworkContents={byCourseHomeworkContents}
-                                        loading={loadingGetByCourse}
-                                        disabled={loadingGetByCourse}
+                                {/* Quality */}
+                                {options.format === 'jpeg' && (
+                                    <Slider
+                                        label="Chất lượng"
+                                        value={options.quality}
+                                        min={50}
+                                        max={100}
+                                        onChange={(v) => handleOptionChange('quality', v)}
                                     />
+                                )}
+
+                                {/* Width */}
+                                <Dropdown
+                                    label="Độ rộng (px)"
+                                    value={options.width}
+                                    options={WIDTH_OPTIONS}
+                                    onChange={(value) => handleOptionChange('width', value)}
+                                />
+                            </div>
+
+                            {/* Checkboxes */}
+                            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                                <Checkbox
+                                    checked={options.includeCourseName}
+                                    onChange={(v) => handleOptionChange('includeCourseName', v)}
+                                    label="Tên khóa học"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeClassName}
+                                    onChange={(v) => handleOptionChange('includeClassName', v)}
+                                    label="Tên lớp"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeStartTime}
+                                    onChange={(v) => handleOptionChange('includeStartTime', v)}
+                                    label="Giờ bắt đầu"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeEndTime}
+                                    onChange={(v) => handleOptionChange('includeEndTime', v)}
+                                    label="Giờ kết thúc"
+                                />
+
+                                <Checkbox
+                                    checked={options.includePhoto}
+                                    onChange={(v) => handleOptionChange('includePhoto', v)}
+                                    label="Ảnh học sinh"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeStudentId}
+                                    onChange={(v) => handleOptionChange('includeStudentId', v)}
+                                    label="Mã học sinh"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeEmail}
+                                    onChange={(v) => handleOptionChange('includeEmail', v)}
+                                    label="Email"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeParentPhone}
+                                    onChange={(v) => handleOptionChange('includeParentPhone', v)}
+                                    label="SĐT phụ huynh"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeStudentPhone}
+                                    onChange={(v) => handleOptionChange('includeStudentPhone', v)}
+                                    label="SĐT học sinh"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeGradeSchool}
+                                    onChange={(v) => handleOptionChange('includeGradeSchool', v)}
+                                    label="Khối & Trường"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeMarkedAt}
+                                    onChange={(v) => handleOptionChange('includeMarkedAt', v)}
+                                    label="Thời gian đến lớp"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeNotes}
+                                    onChange={(v) => handleOptionChange('includeNotes', v)}
+                                    label="Ghi chú & Nhận xét"
+                                />
+
+                                {/* ===== TUITION ===== */}
+                                <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+                                    <Checkbox
+                                        checked={options.includeTuition}
+                                        onChange={(v) => handleOptionChange('includeTuition', v)}
+                                        label="Thông tin học phí"
+                                    />
+                                    {options.includeTuition && (
+                                        <>
+                                            <div className="w-36">
+                                                <Dropdown
+                                                    value={options.tuitionMonth}
+                                                    onChange={(v) => handleOptionChange('tuitionMonth', v)}
+                                                    options={MONTH_OPTIONS}
+                                                    placeholder="Chọn tháng"
+                                                />
+                                            </div>
+                                            <div className="w-32">
+                                                <Dropdown
+                                                    value={options.tuitionYear}
+                                                    onChange={(v) => handleOptionChange('tuitionYear', v)}
+                                                    options={YEAR_OPTIONS}
+                                                    placeholder="Chọn năm"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
-                            )}
+
+                                {/* ===== HOMEWORK ===== */}
+                                <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+                                    <Checkbox
+                                        checked={options.includeHomework}
+                                        onChange={(v) => {
+                                            handleOptionChange('includeHomework', v);
+                                            if (!v) handleOptionChange('homeworkContentId', null);
+                                        }}
+                                        label="Thông tin bài tập về nhà"
+                                        disabled={!courseClass}
+                                    />
+                                    {options.includeHomework && (
+                                        <div className="w-80">
+                                            <HomeworkContentSearchSelect
+                                                value={options.homeworkContentId}
+                                                onSelect={(hw) => handleOptionChange('homeworkContentId', hw ? hw.homeworkContentId : null)}
+                                                homeworkContents={byCourseHomeworkContents}
+                                                loading={loadingGetByCourse}
+                                                disabled={loadingGetByCourse}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Checkbox
+                                    checked={options.includeTeacherName}
+                                    onChange={(v) => handleOptionChange('includeTeacherName', v)}
+                                    label="Giáo viên giảng dạy"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeMarkerName}
+                                    onChange={(v) => handleOptionChange('includeMarkerName', v)}
+                                    label="Người điểm danh"
+                                />
+
+                                <Checkbox
+                                    checked={options.includeQRCode}
+                                    onChange={(v) => handleOptionChange('includeQRCode', v)}
+                                    label="QR Code"
+                                />
+                            </div>
                         </div>
+                    )}
 
-                        <Checkbox
-                            checked={options.includeTeacherName}
-                            onChange={(v) => handleOptionChange('includeTeacherName', v)}
-                            label="Giáo viên giảng dạy"
-                        />
-
-                        <Checkbox
-                            checked={options.includeMarkerName}
-                            onChange={(v) => handleOptionChange('includeMarkerName', v)}
-                            label="Người điểm danh"
-                        />
-
-                        <Checkbox
-                            checked={options.includeQRCode}
-                            onChange={(v) => handleOptionChange('includeQRCode', v)}
-                            label="QR Code"
-                        />
-                    </div>
-
-
-                    {/* Action Buttons */}
-                    <div className="mt-4 flex gap-2">
+                    {/* Action Buttons - luôn hiển thị */}
+                    <div className="px-6 py-3 flex gap-2 bg-primary-light border-t border-border">
                         <Button
                             variant="primary"
                             size="sm"

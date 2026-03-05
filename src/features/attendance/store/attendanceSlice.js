@@ -62,9 +62,10 @@ const initialState = {
         includeTuition: true,
         tuitionMonth: new Date().getMonth() + 1,
         tuitionYear: new Date().getFullYear(),
-        includeHomework: false,
+        includeHomework: true,
         homeworkContentId: null,
     },
+    showExportSettings: false,
     exportExcelOptions: {
         includeSchool: true,
         includeParentPhone: true,
@@ -299,6 +300,9 @@ export const attendanceSlice = createSlice({
         },
         resetExportOptions: (state) => {
             state.exportOptions = initialState.exportOptions;
+        },
+        toggleShowExportSettings: (state) => {
+            state.showExportSettings = !state.showExportSettings;
         },
         setExportExcelOptions: (state, action) => {
             state.exportExcelOptions = { ...state.exportExcelOptions, ...action.payload };
@@ -541,6 +545,7 @@ export const {
     clearStatistics,
     setExportOptions,
     resetExportOptions,
+    toggleShowExportSettings,
     setExportExcelOptions,
     resetExportExcelOptions,
     setQuickAttendanceCoursesSelection,
@@ -569,6 +574,7 @@ export const selectAttendanceLoadingToggleParentNotified = (state) => state.atte
 export const selectAttendanceError = (state) => state.attendance.error;
 export const selectAttendanceFilters = (state) => state.attendance.filters;
 export const selectAttendanceExportOptions = (state) => state.attendance.exportOptions;
+export const selectShowExportSettings = (state) => state.attendance.showExportSettings;
 export const selectAttendanceExportExcelOptions = (state) => state.attendance.exportExcelOptions;
 export const selectQuickAttendanceCoursesSelection = (state) => state.attendance.quickAttendance.coursesSelection;
 export const selectQuickAttendanceClassesSelection = (state) => state.attendance.quickAttendance.classesSelection;
