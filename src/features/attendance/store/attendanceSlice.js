@@ -470,17 +470,15 @@ export const attendanceSlice = createSlice({
             })
             .addCase(toggleParentNotifiedAsync.fulfilled, (state, action) => {
                 state.loadingToggleParentNotified = false;
+                const { attendanceId, parentNotified } = action.payload.data;
                 const index = state.attendances.findIndex(
-                    (att) => att.attendanceId === action.payload.data.attendanceId
+                    (att) => att.attendanceId === attendanceId
                 );
                 if (index !== -1) {
-                    state.attendances[index] = action.payload.data;
+                    state.attendances[index].parentNotified = parentNotified;
                 }
-                if (
-                    state.currentAttendance &&
-                    state.currentAttendance.attendanceId === action.payload.data.attendanceId
-                ) {
-                    state.currentAttendance = action.payload.data;
+                if (state.currentAttendance?.attendanceId === attendanceId) {
+                    state.currentAttendance.parentNotified = parentNotified;
                 }
             })
             .addCase(toggleParentNotifiedAsync.rejected, (state, action) => {
