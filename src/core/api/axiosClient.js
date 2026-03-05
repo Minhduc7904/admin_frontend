@@ -1,6 +1,10 @@
 import axios from "axios";
 import { API_BASE_URL, STORAGE_KEYS, ROUTES } from "../constants";
 
+// Injected store to avoid circular dependency (store → authSlice → authApi → axiosClient)
+let _store;
+export const injectStore = (store) => { _store = store; };
+
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 600000, // 600 giây
@@ -80,7 +84,7 @@ axiosClient.interceptors.response.use(
     // Handle 401 Unauthorized
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
+      console.warn("⚠️ 401 Unauthorized - Attempting token refresh...");
       try {
         const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
 
@@ -91,10 +95,19 @@ axiosClient.interceptors.response.use(
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refreshToken,
         });
-        console.log('Refresh response:', response);
+        console.log('Refresh response:', response.data);
 
-        const { accessToken } = response.data;
+        const { accessToken, refreshToken: newRefreshToken } = response.data?.data ? response.data.data : response.data;
         localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+        if (newRefreshToken) {
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
+        }
+
+        // Sync tokens into Redux store
+        _store?.dispatch({
+          type: 'auth/setCredentials',
+          payload: { accessToken, refreshToken: newRefreshToken || refreshToken },
+        });
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosClient(originalRequest);
@@ -102,7 +115,6 @@ axiosClient.interceptors.response.use(
         // Clear tokens and redirect to login
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.USER_INFO);
 
         if (typeof window !== "undefined") {
           // Use import.meta.env.BASE_URL to respect Vite base path (e.g. /admin/)

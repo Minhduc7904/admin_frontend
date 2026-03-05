@@ -22,6 +22,7 @@ const initialState = {
     loadingStatistics: false,
     loadingExport: false,
     loadingExportImage: false,
+    loadingToggleParentNotified: false,
     error: null,
     filters: {
         search: "",
@@ -196,6 +197,17 @@ export const exportAttendanceBySessionAsync = createAsyncThunk(
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data?.message || 'Lỗi xuất Excel');
         }
+    }
+);
+
+export const toggleParentNotifiedAsync = createAsyncThunk(
+    "attendance/toggleParentNotified",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.toggleParentNotified(id), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Cập nhật trạng thái thông báo phụ huynh thành công",
+            errorTitle: "Lỗi cập nhật trạng thái thông báo phụ huynh",
+        });
     }
 );
 
@@ -449,6 +461,31 @@ export const attendanceSlice = createSlice({
             .addCase(exportAttendanceImageAsync.rejected, (state, action) => {
                 state.loadingExportImage = false;
                 state.error = action.payload;
+            })
+
+            // Toggle parent notified
+            .addCase(toggleParentNotifiedAsync.pending, (state) => {
+                state.loadingToggleParentNotified = true;
+                state.error = null;
+            })
+            .addCase(toggleParentNotifiedAsync.fulfilled, (state, action) => {
+                state.loadingToggleParentNotified = false;
+                const index = state.attendances.findIndex(
+                    (att) => att.attendanceId === action.payload.data.attendanceId
+                );
+                if (index !== -1) {
+                    state.attendances[index] = action.payload.data;
+                }
+                if (
+                    state.currentAttendance &&
+                    state.currentAttendance.attendanceId === action.payload.data.attendanceId
+                ) {
+                    state.currentAttendance = action.payload.data;
+                }
+            })
+            .addCase(toggleParentNotifiedAsync.rejected, (state, action) => {
+                state.loadingToggleParentNotified = false;
+                state.error = action.payload;
             });
     },
 });
@@ -488,6 +525,7 @@ export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loa
 export const selectAttendanceLoadingStatistics = (state) => state.attendance.loadingStatistics;
 export const selectAttendanceLoadingExport = (state) => state.attendance.loadingExport;
 export const selectAttendanceLoadingExportImage = (state) => state.attendance.loadingExportImage;
+export const selectAttendanceLoadingToggleParentNotified = (state) => state.attendance.loadingToggleParentNotified;
 export const selectAttendanceError = (state) => state.attendance.error;
 export const selectAttendanceFilters = (state) => state.attendance.filters;
 export const selectAttendanceExportOptions = (state) => state.attendance.exportOptions;

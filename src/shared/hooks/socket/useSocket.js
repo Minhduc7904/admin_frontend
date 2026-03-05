@@ -17,7 +17,7 @@ import { selectAccessToken, selectIsAuthenticated } from '../../../features/auth
  */
 export const useSocket = (options = {}) => {
     const {
-        autoConnect = true,
+        autoConnect = false,
     } = options
 
     const accessToken = useSelector(selectAccessToken)

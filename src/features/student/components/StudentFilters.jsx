@@ -5,6 +5,7 @@ import { IS_ACTIVE_OPTIONS } from '../../../core/constants/is-active.constants'
 import { TIME_RANGE_OPTIONS } from '../../../core/constants/options'
 import { getDateRange } from '../../../shared/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { CourseClassSearchMultiSelect } from '../../courseClass/components/CourseClassSearchMultiSelect'
 
 const TIME_RANGE_OPTIONS_WITH_DEFAULT = [
     { value: '', label: 'Tùy chọn' },
@@ -22,7 +23,9 @@ export const StudentFilters = ({
     onFromDateChange,
     toDate,
     onToDateChange,
-
+    /* classes filter */
+    selectedClasses,
+    onClassesChange,
     /* ===== NEW ===== */
     showStats,
     onToggleStats,
@@ -100,6 +103,16 @@ export const StudentFilters = ({
                         onToDateChange(e.target.value)
                         setTimeRange('')
                     }}
+                />
+            </div>
+
+            {/* ===== Row 3: Class filter ===== */}
+            <div>
+                <CourseClassSearchMultiSelect
+                    label="Lớp học đã tham gia"
+                    placeholder="Tìm kiếm lớp học..."
+                    value={selectedClasses}
+                    onChange={onClassesChange}
                 />
             </div>
 

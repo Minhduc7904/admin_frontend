@@ -14,6 +14,7 @@ import { GRADE_OPTIONS } from '../../../core/constants/grade-constants'
 import { IS_ACTIVE_OPTIONS } from '../../../core/constants/is-active.constants'
 import { TIME_RANGE_OPTIONS } from '../../../core/constants/options'
 import { getDateRange } from '../../../shared/utils'
+import { CourseClassSearchMultiSelect } from '../../courseClass/components/CourseClassSearchMultiSelect'
 
 import {
     selectStudentExportExcelOptions,
@@ -35,6 +36,7 @@ export const ExportStudentListModal = ({
     const exportOptions = useSelector(selectStudentExportExcelOptions)
 
     const [timeRange, setTimeRange] = useState('')
+    const [selectedClasses, setSelectedClasses] = useState([])
 
     /* ===================== FILTER HANDLERS (IN OPTIONS) ===================== */
     const updateOption = (field) => (value) => {
@@ -76,7 +78,13 @@ export const ExportStudentListModal = ({
 
     const handleClose = () => {
         setTimeRange('')
+        setSelectedClasses([])
         onClose()
+    }
+
+    const handleClassesChange = (classes) => {
+        setSelectedClasses(classes)
+        dispatch(setStudentExportExcelOptions({ classIds: classes.map((c) => c.classId) }))
     }
 
     return (
@@ -150,6 +158,15 @@ export const ExportStudentListModal = ({
                                     updateOption('toDate')(e.target.value)
                                     setTimeRange('')
                                 }}
+                            />
+                        </div>
+
+                        <div>
+                            <CourseClassSearchMultiSelect
+                                label="Lớp học đã tham gia"
+                                placeholder="Tìm kiếm lớp học..."
+                                value={selectedClasses}
+                                onChange={handleClassesChange}
                             />
                         </div>
                     </div>

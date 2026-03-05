@@ -43,4 +43,8 @@ export const attendanceApi = {
             responseType: 'blob',
         });
     },
+
+    toggleParentNotified: (id) => {
+        return axiosClient.put(API_ENDPOINTS.ATTENDANCES.TOGGLE_PARENT_NOTIFIED(id));
+    },
 };

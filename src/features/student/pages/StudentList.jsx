@@ -88,6 +88,7 @@ export const StudentList = () => {
     const [selectedIsActive, setSelectedIsActive] = useState(filters.isActive || '')
     const [fromDate, setFromDate] = useState(filters.fromDate || '')
     const [toDate, setToDate] = useState(filters.toDate || '')
+    const [selectedClasses, setSelectedClasses] = useState([])
 
     const [sort, setSort] = useState({
         field: filters.sortBy || 'createdAt',
@@ -117,6 +118,7 @@ export const StudentList = () => {
         toDate,
         sort.field,
         sort.direction,
+        selectedClasses,
     ])
 
     useEffect(() => {
@@ -133,6 +135,7 @@ export const StudentList = () => {
 
     /* ===================== API ===================== */
     const loadStudents = () => {
+        const classIds = selectedClasses.map((c) => c.classId)
         const params = {
             page: currentPage,
             limit: itemsPerPage,
@@ -142,6 +145,7 @@ export const StudentList = () => {
             toDate: toDate || undefined,
             sortBy: sort.field,
             sortOrder: sort.direction,
+            classIds: classIds.length ? classIds : undefined,
         }
 
         if (selectedIsActive === 'true') params.isActive = true
@@ -210,6 +214,11 @@ export const StudentList = () => {
     const handleToDateChange = (value) => {
         setToDate(value)
         resetPageAndSetFilter({ toDate: value })
+    }
+
+    const handleClassesChange = (classes) => {
+        setSelectedClasses(classes)
+        resetPageAndSetFilter({ classIds: classes.map((c) => c.classId) })
     }
 
     /* ===================== SORT ===================== */
@@ -290,6 +299,8 @@ export const StudentList = () => {
                     onFromDateChange={handleFromDateChange}
                     toDate={toDate}
                     onToDateChange={handleToDateChange}
+                    selectedClasses={selectedClasses}
+                    onClassesChange={handleClassesChange}
                     onToggleStats={() => dispatch(setShowStats(!showStats))}
                     showStats={showStats}
                 />

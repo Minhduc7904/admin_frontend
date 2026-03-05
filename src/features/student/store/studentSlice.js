@@ -46,6 +46,7 @@ const initialState = {
         sortOrder: "desc",
         grade: "",
         isActive: IS_ACTIVE.ACTIVE,
+        classIds: [],
     },
     exportOptions: {
         includeSchool: true,
@@ -64,6 +65,7 @@ const initialState = {
         isActive: IS_ACTIVE.ACTIVE,
         fromDate: '',
         toDate: '',
+        classIds: [],
     },
 };
 

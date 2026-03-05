@@ -1,4 +1,4 @@
-import { Edit2, Trash2, User, Calendar, Eye, FileImage } from 'lucide-react';
+import { Edit2, Trash2, User, Calendar, Eye, FileImage, BellRing } from 'lucide-react';
 import { Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
@@ -39,6 +39,7 @@ export const AttendanceTable = ({
     onDelete,
     onView,
     onExport,
+    onToggleParentNotified,
     loading,
     tuitionMonth,
     tuitionYear,
@@ -135,6 +136,30 @@ export const AttendanceTable = ({
                 >
                     {attendance.notes || '-'}
                 </span>
+            ),
+        },
+        {
+            key: 'parentNotified',
+            label: (
+                <span className="flex items-center justify-center w-full">
+                    <BellRing size={13} />
+                </span>
+            ),
+            align: 'center',
+            render: (attendance) => (
+                <div className="flex items-center justify-center">
+                    <input
+                        type="checkbox"
+                        checked={!!attendance.parentNotified}
+                        onChange={() => { }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleParentNotified && onToggleParentNotified(attendance);
+                        }}
+                        className="w-4 h-4 accent-green-600 cursor-pointer"
+                        title={attendance.parentNotified ? 'Đã gửi phiếu cho phụ huynh' : 'Chưa gửi phiếu cho phụ huynh'}
+                    />
+                </div>
             ),
         },
         {

@@ -32,6 +32,7 @@ import {
     createBulkAttendanceBySessionAsync,
     getStatisticsBySessionAsync,
     exportAttendanceBySessionAsync,
+    toggleParentNotifiedAsync,
     selectAttendances,
     selectAttendancePagination,
     selectAttendanceFilters,
@@ -43,6 +44,7 @@ import {
     selectAttendanceLoadingBulkCreate,
     selectAttendanceLoadingStatistics,
     selectAttendanceLoadingExport,
+    selectAttendanceLoadingToggleParentNotified,
     setFilters,
 } from '../../attendance/store/attendanceSlice';
 import { ROUTES } from '../../../core/constants';
@@ -76,6 +78,7 @@ export const ClassAttendance = () => {
     const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
     const loadingStatistics = useSelector(selectAttendanceLoadingStatistics);
     const loadingExport = useSelector(selectAttendanceLoadingExport);
+    const loadingToggleParentNotified = useSelector(selectAttendanceLoadingToggleParentNotified);
 
     /* homework filter */
     const courseClass = useSelector(selectCurrentCourseClass);
@@ -364,6 +367,15 @@ export const ClassAttendance = () => {
         }
     };
 
+    /* ===================== TOGGLE PARENT NOTIFIED ===================== */
+    const handleToggleParentNotified = async (attendance) => {
+        try {
+            await dispatch(toggleParentNotifiedAsync(attendance.attendanceId)).unwrap();
+        } catch (err) {
+            console.error('Toggle parent notified failed:', err);
+        }
+    };
+
     /* ===================== EXPORT ===================== */
     const handleOpenExportModal = () => {
         setIsExportModalOpen(true);
@@ -511,6 +523,7 @@ export const ClassAttendance = () => {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onExport={handleExportAttendance}
+                            onToggleParentNotified={handleToggleParentNotified}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
                             showHomework={showHomework && !!selectedHomeworkId}
