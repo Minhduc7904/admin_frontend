@@ -250,6 +250,22 @@ class SocketService {
     getSocketId() {
         return this.socket?.id || null
     }
+
+    /**
+     * Disconnect current socket and reconnect with a new token.
+     * Used after a successful token refresh following a 401 auth error.
+     * @param {string} newToken - Fresh JWT access token
+     */
+    reconnectWithToken(newToken) {
+        if (this.socket) {
+            this.socket.io.reconnection(false)
+            this.socket.disconnect()
+            this.socket = null
+        }
+        this.authFailed = false
+        this.isConnected = false
+        this.connect(newToken)
+    }
 }
 
 // Export singleton instance

@@ -1,8 +1,15 @@
 // src/hooks/socket/useSocket.js
-import { useEffect, useState, useCallback } from 'react'
-import { useSelector } from 'react-redux'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import axios from 'axios'
 import { socketService } from '../../../services/socket/socket.service'
-import { selectAccessToken, selectIsAuthenticated } from '../../../features/auth/store/authSlice'
+import {
+    selectAccessToken,
+    selectIsAuthenticated,
+    setCredentials,
+    clearAuth,
+} from '../../../features/auth/store/authSlice'
+import { API_BASE_URL, STORAGE_KEYS, ROUTES } from '../../../core/constants'
 
 /**
  * useSocket Hook
@@ -17,14 +24,18 @@ import { selectAccessToken, selectIsAuthenticated } from '../../../features/auth
  */
 export const useSocket = (options = {}) => {
     const {
-        autoConnect = false,
+        autoConnect = true,
     } = options
 
+    const dispatch = useDispatch()
     const accessToken = useSelector(selectAccessToken)
     const isAuthenticated = useSelector(selectIsAuthenticated)
     const [isConnected, setIsConnected] = useState(false)
     const [socketId, setSocketId] = useState(null)
     const [authFailed, setAuthFailed] = useState(false)
+
+    // Guard: prevent multiple simultaneous refresh calls
+    const isRefreshing = useRef(false)
 
     // Connect to socket
     const connect = useCallback(() => {
@@ -89,11 +100,51 @@ export const useSocket = (options = {}) => {
                 setSocketId(null)
             })
 
-            socketService.on('connect_error', () => {
-                if (socketService.getAuthFailed()) {
+            socketService.on('connect_error', async () => {
+                if (!socketService.getAuthFailed()) return
+                if (isRefreshing.current) return
+                isRefreshing.current = true
+
+                console.warn('🔒 Socket auth failed — attempting token refresh...')
+
+                try {
+                    const storedRefreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+                    if (!storedRefreshToken) throw new Error('No refresh token')
+
+                    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+                        refreshToken: storedRefreshToken,
+                    })
+
+                    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+                        response.data?.data ?? response.data
+
+                    // Persist tokens
+                    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, newAccessToken)
+                    if (newRefreshToken) {
+                        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken)
+                    }
+
+                    // Sync to Redux
+                    dispatch(setCredentials({
+                        accessToken: newAccessToken,
+                        refreshToken: newRefreshToken || storedRefreshToken,
+                    }))
+
+                    console.log('✅ Token refreshed — reconnecting socket...')
+
+                    // Reconnect socket with fresh token
+                    socketService.reconnectWithToken(newAccessToken)
+                    setAuthFailed(false)
+                } catch (err) {
+                    console.error('❌ Token refresh failed — logging out:', err)
+                    dispatch(clearAuth())
                     setAuthFailed(true)
                     setIsConnected(false)
                     setSocketId(null)
+                    const base = import.meta.env.BASE_URL || '/'
+                    window.location.href = base.replace(/\/$/, '') + ROUTES.LOGIN
+                } finally {
+                    isRefreshing.current = false
                 }
             })
         }
