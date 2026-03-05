@@ -85,7 +85,7 @@ export const AttendanceTable = ({
                         {attendance.student.studentId && (
                             <>
                                 <p className="text-xs text-foreground-light">
-                                    #{attendance.student.studentId} / {attendance.student.school || ''}
+                                    #{attendance.student.studentId} / {attendance.student.school || ''} / Lớp {attendance.student.grade || ''}
                                 </p>
                                 <p className="text-xs text-foreground-light">
                                     {attendance.student.studentPhone} / {attendance.student.parentPhone || ''}

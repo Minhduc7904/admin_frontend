@@ -12,7 +12,7 @@ import { useSocketEvent } from '../../hooks/socket/useSocketEvent'
  */
 export const SocketProvider = ({ children }) => {
     const { isConnected, socketId, authFailed } = useSocket({
-        autoConnect: false, // Auto connect when user is authenticated
+        autoConnect: true, // Auto connect when user is authenticated
     })
 
     // Listen to global socket events

@@ -21,6 +21,7 @@ const STATUS_LABEL = {
 export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+    const [isPositioned, setIsPositioned] = useState(false);
     const buttonRef = useRef(null);
     const menuRef = useRef(null);
 
@@ -33,13 +34,15 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) 
                 left: rect.left + window.scrollX,
                 width: rect.width,
             });
+            return true;
         }
+        return false;
     };
 
     // Update position when opening
     useEffect(() => {
-        if (isOpen) {
-            updatePosition();
+        if (!isOpen) {
+            setIsPositioned(false);
         }
     }, [isOpen]);
 
@@ -78,6 +81,21 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) 
         setIsOpen(false);
     };
 
+    const handleToggle = () => {
+        if (disabled) return;
+        
+        if (!isOpen) {
+            // Tính toán position trước khi mở
+            const positioned = updatePosition();
+            if (positioned) {
+                setIsPositioned(true);
+                setIsOpen(true);
+            }
+        } else {
+            setIsOpen(false);
+        }
+    };
+
     return (
         <div
             className="relative inline-block w-full"
@@ -87,7 +105,7 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) 
             <button
                 ref={buttonRef}
                 type="button"
-                onClick={() => !disabled && setIsOpen(!isOpen)}
+                onClick={handleToggle}
                 disabled={disabled}
                 className={`
                     inline-flex items-center justify-between gap-2 px-2.5 py-1 rounded-full text-xs font-medium
@@ -107,10 +125,10 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) 
             </button>
 
             {/* Dropdown Menu - Rendered to document.body via Portal */}
-            {isOpen && createPortal(
+            {isOpen && isPositioned && createPortal(
                 <div
                     ref={menuRef}
-                    className="bg-white border border-border rounded-lg shadow-lg overflow-hidden"
+                    className="bg-white border border-border rounded-lg shadow-lg overflow-hidden transition-opacity duration-150"
                     style={{
                         position: 'absolute',
                         top: `${dropdownPosition.top + 4}px`,
@@ -118,6 +136,7 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) 
                         width: `${dropdownPosition.width}px`,
                         minWidth: '120px',
                         zIndex: 99999,
+                        opacity: 1,
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
