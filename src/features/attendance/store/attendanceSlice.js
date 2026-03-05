@@ -17,6 +17,7 @@ const initialState = {
     loadingGet: false,
     loadingCreate: false,
     loadingUpdate: false,
+    loadingUpdateStatus: false,
     loadingDelete: false,
     loadingBulkCreate: false,
     loadingStatistics: false,
@@ -207,6 +208,16 @@ export const toggleParentNotifiedAsync = createAsyncThunk(
             showSuccess: true,
             successTitle: "Cập nhật trạng thái thông báo phụ huynh thành công",
             errorTitle: "Lỗi cập nhật trạng thái thông báo phụ huynh",
+        });
+    }
+);
+
+export const updateAttendanceStatusAsync = createAsyncThunk(
+    "attendance/updateStatus",
+    async ({ id, status }, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.update(id, { status }), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi cập nhật trạng thái điểm danh",
         });
     }
 );
@@ -484,6 +495,36 @@ export const attendanceSlice = createSlice({
             .addCase(toggleParentNotifiedAsync.rejected, (state, action) => {
                 state.loadingToggleParentNotified = false;
                 state.error = action.payload;
+            })
+
+            // Update attendance status (quick update without refetch)
+            .addCase(updateAttendanceStatusAsync.pending, (state) => {
+                state.loadingUpdateStatus = true;
+                state.error = null;
+            })
+            .addCase(updateAttendanceStatusAsync.fulfilled, (state, action) => {
+                state.loadingUpdateStatus = false;
+                const updatedAttendance = action.payload.data;
+
+                // Update in attendances array
+                const index = state.attendances.findIndex(
+                    (att) => att.attendanceId === updatedAttendance.attendanceId
+                );
+                if (index !== -1) {
+                    state.attendances[index] = updatedAttendance;
+                }
+
+                // Update current attendance if it's the same one
+                if (
+                    state.currentAttendance &&
+                    state.currentAttendance.attendanceId === updatedAttendance.attendanceId
+                ) {
+                    state.currentAttendance = updatedAttendance;
+                }
+            })
+            .addCase(updateAttendanceStatusAsync.rejected, (state, action) => {
+                state.loadingUpdateStatus = false;
+                state.error = action.payload;
             });
     },
 });
@@ -518,6 +559,7 @@ export const selectAttendancePagination = (state) => state.attendance.pagination
 export const selectAttendanceLoadingGet = (state) => state.attendance.loadingGet;
 export const selectAttendanceLoadingCreate = (state) => state.attendance.loadingCreate;
 export const selectAttendanceLoadingUpdate = (state) => state.attendance.loadingUpdate;
+export const selectAttendanceLoadingUpdateStatus = (state) => state.attendance.loadingUpdateStatus;
 export const selectAttendanceLoadingDelete = (state) => state.attendance.loadingDelete;
 export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loadingBulkCreate;
 export const selectAttendanceLoadingStatistics = (state) => state.attendance.loadingStatistics;

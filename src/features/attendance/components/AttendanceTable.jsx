@@ -2,6 +2,7 @@ import { Edit2, Trash2, User, Calendar, Eye, FileImage, BellRing } from 'lucide-
 import { Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
+import { AttendanceStatusDropdown } from './AttendanceStatusDropdown';
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
     PRESENT: 'bg-green-100 text-green-700',
@@ -40,6 +41,7 @@ export const AttendanceTable = ({
     onView,
     onExport,
     onToggleParentNotified,
+    onStatusChange,
     loading,
     tuitionMonth,
     tuitionYear,
@@ -110,11 +112,16 @@ export const AttendanceTable = ({
             key: 'status',
             label: 'Trạng thái',
             render: (attendance) => (
-                <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[attendance.status]}`}
-                >
-                    {attendance.statusLabel || STATUS_LABEL[attendance.status]}
-                </span>
+                <div className="w-32">
+                    <AttendanceStatusDropdown
+                        value={attendance.status}
+                        onChange={(newStatus) => {
+                            if (onStatusChange) {
+                                onStatusChange(attendance, newStatus);
+                            }
+                        }}
+                    />
+                </div>
             ),
         },
         {

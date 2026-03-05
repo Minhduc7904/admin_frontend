@@ -28,6 +28,7 @@ import {
     getAllAttendancesAsync,
     createAttendanceAsync,
     updateAttendanceAsync,
+    updateAttendanceStatusAsync,
     deleteAttendanceAsync,
     createBulkAttendanceBySessionAsync,
     getStatisticsBySessionAsync,
@@ -40,6 +41,7 @@ import {
     selectAttendanceLoadingGet,
     selectAttendanceLoadingCreate,
     selectAttendanceLoadingUpdate,
+    selectAttendanceLoadingUpdateStatus,
     selectAttendanceLoadingDelete,
     selectAttendanceLoadingBulkCreate,
     selectAttendanceLoadingStatistics,
@@ -74,6 +76,7 @@ export const ClassAttendance = () => {
     const loadingGet = useSelector(selectAttendanceLoadingGet);
     const loadingCreate = useSelector(selectAttendanceLoadingCreate);
     const loadingUpdate = useSelector(selectAttendanceLoadingUpdate);
+    const loadingUpdateStatus = useSelector(selectAttendanceLoadingUpdateStatus);
     const loadingDelete = useSelector(selectAttendanceLoadingDelete);
     const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
     const loadingStatistics = useSelector(selectAttendanceLoadingStatistics);
@@ -376,6 +379,21 @@ export const ClassAttendance = () => {
         }
     };
 
+    /* ===================== UPDATE STATUS ===================== */
+    const handleAttendanceStatusChange = async (attendance, newStatus) => {
+        // Không cập nhật nếu status giống nhau
+        if (attendance.status === newStatus) return;
+
+        try {
+            await dispatch(updateAttendanceStatusAsync({
+                id: attendance.attendanceId,
+                status: newStatus,
+            })).unwrap();
+        } catch (err) {
+            console.error('Update status failed:', err);
+        }
+    };
+
     /* ===================== EXPORT ===================== */
     const handleOpenExportModal = () => {
         setIsExportModalOpen(true);
@@ -524,6 +542,7 @@ export const ClassAttendance = () => {
                             onDelete={handleDelete}
                             onExport={handleExportAttendance}
                             onToggleParentNotified={handleToggleParentNotified}
+                            onStatusChange={handleAttendanceStatusChange}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
                             showHomework={showHomework && !!selectedHomeworkId}
