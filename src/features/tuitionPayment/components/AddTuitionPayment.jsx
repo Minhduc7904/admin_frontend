@@ -48,8 +48,6 @@ export const AddTuitionPayment = ({ onClose, onSuccess }) => {
         const errs = {}
 
         if (!formData.studentId) errs.studentId = 'Bắt buộc chọn học sinh'
-        if (!formData.amount || Number(formData.amount) <= 0)
-            errs.amount = 'Số tiền phải lớn hơn 0'
         if (!formData.month) errs.month = 'Bắt buộc chọn tháng'
         if (!formData.year) errs.year = 'Bắt buộc chọn năm'
 

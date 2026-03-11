@@ -38,10 +38,6 @@ export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
     const validateForm = () => {
         const newErrors = {}
 
-        if (!formData.amount || formData.amount <= 0) {
-            newErrors.amount = 'Số tiền phải lớn hơn 0'
-        }
-
         if (!formData.month) {
             newErrors.month = 'Vui lòng chọn tháng'
         }

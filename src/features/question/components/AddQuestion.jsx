@@ -72,8 +72,8 @@ export const AddQuestion = ({ onClose, loadQuestions }) => {
             errors.type = 'Vui lòng chọn loại câu hỏi';
         }
 
-        if (formData.pointsOrigin && parseFloat(formData.pointsOrigin) <= 0) {
-            errors.pointsOrigin = 'Điểm phải lớn hơn 0';
+        if (formData.pointsOrigin && parseFloat(formData.pointsOrigin) < 0) {
+            errors.pointsOrigin = 'Điểm phải lớn hơn hoặc bằng 0';
         }
 
         return errors;
