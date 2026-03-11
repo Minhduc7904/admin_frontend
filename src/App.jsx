@@ -37,7 +37,7 @@ const renderRoutes = (routes, { protect = false, parentKey = 'route' } = {}) =>
 function App() {
   return (
     <BrowserRouter basename="/admin">
-      {/* <SocketProvider> */}
+      <SocketProvider>
         <NotificationContainer />
         <Routes>
           {renderRoutes(authRouter, { parentKey: 'auth' })}
@@ -49,7 +49,7 @@ function App() {
           <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
           <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />
         </Routes>
-      {/* </SocketProvider> */}
+      </SocketProvider>
     </BrowserRouter>
   );
 }

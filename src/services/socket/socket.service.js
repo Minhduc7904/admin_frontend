@@ -74,7 +74,7 @@ class SocketService {
             console.error('❌ Socket connection error:', error.message)
             this.isConnected = false
 
-            // If the error is authentication-related, stop reconnecting immediately
+            // Check if error is authentication-related
             const msg = (error.message || '').toLowerCase()
             const isAuthError = msg.includes('jwt') ||
                 msg.includes('expired') ||
@@ -85,13 +85,8 @@ class SocketService {
                 error.type === 'UnauthorizedException'
 
             if (isAuthError) {
-                console.warn('🔒 Socket auth error — stopping reconnection:', error.message)
                 this.authFailed = true
-                // Disable built-in reconnection then cleanly disconnect
-                if (this.socket) {
-                    this.socket.io.reconnection(false)
-                    this.socket.disconnect()
-                }
+                console.warn('🔒 Socket auth error detected')
             }
         })
 

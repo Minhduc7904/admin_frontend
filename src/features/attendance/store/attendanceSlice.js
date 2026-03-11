@@ -17,6 +17,7 @@ const initialState = {
     loadingGet: false,
     loadingCreate: false,
     loadingUpdate: false,
+    loadingUpdateStatus: false,
     loadingDelete: false,
     loadingBulkCreate: false,
     loadingStatistics: false,
@@ -61,9 +62,10 @@ const initialState = {
         includeTuition: true,
         tuitionMonth: new Date().getMonth() + 1,
         tuitionYear: new Date().getFullYear(),
-        includeHomework: false,
+        includeHomework: true,
         homeworkContentId: null,
     },
+    showExportSettings: false,
     exportExcelOptions: {
         includeSchool: true,
         includeParentPhone: true,
@@ -211,6 +213,16 @@ export const toggleParentNotifiedAsync = createAsyncThunk(
     }
 );
 
+export const updateAttendanceStatusAsync = createAsyncThunk(
+    "attendance/updateStatus",
+    async ({ id, status }, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.update(id, { status }), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi cập nhật trạng thái điểm danh",
+        });
+    }
+);
+
 export const exportAttendanceImageAsync = createAsyncThunk(
     "attendance/exportImage",
     async ({ id, options = {} }, thunkAPI) => {
@@ -288,6 +300,9 @@ export const attendanceSlice = createSlice({
         },
         resetExportOptions: (state) => {
             state.exportOptions = initialState.exportOptions;
+        },
+        toggleShowExportSettings: (state) => {
+            state.showExportSettings = !state.showExportSettings;
         },
         setExportExcelOptions: (state, action) => {
             state.exportExcelOptions = { ...state.exportExcelOptions, ...action.payload };
@@ -484,6 +499,36 @@ export const attendanceSlice = createSlice({
             .addCase(toggleParentNotifiedAsync.rejected, (state, action) => {
                 state.loadingToggleParentNotified = false;
                 state.error = action.payload;
+            })
+
+            // Update attendance status (quick update without refetch)
+            .addCase(updateAttendanceStatusAsync.pending, (state) => {
+                state.loadingUpdateStatus = true;
+                state.error = null;
+            })
+            .addCase(updateAttendanceStatusAsync.fulfilled, (state, action) => {
+                state.loadingUpdateStatus = false;
+                const updatedAttendance = action.payload.data;
+
+                // Update in attendances array
+                const index = state.attendances.findIndex(
+                    (att) => att.attendanceId === updatedAttendance.attendanceId
+                );
+                if (index !== -1) {
+                    state.attendances[index] = updatedAttendance;
+                }
+
+                // Update current attendance if it's the same one
+                if (
+                    state.currentAttendance &&
+                    state.currentAttendance.attendanceId === updatedAttendance.attendanceId
+                ) {
+                    state.currentAttendance = updatedAttendance;
+                }
+            })
+            .addCase(updateAttendanceStatusAsync.rejected, (state, action) => {
+                state.loadingUpdateStatus = false;
+                state.error = action.payload;
             });
     },
 });
@@ -500,6 +545,7 @@ export const {
     clearStatistics,
     setExportOptions,
     resetExportOptions,
+    toggleShowExportSettings,
     setExportExcelOptions,
     resetExportExcelOptions,
     setQuickAttendanceCoursesSelection,
@@ -518,6 +564,7 @@ export const selectAttendancePagination = (state) => state.attendance.pagination
 export const selectAttendanceLoadingGet = (state) => state.attendance.loadingGet;
 export const selectAttendanceLoadingCreate = (state) => state.attendance.loadingCreate;
 export const selectAttendanceLoadingUpdate = (state) => state.attendance.loadingUpdate;
+export const selectAttendanceLoadingUpdateStatus = (state) => state.attendance.loadingUpdateStatus;
 export const selectAttendanceLoadingDelete = (state) => state.attendance.loadingDelete;
 export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loadingBulkCreate;
 export const selectAttendanceLoadingStatistics = (state) => state.attendance.loadingStatistics;
@@ -527,6 +574,7 @@ export const selectAttendanceLoadingToggleParentNotified = (state) => state.atte
 export const selectAttendanceError = (state) => state.attendance.error;
 export const selectAttendanceFilters = (state) => state.attendance.filters;
 export const selectAttendanceExportOptions = (state) => state.attendance.exportOptions;
+export const selectShowExportSettings = (state) => state.attendance.showExportSettings;
 export const selectAttendanceExportExcelOptions = (state) => state.attendance.exportExcelOptions;
 export const selectQuickAttendanceCoursesSelection = (state) => state.attendance.quickAttendance.coursesSelection;
 export const selectQuickAttendanceClassesSelection = (state) => state.attendance.quickAttendance.classesSelection;
