@@ -115,6 +115,7 @@ export const ClassAttendance = () => {
 
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedSession, setSelectedSession] = useState(null);
+    const [statusUpdatingAttendanceId, setStatusUpdatingAttendanceId] = useState(null);
 
     /* tuition / homework filter — persisted in slice */
     const showTuition = filters.showTuition;
@@ -384,6 +385,7 @@ export const ClassAttendance = () => {
         // Không cập nhật nếu status giống nhau
         if (attendance.status === newStatus) return;
 
+        setStatusUpdatingAttendanceId(attendance.attendanceId);
         try {
             await dispatch(updateAttendanceStatusAsync({
                 id: attendance.attendanceId,
@@ -391,6 +393,10 @@ export const ClassAttendance = () => {
             })).unwrap();
         } catch (err) {
             console.error('Update status failed:', err);
+        } finally {
+            setStatusUpdatingAttendanceId((prev) =>
+                prev === attendance.attendanceId ? null : prev
+            );
         }
     };
 
@@ -543,6 +549,8 @@ export const ClassAttendance = () => {
                             onExport={handleExportAttendance}
                             onToggleParentNotified={handleToggleParentNotified}
                             onStatusChange={handleAttendanceStatusChange}
+                            statusLoading={loadingUpdateStatus}
+                            statusUpdatingAttendanceId={statusUpdatingAttendanceId}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
                             showHomework={showHomework && !!selectedHomeworkId}

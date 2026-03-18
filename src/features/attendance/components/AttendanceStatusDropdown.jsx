@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Loader2 } from 'lucide-react';
 import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
 
 /* ===================== STATUS BADGE MAP ===================== */
@@ -18,7 +18,7 @@ const STATUS_LABEL = {
     MAKEUP: 'Học bù',
 };
 
-export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) => {
+export const AttendanceStatusDropdown = ({ value, onChange, disabled = false, loading = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const [isPositioned, setIsPositioned] = useState(false);
@@ -82,7 +82,7 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) 
     };
 
     const handleToggle = () => {
-        if (disabled) return;
+        if (disabled || loading) return;
         
         if (!isOpen) {
             // Tính toán position trước khi mở
@@ -111,17 +111,21 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false }) 
                     inline-flex items-center justify-between gap-2 px-2.5 py-1 rounded-full text-xs font-medium
                     w-full min-w-[100px]
                     ${STATUS_BADGE[value] || 'bg-gray-100 text-gray-700'}
-                    ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:opacity-80'}
+                    ${disabled || loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:opacity-80'}
                     transition-opacity
                 `}
             >
                 <span className="flex-1 text-left truncate">
                     {selectedOption?.label || STATUS_LABEL[value] || 'Chọn...'}
                 </span>
-                <ChevronDown
-                    size={14}
-                    className={`flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                />
+                {loading ? (
+                    <Loader2 size={14} className="flex-shrink-0 animate-spin" />
+                ) : (
+                    <ChevronDown
+                        size={14}
+                        className={`flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                )}
             </button>
 
             {/* Dropdown Menu - Rendered to document.body via Portal */}

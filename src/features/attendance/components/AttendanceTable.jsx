@@ -47,6 +47,8 @@ export const AttendanceTable = ({
     tuitionYear,
     showHomework = false,
     homeworkTitle,
+    statusLoading = false,
+    statusUpdatingAttendanceId = null,
 }) => {
     const showTuitionCol = !!tuitionMonth && !!tuitionYear;
     const showHomeworkCol = showHomework;
@@ -111,10 +113,16 @@ export const AttendanceTable = ({
         {
             key: 'status',
             label: 'Trạng thái',
-            render: (attendance) => (
-                <div className="w-32">
+            render: (attendance) => {
+                const isStatusUpdating =
+                    statusLoading && statusUpdatingAttendanceId === attendance.attendanceId;
+
+                return (
+                    <div className="w-32">
                     <AttendanceStatusDropdown
                         value={attendance.status}
+                        disabled={isStatusUpdating}
+                        loading={isStatusUpdating}
                         onChange={(newStatus) => {
                             if (onStatusChange) {
                                 onStatusChange(attendance, newStatus);
@@ -122,7 +130,8 @@ export const AttendanceTable = ({
                         }}
                     />
                 </div>
-            ),
+                );
+            },
         },
         {
             key: 'markedAt',
