@@ -31,7 +31,8 @@ const TUITION_LABEL = {
 /* ===================== HOMEWORK SUBMIT STATUS ===================== */
 const HOMEWORK_BADGE = {
     submitted: 'bg-green-100 text-green-700',
-    none: 'bg-red-100 text-red-700',
+    notAssigned: 'bg-gray-100 text-gray-600',
+    notSubmitted: 'bg-red-100 text-red-700',
 };
 
 export const AttendanceTable = ({
@@ -196,11 +197,21 @@ export const AttendanceTable = ({
                     key: 'homework',
                     label: homeworkTitle ? `BT: ${homeworkTitle}` : 'Bài tập về nhà',
                     render: (attendance) => {
+                        const homeworkId = attendance.classSession?.homeworkId;
                         const hs = attendance.homeworkSubmit;
+
+                        if (!homeworkId) {
+                            return (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${HOMEWORK_BADGE.notAssigned}`}>
+                                    Không giao bài
+                                </span>
+                            );
+                        }
+
                         if (!hs) {
                             return (
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${HOMEWORK_BADGE.none}`}>
-                                    Không có
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${HOMEWORK_BADGE.notSubmitted}`}>
+                                    Chưa nộp
                                 </span>
                             );
                         }

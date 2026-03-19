@@ -13,14 +13,6 @@ import {
 import { attendanceApi } from '../../../core/api';
 import PDDExample from '../../../assets/PhieuDiemDanh_example.png'
 import { useDebounce } from '../../../shared/hooks/useDebounce';
-import { selectCurrentCourseClass } from '../../courseClass/store/courseClassSlice';
-import {
-    getHomeworkContentsByCourseAsync,
-    clearByCourseHomeworkContents,
-    selectByCourseHomeworkContents,
-    selectHomeworkContentLoadingGetByCourse,
-} from '../../homeworkContent/store/homeworkContentSlice';
-import { HomeworkContentSearchSelect } from '../../homeworkContent/components/HomeworkContentSearchSelect';
 
 const FORMAT_OPTIONS = [
     { label: 'PNG (Chất lượng cao)', value: 'png' },
@@ -57,34 +49,12 @@ export const AttendanceExport = ({ attendance }) => {
     const showSettings = useSelector(selectShowExportSettings);
     const debouncedQuality = useDebounce(options.quality, 400);
 
-    const courseClass = useSelector(selectCurrentCourseClass);
-    const byCourseHomeworkContents = useSelector(selectByCourseHomeworkContents);
-    const loadingGetByCourse = useSelector(selectHomeworkContentLoadingGetByCourse);
-
-
-    // Fetch homework list when includeHomework is toggled on
-    useEffect(() => {
-        if (options.includeHomework && courseClass?.courseId && byCourseHomeworkContents.length === 0) {
-            dispatch(getHomeworkContentsByCourseAsync(courseClass.courseId));
-        }
-        if (!options.includeHomework) {
-            dispatch(clearByCourseHomeworkContents());
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [options.includeHomework, courseClass?.courseId]);
-
     // Load preview whenever options change
     useEffect(() => {
         if (attendance?.attendanceId) {
             // Block preview if includeTuition but no month/year
             if (options.includeTuition && (!options.tuitionMonth || !options.tuitionYear)) {
                 setPreviewBlocked('Vui lòng chọn tháng và năm để hiển thị thông tin học phí.');
-                setPreviewUrl(null);
-                return;
-            }
-            // Block preview if includeHomework but no homeworkContentId
-            if (options.includeHomework && !options.homeworkContentId) {
-                setPreviewBlocked('Vui lòng chọn bài tập về nhà để hiển thị phiếu.');
                 setPreviewUrl(null);
                 return;
             }
@@ -117,7 +87,6 @@ export const AttendanceExport = ({ attendance }) => {
         options.tuitionMonth,
         options.tuitionYear,
         options.includeHomework,
-        options.homeworkContentId,
         options.includeTeacherName,
         options.includeMarkerName,
         options.includeQRCode,
@@ -360,24 +329,9 @@ export const AttendanceExport = ({ attendance }) => {
                                 <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                                     <Checkbox
                                         checked={options.includeHomework}
-                                        onChange={(v) => {
-                                            handleOptionChange('includeHomework', v);
-                                            if (!v) handleOptionChange('homeworkContentId', null);
-                                        }}
+                                        onChange={(v) => handleOptionChange('includeHomework', v)}
                                         label="Thông tin bài tập về nhà"
-                                        disabled={!courseClass}
                                     />
-                                    {options.includeHomework && (
-                                        <div className="w-80">
-                                            <HomeworkContentSearchSelect
-                                                value={options.homeworkContentId}
-                                                onSelect={(hw) => handleOptionChange('homeworkContentId', hw ? hw.homeworkContentId : null)}
-                                                homeworkContents={byCourseHomeworkContents}
-                                                loading={loadingGetByCourse}
-                                                disabled={loadingGetByCourse}
-                                            />
-                                        </div>
-                                    )}
                                 </div>
 
                                 <Checkbox

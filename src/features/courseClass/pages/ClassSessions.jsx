@@ -35,6 +35,7 @@ import {
     setFilters,
 } from '../../classSesssion/store/classSesssionSlice';
 import { ROUTES } from '../../../core/constants';
+import { selectCurrentCourseClass } from '../store/courseClassSlice';
 /**
  * ClassSessions - Danh sách buổi học của một lớp
  */
@@ -47,6 +48,7 @@ export const ClassSessions = () => {
     const sessions = useSelector(selectClassSessions);
     const pagination = useSelector(selectClassSessionPagination);
     const filters = useSelector(selectClassSessionFilters);
+    const courseClass = useSelector(selectCurrentCourseClass);
 
     const loadingGet = useSelector(selectClassSessionLoadingGet);
     const loadingCreate = useSelector(selectClassSessionLoadingCreate);
@@ -71,6 +73,7 @@ export const ClassSessions = () => {
         startTime: '',
         endTime: '',
         makeupNote: '',
+        homeworkId: null,
     });
 
     const [errors, setErrors] = useState({});
@@ -113,6 +116,16 @@ export const ClassSessions = () => {
         // Clear error when user types
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handleHomeworkChange = (homework) => {
+        setFormData((prev) => ({
+            ...prev,
+            homeworkId: homework?.homeworkContentId ?? null,
+        }));
+        if (errors.homeworkId) {
+            setErrors((prev) => ({ ...prev, homeworkId: '' }));
         }
     };
 
@@ -159,6 +172,7 @@ export const ClassSessions = () => {
             startTime: '',
             endTime: '',
             makeupNote: '',
+            homeworkId: null,
         });
         setErrors({});
         setIsCreatePanelOpen(true);
@@ -185,6 +199,7 @@ export const ClassSessions = () => {
                     startTime,
                     endTime,
                     makeupNote: formData.makeupNote || undefined,
+                    homeworkId: formData.homeworkId || undefined,
                 })
             ).unwrap();
 
@@ -210,6 +225,7 @@ export const ClassSessions = () => {
             startTime,
             endTime,
             makeupNote: session.makeupNote || '',
+            homeworkId: session.homeworkId || session.homeworkContentId || session.homework?.homeworkId || session.homeworkContent?.homeworkContentId || null,
         });
         setErrors({});
         setIsEditPanelOpen(true);
@@ -237,6 +253,7 @@ export const ClassSessions = () => {
                         startTime,
                         endTime,
                         makeupNote: formData.makeupNote || undefined,
+                        homeworkId: formData.homeworkId || undefined,
                     },
                 })
             ).unwrap();
@@ -370,9 +387,11 @@ export const ClassSessions = () => {
                     formData={formData}
                     errors={errors}
                     onChange={handleFormChange}
+                    onHomeworkChange={handleHomeworkChange}
                     onSubmit={handleSubmitCreate}
                     onCancel={() => setIsCreatePanelOpen(false)}
                     loading={loadingCreate}
+                    courseId={courseClass?.courseId}
                 />
             </RightPanel>
 
@@ -387,9 +406,11 @@ export const ClassSessions = () => {
                     formData={formData}
                     errors={errors}
                     onChange={handleFormChange}
+                    onHomeworkChange={handleHomeworkChange}
                     onSubmit={handleSubmitEdit}
                     onCancel={() => setIsEditPanelOpen(false)}
                     loading={loadingUpdate}
+                    courseId={courseClass?.courseId}
                 />
             </RightPanel>
         </>

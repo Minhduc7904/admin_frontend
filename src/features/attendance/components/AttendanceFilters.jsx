@@ -1,6 +1,5 @@
 import { SearchInput, Dropdown, Checkbox } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
-import { HomeworkContentSearchSelect } from '../../homeworkContent/components/HomeworkContentSearchSelect';
 import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
 
 /* ===================== STATUS OPTIONS ===================== */
@@ -46,14 +45,6 @@ export const AttendanceFilters = ({
     onTuitionYearChange,
     tuitionStatus,
     onTuitionStatusChange,
-    /* homework */
-    hasClass = false,
-    showHomework = false,
-    onShowHomeworkChange,
-    homeworkContents = [],
-    selectedHomework,
-    onHomeworkChange,
-    loadingHomework = false,
 }) => {
     return (
         <div className="mb-4 space-y-3">
@@ -127,30 +118,6 @@ export const AttendanceFilters = ({
             )}
         </div>
 
-        {/* ===== ROW 3: homework toggle ===== */}
-        <div className="flex items-center gap-4">
-            <Checkbox
-                id="show-homework"
-                label="Hiển thị bài tập về nhà"
-                checked={showHomework}
-                onChange={onShowHomeworkChange}
-                disabled={!hasClass}
-            />
-
-            {showHomework && (
-                <div className="w-96">
-                    <HomeworkContentSearchSelect
-                        placeholder="Tìm kiếm bài tập..."
-                        onSelect={onHomeworkChange}
-                        value={selectedHomework}
-                        homeworkContents={homeworkContents}
-                        loading={loadingHomework}
-                        disabled={loadingHomework}
-                        label=""
-                    />
-                </div>
-            )}
-        </div>
     </div>
     );
 };

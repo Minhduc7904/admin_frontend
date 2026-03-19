@@ -1,4 +1,5 @@
 import { Button, Input, Textarea } from '../../../shared/components/ui';
+import { HomeworkContentSearchSelect } from '../../homeworkContent/components/HomeworkContentSearchSelect';
 
 export const ClassSessionForm = ({
     formData,
@@ -6,7 +7,9 @@ export const ClassSessionForm = ({
     onChange,
     onSubmit,
     onCancel,
+    onHomeworkChange,
     loading,
+    courseId,
     mode = 'create',
 }) => {
     return (
@@ -94,6 +97,22 @@ export const ClassSessionForm = ({
                     />
                     <p className="text-xs text-foreground-light mt-1">
                         Thông tin về các buổi học bù (nếu có)
+                    </p>
+                </div>
+
+                {/* ===== HOMEWORK CONTENT ===== */}
+                <div>
+                    <HomeworkContentSearchSelect
+                        label="Bài tập về nhà"
+                        placeholder={courseId ? 'Chọn bài tập cho buổi học...' : 'Chưa xác định khóa học của lớp'}
+                        onSelect={onHomeworkChange}
+                        value={formData.homeworkId}
+                        error={errors.homeworkId}
+                        courseId={courseId}
+                        disabled={!courseId || loading}
+                    />
+                    <p className="text-xs text-foreground-light mt-1">
+                        Có thể chọn bài tập về nhà liên kết cho buổi học (không bắt buộc)
                     </p>
                 </div>
             </div>

@@ -46,19 +46,9 @@ import {
     selectAttendanceLoadingBulkCreate,
     selectAttendanceLoadingStatistics,
     selectAttendanceLoadingExport,
-    selectAttendanceLoadingToggleParentNotified,
     setFilters,
 } from '../../attendance/store/attendanceSlice';
 import { ROUTES } from '../../../core/constants';
-import {
-    selectCurrentCourseClass,
-} from '../store/courseClassSlice';
-import {
-    getHomeworkContentsByCourseAsync,
-    clearByCourseHomeworkContents,
-    selectByCourseHomeworkContents,
-    selectHomeworkContentLoadingGetByCourse,
-} from '../../homeworkContent/store/homeworkContentSlice';
 /**
  * ClassAttendance - Điểm danh của một lớp
  */
@@ -81,12 +71,6 @@ export const ClassAttendance = () => {
     const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
     const loadingStatistics = useSelector(selectAttendanceLoadingStatistics);
     const loadingExport = useSelector(selectAttendanceLoadingExport);
-    const loadingToggleParentNotified = useSelector(selectAttendanceLoadingToggleParentNotified);
-
-    /* homework filter */
-    const courseClass = useSelector(selectCurrentCourseClass);
-    const byCourseHomeworkContents = useSelector(selectByCourseHomeworkContents);
-    const loadingGetByCourse = useSelector(selectHomeworkContentLoadingGetByCourse);
 
     /* ===================== LOCAL STATE ===================== */
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
@@ -122,13 +106,6 @@ export const ClassAttendance = () => {
     const tuitionMonth = filters.tuitionMonth;
     const tuitionYear = filters.tuitionYear;
     const tuitionStatus = filters.tuitionStatus || '';
-    const showHomework = filters.showHomework;
-    const selectedHomeworkId = filters.selectedHomeworkId;
-
-    // Find selected homework object from ID for SearchableSelect
-    const selectedHomework = selectedHomeworkId
-        ? byCourseHomeworkContents.find(hw => hw.homeworkContentId === selectedHomeworkId)
-        : null;
 
     // Stable key: non-empty only when both month AND year are selected
     const tuitionFilterKey = (showTuition && tuitionMonth && tuitionYear)
@@ -140,16 +117,8 @@ export const ClassAttendance = () => {
         loadAttendances();
     // Only re-fetch for tuition when BOTH month and year are chosen (or both cleared)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey, tuitionStatus, selectedHomeworkId]);
-
-    // Fetch homework list when showHomework is toggled on and list is not yet loaded
-    useEffect(() => {
-        if (showHomework && courseClass?.courseId && byCourseHomeworkContents.length === 0) {
-            dispatch(getHomeworkContentsByCourseAsync(courseClass.courseId));
-        }
+    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey, tuitionStatus]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showHomework, courseClass?.courseId]);
-
     useEffect(() => {
         if (selectedSession?.sessionId) {
             dispatch(getStatisticsBySessionAsync(selectedSession.sessionId));
@@ -169,7 +138,6 @@ export const ClassAttendance = () => {
                 month: showTuition ? tuitionMonth : undefined,
                 year: showTuition ? tuitionYear : undefined,
                 tuitionStatus: (showTuition && tuitionStatus) ? tuitionStatus : undefined,
-                homeworkContentId: (showHomework && selectedHomeworkId) ? selectedHomeworkId : undefined,
             })
         );
     };
@@ -204,19 +172,6 @@ export const ClassAttendance = () => {
     const handleTuitionMonthChange = (val) => { dispatch(setFilters({ tuitionMonth: val })); setCurrentPage(1); };
     const handleTuitionYearChange  = (val) => { dispatch(setFilters({ tuitionYear: val }));  setCurrentPage(1); };
     const handleTuitionStatusChange = (val) => { dispatch(setFilters({ tuitionStatus: val })); setCurrentPage(1); };
-
-    const handleShowHomeworkChange = (val) => {
-        dispatch(setFilters({ showHomework: val }));
-        if (!val) {
-            dispatch(setFilters({ selectedHomeworkId: null }));
-            dispatch(clearByCourseHomeworkContents());
-        }
-        setCurrentPage(1);
-    };
-    const handleHomeworkChange = (homeworkObject) => {
-        dispatch(setFilters({ selectedHomeworkId: homeworkObject?.homeworkContentId || null }));
-        setCurrentPage(1);
-    };
 
     /* ===================== FORM ===================== */
     const handleFormChange = (e) => {
@@ -486,14 +441,6 @@ export const ClassAttendance = () => {
                     onTuitionYearChange={handleTuitionYearChange}
                     tuitionStatus={tuitionStatus}
                     onTuitionStatusChange={handleTuitionStatusChange}
-                    /* homework */
-                    hasClass={!!courseClass}
-                    showHomework={showHomework}
-                    onShowHomeworkChange={handleShowHomeworkChange}
-                    homeworkContents={byCourseHomeworkContents}
-                    selectedHomework={selectedHomework}
-                    onHomeworkChange={handleHomeworkChange}
-                    loadingHomework={loadingGetByCourse}
                 />
             </div>
 
@@ -553,8 +500,7 @@ export const ClassAttendance = () => {
                             statusUpdatingAttendanceId={statusUpdatingAttendanceId}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
-                            showHomework={showHomework && !!selectedHomeworkId}
-                            homeworkTitle={selectedHomework?.content}
+                            showHomework
                         />
 
                         <div className="p-4 border-t border-border">

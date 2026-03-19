@@ -1,4 +1,11 @@
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { SearchableSelect } from '../../../shared/components/ui';
+import {
+    getHomeworkContentsByCourseAsync,
+    selectByCourseHomeworkContents,
+    selectHomeworkContentLoadingGetByCourse,
+} from '../store/homeworkContentSlice';
 
 /**
  * HomeworkContentSearchSelect - Component for searching and selecting homework from a local list
@@ -13,19 +20,34 @@ export const HomeworkContentSearchSelect = ({
     required = false,
     disabled = false,
     className = '',
-    homeworkContents = [], // Danh sách homework từ parent
+    homeworkContents = [], // Danh sách homework từ parent (optional)
+    courseId = null,
     loading = false,
 }) => {
+    const dispatch = useDispatch();
+    const byCourseHomeworkContents = useSelector(selectByCourseHomeworkContents);
+    const loadingGetByCourse = useSelector(selectHomeworkContentLoadingGetByCourse);
+
+    const availableHomeworkContents = homeworkContents.length > 0
+        ? homeworkContents
+        : byCourseHomeworkContents;
+
+    useEffect(() => {
+        if (!courseId || homeworkContents.length > 0) return;
+
+        dispatch(getHomeworkContentsByCourseAsync(courseId));
+    }, [courseId, dispatch, homeworkContents.length]);
+
+    const isLoading = loading || (Boolean(courseId) && loadingGetByCourse);
+
     // Search function - filter local array
     const handleSearch = async (keyword) => {
-        console.log('Searching for:', keyword);
         if (!keyword || keyword.trim() === '') {
-            console.log('No keyword entered, returning all items');
-            return homeworkContents;
+            return availableHomeworkContents;
         }
         
         const lowerKeyword = keyword.toLowerCase();
-        return homeworkContents.filter((hw) => 
+        return availableHomeworkContents.filter((hw) => 
             hw.content?.toLowerCase().includes(lowerKeyword) ||
             hw.learningItem?.title?.toLowerCase().includes(lowerKeyword)
         );
@@ -33,7 +55,7 @@ export const HomeworkContentSearchSelect = ({
 
     // Fetch default items - trả về toàn bộ list
     const fetchDefaultItems = async () => {
-        return homeworkContents;
+        return availableHomeworkContents;
     };
 
     // Custom render option để hiển thị thông tin chi tiết hơn
@@ -53,7 +75,7 @@ export const HomeworkContentSearchSelect = ({
     return (
         <SearchableSelect
             label={label}
-            placeholder={loading ? 'Đang tải...' : placeholder}
+            placeholder={isLoading ? 'Đang tải...' : placeholder}
             searchFunction={handleSearch}
             fetchDefaultItems={fetchDefaultItems}
             onSelect={onSelect}
@@ -63,7 +85,7 @@ export const HomeworkContentSearchSelect = ({
             value={value}
             error={error}
             required={required}
-            disabled={disabled || loading}
+            disabled={disabled || isLoading}
             className={className}
         />
     );

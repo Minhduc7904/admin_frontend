@@ -81,6 +81,36 @@ export const ClassSessionTable = ({
             ),
         },
         {
+            key: 'homework',
+            label: 'Bài tập về nhà',
+            render: (session) => {
+                const homeworkName = session.homeworkContent?.content;
+                const homeworkId = session.homeworkId || session.homeworkContent?.homeworkContentId;
+
+                if (!homeworkName && !homeworkId) {
+                    return (
+                        <span className="text-sm text-foreground-light">-</span>
+                    );
+                }
+
+                return (
+                    <div className="max-w-xs">
+                        <span
+                            className="text-sm text-foreground block truncate"
+                            title={homeworkName || `#${homeworkId}`}
+                        >
+                            {homeworkName || `#${homeworkId}`}
+                        </span>
+                        {homeworkId && (
+                            <span className="text-xs text-foreground-light">
+                                #{homeworkId}
+                            </span>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
             key: 'status',
             label: 'Trạng thái',
             render: (session) => (

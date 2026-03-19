@@ -37,8 +37,6 @@ const initialState = {
         tuitionMonth: new Date().getMonth() + 1,
         tuitionYear: new Date().getFullYear(),
         tuitionStatus: '',
-        showHomework: false,
-        selectedHomeworkId: null,
     },
     exportOptions: {
         format: 'jpeg',
@@ -63,7 +61,6 @@ const initialState = {
         tuitionMonth: new Date().getMonth() + 1,
         tuitionYear: new Date().getFullYear(),
         includeHomework: true,
-        homeworkContentId: null,
     },
     showExportSettings: false,
     exportExcelOptions: {
