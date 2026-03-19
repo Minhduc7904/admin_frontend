@@ -47,4 +47,8 @@ export const attendanceApi = {
     toggleParentNotified: (id) => {
         return axiosClient.put(API_ENDPOINTS.ATTENDANCES.TOGGLE_PARENT_NOTIFIED(id));
     },
+
+    sendToParent: (id) => {
+        return axiosClient.post(API_ENDPOINTS.ATTENDANCES.SEND_TO_PARENT(id));
+    },
 };

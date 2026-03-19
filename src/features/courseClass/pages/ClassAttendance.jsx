@@ -34,6 +34,7 @@ import {
     getStatisticsBySessionAsync,
     exportAttendanceBySessionAsync,
     toggleParentNotifiedAsync,
+    sendAttendanceToParentAsync,
     selectAttendances,
     selectAttendancePagination,
     selectAttendanceFilters,
@@ -46,6 +47,7 @@ import {
     selectAttendanceLoadingBulkCreate,
     selectAttendanceLoadingStatistics,
     selectAttendanceLoadingExport,
+    selectAttendanceLoadingSendToParent,
     setFilters,
 } from '../../attendance/store/attendanceSlice';
 import { ROUTES } from '../../../core/constants';
@@ -71,6 +73,7 @@ export const ClassAttendance = () => {
     const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
     const loadingStatistics = useSelector(selectAttendanceLoadingStatistics);
     const loadingExport = useSelector(selectAttendanceLoadingExport);
+    const loadingSendToParent = useSelector(selectAttendanceLoadingSendToParent);
 
     /* ===================== LOCAL STATE ===================== */
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
@@ -100,6 +103,7 @@ export const ClassAttendance = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedSession, setSelectedSession] = useState(null);
     const [statusUpdatingAttendanceId, setStatusUpdatingAttendanceId] = useState(null);
+    const [sendToParentAttendanceId, setSendToParentAttendanceId] = useState(null);
 
     /* tuition / homework filter — persisted in slice */
     const showTuition = filters.showTuition;
@@ -335,6 +339,22 @@ export const ClassAttendance = () => {
         }
     };
 
+    /* ===================== SEND TO PARENT (ZALO) ===================== */
+    const handleSendToParent = async (attendance) => {
+        if (!attendance?.student?.hasParentZaloId) return;
+
+        setSendToParentAttendanceId(attendance.attendanceId);
+        try {
+            await dispatch(sendAttendanceToParentAsync(attendance.attendanceId)).unwrap();
+        } catch (err) {
+            console.error('Send attendance to parent failed:', err);
+        } finally {
+            setSendToParentAttendanceId((prev) =>
+                prev === attendance.attendanceId ? null : prev
+            );
+        }
+    };
+
     /* ===================== UPDATE STATUS ===================== */
     const handleAttendanceStatusChange = async (attendance, newStatus) => {
         // Không cập nhật nếu status giống nhau
@@ -495,9 +515,12 @@ export const ClassAttendance = () => {
                             onDelete={handleDelete}
                             onExport={handleExportAttendance}
                             onToggleParentNotified={handleToggleParentNotified}
+                            onSendToParent={handleSendToParent}
                             onStatusChange={handleAttendanceStatusChange}
                             statusLoading={loadingUpdateStatus}
                             statusUpdatingAttendanceId={statusUpdatingAttendanceId}
+                            sendToParentLoading={loadingSendToParent}
+                            sendToParentAttendanceId={sendToParentAttendanceId}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
                             showHomework

@@ -24,7 +24,9 @@ const initialState = {
     loadingExport: false,
     loadingExportImage: false,
     loadingToggleParentNotified: false,
+    loadingSendToParent: false,
     error: null,
+    errorSendToParent: null,
     filters: {
         search: "",
         sessionId: null,
@@ -205,6 +207,17 @@ export const toggleParentNotifiedAsync = createAsyncThunk(
             showSuccess: true,
             successTitle: "Cập nhật trạng thái thông báo phụ huynh thành công",
             errorTitle: "Lỗi cập nhật trạng thái thông báo phụ huynh",
+        });
+    }
+);
+
+export const sendAttendanceToParentAsync = createAsyncThunk(
+    "attendance/sendToParent",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.sendToParent(id), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Đã gửi thông báo cho phụ huynh",
+            errorTitle: "Lỗi gửi thông báo cho phụ huynh",
         });
     }
 );
@@ -497,6 +510,20 @@ export const attendanceSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // Send attendance notification to parent manually
+            .addCase(sendAttendanceToParentAsync.pending, (state) => {
+                state.loadingSendToParent = true;
+                state.errorSendToParent = null;
+            })
+            .addCase(sendAttendanceToParentAsync.fulfilled, (state) => {
+                state.loadingSendToParent = false;
+                state.errorSendToParent = null;
+            })
+            .addCase(sendAttendanceToParentAsync.rejected, (state, action) => {
+                state.loadingSendToParent = false;
+                state.errorSendToParent = action.payload;
+            })
+
             // Update attendance status (quick update without refetch)
             .addCase(updateAttendanceStatusAsync.pending, (state) => {
                 state.loadingUpdateStatus = true;
@@ -567,7 +594,9 @@ export const selectAttendanceLoadingStatistics = (state) => state.attendance.loa
 export const selectAttendanceLoadingExport = (state) => state.attendance.loadingExport;
 export const selectAttendanceLoadingExportImage = (state) => state.attendance.loadingExportImage;
 export const selectAttendanceLoadingToggleParentNotified = (state) => state.attendance.loadingToggleParentNotified;
+export const selectAttendanceLoadingSendToParent = (state) => state.attendance.loadingSendToParent;
 export const selectAttendanceError = (state) => state.attendance.error;
+export const selectAttendanceErrorSendToParent = (state) => state.attendance.errorSendToParent;
 export const selectAttendanceFilters = (state) => state.attendance.filters;
 export const selectAttendanceExportOptions = (state) => state.attendance.exportOptions;
 export const selectShowExportSettings = (state) => state.attendance.showExportSettings;

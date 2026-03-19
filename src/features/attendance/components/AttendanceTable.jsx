@@ -1,4 +1,4 @@
-import { Edit2, Trash2, User, Calendar, Eye, FileImage, BellRing } from 'lucide-react';
+import { Edit2, Trash2, User, Calendar, Eye, FileImage, BellRing, MessageCircle } from 'lucide-react';
 import { Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
@@ -42,6 +42,7 @@ export const AttendanceTable = ({
     onView,
     onExport,
     onToggleParentNotified,
+    onSendToParent,
     onStatusChange,
     loading,
     tuitionMonth,
@@ -50,6 +51,8 @@ export const AttendanceTable = ({
     homeworkTitle,
     statusLoading = false,
     statusUpdatingAttendanceId = null,
+    sendToParentLoading = false,
+    sendToParentAttendanceId = null,
 }) => {
     const showTuitionCol = !!tuitionMonth && !!tuitionYear;
     const showHomeworkCol = showHomework;
@@ -120,17 +123,17 @@ export const AttendanceTable = ({
 
                 return (
                     <div className="w-32">
-                    <AttendanceStatusDropdown
-                        value={attendance.status}
-                        disabled={isStatusUpdating}
-                        loading={isStatusUpdating}
-                        onChange={(newStatus) => {
-                            if (onStatusChange) {
-                                onStatusChange(attendance, newStatus);
-                            }
-                        }}
-                    />
-                </div>
+                        <AttendanceStatusDropdown
+                            value={attendance.status}
+                            disabled={isStatusUpdating}
+                            loading={isStatusUpdating}
+                            onChange={(newStatus) => {
+                                if (onStatusChange) {
+                                    onStatusChange(attendance, newStatus);
+                                }
+                            }}
+                        />
+                    </div>
                 );
             },
         },
@@ -263,63 +266,82 @@ export const AttendanceTable = ({
             key: 'actions',
             label: 'Thao tác',
             align: 'right',
-            render: (attendance) => (
-                <div className="flex items-center justify-end gap-2">
-                    {/* View */}
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onView(attendance);
-                        }}
-                        className="p-1 rounded hover:bg-blue-100 transition-colors"
-                        title="Xem chi tiết"
-                    >
-                        <Eye size={16} className="text-blue-600" />
-                    </button>
-                    {/* Export */}
-                    {onExport && (
+            render: (attendance) => {
+                const canSendParentZalo = !!attendance.student?.hasParentZaloId && !!onSendToParent;
+                const isSendingToParent =
+                    sendToParentLoading && sendToParentAttendanceId === attendance.attendanceId;
+
+                return (
+                    <div className="flex items-center justify-end gap-2">
+                        {/* View */}
                         <button
                             type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onExport(attendance);
+                                onView(attendance);
                             }}
-                            className="p-1 rounded hover:bg-purple-100 transition-colors"
-                            title="Xuất phiếu"
+                            className="p-1 rounded hover:bg-blue-100 transition-colors"
+                            title="Xem chi tiết"
                         >
-                            <FileImage size={16} className="text-purple-600" />
+                            <Eye size={16} className="text-blue-600" />
                         </button>
-                    )}
-                    {/* Edit */}
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit(attendance);
-                        }}
-                        className="p-1 rounded hover:bg-gray-200 transition-colors"
-                        title="Cập nhật điểm danh"
-                    >
-                        <Edit2 size={16} className="text-warning" />
-                    </button>
-                    {/* Delete */}
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(attendance);
-                        }}
-                        className="p-1 rounded hover:bg-red-100 transition-colors"
-                        title="Xóa điểm danh"
-                    >
-                        <Trash2
-                            size={16}
-                            className="text-red-600"
-                        />
-                    </button>
-                </div>
-            ),
+                        {/* Export */}
+                        {onExport && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onExport(attendance);
+                                }}
+                                className="p-1 rounded hover:bg-purple-100 transition-colors"
+                                title="Xuất phiếu"
+                            >
+                                <FileImage size={16} className="text-purple-600" />
+                            </button>
+                        )}
+                        {/* Send parent Zalo */}
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onSendToParent(attendance);
+                            }}
+                            disabled={isSendingToParent || !canSendParentZalo}
+                            className="p-1 rounded hover:bg-emerald-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                            title={canSendParentZalo ? (isSendingToParent ? 'Đang gửi...' : 'Gửi phiếu qua Zalo cho phụ huynh') : 'Học sinh chưa liên kết Zalo của phụ huynh'}
+                        >
+                            <MessageCircle size={16} className="text-emerald-600" />
+                        </button>
+                        {/* Edit */}
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(attendance);
+                            }}
+                            className="p-1 rounded hover:bg-gray-200 transition-colors"
+                            title="Cập nhật điểm danh"
+                        >
+                            <Edit2 size={16} className="text-warning" />
+                        </button>
+                        {/* Delete */}
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(attendance);
+                            }}
+                            className="p-1 rounded hover:bg-red-100 transition-colors"
+                            title="Xóa điểm danh"
+                        >
+                            <Trash2
+                                size={16}
+                                className="text-red-600"
+                            />
+                        </button>
+                    </div>
+                );
+            },
         },
     ];
 

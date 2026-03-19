@@ -264,6 +264,7 @@ export const API_ENDPOINTS = {
     EXPORT_BY_SESSION: (sessionId) => `/attendances/export/session/${sessionId}`,
     EXPORT_IMAGE: (id) => `/attendances/export/image/${id}`,
     TOGGLE_PARENT_NOTIFIED: (id) => `/attendances/${id}/toggle-parent-notified`,
+    SEND_TO_PARENT: (id) => `/attendances/${id}/send-to-parent`,
   },
   LEARNING_ITEMS: {
     LIST: "/learning-items",
