@@ -49,6 +49,10 @@ export const AttendanceExport = ({ attendance }) => {
     const showSettings = useSelector(selectShowExportSettings);
     const debouncedQuality = useDebounce(options.quality, 400);
 
+    const buildExportOptions = (mode) => {
+        return { ...options, mode };
+    };
+
     // Load preview whenever options change
     useEffect(() => {
         if (attendance?.attendanceId) {
@@ -86,7 +90,6 @@ export const AttendanceExport = ({ attendance }) => {
         options.includeTuition,
         options.tuitionMonth,
         options.tuitionYear,
-        options.includeHomework,
         options.includeTeacherName,
         options.includeMarkerName,
         options.includeQRCode,
@@ -99,8 +102,7 @@ export const AttendanceExport = ({ attendance }) => {
         setIsLoadingPreview(true);
         try {
             const response = await attendanceApi.exportImage(attendance.attendanceId, {
-                ...options,
-                mode: 'view',
+                ...buildExportOptions('view'),
             });
 
             const blob = response.data || response;
@@ -126,14 +128,14 @@ export const AttendanceExport = ({ attendance }) => {
     const handleDownload = () => {
         dispatch(exportAttendanceImageAsync({
             id: attendance.attendanceId,
-            options: { ...options, mode: 'download' },
+            options: buildExportOptions('download'),
         }));
     };
 
     const handleViewInNewTab = () => {
         dispatch(exportAttendanceImageAsync({
             id: attendance.attendanceId,
-            options: { ...options, mode: 'view' },
+            options: buildExportOptions('view'),
         }));
     };
 
@@ -323,15 +325,6 @@ export const AttendanceExport = ({ attendance }) => {
                                             </div>
                                         </>
                                     )}
-                                </div>
-
-                                {/* ===== HOMEWORK ===== */}
-                                <div className="md:col-span-2 flex flex-wrap items-center gap-3">
-                                    <Checkbox
-                                        checked={options.includeHomework}
-                                        onChange={(v) => handleOptionChange('includeHomework', v)}
-                                        label="Thông tin bài tập về nhà"
-                                    />
                                 </div>
 
                                 <Checkbox

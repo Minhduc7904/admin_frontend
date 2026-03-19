@@ -89,10 +89,11 @@ export const AddStudent = ({ onClose, loadStudents }) => {
             const firstName = name === 'firstName' ? value : formData.firstName;
             const studentPhone = name === 'studentPhone' ? value : formData.studentPhone;
             if (firstName && studentPhone) {
-                const generated = toSlug(firstName) + studentPhone.trim();
-                updated.username = generated;
-                updated.password = generated;
-                updated.confirmPassword = generated;
+                const normalizedPhone = studentPhone.trim();
+                const generatedUsername = toSlug(firstName) + normalizedPhone;
+                updated.username = generatedUsername;
+                updated.password = normalizedPhone;
+                updated.confirmPassword = normalizedPhone;
             }
         }
 
@@ -102,11 +103,12 @@ export const AddStudent = ({ onClose, loadStudents }) => {
     const handleAutoGenChange = (checked) => {
         setAutoGenCredentials(checked);
         if (checked && formData.firstName && formData.studentPhone) {
-            const generated = toSlug(formData.firstName) + formData.studentPhone.trim();
+            const normalizedPhone = formData.studentPhone.trim();
+            const generatedUsername = toSlug(formData.firstName) + normalizedPhone;
             dispatch(setAddStudentFormData({
-                username: generated,
-                password: generated,
-                confirmPassword: generated,
+                username: generatedUsername,
+                password: normalizedPhone,
+                confirmPassword: normalizedPhone,
             }));
         }
     };

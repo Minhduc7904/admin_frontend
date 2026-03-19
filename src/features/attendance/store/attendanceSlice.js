@@ -60,7 +60,6 @@ const initialState = {
         includeTuition: true,
         tuitionMonth: new Date().getMonth() + 1,
         tuitionYear: new Date().getFullYear(),
-        includeHomework: true,
     },
     showExportSettings: false,
     exportExcelOptions: {

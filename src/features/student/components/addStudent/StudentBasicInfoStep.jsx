@@ -19,7 +19,7 @@ export const StudentBasicInfoStep = ({
                     checked={autoGenCredentials}
                     onChange={onAutoGenChange}
                     label="Tự động tạo tài khoản & mật khẩu"
-                    tooltipText="Tài khoản và mật khẩu sẽ được tạo tự động từ tên + SĐT học sinh (VD: Đức 0392923661 → duc0392923661)"
+                    tooltipText="Tài khoản sẽ tạo từ tên + SĐT học sinh, mật khẩu là SĐT học sinh (VD: Đức 0392923661 -> username: duc0392923661, password: 0392923661)"
                 />
                 {autoGenCredentials && formData.firstName && formData.studentPhone && (
                     <p className="text-xs text-blue-600 mt-2 ml-6">
