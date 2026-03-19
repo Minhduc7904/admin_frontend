@@ -127,6 +127,22 @@ export const StudentTable = ({
             ),
         },
         {
+            key: 'hasParentZaloId',
+            label: 'PH Zalo',
+            render: (student) =>
+                student.hasParentZaloId ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <UserCheck size={12} />
+                        Đã đăng ký
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                        <UserX size={12} />
+                        Chưa đăng ký
+                    </span>
+                ),
+        },
+        {
             key: 'actions',
             label: 'Thao tác',
             align: 'right',
