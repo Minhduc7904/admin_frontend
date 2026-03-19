@@ -72,6 +72,9 @@ export const ClassSearchSelect = ({
                         <span>GV: {courseClass.instructor.fullName}</span>
                     )}
                 </div>
+                <span className="text-xs text-foreground-light mt-1">
+                    Lịch học: {courseClass.weeklySchedule || 'Chưa có lịch học'}
+                </span>
             </div>
         );
     };

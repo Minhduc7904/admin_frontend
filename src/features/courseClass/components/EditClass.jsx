@@ -21,6 +21,7 @@ export const EditClass = ({
 
     const [formData, setFormData] = useState({
         className: '',
+        weeklySchedule: '',
         startDate: '',
         endDate: '',
         room: '',
@@ -35,6 +36,7 @@ export const EditClass = ({
         if (courseClass) {
             setFormData({
                 className: courseClass.className || '',
+                weeklySchedule: courseClass.weeklySchedule || '',
                 startDate: courseClass.startDate ? new Date(courseClass.startDate).toISOString().split('T')[0] : '',
                 endDate: courseClass.endDate ? new Date(courseClass.endDate).toISOString().split('T')[0] : '',
                 room: courseClass.room || '',
@@ -86,6 +88,10 @@ export const EditClass = ({
             newErrors.room = 'Tên phòng học không được vượt quá 100 ký tự';
         }
 
+        if (formData.weeklySchedule && formData.weeklySchedule.trim().length > 255) {
+            newErrors.weeklySchedule = 'Lịch học trong tuần không được vượt quá 255 ký tự';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -103,6 +109,7 @@ export const EditClass = ({
                 startDate: formData.startDate || undefined,
                 endDate: formData.endDate || undefined,
                 room: formData.room?.trim() || undefined,
+                weeklySchedule: formData.weeklySchedule?.trim() || undefined,
                 instructorId: formData.instructorId ? parseInt(formData.instructorId) : undefined,
             };
 
@@ -190,6 +197,18 @@ export const EditClass = ({
                         value={formData.room}
                         onChange={handleChange}
                         placeholder="VD: P101, Tầng 2"
+                    />
+                </div>
+
+                {/* Lịch học trong tuần */}
+                <div>
+                    <Input
+                        error={errors.weeklySchedule}
+                        name="weeklySchedule"
+                        label="Lịch học trong tuần"
+                        value={formData.weeklySchedule}
+                        onChange={handleChange}
+                        placeholder="VD: Thứ 2, 4, 6 - 18:30"
                     />
                 </div>
             </div>

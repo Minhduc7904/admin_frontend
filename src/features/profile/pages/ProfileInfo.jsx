@@ -66,10 +66,10 @@ export const ProfileInfo = () => {
             newErrors.lastName = 'Họ không được để trống';
         }
 
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email không được để trống';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Email không hợp lệ';
+        if (formData.email.trim()) {
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                newErrors.email = 'Email không hợp lệ';
+            }
         }
 
         setErrors(newErrors);

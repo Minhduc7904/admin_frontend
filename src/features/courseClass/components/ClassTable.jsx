@@ -1,4 +1,4 @@
-import { Eye, Edit, Trash2, Calendar, MapPin, User } from 'lucide-react';
+import { Eye, Edit, Trash2, Calendar, MapPin } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
 
 export const ClassTable = ({ classes, onView, onEdit, onDelete, loading }) => {
@@ -92,6 +92,18 @@ export const ClassTable = ({ classes, onView, onEdit, onDelete, loading }) => {
         },
         {
             key: 'schedule',
+            label: 'Lịch học',
+            render: (classItem) => (
+                <div className="flex items-start gap-1 text-sm text-foreground-light max-w-xs">
+                    <Calendar size={14} className="mt-0.5 shrink-0" />
+                    <span className="break-words">
+                        {classItem.weeklySchedule || <span className="italic text-foreground-lighter">Chưa có</span>}
+                    </span>
+                </div>
+            )
+        },
+        {
+            key: 'dateRange',
             label: 'Thời gian',
             render: (classItem) => (
                 <div className="flex flex-col text-xs">

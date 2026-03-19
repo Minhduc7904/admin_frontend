@@ -60,23 +60,28 @@ export const CourseClassSearchMultiSelect = ({
                     {courseClass.className || 'N/A'}
                 </span>
 
-                <div className="flex items-center gap-2 text-xs text-foreground-light">
+                <div className="flex items-center gap-2 text-xs text-foreground-light ">
                     {courseClass.course?.title && (
                         <span>{courseClass.course.title}</span>
                     )}
 
                     {courseClass.room && (
                         <span className="px-1.5 py-0.5 bg-gray-100 rounded">
-                            Phòng {courseClass.room}
+                            / Phòng {courseClass.room}
                         </span>
                     )}
 
                     {courseClass.startDate && (
                         <span>
-                            {new Date(courseClass.startDate).toLocaleDateString('vi-VN')}
+                            / {new Date(courseClass.startDate).toLocaleDateString('vi-VN')}
                         </span>
                     )}
+                    <span className="text-xs text-foreground-light">
+                        / Lịch học: {courseClass.weeklySchedule || 'Chưa có lịch học'}
+                    </span>
                 </div>
+
+
             </div>
         );
     };
