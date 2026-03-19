@@ -1,4 +1,4 @@
-import { Dashboard } from '../features/admin/pages';
+import { Dashboard, SuperAdminPage } from '../features/admin/pages';
 import { RoleList, RoleCreate, RoleEdit } from '../features/role/pages';
 import { PermissionList } from '../features/permission/pages';
 import { AuditLogList } from '../features/adminAuditLog/pages';
@@ -64,6 +64,15 @@ export const adminRouter = [
                     {
                         path: ROUTES.DASHBOARD,
                         element: <Dashboard />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.SUPER_ADMIN} />,
+                children: [
+                    {
+                        path: ROUTES.SUPER_ADMIN,
+                        element: <SuperAdminPage />,
                     },
                 ],
             },

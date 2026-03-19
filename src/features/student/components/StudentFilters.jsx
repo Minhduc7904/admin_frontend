@@ -12,6 +12,12 @@ const TIME_RANGE_OPTIONS_WITH_DEFAULT = [
     ...TIME_RANGE_OPTIONS,
 ]
 
+const PARENT_ZALO_OPTIONS = [
+    { value: '', label: 'Tất cả PH Zalo' },
+    { value: 'true', label: 'Đã đăng ký PH Zalo' },
+    { value: 'false', label: 'Chưa đăng ký PH Zalo' },
+]
+
 export const StudentFilters = ({
     search,
     onSearchChange,
@@ -19,6 +25,8 @@ export const StudentFilters = ({
     onGradeChange,
     isActive,
     onIsActiveChange,
+    hasParentZaloId,
+    onHasParentZaloIdChange,
     fromDate,
     onFromDateChange,
     toDate,
@@ -49,7 +57,7 @@ export const StudentFilters = ({
         <div className="mb-4 bg-white border border-border rounded-sm p-4 space-y-4">
             {/* ===== Row 1: Search + main filters ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-6">
+                <div className="lg:col-span-5">
                     <SearchInput
                         value={search}
                         onChange={onSearchChange}
@@ -57,7 +65,7 @@ export const StudentFilters = ({
                     />
                 </div>
 
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-2">
                     <Dropdown
                         value={grade}
                         onChange={onGradeChange}
@@ -66,12 +74,21 @@ export const StudentFilters = ({
                     />
                 </div>
 
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-2">
                     <Dropdown
                         value={isActive}
                         onChange={onIsActiveChange}
                         options={IS_ACTIVE_OPTIONS}
                         placeholder="Trạng thái"
+                    />
+                </div>
+
+                <div className="lg:col-span-3">
+                    <Dropdown
+                        value={hasParentZaloId}
+                        onChange={onHasParentZaloIdChange}
+                        options={PARENT_ZALO_OPTIONS}
+                        placeholder="Zalo phụ huynh"
                     />
                 </div>
             </div>

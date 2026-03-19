@@ -9,6 +9,7 @@ import mediaReducer from "../../features/media/store/mediaSlice";
 import mediaUsageReducer from "../../features/mediaUsage/store/mediaUsageSlice";
 import mediaFolderReducer from "../../features/mediaFolder/store/mediaFolderSlice";
 import adminReducer from "../../features/admin/store/adminSlice";
+import superAdminReducer from "../../features/superAdmin/store/superAdminSlice";
 import { userReducer } from "../../features/user/store/userSlice";
 import studentReducer from "../../features/student/store/studentSlice";
 import subjectReducer from "../../features/subject/store/subjectSlice";
@@ -51,6 +52,7 @@ export const store = configureStore({
     mediaUsage: mediaUsageReducer,
     mediaFolder: mediaFolderReducer,
     admin: adminReducer,
+    superAdmin: superAdminReducer,
     user: userReducer,
     student: studentReducer,
     subject: subjectReducer,

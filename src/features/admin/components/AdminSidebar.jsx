@@ -22,6 +22,8 @@ import { PERMISSIONS } from '../../../core/constants/permission/permission.codes
 
 export const AdminSidebar = () => {
   const sections = [
+
+
     {
       label: null, // không cần label cho dashboard
       items: [
@@ -31,6 +33,19 @@ export const AdminSidebar = () => {
           href: ROUTES.DASHBOARD,
           icon: LayoutDashboard,
           permission: PERMISSIONS.ADMIN_PAGE.DASHBOARD,
+        },
+      ],
+    },
+
+    {
+      label: 'Super Admin',
+      items: [
+        {
+          key: 'superAdmin',
+          name: 'Trang Super Admin',
+          href: ROUTES.SUPER_ADMIN,
+          icon: Shield,
+          permission: PERMISSIONS.ADMIN_PAGE.SUPER_ADMIN,
         },
       ],
     },

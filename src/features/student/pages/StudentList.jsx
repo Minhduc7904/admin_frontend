@@ -86,6 +86,7 @@ export const StudentList = () => {
 
     const [selectedGrade, setSelectedGrade] = useState(filters.grade || '')
     const [selectedIsActive, setSelectedIsActive] = useState(filters.isActive || '')
+    const [selectedHasParentZaloId, setSelectedHasParentZaloId] = useState(filters.hasParentZaloId || '')
     const [fromDate, setFromDate] = useState(filters.fromDate || '')
     const [toDate, setToDate] = useState(filters.toDate || '')
     const [selectedClasses, setSelectedClasses] = useState([])
@@ -114,6 +115,7 @@ export const StudentList = () => {
         debouncedSearch,
         selectedGrade,
         selectedIsActive,
+        selectedHasParentZaloId,
         fromDate,
         toDate,
         sort.field,
@@ -150,6 +152,8 @@ export const StudentList = () => {
 
         if (selectedIsActive === 'true') params.isActive = true
         if (selectedIsActive === 'false') params.isActive = false
+        if (selectedHasParentZaloId === 'true') params.hasParentZaloId = true
+        if (selectedHasParentZaloId === 'false') params.hasParentZaloId = false
 
         dispatch(getAllStudentsAsync(params))
     }
@@ -209,6 +213,11 @@ export const StudentList = () => {
     const handleFromDateChange = (value) => {
         setFromDate(value)
         resetPageAndSetFilter({ fromDate: value })
+    }
+
+    const handleHasParentZaloIdChange = (value) => {
+        setSelectedHasParentZaloId(value)
+        resetPageAndSetFilter({ hasParentZaloId: value })
     }
 
     const handleToDateChange = (value) => {
@@ -295,6 +304,8 @@ export const StudentList = () => {
                     onGradeChange={handleGradeChange}
                     isActive={selectedIsActive}
                     onIsActiveChange={handleIsActiveChange}
+                    hasParentZaloId={selectedHasParentZaloId}
+                    onHasParentZaloIdChange={handleHasParentZaloIdChange}
                     fromDate={fromDate}
                     onFromDateChange={handleFromDateChange}
                     toDate={toDate}

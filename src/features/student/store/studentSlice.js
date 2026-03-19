@@ -46,6 +46,7 @@ const initialState = {
         sortOrder: "desc",
         grade: "",
         isActive: IS_ACTIVE.ACTIVE,
+        hasParentZaloId: "",
         classIds: [],
     },
     exportOptions: {

@@ -8,6 +8,7 @@ export { mediaApi } from './mediaApi';
 export { mediaUsageApi } from './mediaUsageApi';
 export { mediaFolderApi } from './mediaFolderApi';
 export { adminApi } from './adminApi';
+export { superAdminApi } from './superAdminApi';
 export { userApi } from './userApi';
 export { studentApi } from './studentApi';
 export { courseApi } from './courseApi';

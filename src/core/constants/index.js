@@ -17,6 +17,7 @@ export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
+  SUPER_ADMIN: "/super-admin",
   PROFILE: "/profile",
   PROFILE_INFO: "/profile/info",
   PROFILE_PERMISSIONS: "/profile/permissions",
@@ -114,6 +115,9 @@ export const API_ENDPOINTS = {
     CREATE: "/admins",
     UPDATE: (id) => `/admins/${id}`,
     DELETE: (id) => `/admins/${id}`,
+  },
+  SUPER_ADMIN: {
+    RESET_PASSWORD_BY_DATE_RANGE: "/super-admin/reset-password-by-date-range",
   },
   STUDENTS: {
     LIST: "/students",

@@ -296,6 +296,7 @@ export const PERMISSIONS = {
   // ADMIN PAGE PERMISSIONS
   // ===================================
   ADMIN_PAGE: {
+    SUPER_ADMIN: 'admin:page:super-admin',
     DASHBOARD: 'admin:page:dashboard',
     ROLES: 'admin:page:roles',
     ROLE_CREATE: 'admin:page:role-create',
