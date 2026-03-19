@@ -118,6 +118,7 @@ export const API_ENDPOINTS = {
   },
   SUPER_ADMIN: {
     RESET_PASSWORD_BY_DATE_RANGE: "/super-admin/reset-password-by-date-range",
+    UPDATE_ADMIN_DIRECT: "/super-admin/update-admin-direct",
   },
   STUDENTS: {
     LIST: "/students",
