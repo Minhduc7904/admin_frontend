@@ -69,7 +69,7 @@ export const TuitionPaymentList = () => {
         direction: filters.sortOrder || 'desc',
     })
 
-    const [showStats, setShowStats] = useState(true)
+    const [showStats, setShowStats] = useState(false)
     const [openAddPanel, setOpenAddPanel] = useState(false)
     const [openExcelModal, setOpenExcelModal] = useState(false)
     const [openExportListModal, setOpenExportListModal] = useState(false)
