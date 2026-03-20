@@ -9,6 +9,9 @@ const initialState = {
     loadingUpdateAdminDirect: false,
     errorUpdateAdminDirect: null,
     updateAdminDirectResult: null,
+    loadingCleanupUnusedMediaOlderThan30Days: false,
+    errorCleanupUnusedMediaOlderThan30Days: null,
+    cleanupUnusedMediaOlderThan30DaysResult: null,
 };
 
 export const resetPasswordByDateRangeAsync = createAsyncThunk(
@@ -33,6 +36,21 @@ export const updateAdminDirectAsync = createAsyncThunk(
     }
 );
 
+export const cleanupUnusedMediaOlderThan30DaysAsync = createAsyncThunk(
+    "superAdmin/cleanupUnusedMediaOlderThan30Days",
+    async (payload, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.cleanupUnusedMediaOlderThan30Days(payload),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Dọn dẹp media không dùng (hơn 30 ngày) thành công",
+                errorTitle: "Lỗi dọn dẹp media không dùng (hơn 30 ngày)",
+            }
+        );
+    }
+);
+
 export const superAdminSlice = createSlice({
     name: "superAdmin",
     initialState,
@@ -44,6 +62,10 @@ export const superAdminSlice = createSlice({
         clearUpdateAdminDirectState: (state) => {
             state.errorUpdateAdminDirect = null;
             state.updateAdminDirectResult = null;
+        },
+        clearCleanupUnusedMediaOlderThan30DaysState: (state) => {
+            state.errorCleanupUnusedMediaOlderThan30Days = null;
+            state.cleanupUnusedMediaOlderThan30DaysResult = null;
         },
     },
     extraReducers: (builder) => {
@@ -71,6 +93,18 @@ export const superAdminSlice = createSlice({
             .addCase(updateAdminDirectAsync.rejected, (state, action) => {
                 state.loadingUpdateAdminDirect = false;
                 state.errorUpdateAdminDirect = action.payload;
+            })
+            .addCase(cleanupUnusedMediaOlderThan30DaysAsync.pending, (state) => {
+                state.loadingCleanupUnusedMediaOlderThan30Days = true;
+                state.errorCleanupUnusedMediaOlderThan30Days = null;
+            })
+            .addCase(cleanupUnusedMediaOlderThan30DaysAsync.fulfilled, (state, action) => {
+                state.loadingCleanupUnusedMediaOlderThan30Days = false;
+                state.cleanupUnusedMediaOlderThan30DaysResult = action.payload || null;
+            })
+            .addCase(cleanupUnusedMediaOlderThan30DaysAsync.rejected, (state, action) => {
+                state.loadingCleanupUnusedMediaOlderThan30Days = false;
+                state.errorCleanupUnusedMediaOlderThan30Days = action.payload;
             });
     },
 });
@@ -78,6 +112,7 @@ export const superAdminSlice = createSlice({
 export const {
     clearResetPasswordByDateRangeState,
     clearUpdateAdminDirectState,
+    clearCleanupUnusedMediaOlderThan30DaysState,
 } = superAdminSlice.actions;
 
 export const selectSuperAdminLoadingResetPasswordByDateRange = (state) =>
@@ -93,5 +128,12 @@ export const selectSuperAdminErrorUpdateAdminDirect = (state) =>
     state.superAdmin.errorUpdateAdminDirect;
 export const selectSuperAdminUpdateAdminDirectResult = (state) =>
     state.superAdmin.updateAdminDirectResult;
+
+export const selectSuperAdminLoadingCleanupUnusedMediaOlderThan30Days = (state) =>
+    state.superAdmin.loadingCleanupUnusedMediaOlderThan30Days;
+export const selectSuperAdminErrorCleanupUnusedMediaOlderThan30Days = (state) =>
+    state.superAdmin.errorCleanupUnusedMediaOlderThan30Days;
+export const selectSuperAdminCleanupUnusedMediaOlderThan30DaysResult = (state) =>
+    state.superAdmin.cleanupUnusedMediaOlderThan30DaysResult;
 
 export default superAdminSlice.reducer;

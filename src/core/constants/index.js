@@ -119,6 +119,8 @@ export const API_ENDPOINTS = {
   SUPER_ADMIN: {
     RESET_PASSWORD_BY_DATE_RANGE: "/super-admin/reset-password-by-date-range",
     UPDATE_ADMIN_DIRECT: "/super-admin/update-admin-direct",
+    CLEANUP_UNUSED_MEDIA_OLDER_THAN_30_DAYS:
+      "/super-admin/cleanup-unused-media-older-than-30-days",
   },
   STUDENTS: {
     LIST: "/students",

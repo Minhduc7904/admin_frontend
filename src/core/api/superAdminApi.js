@@ -18,4 +18,15 @@ export const superAdminApi = {
     updateAdminDirect: (data) => {
         return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.UPDATE_ADMIN_DIRECT, data);
     },
+
+    /**
+     * Find and delete all media that has no usage and was created more than 30 days ago.
+     * POST /super-admin/cleanup-unused-media-older-than-30-days
+     */
+    cleanupUnusedMediaOlderThan30Days: (data = {}) => {
+        return axiosClient.post(
+            API_ENDPOINTS.SUPER_ADMIN.CLEANUP_UNUSED_MEDIA_OLDER_THAN_30_DAYS,
+            data
+        );
+    },
 };
