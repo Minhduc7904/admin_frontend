@@ -56,6 +56,7 @@ export const AttendanceTable = ({
 }) => {
     const showTuitionCol = !!tuitionMonth && !!tuitionYear;
     const showHomeworkCol = showHomework;
+
     const formatDateTime = (date) => {
         return new Date(date).toLocaleString('vi-VN', {
             year: 'numeric',
@@ -64,6 +65,22 @@ export const AttendanceTable = ({
             hour: '2-digit',
             minute: '2-digit',
         });
+    };
+
+    const renderParentZaloBadge = (hasParentZaloId) => {
+        const linked = !!hasParentZaloId;
+
+        return (
+            <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                    linked ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                }`}
+                title={linked ? 'Đã liên kết Zalo phụ huynh' : 'Chưa liên kết Zalo phụ huynh'}
+            >
+                <MessageCircle size={11} />
+                {linked ? 'Đã liên kết Zalo PH' : 'Chưa liên kết Zalo PH'}
+            </span>
+        );
     };
 
     const columns = [
@@ -84,9 +101,12 @@ export const AttendanceTable = ({
                     <User size={14} className="text-foreground-light" />
                     <div>
                         <Link to={ROUTES.STUDENT_DETAIL(attendance.studentId)} className="hover:underline cursor-pointer">
-                            <span className="text-sm font-medium text-foreground">
-                                {attendance.student.fullName || 'N/A'}
-                            </span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-medium text-foreground">
+                                    {attendance.student.fullName || 'N/A'}
+                                </span>
+                                {renderParentZaloBadge(attendance.student?.hasParentZaloId)}
+                            </div>
                         </Link>
                         {attendance.student.studentId && (
                             <>
