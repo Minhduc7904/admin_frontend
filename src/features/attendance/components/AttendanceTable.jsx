@@ -1,3 +1,5 @@
+import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Edit2, Trash2, User, Calendar, Eye, FileImage, BellRing, MessageCircle } from 'lucide-react';
 import { Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
@@ -59,6 +61,22 @@ export const AttendanceTable = ({
 }) => {
     const showTuitionCol = !!tuitionMonth && !!tuitionYear;
     const showHomeworkCol = showHomework;
+    const [hoveredOtherAttendance, setHoveredOtherAttendance] = useState(null);
+    const hoverCloseTimerRef = useRef(null);
+
+    const clearHoverCloseTimer = () => {
+        if (hoverCloseTimerRef.current) {
+            clearTimeout(hoverCloseTimerRef.current);
+            hoverCloseTimerRef.current = null;
+        }
+    };
+
+    const scheduleHideHoveredAttendance = () => {
+        clearHoverCloseTimer();
+        hoverCloseTimerRef.current = setTimeout(() => {
+            setHoveredOtherAttendance(null);
+        }, 120);
+    };
 
     const formatDateTime = (date) => {
         return new Date(date).toLocaleString('vi-VN', {
@@ -67,6 +85,16 @@ export const AttendanceTable = ({
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
+        });
+    };
+
+    const formatTimeOnly = (date) => {
+        if (!date) return '';
+
+        return new Date(date).toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
         });
     };
 
@@ -99,6 +127,9 @@ export const AttendanceTable = ({
                     const statusClass = STATUS_BADGE[other.status] || 'bg-gray-100 text-gray-700';
                     const statusLabel = other.statusLabel || STATUS_LABEL[other.status] || other.status;
                     const sessionLabel = other.classSession?.name || `Buổi #${other.sessionId}`;
+                    const className = other.classSession?.courseClass?.className;
+                    const sessionStart = formatTimeOnly(other.classSession?.startTime);
+                    const sessionEnd = formatTimeOnly(other.classSession?.endTime);
                     const isDeletingOtherInWeek =
                         deleteOtherInWeekLoading && deleteOtherInWeekAttendanceId === other.attendanceId;
 
@@ -107,8 +138,36 @@ export const AttendanceTable = ({
                             key={other.attendanceId}
                             className="flex items-center justify-between gap-2 rounded-md bg-gray-50 px-2 py-1"
                             title={`${sessionLabel} - ${statusLabel}`}
+                            onMouseEnter={(e) => {
+                                clearHoverCloseTimer();
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setHoveredOtherAttendance({
+                                    id: other.attendanceId,
+                                    attendance: other,
+                                    sessionLabel,
+                                    className,
+                                    sessionStart,
+                                    sessionEnd,
+                                    statusLabel,
+                                    statusClass,
+                                    rect,
+                                });
+                            }}
+                            onMouseLeave={scheduleHideHoveredAttendance}
                         >
-                            <span className="text-xs text-foreground truncate">{sessionLabel}</span>
+                            <div className="flex flex-col min-w-0">
+                                <div className="flex items-center gap-1 min-w-0">
+                                    <span className="text-xs text-foreground break-words whitespace-nowrap">{sessionLabel}</span>
+                                    {className && (
+                                        <span className="text-[11px] text-foreground-light truncate">({className})</span>
+                                    )}
+                                </div>
+                                {(sessionStart || sessionEnd) && (
+                                    <span className="text-[11px] text-foreground-light whitespace-nowrap">
+                                        {sessionStart || '--:--'} - {sessionEnd || '--:--'}
+                                    </span>
+                                )}
+                            </div>
                             <div className="flex items-center gap-1">
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap ${statusClass}`}>
                                     {statusLabel}
@@ -422,13 +481,83 @@ export const AttendanceTable = ({
         },
     ];
 
+    const hoverPreviewStyle = (() => {
+        if (!hoveredOtherAttendance) return null;
+
+        const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+        const maxWidth = Math.min(viewportWidth - 24, 920);
+        const minWidth = Math.min(maxWidth, Math.max(420, hoveredOtherAttendance.rect.width + 80));
+        const popupLeft = Math.min(
+            Math.max(12, hoveredOtherAttendance.rect.left - 6),
+            Math.max(12, viewportWidth - minWidth - 12)
+        );
+
+        return {
+            top: Math.max(12, hoveredOtherAttendance.rect.top - 4),
+            left: popupLeft,
+            width: 'max-content',
+            minWidth,
+            maxWidth,
+            transform: 'scale(1.04)',
+            transformOrigin: 'left center',
+        };
+    })();
+
     return (
-        <Table
-            columns={columns}
-            data={attendances}
-            loading={loading}
-            emptyMessage="Chưa có điểm danh nào"
-            onRowClick={onView}
-        />
+        <>
+            <Table
+                columns={columns}
+                data={attendances}
+                loading={loading}
+                emptyMessage="Chưa có điểm danh nào"
+                onRowClick={onView}
+            />
+
+            {hoveredOtherAttendance && typeof document !== 'undefined' && createPortal(
+                <div
+                    className="fixed z-[9999] pointer-events-auto"
+                    style={hoverPreviewStyle}
+                    onMouseEnter={clearHoverCloseTimer}
+                    onMouseLeave={scheduleHideHoveredAttendance}
+                >
+                    <div className="flex items-center justify-between gap-2 rounded-md bg-white shadow-xl ring-1 ring-gray-200 px-3 py-2">
+                        <div className="flex flex-col min-w-0 ">
+                            <div className="flex items-center gap-1 min-w-0 w-full whitespace-nowrap">
+                                <span className="text-sm text-foreground whitespace-nowrap">{hoveredOtherAttendance.sessionLabel}</span>
+                                {hoveredOtherAttendance.className && (
+                                    <span className="text-xs text-foreground-light whitespace-nowrap">({hoveredOtherAttendance.className})</span>
+                                )}
+                            </div>
+                            {(hoveredOtherAttendance.sessionStart || hoveredOtherAttendance.sessionEnd) && (
+                                <span className="text-xs text-foreground-light whitespace-nowrap">
+                                    {hoveredOtherAttendance.sessionStart || '--:--'} - {hoveredOtherAttendance.sessionEnd || '--:--'}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${hoveredOtherAttendance.statusClass}`}>
+                                {hoveredOtherAttendance.statusLabel}
+                            </span>
+                            {onDeleteOtherAttendanceInWeek && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteOtherAttendanceInWeek(hoveredOtherAttendance.attendance);
+                                        setHoveredOtherAttendance(null);
+                                    }}
+                                    disabled={deleteOtherInWeekLoading && deleteOtherInWeekAttendanceId === hoveredOtherAttendance.id}
+                                    className="p-1 rounded hover:bg-red-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                    title={deleteOtherInWeekLoading && deleteOtherInWeekAttendanceId === hoveredOtherAttendance.id ? 'Đang xóa...' : 'Xóa điểm danh này'}
+                                >
+                                    <Trash2 size={12} className="text-red-600" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+        </>
     );
 };
