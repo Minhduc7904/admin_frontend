@@ -53,6 +53,9 @@ export const AttendanceTable = ({
     statusUpdatingAttendanceId = null,
     sendToParentLoading = false,
     sendToParentAttendanceId = null,
+    onDeleteOtherAttendanceInWeek,
+    deleteOtherInWeekLoading = false,
+    deleteOtherInWeekAttendanceId = null,
 }) => {
     const showTuitionCol = !!tuitionMonth && !!tuitionYear;
     const showHomeworkCol = showHomework;
@@ -80,6 +83,55 @@ export const AttendanceTable = ({
                 <MessageCircle size={11} />
                 {linked ? 'Đã liên kết Zalo PH' : 'Chưa liên kết Zalo PH'}
             </span>
+        );
+    };
+
+    const renderOtherAttendancesInWeek = (attendance) => {
+        const otherAttendances = attendance.otherAttendancesInWeek || [];
+
+        if (!otherAttendances.length) {
+            return <span className="text-xs text-foreground-light">-</span>;
+        }
+
+        return (
+            <div className="flex flex-col gap-1 max-w-[280px]">
+                {otherAttendances.map((other) => {
+                    const statusClass = STATUS_BADGE[other.status] || 'bg-gray-100 text-gray-700';
+                    const statusLabel = other.statusLabel || STATUS_LABEL[other.status] || other.status;
+                    const sessionLabel = other.classSession?.name || `Buổi #${other.sessionId}`;
+                    const isDeletingOtherInWeek =
+                        deleteOtherInWeekLoading && deleteOtherInWeekAttendanceId === other.attendanceId;
+
+                    return (
+                        <div
+                            key={other.attendanceId}
+                            className="flex items-center justify-between gap-2 rounded-md bg-gray-50 px-2 py-1"
+                            title={`${sessionLabel} - ${statusLabel}`}
+                        >
+                            <span className="text-xs text-foreground truncate">{sessionLabel}</span>
+                            <div className="flex items-center gap-1">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap ${statusClass}`}>
+                                    {statusLabel}
+                                </span>
+                                {onDeleteOtherAttendanceInWeek && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteOtherAttendanceInWeek(other);
+                                        }}
+                                        disabled={isDeletingOtherInWeek}
+                                        className="p-1 rounded hover:bg-red-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                        title={isDeletingOtherInWeek ? 'Đang xóa...' : 'Xóa điểm danh này'}
+                                    >
+                                        <Trash2 size={12} className="text-red-600" />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
         );
     };
 
@@ -156,6 +208,11 @@ export const AttendanceTable = ({
                     </div>
                 );
             },
+        },
+        {
+            key: 'otherAttendancesInWeek',
+            label: 'Điểm danh khác trong tuần',
+            render: (attendance) => renderOtherAttendancesInWeek(attendance),
         },
         {
             key: 'markedAt',

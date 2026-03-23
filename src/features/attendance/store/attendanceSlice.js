@@ -19,6 +19,7 @@ const initialState = {
     loadingUpdate: false,
     loadingUpdateStatus: false,
     loadingDelete: false,
+    loadingDeleteOtherInWeek: false,
     loadingBulkCreate: false,
     loadingStatistics: false,
     loadingExport: false,
@@ -149,6 +150,17 @@ export const deleteAttendanceAsync = createAsyncThunk(
             showSuccess: true,
             successTitle: "Xóa điểm danh thành công",
             errorTitle: "Lỗi xóa điểm danh",
+        });
+    }
+);
+
+export const deleteOtherAttendanceInWeekAsync = createAsyncThunk(
+    "attendance/deleteOtherInWeek",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.delete(id), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Xóa điểm danh tuần thành công",
+            errorTitle: "Lỗi xóa điểm danh tuần",
         });
     }
 );
@@ -447,6 +459,36 @@ export const attendanceSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // Delete other attendance in week (no refetch)
+            .addCase(deleteOtherAttendanceInWeekAsync.pending, (state) => {
+                state.loadingDeleteOtherInWeek = true;
+                state.error = null;
+            })
+            .addCase(deleteOtherAttendanceInWeekAsync.fulfilled, (state, action) => {
+                state.loadingDeleteOtherInWeek = false;
+                const deletedAttendanceId = action.meta.arg;
+
+                state.attendances = state.attendances.map((att) => ({
+                    ...att,
+                    otherAttendancesInWeek: (att.otherAttendancesInWeek || []).filter(
+                        (other) => other.attendanceId !== deletedAttendanceId
+                    ),
+                }));
+
+                if (state.currentAttendance) {
+                    state.currentAttendance = {
+                        ...state.currentAttendance,
+                        otherAttendancesInWeek: (state.currentAttendance.otherAttendancesInWeek || []).filter(
+                            (other) => other.attendanceId !== deletedAttendanceId
+                        ),
+                    };
+                }
+            })
+            .addCase(deleteOtherAttendanceInWeekAsync.rejected, (state, action) => {
+                state.loadingDeleteOtherInWeek = false;
+                state.error = action.payload;
+            })
+
             // Get statistics by session
             .addCase(getStatisticsBySessionAsync.pending, (state) => {
                 state.loadingStatistics = true;
@@ -589,6 +631,7 @@ export const selectAttendanceLoadingCreate = (state) => state.attendance.loading
 export const selectAttendanceLoadingUpdate = (state) => state.attendance.loadingUpdate;
 export const selectAttendanceLoadingUpdateStatus = (state) => state.attendance.loadingUpdateStatus;
 export const selectAttendanceLoadingDelete = (state) => state.attendance.loadingDelete;
+export const selectAttendanceLoadingDeleteOtherInWeek = (state) => state.attendance.loadingDeleteOtherInWeek;
 export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loadingBulkCreate;
 export const selectAttendanceLoadingStatistics = (state) => state.attendance.loadingStatistics;
 export const selectAttendanceLoadingExport = (state) => state.attendance.loadingExport;

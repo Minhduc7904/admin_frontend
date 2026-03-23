@@ -5,6 +5,7 @@ import { Plus, Users, Download, Calendar } from 'lucide-react';
 
 import {
     Button,
+    ConfirmModal,
     StatsCard,
     StatsGrid,
     Pagination,
@@ -30,6 +31,7 @@ import {
     updateAttendanceAsync,
     updateAttendanceStatusAsync,
     deleteAttendanceAsync,
+    deleteOtherAttendanceInWeekAsync,
     createBulkAttendanceBySessionAsync,
     getStatisticsBySessionAsync,
     exportAttendanceBySessionAsync,
@@ -44,6 +46,7 @@ import {
     selectAttendanceLoadingUpdate,
     selectAttendanceLoadingUpdateStatus,
     selectAttendanceLoadingDelete,
+    selectAttendanceLoadingDeleteOtherInWeek,
     selectAttendanceLoadingBulkCreate,
     selectAttendanceLoadingStatistics,
     selectAttendanceLoadingExport,
@@ -70,6 +73,7 @@ export const ClassAttendance = () => {
     const loadingUpdate = useSelector(selectAttendanceLoadingUpdate);
     const loadingUpdateStatus = useSelector(selectAttendanceLoadingUpdateStatus);
     const loadingDelete = useSelector(selectAttendanceLoadingDelete);
+    const loadingDeleteOtherInWeek = useSelector(selectAttendanceLoadingDeleteOtherInWeek);
     const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
     const loadingStatistics = useSelector(selectAttendanceLoadingStatistics);
     const loadingExport = useSelector(selectAttendanceLoadingExport);
@@ -86,10 +90,12 @@ export const ClassAttendance = () => {
     const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
     const [isExportPanelOpen, setIsExportPanelOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleteOtherInWeekModalOpen, setIsDeleteOtherInWeekModalOpen] = useState(false);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     const [selectedAttendance, setSelectedAttendance] = useState(null);
+    const [selectedOtherAttendanceInWeek, setSelectedOtherAttendanceInWeek] = useState(null);
 
     const [formData, setFormData] = useState({
         sessionId: null,
@@ -104,6 +110,7 @@ export const ClassAttendance = () => {
     const [selectedSession, setSelectedSession] = useState(null);
     const [statusUpdatingAttendanceId, setStatusUpdatingAttendanceId] = useState(null);
     const [sendToParentAttendanceId, setSendToParentAttendanceId] = useState(null);
+    const [deleteOtherInWeekAttendanceId, setDeleteOtherInWeekAttendanceId] = useState(null);
 
     /* tuition / homework filter — persisted in slice */
     const showTuition = filters.showTuition;
@@ -330,6 +337,30 @@ export const ClassAttendance = () => {
         }
     };
 
+    const handleDeleteOtherAttendanceInWeek = async (otherAttendance) => {
+        if (!otherAttendance?.attendanceId) return;
+
+        setSelectedOtherAttendanceInWeek(otherAttendance);
+        setIsDeleteOtherInWeekModalOpen(true);
+    };
+
+    const handleConfirmDeleteOtherAttendanceInWeek = async () => {
+        if (!selectedOtherAttendanceInWeek?.attendanceId) return;
+
+        setDeleteOtherInWeekAttendanceId(selectedOtherAttendanceInWeek.attendanceId);
+        try {
+            await dispatch(deleteOtherAttendanceInWeekAsync(selectedOtherAttendanceInWeek.attendanceId)).unwrap();
+            setIsDeleteOtherInWeekModalOpen(false);
+            setSelectedOtherAttendanceInWeek(null);
+        } catch (err) {
+            console.error('Delete other attendance in week failed:', err);
+        } finally {
+            setDeleteOtherInWeekAttendanceId((prev) =>
+                prev === selectedOtherAttendanceInWeek.attendanceId ? null : prev
+            );
+        }
+    };
+
     /* ===================== TOGGLE PARENT NOTIFIED ===================== */
     const handleToggleParentNotified = async (attendance) => {
         try {
@@ -521,6 +552,9 @@ export const ClassAttendance = () => {
                             statusUpdatingAttendanceId={statusUpdatingAttendanceId}
                             sendToParentLoading={loadingSendToParent}
                             sendToParentAttendanceId={sendToParentAttendanceId}
+                            onDeleteOtherAttendanceInWeek={handleDeleteOtherAttendanceInWeek}
+                            deleteOtherInWeekLoading={loadingDeleteOtherInWeek}
+                            deleteOtherInWeekAttendanceId={deleteOtherInWeekAttendanceId}
                             tuitionMonth={(showTuition && tuitionMonth && tuitionYear) ? tuitionMonth : undefined}
                             tuitionYear={(showTuition && tuitionMonth && tuitionYear) ? tuitionYear : undefined}
                             showHomework
@@ -549,6 +583,32 @@ export const ClassAttendance = () => {
                 loading={loadingDelete}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleConfirmDelete}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteOtherInWeekModalOpen}
+                onClose={() => {
+                    if (loadingDeleteOtherInWeek) return;
+                    setIsDeleteOtherInWeekModalOpen(false);
+                    setSelectedOtherAttendanceInWeek(null);
+                }}
+                onConfirm={handleConfirmDeleteOtherAttendanceInWeek}
+                title="Xác nhận xóa điểm danh tuần"
+                message={
+                    <>
+                        Bạn có chắc chắn muốn xóa điểm danh
+                        {' '}<strong>#{selectedOtherAttendanceInWeek?.attendanceId}</strong>
+                        {' '}của buổi
+                        {' '}<strong>{selectedOtherAttendanceInWeek?.classSession?.name || `#${selectedOtherAttendanceInWeek?.sessionId || ''}`}</strong>
+                        ?
+                        <br />
+                        <span className="text-red-600 text-sm">Hành động này không thể hoàn tác.</span>
+                    </>
+                }
+                confirmText="Xóa"
+                cancelText="Hủy"
+                variant="danger"
+                loading={loadingDeleteOtherInWeek}
             />
 
             {/* ===== BULK ATTENDANCE MODAL ===== */}
