@@ -26,6 +26,7 @@ export { Tooltip } from './Tooltip';
 export { InfoTooltip } from './InfoTooltip';
 export { LabelWithTooltip } from './LabelWithTooltip';
 export { ViewModeToggle } from './ViewModeToggle';
+export { QrCodeShare } from './QrCodeShare';
 
 // Empty states
 export * from '../empty';

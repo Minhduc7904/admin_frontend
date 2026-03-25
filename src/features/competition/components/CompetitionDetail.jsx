@@ -3,14 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Calendar, Trophy, FileText, Clock, RefreshCw,
     Edit2, CheckCircle, XCircle, Eye,
-    AlertCircle, Users, BookOpen, Edit, Link2, Copy, Check
+    AlertCircle, Users, BookOpen, Edit, Link2
 } from 'lucide-react';
 import {
     getCompetitionByIdAsync,
     selectCurrentCompetition,
     selectCompetitionLoadingGetById
 } from '../store/competitionSlice';
-import { Button, RightPanel } from '../../../shared/components/ui';
+import { Button, RightPanel, QrCodeShare } from '../../../shared/components/ui';
 import { InlineLoading, MarkdownRenderer } from '../../../shared/components';
 import { EditHomeworkContent } from '../../homeworkContent/components';
 
@@ -81,32 +81,11 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
     const competition = useSelector(selectCurrentCompetition);
     const loading = useSelector(selectCompetitionLoadingGetById);
     const [editingHomework, setEditingHomework] = useState(null);
-    const [copiedStudentLink, setCopiedStudentLink] = useState(false);
 
     const isPublicCompetition = ['PUBLISHED', 'PUBLIC'].includes(competition?.visibility);
     const studentCompetitionLink = competition?.competitionId
         ? `https://beeedu.vn/student/competition/${competition.competitionId}`
         : '';
-
-    const handleCopyStudentLink = async () => {
-        if (!studentCompetitionLink) return;
-        try {
-            if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(studentCompetitionLink);
-            } else {
-                const tempInput = document.createElement('input');
-                tempInput.value = studentCompetitionLink;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempInput);
-            }
-            setCopiedStudentLink(true);
-            setTimeout(() => setCopiedStudentLink(false), 1800);
-        } catch (error) {
-            console.error('Copy student competition link failed:', error);
-        }
-    };
 
     useEffect(() => {
         if (competitionId) {
@@ -180,24 +159,17 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
                                 icon={Link2}
                                 label="Link làm bài học sinh"
                                 value={(
-                                    <div className="flex flex-wrap items-center gap-2">
+                                    <div className="flex flex-col items-start gap-2">
                                         <a
                                             href={studentCompetitionLink}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-sm text-primary hover:underline break-all"
+                                            className="text-sm text-gray-900 hover:underline break-all"
                                         >
                                             {studentCompetitionLink}
                                         </a>
-                                        <button
-                                            type="button"
-                                            onClick={handleCopyStudentLink}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border border-border bg-white hover:bg-gray-50 transition-colors"
-                                            title="Sao chép link"
-                                        >
-                                            {copiedStudentLink ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
-                                            {copiedStudentLink ? 'Đã sao chép' : 'Sao chép'}
-                                        </button>
+                                        
+                                        <QrCodeShare link={studentCompetitionLink} />
                                     </div>
                                 )}
                             />
