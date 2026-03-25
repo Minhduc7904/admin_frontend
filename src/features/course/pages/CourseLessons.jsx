@@ -425,6 +425,8 @@ export const CourseLessons = () => {
                         />
                     ) : selectedItem?.type === 'learningItem' ? (
                         <LearningItemDetail
+                            courseId={courseId}
+                            lessonId={selectedItem?.lessonId ?? currentLesson?.lessonId}
                             learningItem={currentLearningItem}
                             lessonTitle={currentLesson?.title}
                             onEdit={() => handleEditLearningItem(currentLearningItem)}

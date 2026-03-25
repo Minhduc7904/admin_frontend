@@ -1,6 +1,7 @@
 // src/features/course/components/LearningItemDetail.jsx
-import { Edit, Trash2, Calendar, FileText, Video, Youtube, FileCheck, Hash, Info } from 'lucide-react'
-import { Button } from '../../../shared/components'
+import { useState } from 'react'
+import { Edit, Trash2, Calendar, FileText, Video, Youtube, FileCheck, Hash, Info, Link2, Copy, Check } from 'lucide-react'
+import { Button, QrCodeShare } from '../../../shared/components'
 import { DocumentContentList } from '../../documentContent/components/DocumentContentList'
 import { VideoContentList } from '../../videoContent/components/VideoContentList'
 import { YoutubeContentList } from '../../youtubeContent/components/YoutubeContentList'
@@ -15,6 +16,8 @@ const LEARNING_ITEM_TYPES = {
 }
 
 export const LearningItemDetail = ({
+    courseId,
+    lessonId,
     learningItem,
     lessonTitle,
     onEdit,
@@ -23,6 +26,8 @@ export const LearningItemDetail = ({
     onEditContent,
     onDeleteContent,
 }) => {
+    const [copiedHomeworkLink, setCopiedHomeworkLink] = useState(false)
+
     if (!learningItem) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -38,6 +43,22 @@ export const LearningItemDetail = ({
         bg: 'bg-gray-50',
     }
     const TypeIcon = typeInfo.icon
+    const learningItemId = learningItem.learningItem?.learningItemId || learningItem.learningItemId
+    const isHomework = learningItem.learningItem?.type === 'HOMEWORK'
+    const homeworkLink = (courseId && lessonId && learningItemId)
+        ? `https://beeedu.vn/student/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}`
+        : ''
+
+    const handleCopyHomeworkLink = async () => {
+        if (!homeworkLink) return
+        try {
+            await navigator.clipboard.writeText(homeworkLink)
+            setCopiedHomeworkLink(true)
+            setTimeout(() => setCopiedHomeworkLink(false), 1800)
+        } catch (error) {
+            console.error('Copy homework link failed:', error)
+        }
+    }
 
     return (
         <div className="h-full flex flex-col">
@@ -107,6 +128,37 @@ export const LearningItemDetail = ({
                         <p className="text-sm text-foreground leading-relaxed">
                             {learningItem.learningItem.description}
                         </p>
+                    </div>
+                )}
+
+                {isHomework && homeworkLink && (
+                    <div className="p-4 bg-gray-50 rounded-lg border border-border space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Link2 className="w-4 h-4 text-muted-foreground" />
+                            <p className="text-sm font-medium text-foreground">Link làm bài tập về nhà</p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            <a
+                                href={homeworkLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-gray-900 hover:underline break-all"
+                            >
+                                {homeworkLink}
+                            </a>
+                            <button
+                                type="button"
+                                onClick={handleCopyHomeworkLink}
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border border-border bg-white hover:bg-gray-100 transition-colors"
+                                title="Sao chép link"
+                            >
+                                {copiedHomeworkLink ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+                                {copiedHomeworkLink ? 'Đã sao chép' : 'Sao chép link'}
+                            </button>
+                        </div>
+
+                        <QrCodeShare link={homeworkLink} />
                     </div>
                 )}
 
