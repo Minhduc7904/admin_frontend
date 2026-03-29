@@ -1,21 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { User, Trophy, RefreshCw, CheckCircle2, XCircle, BarChart2, RotateCcw } from 'lucide-react';
+import { User, Trophy, RefreshCw, CheckCircle2, XCircle, BarChart2, RotateCcw, Pencil, Trash2 } from 'lucide-react';
 import {
+    deleteCompetitionSubmitAsync,
     getAllCompetitionSubmitsAsync,
     regradeCompetitionSubmitAsync,
     selectCompetitionSubmits,
+    selectCompetitionSubmitLoadingDelete,
     selectCompetitionSubmitPagination,
     selectCompetitionSubmitLoadingGet,
     selectCompetitionSubmitLoadingRegrade,
 } from '../../competitionSubmit/store/competitionSubmitSlice';
+import { EditCompetitionSubmitPanel } from '../../competitionSubmit/components/EditCompetitionSubmitPanel';
 import {
     getCompetitionQuestionStatsAsync,
     selectCompetitionQuestionStats,
     selectCompetitionLoadingQuestionStats,
 } from '../store/competitionSlice';
 import { useSearch } from '../../../shared/hooks';
-import { SearchInput, Dropdown, Table } from '../../../shared/components/ui';
+import { SearchInput, Dropdown, Table, ConfirmModal } from '../../../shared/components/ui';
 import { Pagination } from '../../../shared/components/ui/Pagination';
 import { CompetitionSubmitDetail } from '../../competitionSubmit/components/CompetitionSubmitDetail';
 import { StackedBarChart, PercentPieChart } from '../../../shared/components/stat';
@@ -87,7 +90,10 @@ export const CompetitionLeaderboard = ({ competition }) => {
     const questionStats = useSelector(selectCompetitionQuestionStats);
     const loadingStats = useSelector(selectCompetitionLoadingQuestionStats);
     const loadingRegrade = useSelector(selectCompetitionSubmitLoadingRegrade);
+    const loadingDelete = useSelector(selectCompetitionSubmitLoadingDelete);
     const [regradingId, setRegradingId] = useState(null);
+    const [editingSubmit, setEditingSubmit] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     const [activeTab, setActiveTab] = useState('submits'); // 'submits' | 'stats'
     const [status, setStatus] = useState('');
@@ -219,22 +225,44 @@ export const CompetitionLeaderboard = ({ competition }) => {
             render: (s) => {
                 const id = s.competitionSubmitId ?? s.submitId;
                 const isRegrading = regradingId === id && loadingRegrade;
+                const isDeleting = deleteTarget?.id === id && loadingDelete;
                 return (
                     <div onClick={(e) => e.stopPropagation()}>
-                        <button
-                            title="Chấm lại"
-                            disabled={isRegrading}
-                            onClick={async () => {
-                                setRegradingId(id);
-                                await dispatch(regradeCompetitionSubmitAsync(id));
-                                setRegradingId(null);
-                                loadSubmits();
-                            }}
-                            className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 disabled:opacity-50 disabled:cursor-not-allowed truncate transition-colors"
-                        >
-                            <RotateCcw size={11} className={isRegrading ? 'animate-spin' : ''} />
-                            Chấm lại
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button
+                                title="Chỉnh sửa"
+                                onClick={() => setEditingSubmit(s)}
+                                className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 truncate transition-colors"
+                            >
+                                <Pencil size={11} />
+                            </button>
+                            <button
+                                title="Chấm lại"
+                                disabled={isRegrading}
+                                onClick={async () => {
+                                    setRegradingId(id);
+                                    await dispatch(regradeCompetitionSubmitAsync(id));
+                                    setRegradingId(null);
+                                    loadSubmits();
+                                }}
+                                className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 disabled:opacity-50 disabled:cursor-not-allowed truncate transition-colors"
+                            >
+                                <RotateCcw size={11} className={isRegrading ? 'animate-spin' : ''} />
+                            </button>
+                            <button
+                                title="Xóa"
+                                disabled={isDeleting}
+                                onClick={() => {
+                                    setDeleteTarget({
+                                        id,
+                                        studentName: s.student?.fullName,
+                                    });
+                                }}
+                                className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed truncate transition-colors"
+                            >
+                                <Trash2 size={11} className={isDeleting ? 'animate-pulse' : ''} />
+                            </button>
+                        </div>
                     </div>
                 );
             },
@@ -669,6 +697,39 @@ export const CompetitionLeaderboard = ({ competition }) => {
                 submitId={selectedSubmitId}
                 isOpen={!!selectedSubmitId}
                 onClose={() => setSelectedSubmitId(null)}
+            />
+
+            <EditCompetitionSubmitPanel
+                isOpen={!!editingSubmit}
+                submit={editingSubmit}
+                onClose={() => setEditingSubmit(null)}
+                onSuccess={loadSubmits}
+            />
+
+            <ConfirmModal
+                isOpen={!!deleteTarget}
+                onClose={() => {
+                    if (!loadingDelete) setDeleteTarget(null);
+                }}
+                onConfirm={async () => {
+                    if (!deleteTarget?.id) return;
+                    try {
+                        await dispatch(deleteCompetitionSubmitAsync(deleteTarget.id)).unwrap();
+                        setDeleteTarget(null);
+                        if (selectedSubmitId === deleteTarget.id) {
+                            setSelectedSubmitId(null);
+                        }
+                        loadSubmits();
+                    } catch {
+                        // Error notification is handled by async thunk helper.
+                    }
+                }}
+                title="Xóa bài nộp"
+                message={`Bạn có chắc chắn muốn xóa bài nộp #${deleteTarget?.id}${deleteTarget?.studentName ? ` của ${deleteTarget.studentName}` : ''}? Thao tác này không thể hoàn tác.`}
+                confirmText="Xóa"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={loadingDelete}
             />
         </div>
     );

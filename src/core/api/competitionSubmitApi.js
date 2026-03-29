@@ -57,6 +57,17 @@ export const competitionSubmitApi = {
         return axiosClient.post(API_ENDPOINTS.COMPETITION_SUBMITS.REGRADE(id));
     },
 
+    /**
+     * PUT /competition-submits/:id
+     * Cập nhật thông tin bài nộp cuộc thi.
+     * @param {number} id - Competition submit ID
+     * @param {Object} data - Dữ liệu cập nhật
+     * @returns {Promise}
+     */
+    update: (id, data) => {
+        return axiosClient.put(API_ENDPOINTS.COMPETITION_SUBMITS.UPDATE(id), data);
+    },
+
     /**     * DELETE /competition-submits/:id
      * Xoá bài nộp (admin only, ghi audit log)
      * @param {number} id - Competition submit ID

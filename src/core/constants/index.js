@@ -440,6 +440,7 @@ export const API_ENDPOINTS = {
   COMPETITION_SUBMITS: {
     LIST: "/competition-submits",
     DETAIL: (id) => `/competition-submits/${id}`,
+    UPDATE: (id) => `/competition-submits/${id}`,
     FULL_DETAIL: (id) => `/competition-submits/${id}/detail`,
     REGRADE: (id) => `/competition-submits/${id}/regrade`,
     DELETE: (id) => `/competition-submits/${id}`,

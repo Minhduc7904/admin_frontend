@@ -18,6 +18,7 @@ const initialState = {
     loadingGetById: false,
     loadingGetDetail: false,
     loadingRegrade: false,
+    loadingUpdate: false,
     loadingDelete: false,
     error: null,
     filters: {
@@ -102,6 +103,20 @@ export const deleteCompetitionSubmitAsync = createAsyncThunk(
                 successTitle: 'Xóa bài nộp thành công',
                 successMessage: 'Bài nộp đã được xóa khỏi hệ thống',
                 errorTitle: 'Xóa bài nộp thất bại',
+            }
+        );
+    }
+);
+
+export const updateCompetitionSubmitAsync = createAsyncThunk(
+    'competitionSubmit/update',
+    async ({ id, data }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => competitionSubmitApi.update(id, data),
+            thunkAPI,
+            {
+                successTitle: 'Cập nhật bài nộp thành công',
+                errorTitle: 'Cập nhật bài nộp thất bại',
             }
         );
     }
@@ -211,6 +226,52 @@ const competitionSubmitSlice = createSlice({
                 state.loadingRegrade = false;
                 state.error = action.payload;
             })
+            /* ── Update ───────────────────────────────────────────── */
+            .addCase(updateCompetitionSubmitAsync.pending, (state) => {
+                state.loadingUpdate = true;
+                state.error = null;
+            })
+            .addCase(updateCompetitionSubmitAsync.fulfilled, (state, action) => {
+                state.loadingUpdate = false;
+                const updatedSubmit = action.payload.data;
+                const updatedSubmitId = updatedSubmit?.competitionSubmitId ?? updatedSubmit?.submitId;
+
+                if (
+                    updatedSubmitId &&
+                    (state.currentSubmit?.competitionSubmitId ?? state.currentSubmit?.submitId) === updatedSubmitId
+                ) {
+                    state.currentSubmit = {
+                        ...state.currentSubmit,
+                        ...updatedSubmit,
+                    };
+                }
+
+                if (
+                    updatedSubmitId &&
+                    (state.currentSubmitDetail?.competitionSubmitId ?? state.currentSubmitDetail?.submitId) === updatedSubmitId
+                ) {
+                    state.currentSubmitDetail = {
+                        ...state.currentSubmitDetail,
+                        ...updatedSubmit,
+                    };
+                }
+
+                const idx = state.submits.findIndex(
+                    (s) => (s.competitionSubmitId ?? s.submitId) === updatedSubmitId
+                );
+                if (idx !== -1) {
+                    state.submits[idx] = {
+                        ...state.submits[idx],
+                        ...updatedSubmit,
+                    };
+                }
+
+                state.error = null;
+            })
+            .addCase(updateCompetitionSubmitAsync.rejected, (state, action) => {
+                state.loadingUpdate = false;
+                state.error = action.payload;
+            })
             /* ── Delete ───────────────────────────────────────────── */
             .addCase(deleteCompetitionSubmitAsync.pending, (state) => {
                 state.loadingDelete = true;
@@ -218,11 +279,15 @@ const competitionSubmitSlice = createSlice({
             })
             .addCase(deleteCompetitionSubmitAsync.fulfilled, (state, action) => {
                 state.loadingDelete = false;
+                const deletedId = action.meta.arg;
                 state.submits = state.submits.filter(
-                    (s) => s.submitId !== action.meta.arg
+                    (s) => (s.competitionSubmitId ?? s.submitId) !== deletedId
                 );
-                if (state.currentSubmit?.submitId === action.meta.arg) {
+                if ((state.currentSubmit?.competitionSubmitId ?? state.currentSubmit?.submitId) === deletedId) {
                     state.currentSubmit = null;
+                }
+                if ((state.currentSubmitDetail?.competitionSubmitId ?? state.currentSubmitDetail?.submitId) === deletedId) {
+                    state.currentSubmitDetail = null;
                 }
                 state.error = null;
             })
@@ -253,6 +318,7 @@ export const selectCompetitionSubmitLoadingGetById = (state) => state.competitio
 export const selectCompetitionSubmitLoadingGetDetail = (state) => state.competitionSubmit.loadingGetDetail;
 export const selectCurrentCompetitionSubmitDetail = (state) => state.competitionSubmit.currentSubmitDetail;
 export const selectCompetitionSubmitLoadingRegrade = (state) => state.competitionSubmit.loadingRegrade;
+export const selectCompetitionSubmitLoadingUpdate = (state) => state.competitionSubmit.loadingUpdate;
 export const selectCompetitionSubmitLoadingDelete = (state) => state.competitionSubmit.loadingDelete;
 export const selectCompetitionSubmitError = (state) => state.competitionSubmit.error;
 
