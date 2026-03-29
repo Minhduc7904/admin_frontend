@@ -1,33 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Camera, Loader } from 'lucide-react';
 import {
-    attachMediaAsync,
-    detachMediaByEntityAsync
-} from '../../mediaUsage/store/mediaUsageSlice';
-import {
     selectProfile,
-    getAvatarUsagesAsync,
-    getAvatarViewUrlAsync,
-    selectAvatarUsages,
-    selectAvatarLoading,
-    selectAvatarViewUrl,
-    selectAvatarViewUrlLoading
+    uploadAvatarAsync,
+    selectAvatarUploading,
 } from '../store/profileSlice';
-import { addNotification } from '../../notification/store/notificationSlice';
-import { MediaPickerModal } from '../../media/components';
 
 export const ProfileAvatar = ({ size = 'large' }) => {
     const dispatch = useDispatch();
     const profile = useSelector(selectProfile);
-    const avatarUsages = useSelector(selectAvatarUsages);
-    const loadingAvatar = useSelector(selectAvatarLoading);
-    const avatarViewUrl = useSelector(selectAvatarViewUrl);
-    const loadingViewUrlLoading = useSelector(selectAvatarViewUrlLoading);
+    const uploading = useSelector(selectAvatarUploading);
+    const inputRef = useRef(null);
 
-    const [uploading, setUploading] = useState(false);
     const [hovering, setHovering] = useState(false);
-    const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+    const avatarUrl = profile?.avatarUrl || profile?.avatarurl || null;
 
     // Size configurations
     const sizeClasses = {
@@ -35,23 +22,6 @@ export const ProfileAvatar = ({ size = 'large' }) => {
         medium: 'w-24 h-24 text-3xl',
         large: 'w-32 h-32 text-4xl'
     };
-
-    // Fetch avatar when component mounts or profile changes
-    useEffect(() => {
-        if (profile?.userId) {
-            dispatch(getAvatarUsagesAsync(profile.userId));
-        }
-    }, [dispatch, profile?.userId]);
-
-    // Load download URL when avatar usages change
-    useEffect(() => {
-        if (avatarUsages.data && avatarUsages.data.length > 0) {
-            const firstAvatar = avatarUsages.data[0];
-            if (firstAvatar?.mediaId) {
-                dispatch(getAvatarViewUrlAsync(firstAvatar.mediaId));
-            }
-        }
-    }, [dispatch, avatarUsages]);
 
     const getAvatarText = (name) => {
         if (!name) return 'U';
@@ -69,62 +39,24 @@ export const ProfileAvatar = ({ size = 'large' }) => {
         return profile?.username || 'User';
     };
 
-    const handleMediaSelect = async (mediaId) => {
-        if (!profile?.userId) return;
-
-        setUploading(true);
-        setIsMediaPickerOpen(false);
+    const handleFileChange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
 
         try {
-            // Step 1: Detach old avatar (if exists)
-            if (avatarUsages.data.length > 0) {
-                await dispatch(detachMediaByEntityAsync({
-                    entityType: 'AVATAR',
-                    entityId: profile.userId,
-                })).unwrap();
-            }
-
-            // Step 2: Attach new avatar
-            await dispatch(attachMediaAsync({
-                mediaId,
-                entityType: 'AVATAR',
-                entityId: profile.userId,
-                fieldName: 'avatar',
-                visibility: 'PUBLIC',
-            })).unwrap();
-
-            // Step 3: Refresh avatar
-            dispatch(getAvatarUsagesAsync(profile.userId));
-
-            dispatch(addNotification({
-                type: 'success',
-                title: 'Cập nhật avatar thành công',
-                message: 'Ảnh đại diện của bạn đã được cập nhật'
-            }));
-
+            await dispatch(uploadAvatarAsync(file)).unwrap();
         } catch (error) {
             console.error('Failed to update avatar:', error);
-            dispatch(addNotification({
-                type: 'error',
-                title: 'Cập nhật avatar thất bại',
-                message: 'Vui lòng thử lại sau'
-            }));
         } finally {
-            setUploading(false);
+            event.target.value = '';
         }
     };
 
     const handleAvatarClick = () => {
-        setIsMediaPickerOpen(true);
+        if (!uploading) {
+            inputRef.current?.click();
+        }
     };
-
-    if (loadingAvatar && !avatarViewUrl) {
-        return (
-            <div className={`${sizeClasses[size]} rounded-full bg-gray-200 flex items-center justify-center`}>
-                <Loader className="animate-spin text-gray-400" size={size === 'large' ? 32 : 24} />
-            </div>
-        );
-    }
 
     return (
         <div className="relative">
@@ -134,9 +66,9 @@ export const ProfileAvatar = ({ size = 'large' }) => {
                 onMouseLeave={() => setHovering(false)}
                 onClick={handleAvatarClick}
             >
-                {avatarViewUrl ? (
+                {avatarUrl ? (
                     <img
-                        src={avatarViewUrl}
+                        src={avatarUrl}
                         alt={getFullName()}
                         className="w-full h-full rounded-full object-cover"
                     />
@@ -161,18 +93,16 @@ export const ProfileAvatar = ({ size = 'large' }) => {
                 )}
             </div>
 
+            <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+            />
+
             {/* Status indicator */}
             <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
-
-            {/* Media Picker Modal */}
-            <MediaPickerModal
-                isOpen={isMediaPickerOpen}
-                onClose={() => setIsMediaPickerOpen(false)}
-                onSave={handleMediaSelect}
-                selectedMediaId={avatarUsages.data?.[0]?.mediaId || null}
-                title="Chọn ảnh đại diện"
-                type="IMAGE"
-            />
         </div>
     );
 };

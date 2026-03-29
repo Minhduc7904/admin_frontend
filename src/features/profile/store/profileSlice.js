@@ -1,15 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { profileApi, mediaApi, mediaUsageApi } from "../../../core/api";
+import { profileApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 
 const initialState = {
   profile: null,
   loading: false,
   error: null,
-  avatarUsages: [],
-  loadingAvatar: false,
-  avatarViewUrl: null,
-  loadingAvatarViewUrl: false,
+  uploadingAvatar: false,
   permissions: [],
   roles: [],
 };
@@ -36,25 +33,17 @@ export const updateProfileAsync = createAsyncThunk(
   }
 );
 
-export const getAvatarUsagesAsync = createAsyncThunk(
-  "profile/getAvatarUsages",
-  async (userId, thunkAPI) => {
+export const uploadAvatarAsync = createAsyncThunk(
+  "profile/uploadAvatar",
+  async (file, thunkAPI) => {
     return handleAsyncThunk(
-      () => mediaUsageApi.getByEntity("AVATAR", userId),
-      thunkAPI, {
-      showSuccess: false,
-    });
-  }
-);
-
-export const getAvatarViewUrlAsync = createAsyncThunk(
-  "profile/getAvatarViewUrl",
-  async (mediaId, thunkAPI) => {
-    return handleAsyncThunk(
-      () => mediaApi.getMyViewUrl(mediaId, 3600),
-      thunkAPI, {
-      showSuccess: false,
-    });
+      () => profileApi.uploadAvatar(file),
+      thunkAPI,
+      {
+        successTitle: "Cập nhật avatar thành công",
+        errorTitle: "Cập nhật avatar thất bại",
+      }
+    );
   }
 );
 
@@ -68,12 +57,6 @@ const profileSlice = createSlice({
     },
     setProfile: (state, action) => {
       state.profile = action.payload;
-    },
-    setAvatarViewUrl: (state, action) => {
-      state.avatarViewUrl = action.payload;
-    },
-    setLoadingAvatarViewUrl: (state, action) => {
-      state.loadingAvatarViewUrl = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -122,30 +105,22 @@ const profileSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(getAvatarUsagesAsync.pending, (state) => {
-        state.loadingAvatar = true;
+      .addCase(uploadAvatarAsync.pending, (state) => {
+        state.uploadingAvatar = true;
         state.error = null;
       })
-      .addCase(getAvatarUsagesAsync.fulfilled, (state, action) => {
-        state.loadingAvatar = false;
-        state.avatarUsages = action.payload.data;
+      .addCase(uploadAvatarAsync.fulfilled, (state, action) => {
+        state.uploadingAvatar = false;
+        const avatarData = action.payload?.data || {};
+        const nextAvatarUrl =
+          avatarData.viewUrl || avatarData.url || avatarData.downloadUrl || null;
+        if (state.profile && nextAvatarUrl) {
+          state.profile.avatarUrl = nextAvatarUrl;
+        }
         state.error = null;
       })
-      .addCase(getAvatarUsagesAsync.rejected, (state, action) => {
-        state.loadingAvatar = false;
-        state.error = action.payload;
-      })
-      .addCase(getAvatarViewUrlAsync.pending, (state) => {
-        state.loadingAvatarViewUrl = true;
-        state.error = null;
-      })
-      .addCase(getAvatarViewUrlAsync.fulfilled, (state, action) => {
-        state.loadingAvatarViewUrl = false;
-        state.avatarViewUrl = action.payload.data.viewUrl;
-        state.error = null;
-      })
-      .addCase(getAvatarViewUrlAsync.rejected, (state, action) => {
-        state.loadingAvatarViewUrl = false;
+      .addCase(uploadAvatarAsync.rejected, (state, action) => {
+        state.uploadingAvatar = false;
         state.error = action.payload;
       });
   },
@@ -156,10 +131,7 @@ export const { clearProfile, setProfile } = profileSlice.actions;
 // Selectors
 export const selectProfile = (state) => state.profile.profile;
 export const selectProfileLoading = (state) => state.profile.loading;
-export const selectAvatarUsages = (state) => state.profile.avatarUsages;
-export const selectAvatarLoading = (state) => state.profile.loadingAvatar;
-export const selectAvatarViewUrl = (state) => state.profile.avatarViewUrl;
-export const selectAvatarViewUrlLoading = (state) => state.profile.loadingAvatarViewUrl;
+export const selectAvatarUploading = (state) => state.profile.uploadingAvatar;
 export const selectProfileError = (state) => state.profile.error;
 export const selectProfilePermissions = (state) => state.profile.permissions;
 export const selectProfileRoles = (state) => state.profile.roles;

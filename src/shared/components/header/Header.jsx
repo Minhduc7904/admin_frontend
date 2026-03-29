@@ -4,13 +4,7 @@ import { Menu, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
 import { logoutAsync } from '../../../features/auth/store/authSlice';
 import { NotificationBell } from '../../../features/notification/components';
-import {
-    clearProfile,
-    getAvatarUsagesAsync,
-    getAvatarViewUrlAsync,
-    selectAvatarUsages,
-    selectAvatarViewUrl
-} from '../../../features/profile/store/profileSlice';
+import { clearProfile } from '../../../features/profile/store/profileSlice';
 import { ROUTES } from '../../../core/constants';
 
 export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
@@ -19,24 +13,7 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { profile } = useAppSelector((state) => state.profile);
-    const avatarUsages = useAppSelector(selectAvatarUsages);
-    const avatarViewUrl = useAppSelector(selectAvatarViewUrl);
-    // Fetch avatar when profile changes
-    useEffect(() => {
-        if (profile?.userId) {
-            dispatch(getAvatarUsagesAsync(profile.userId));
-        }
-    }, [dispatch, profile?.userId]);
-
-    // Load download URL when avatar usages change
-    useEffect(() => {
-        if (avatarUsages?.data && avatarUsages.data.length > 0) {
-            const firstAvatar = avatarUsages.data[0];
-            if (firstAvatar?.mediaId) {
-                dispatch(getAvatarViewUrlAsync(firstAvatar.mediaId));
-            }
-        }
-    }, [dispatch, avatarUsages]);
+    const avatarUrl = profile?.avatarUrl || profile?.avatarurl || null;
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -89,9 +66,9 @@ export const Header = ({ onMenuClick, title = 'Dashboard' }) => {
                         >
                             {/* Avatar */}
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white overflow-hidden">
-                                {avatarViewUrl ? (
+                                {avatarUrl ? (
                                     <img
-                                        src={avatarViewUrl}
+                                        src={avatarUrl}
                                         alt={profile?.fullName || 'Avatar'}
                                         className="w-full h-full object-cover"
                                     />

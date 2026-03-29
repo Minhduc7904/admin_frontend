@@ -18,4 +18,18 @@ export const profileApi = {
   updateProfile: (data) => {
     return axiosClient.put(API_ENDPOINTS.PROFILE.UPDATE, data);
   },
+
+  /**
+   * Upload admin avatar
+   * @param {File} file - Avatar file
+   * @returns {Promise}
+   */
+  uploadAvatar: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return axiosClient.post(API_ENDPOINTS.PROFILE.UPLOAD_AVATAR, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
 };

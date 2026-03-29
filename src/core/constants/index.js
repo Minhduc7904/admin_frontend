@@ -99,6 +99,7 @@ export const API_ENDPOINTS = {
   PROFILE: {
     GET: "admin/profile",
     UPDATE: "admin/profile",
+    UPLOAD_AVATAR: "/admin/profile/avatar",
   },
   USERS: {
     LIST: "/users",
@@ -468,5 +469,6 @@ export const HTTP_STATUS = {
 };
 
 export * from "./visibility"
+export * from "./exam-constants"
 export * from "./options"
 export * from "./permission/permission.codes"

@@ -5,7 +5,7 @@ import { Input, Button, Dropdown, YoutubeInput } from "../../../shared/component
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
 import { GRADE_OPTIONS } from "../../../core/constants/grade-constants";
 import { MarkdownEditorPreview } from "../../../shared/components/markdown/MarkdownEditorPreview";
-import { VISIBILITY_OPTIONS, VISIBILITY } from "../../../core/constants";
+import { TYPE_OF_EXAM_OPTIONS, VISIBILITY_OPTIONS, VISIBILITY } from "../../../core/constants";
 
 export const AddExam = ({ onClose, loadExams }) => {
     const dispatch = useDispatch();
@@ -14,14 +14,13 @@ export const AddExam = ({ onClose, loadExams }) => {
     
     const [formData, setFormData] = useState({
         title: '',
+        typeOfExam: '',
         grade: '',
         subjectId: '',
         description: '',
         visibility: VISIBILITY.DRAFT,
         solutionYoutubeUrl: '',
     });
-
-    const [selectedSubject, setSelectedSubject] = useState(null);
 
     const visibilityOptions = VISIBILITY_OPTIONS;
 
@@ -54,6 +53,10 @@ export const AddExam = ({ onClose, loadExams }) => {
             errors.visibility = 'Vui lòng chọn trạng thái';
         }
 
+        if (!formData.typeOfExam) {
+            errors.typeOfExam = 'Vui lòng chọn loại đề thi';
+        }
+
         if (formData.description && formData.description.trim().length > 2000) {
             errors.description = 'Mô tả không được quá 2000 ký tự';
         }
@@ -73,6 +76,7 @@ export const AddExam = ({ onClose, loadExams }) => {
 
         const data = {
             title: formData.title.trim(),
+            typeOfExam: formData.typeOfExam,
             grade: parseInt(formData.grade),
             visibility: formData.visibility,
             description: formData.description?.trim() || undefined,
@@ -106,7 +110,7 @@ export const AddExam = ({ onClose, loadExams }) => {
                 </div>
 
                 {/* Grade and Visibility */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <Dropdown
                             label="Khối lớp"
@@ -115,6 +119,16 @@ export const AddExam = ({ onClose, loadExams }) => {
                             onChange={(value) => setFormData(prev => ({ ...prev, grade: value }))}
                             options={GRADE_OPTIONS}
                             error={errors.grade}
+                        />
+                    </div>
+                    <div>
+                        <Dropdown
+                            label="Loại đề thi"
+                            required={true}
+                            value={formData.typeOfExam}
+                            onChange={(value) => setFormData(prev => ({ ...prev, typeOfExam: value }))}
+                            options={TYPE_OF_EXAM_OPTIONS}
+                            error={errors.typeOfExam}
                         />
                     </div>
                     <div>
@@ -136,7 +150,6 @@ export const AddExam = ({ onClose, loadExams }) => {
                         placeholder="Tìm kiếm môn học..."
                         value={formData.subjectId}
                         onSelect={(subject) => {
-                            setSelectedSubject(subject);
                             setFormData(prev => ({
                                 ...prev,
                                 subjectId: subject?.subjectId || ''

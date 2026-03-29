@@ -1,5 +1,6 @@
 import { Eye, Edit, Trash2, FileText, Youtube } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
+import { TYPE_OF_EXAM_LABELS } from '../../../core/constants';
 
 export const ExamTable = ({ exams, onView, onEdit, onDelete, loading, showSubject = true }) => {
     const getVisibilityBadge = (visibility) => {
@@ -66,6 +67,19 @@ export const ExamTable = ({ exams, onView, onEdit, onDelete, loading, showSubjec
                 exam.grade ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                         Khối {exam.grade}
+                    </span>
+                ) : (
+                    <span className="italic text-foreground-lighter">-</span>
+                )
+            )
+        },
+        {
+            key: 'typeOfExam',
+            label: 'Loại đề thi',
+            render: (exam) => (
+                exam.typeOfExam ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                        {TYPE_OF_EXAM_LABELS[exam.typeOfExam] || exam.typeOfExam}
                     </span>
                 ) : (
                     <span className="italic text-foreground-lighter">-</span>
