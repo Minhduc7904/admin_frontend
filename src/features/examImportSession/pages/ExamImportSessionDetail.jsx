@@ -38,6 +38,7 @@ export const ExamImportSessionDetail = () => {
         title: '',
         description: '',
         grade: '',
+        typeOfExam: '',
         subjectId: '',
         visibility: VISIBILITY.PRIVATE,
         solutionYoutubeUrl: '',
@@ -68,6 +69,7 @@ export const ExamImportSessionDetail = () => {
                 title: tempExam.title || '',
                 description: tempExam.description || '',
                 grade: tempExam.grade?.toString() || '',
+                typeOfExam: tempExam.typeOfExam || '',
                 subjectId: tempExam.subjectId?.toString() || '',
                 visibility: tempExam.visibility || VISIBILITY.PRIVATE,
                 solutionYoutubeUrl: tempExam.solutionYoutubeUrl || '',
@@ -102,6 +104,10 @@ export const ExamImportSessionDetail = () => {
             newErrors.grade = 'Khối phải từ 1 đến 12';
         }
 
+        if (!data.typeOfExam) {
+            newErrors.typeOfExam = 'Vui lòng chọn loại đề thi';
+        }
+
         if (!data.subjectId) {
             newErrors.subjectId = 'Môn học không được để trống';
         }
@@ -121,6 +127,7 @@ export const ExamImportSessionDetail = () => {
             title: formData.title.trim(),
             description: formData.description?.trim() || undefined,
             grade: formData.grade ? Number(formData.grade) : undefined,
+            typeOfExam: formData.typeOfExam,
             subjectId: formData.subjectId ? Number(formData.subjectId) : undefined,
             visibility: formData.visibility,
             solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || undefined,
@@ -137,6 +144,7 @@ export const ExamImportSessionDetail = () => {
                 title: '',
                 description: '',
                 grade: '',
+                typeOfExam: '',
                 subjectId: '',
                 visibility: 'PRIVATE',
                 solutionYoutubeUrl: '',
@@ -157,6 +165,7 @@ export const ExamImportSessionDetail = () => {
             title: formData.title.trim(),
             description: formData.description?.trim() || undefined,
             grade: formData.grade ? Number(formData.grade) : undefined,
+            typeOfExam: formData.typeOfExam,
             subjectId: formData.subjectId ? Number(formData.subjectId) : undefined,
             visibility: formData.visibility,
             solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || undefined,
@@ -174,6 +183,7 @@ export const ExamImportSessionDetail = () => {
                 title: '',
                 description: '',
                 grade: '',
+                typeOfExam: '',
                 subjectId: '',
                 visibility: VISIBILITY.PRIVATE,
                 solutionYoutubeUrl: '',
@@ -192,6 +202,7 @@ export const ExamImportSessionDetail = () => {
             title: '',
             description: '',
             grade: '',
+            typeOfExam: '',
             subjectId: '',
             visibility: VISIBILITY.PRIVATE,
             solutionYoutubeUrl: '',
@@ -283,6 +294,12 @@ export const ExamImportSessionDetail = () => {
                             setFormData(prev => ({ ...prev, grade: value }));
                             if (errors.grade) {
                                 setErrors(prev => ({ ...prev, grade: '' }));
+                            }
+                        }}
+                        onTypeOfExamChange={(value) => {
+                            setFormData(prev => ({ ...prev, typeOfExam: value }));
+                            if (errors.typeOfExam) {
+                                setErrors(prev => ({ ...prev, typeOfExam: '' }));
                             }
                         }}
                         onVisibilityChange={(value) => {

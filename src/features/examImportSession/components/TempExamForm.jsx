@@ -3,7 +3,7 @@ import { Input, Button, Dropdown, Textarea } from '../../../shared/components';
 import { SubjectSearchSelect } from '../../subject/components/SubjectSearchSelect';
 import { GRADE_OPTIONS } from '../../../core/constants/grade-constants';
 
-import { VISIBILITY_OPTIONS } from '../../../core/constants';
+import { TYPE_OF_EXAM_OPTIONS, VISIBILITY_OPTIONS } from '../../../core/constants';
 
 export const TempExamForm = ({ 
     formData, 
@@ -14,6 +14,7 @@ export const TempExamForm = ({
     errors = {},
     isEditing = false,
     onGradeChange,
+    onTypeOfExamChange,
     onVisibilityChange,
     onSubjectSelect,
 }) => {
@@ -51,7 +52,7 @@ export const TempExamForm = ({
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <Dropdown
                             label="Khối"
@@ -59,6 +60,17 @@ export const TempExamForm = ({
                             onChange={onGradeChange}
                             options={GRADE_OPTIONS}
                             error={errors.grade}
+                        />
+                    </div>
+
+                    <div>
+                        <Dropdown
+                            label="Loại đề thi"
+                            required={true}
+                            value={formData.typeOfExam}
+                            onChange={onTypeOfExamChange}
+                            options={TYPE_OF_EXAM_OPTIONS}
+                            error={errors.typeOfExam}
                         />
                     </div>
 

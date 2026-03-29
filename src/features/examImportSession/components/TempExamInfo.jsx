@@ -14,7 +14,7 @@ import {
     selectMediaUsageLoadingAttach,
     selectMediaUsageLoadingDetach,
 } from '../../mediaUsage/store/mediaUsageSlice';
-import { VISIBILITY_LABELS } from '../../../core/constants';
+import { TYPE_OF_EXAM_LABELS, VISIBILITY_LABELS } from '../../../core/constants';
 export const TempExamInfo = ({ tempExam, onEdit, onMediaClick, onYoutubeClick }) => {
     const dispatch = useDispatch();
     const [modalState, setModalState] = useState({
@@ -218,6 +218,17 @@ export const TempExamInfo = ({ tempExam, onEdit, onMediaClick, onYoutubeClick })
                             Môn học
                         </label>
                         <p className="text-foreground mt-1">{tempExam.subjectName}</p>
+                    </div>
+                )}
+
+                {tempExam.typeOfExam && (
+                    <div>
+                        <label className="text-sm font-medium text-foreground-light">
+                            Loại đề thi
+                        </label>
+                        <p className="text-foreground mt-1">
+                            {TYPE_OF_EXAM_LABELS[tempExam.typeOfExam] || tempExam.typeOfExam}
+                        </p>
                     </div>
                 )}
 
