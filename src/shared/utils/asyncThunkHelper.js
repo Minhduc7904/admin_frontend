@@ -22,6 +22,14 @@ export const handleAsyncThunk = async (asyncFn, thunkAPI, messages = {}) => {
 
   try {
     const response = await asyncFn();
+
+    // Some APIs may return HTTP 200 but semantic failure with success: false
+    if (response?.data && typeof response.data === 'object' && response.data.success === false) {
+      const apiError = new Error(response.data.message || 'Có lỗi xảy ra');
+      apiError.response = { data: response.data };
+      throw apiError;
+    }
+
     if (showSuccess) {
       // Evaluate successMessage if it's a function
       const message = typeof successMessage === 'function'
@@ -38,7 +46,11 @@ export const handleAsyncThunk = async (asyncFn, thunkAPI, messages = {}) => {
 
     return response.data ? response.data : response;
   } catch (error) {
-    const errorMessage = error.message || 'Có lỗi xảy ra';
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Có lỗi xảy ra';
+
     dispatch(addNotification({
       type: 'error',
       title: errorTitle,
