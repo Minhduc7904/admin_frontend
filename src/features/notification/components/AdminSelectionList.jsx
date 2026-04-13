@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
 import { Input, Checkbox } from '../../../shared/components/ui'
 import { Spinner } from '../../../shared/components/loading'
+import { Pagination } from '../../../shared/components/ui/Pagination'
 
 /* ======================================================
    SUB COMPONENTS (INTERNAL)
@@ -47,12 +48,6 @@ const SelectAllBar = ({ isAllSelected, isSomeSelected, onToggle }) => (
 )
 
 const AdminRow = ({ admin, isSelected, onToggle, isLast }) => {
-    const handleClick = (e) => {
-        // Prevent double toggle when clicking on checkbox
-        if (e.target.type === 'checkbox') return;
-        onToggle();
-    };
-
     return (
         <div
             className={`
@@ -61,13 +56,18 @@ const AdminRow = ({ admin, isSelected, onToggle, isLast }) => {
                 ${!isLast ? 'border-b border-border' : ''}
                 ${isSelected ? 'bg-primary/5' : 'hover:bg-gray-50'}
             `}
-            onClick={handleClick}
+            onClick={onToggle}
         >
             {/* Checkbox */}
-            <Checkbox
-                checked={isSelected}
-                onChange={onToggle}
-            />
+            <div
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+            >
+                <Checkbox
+                    checked={isSelected}
+                    onChange={onToggle}
+                />
+            </div>
 
             {/* Main content */}
             <div className="flex-1 min-w-0">
@@ -161,17 +161,58 @@ export const AdminSelectionList = ({
     loading = false,
 }) => {
     const [searchTerm, setSearchTerm] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(10)
+
+    const normalizeText = (value = '') =>
+        String(value)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D')
+            .toLowerCase()
+            .trim()
+
+    const normalizeCompact = (value = '') => normalizeText(value).replace(/\s+/g, '')
+
     const filteredAdmins = useMemo(() => {
         if (!searchTerm.trim()) return admins
-        const term = searchTerm.toLowerCase()
+        const normalizedTerm = normalizeText(searchTerm)
+        const compactTerm = normalizeCompact(searchTerm)
 
-        return admins.filter((admin) =>
-            admin?.fullName?.toLowerCase().includes(term) ||
-            admin?.user?.username?.toLowerCase().includes(term) ||
-            admin?.user?.email?.toLowerCase().includes(term) ||
-            admin?.role?.name?.toLowerCase().includes(term)
-        )
+        return admins.filter((admin) => {
+            const fullName = admin?.fullName || ''
+            const normalizedFullName = normalizeText(fullName)
+            const compactFullName = normalizeCompact(fullName)
+
+            const username = normalizeText(admin?.user?.username || '')
+            const email = normalizeText(admin?.user?.email || '')
+            const roleName = normalizeText(admin?.role?.name || '')
+
+            return (
+                normalizedFullName.includes(normalizedTerm) ||
+                compactFullName.includes(compactTerm) ||
+                username.includes(normalizedTerm) ||
+                email.includes(normalizedTerm) ||
+                roleName.includes(normalizedTerm)
+            )
+        })
     }, [admins, searchTerm])
+
+    const totalPages = useMemo(() => {
+        if (filteredAdmins.length === 0) return 1
+        return Math.ceil(filteredAdmins.length / itemsPerPage)
+    }, [filteredAdmins.length, itemsPerPage])
+
+    const safeCurrentPage = useMemo(() => {
+        return Math.min(currentPage, totalPages)
+    }, [currentPage, totalPages])
+
+    const paginatedAdmins = useMemo(() => {
+        const start = (safeCurrentPage - 1) * itemsPerPage
+        const end = start + itemsPerPage
+        return filteredAdmins.slice(start, end)
+    }, [filteredAdmins, safeCurrentPage, itemsPerPage])
 
     const isAllSelected = useMemo(() => {
         if (filteredAdmins.length === 0) return false
@@ -227,7 +268,10 @@ export const AdminSelectionList = ({
 
                 <AdminSearch
                     value={searchTerm}
-                    onChange={setSearchTerm}
+                    onChange={(value) => {
+                        setSearchTerm(value)
+                        setCurrentPage(1)
+                    }}
                 />
 
                 {filteredAdmins.length > 0 && (
@@ -242,12 +286,26 @@ export const AdminSelectionList = ({
             <div className="max-h-[600px] overflow-y-auto">
                 <AdminListContent
                     admins={admins}
-                    filteredAdmins={filteredAdmins}
+                    filteredAdmins={paginatedAdmins}
                     selectedAdminIds={selectedAdminIds}
                     searchTerm={searchTerm}
                     onToggleAdmin={handleToggleAdmin}
                 />
             </div>
+
+            {filteredAdmins.length > 0 && (
+                <Pagination
+                    currentPage={safeCurrentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={(value) => {
+                        setItemsPerPage(Number(value))
+                        setCurrentPage(1)
+                    }}
+                    totalItems={filteredAdmins.length}
+                />
+            )}
         </div>
     )
 }

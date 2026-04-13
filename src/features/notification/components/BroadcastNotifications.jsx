@@ -22,6 +22,21 @@ const NotifyAllUsers = () => {
     );
 }
 
+const NotifyAllUnpaidTuitionStudents = () => {
+    return (
+        <div className="bg-white border border-border rounded-sm p-6">
+            <div className="text-center text-foreground-light">
+                <p className="mb-2 text-lg font-semibold">Gửi đến tất cả học sinh chưa đóng học phí</p>
+                <p className="text-sm">
+                    Thông báo sẽ được gửi đến toàn bộ học sinh chưa hoàn tất học phí.
+                    <br />
+                    Không cần chọn học sinh cụ thể.
+                </p>
+            </div>
+        </div>
+    );
+}
+
 export const BroadcastNotifications = ({
     title,
     description,
@@ -128,6 +143,12 @@ export const BroadcastNotifications = ({
                     {recipientType === 'ALL' && (
                         <IfAllowed allowed={hasNotifyAllAccess}>
                             <NotifyAllUsers />
+                        </IfAllowed>
+                    )}
+
+                    {recipientType === 'UNPAID_TUITION_STUDENTS' && (
+                        <IfAllowed allowed={hasGetAllStudentAccess}>
+                            <NotifyAllUnpaidTuitionStudents />
                         </IfAllowed>
                     )}
                 </div>

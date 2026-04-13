@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
 import { Input, Checkbox, Dropdown } from '../../../shared/components/ui'
 import { Spinner } from '../../../shared/components/loading'
+import { Pagination } from '../../../shared/components/ui/Pagination'
 
 /* ======================================================
    SUB COMPONENTS (INTERNAL)
@@ -75,10 +76,15 @@ const StudentRow = ({ studentItem, isSelected, onToggle, isLast }) => {
             onClick={onToggle}
         >
             {/* Checkbox */}
-            <Checkbox
-                checked={isSelected}
-                onChange={onToggle}
-            />
+            <div
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+            >
+                <Checkbox
+                    checked={isSelected}
+                    onChange={onToggle}
+                />
+            </div>
 
             {/* Main content */}
             <div className="flex-1 min-w-0">
@@ -179,18 +185,57 @@ export const StudentSelectionList = ({
     gradeOptions,
 }) => {
     const [searchTerm, setSearchTerm] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(10)
+
+    const normalizeText = (value = '') =>
+        String(value)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D')
+            .toLowerCase()
+            .trim()
+
+    const normalizeCompact = (value = '') => normalizeText(value).replace(/\s+/g, '')
+
     const filteredStudents = useMemo(() => {
         if (!searchTerm.trim()) return students
-        const term = searchTerm.toLowerCase()
+        const normalizedTerm = normalizeText(searchTerm)
+        const compactTerm = normalizeCompact(searchTerm)
+        return students.filter((item) => {
+            const student = item?.student || item
+            const fullName = student?.fullName || ''
+            const normalizedFullName = normalizeText(fullName)
+            const compactFullName = normalizeCompact(fullName)
 
-        return students.filter(({ student }) =>
-            student?.fullName?.toLowerCase().includes(term) ||
-            student?.email?.toLowerCase().includes(term) ||
-            student?.studentPhone?.includes(term) ||
-            student?.parentPhone?.includes(term) ||
-            student?.school?.toLowerCase().includes(term)
-        )
+            const studentPhone = normalizeText(student?.studentPhone || '')
+            const parentPhone = normalizeText(student?.parentPhone || '')
+            const school = normalizeText(student?.school || '')
+            return (
+                normalizedFullName.includes(normalizedTerm) ||
+                compactFullName.includes(compactTerm) ||
+                studentPhone.includes(normalizedTerm) ||
+                parentPhone.includes(normalizedTerm) ||
+                school.includes(normalizedTerm)
+            )
+        })
     }, [students, searchTerm])
+
+    const totalPages = useMemo(() => {
+        if (filteredStudents.length === 0) return 1
+        return Math.ceil(filteredStudents.length / itemsPerPage)
+    }, [filteredStudents.length, itemsPerPage])
+
+    const safeCurrentPage = useMemo(() => {
+        return Math.min(currentPage, totalPages)
+    }, [currentPage, totalPages])
+
+    const paginatedStudents = useMemo(() => {
+        const start = (safeCurrentPage - 1) * itemsPerPage
+        const end = start + itemsPerPage
+        return filteredStudents.slice(start, end)
+    }, [filteredStudents, safeCurrentPage, itemsPerPage])
 
     const isAllSelected = useMemo(() => {
         if (filteredStudents.length === 0) return false
@@ -246,9 +291,15 @@ export const StudentSelectionList = ({
 
                 <StudentSearch
                     value={searchTerm}
-                    onChange={setSearchTerm}
+                    onChange={(value) => {
+                        setSearchTerm(value)
+                        setCurrentPage(1)
+                    }}
                     grade={grade}
-                    onGradeChange={onGradeChange}
+                    onGradeChange={(value) => {
+                        onGradeChange(value)
+                        setCurrentPage(1)
+                    }}
                     gradeOptions={gradeOptions}
                 />
 
@@ -264,12 +315,26 @@ export const StudentSelectionList = ({
             <div className="max-h-[600px] overflow-y-auto">
                 <StudentListContent
                     students={students}
-                    filteredStudents={filteredStudents}
+                    filteredStudents={paginatedStudents}
                     selectedStudentIds={selectedStudentIds}
                     searchTerm={searchTerm}
                     onToggleStudent={handleToggleStudent}
                 />
             </div>
+
+            {filteredStudents.length > 0 && (
+                <Pagination
+                    currentPage={safeCurrentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={(value) => {
+                        setItemsPerPage(Number(value))
+                        setCurrentPage(1)
+                    }}
+                    totalItems={filteredStudents.length}
+                />
+            )}
         </div>
     )
 }

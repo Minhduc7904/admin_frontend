@@ -5,18 +5,15 @@ import { BroadcastNotifications } from '../components/BroadcastNotifications';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
 import { Navigate } from 'react-router-dom';
 import {
-    getAllStudentsAsync,
-    selectStudents,
-    selectStudentLoadingGet,
-} from '../../student/store/studentSlice';
-
-import {
     getAllAdminsAsync,
     selectAdmins,
     selectAdminLoadingGet,
 } from '../../admin/store/adminSlice';
 
 import {
+    getAllStudentsForNotificationAsync,
+    selectStudentsForBroadcast,
+    selectLoadingStudentsForBroadcast,
     sendNotificationAsync,
     selectLoadingSend,
 } from '../store/notificationSlice';
@@ -42,7 +39,7 @@ import { ROUTES } from '../../../core/constants';
  * 2. STUDENT_GET_ALL ('student:get-all')
  *    → Quyền xem danh sách tất cả students
  *    → Dùng khi recipientType là 'STUDENT'
- *    → Gọi getAllStudentsAsync để load danh sách students
+ *    → Gọi getAllStudentsForNotificationAsync để load danh sách students
  * 
  * 3. NOTIFY_ALL_USERS ('notification:notify-all-users')
  *    → Quyền gửi thông báo đến tất cả người dùng trong hệ thống
@@ -69,8 +66,8 @@ export const BroadcastNotificationsPage = () => {
     }
 
     /* ===== STORE ===== */
-    const students = useAppSelector(selectStudents);
-    const loadingStudents = useAppSelector(selectStudentLoadingGet);
+    const students = useAppSelector(selectStudentsForBroadcast);
+    const loadingStudents = useAppSelector(selectLoadingStudentsForBroadcast);
     const admins = useAppSelector(selectAdmins);
     const loadingAdmins = useAppSelector(selectAdminLoadingGet);
     const loadingSend = useAppSelector(selectLoadingSend);
@@ -99,7 +96,7 @@ export const BroadcastNotificationsPage = () => {
             hasGetAllStudentAccess &&
             !studentsLoadedRef.current
         ) {
-            dispatch(getAllStudentsAsync({ page: 1, limit: 1000 }));
+            dispatch(getAllStudentsForNotificationAsync({ page: 1, limit: 1000 }));
             studentsLoadedRef.current = true;
         }
     }, [recipientType, hasGetAllStudentAccess, dispatch]);
@@ -122,6 +119,7 @@ export const BroadcastNotificationsPage = () => {
         // 🔒 Permission guards
         if (newType === 'ALL' && !hasNotifyAllAccess) return;
         if (newType === 'STUDENT' && !hasGetAllStudentAccess) return;
+        if (newType === 'UNPAID_TUITION_STUDENTS' && !hasGetAllStudentAccess) return;
         if (newType === 'ADMIN' && !hasGetAllAdminAccess) return;
 
         setRecipientType(newType);
@@ -149,11 +147,16 @@ export const BroadcastNotificationsPage = () => {
         // 🔒 Permission guards - Kiểm tra lại permission trước khi gửi
         if (recipientType === 'ALL' && !hasNotifyAllAccess) return;
         if (recipientType === 'STUDENT' && !hasGetAllStudentAccess) return;
+        if (recipientType === 'UNPAID_TUITION_STUDENTS' && !hasGetAllStudentAccess) return;
         if (recipientType === 'ADMIN' && !hasGetAllAdminAccess) return;
 
         let userIds = [];
 
         if (recipientType === 'ALL') {
+            userIds = null;
+        }
+
+        if (recipientType === 'UNPAID_TUITION_STUDENTS') {
             userIds = null;
         }
 
@@ -181,9 +184,14 @@ export const BroadcastNotificationsPage = () => {
                 level: formData.level,
                 userIds,
                 all: recipientType === 'ALL',
+                allUnpaidTuition: recipientType === 'UNPAID_TUITION_STUDENTS',
                 data: {
                     entity: 'broadcast',
                     recipientType,
+                    isMarkdown: true,
+                    ...(formData.shouldShowReminderModal
+                        ? { shouldShowReminderModal: true }
+                        : {}),
                 },
             })
         ).unwrap();

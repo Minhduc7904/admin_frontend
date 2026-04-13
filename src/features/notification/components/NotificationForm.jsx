@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Button, Input, Textarea, Dropdown } from '../../../shared/components/ui'
+import { Button, Input, Dropdown, Checkbox } from '../../../shared/components/ui'
+import { MarkdownEditorPreview } from '../../../shared/components/markdown/MarkdownEditorPreview'
 
 /**
  * NotificationForm
@@ -28,6 +29,7 @@ export const NotificationForm = ({
         message: '',
         type: 'SYSTEM',
         level: 'INFO',
+        shouldShowReminderModal: false,
     })
 
     const [errors, setErrors] = useState({})
@@ -39,6 +41,7 @@ export const NotificationForm = ({
     const canUseRecipientType = (type) => {
         if (type === 'ALL') return canSendAll
         if (type === 'STUDENT') return canSendStudents
+        if (type === 'UNPAID_TUITION_STUDENTS') return canSendStudents
         if (type === 'ADMIN') return canSendAdmins
         return false
     }
@@ -46,9 +49,11 @@ export const NotificationForm = ({
     const canSubmit =
         recipientType === 'ALL'
             ? canSendAll
-            : recipientType === 'ADMIN'
-                ? canSendAdmins
-                : canSendStudents
+            : recipientType === 'UNPAID_TUITION_STUDENTS'
+                ? canSendStudents
+                : recipientType === 'ADMIN'
+                    ? canSendAdmins
+                    : canSendStudents
 
     /* ======================================================
        HANDLERS
@@ -79,6 +84,13 @@ export const NotificationForm = ({
         }
     }
 
+    const handleReminderModalChange = () => {
+        setFormData((prev) => ({
+            ...prev,
+            shouldShowReminderModal: !prev.shouldShowReminderModal,
+        }))
+    }
+
     const validate = () => {
         const nextErrors = {}
 
@@ -98,7 +110,11 @@ export const NotificationForm = ({
             nextErrors.permission = 'Bạn không có quyền gửi loại thông báo này'
         }
 
-        if (recipientType !== 'ALL' && selectedStudents.length === 0) {
+        if (
+            recipientType !== 'ALL' &&
+            recipientType !== 'UNPAID_TUITION_STUDENTS' &&
+            selectedStudents.length === 0
+        ) {
             const label =
                 recipientType === 'ADMIN' ? 'quản trị viên' : 'học sinh'
             nextErrors.students = `Vui lòng chọn ít nhất 1 ${label}`
@@ -120,6 +136,7 @@ export const NotificationForm = ({
             message: '',
             type: 'SYSTEM',
             level: 'INFO',
+            shouldShowReminderModal: false,
         })
         setErrors({})
     }
@@ -146,6 +163,11 @@ export const NotificationForm = ({
 
     const recipientTypeOptions = [
         { value: 'ALL', label: 'Tất cả người dùng', disabled: !canSendAll },
+        {
+            value: 'UNPAID_TUITION_STUDENTS',
+            label: 'Tất cả học sinh chưa đóng học phí',
+            disabled: !canSendStudents,
+        },
         { value: 'ADMIN', label: 'Quản trị viên', disabled: !canSendAdmins },
         { value: 'STUDENT', label: 'Học sinh', disabled: !canSendStudents },
     ]
@@ -167,9 +189,7 @@ export const NotificationForm = ({
                     {/* Recipient Type */}
                     {showRecipientTypeSelector && (
                         <div className="mb-4">
-                            <label className="block text-sm font-medium mb-2">
-                                Gửi đến
-                            </label>
+
                             <Dropdown
                                 value={recipientType}
                                 onChange={(value) => {
@@ -179,6 +199,7 @@ export const NotificationForm = ({
                                 options={recipientTypeOptions}
                                 placeholder="Chọn đối tượng nhận..."
                                 disabled={loading}
+                                label={"Gửi đến"}
                             />
                         </div>
                     )}
@@ -208,15 +229,25 @@ export const NotificationForm = ({
                         <label className="block text-sm font-medium mb-2">
                             Nội dung <span className="text-error">*</span>
                         </label>
-                        <Textarea
-                            name="message"
+                        <MarkdownEditorPreview
                             value={formData.message}
-                            onChange={handleChange}
-                            rows={6}
-                            error={errors.message}
-                            disabled={isFormDisabled}
+                            onChange={(value) => {
+                                setFormData((prev) => ({ ...prev, message: value }))
+                                if (errors.message) {
+                                    setErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.message
+                                        return next
+                                    })
+                                }
+                            }}
+                            height="320px"
+                            editable={!isFormDisabled}
                             maxLength={1000}
                         />
+                        {errors.message && (
+                            <p className="mt-1 text-sm text-error">{errors.message}</p>
+                        )}
                     </div>
 
                     {/* Type */}
@@ -228,6 +259,7 @@ export const NotificationForm = ({
                             }
                             options={typeOptions}
                             disabled={isFormDisabled}
+                            label={"Loại tin nhắn"}
                         />
                     </div>
 
@@ -240,6 +272,15 @@ export const NotificationForm = ({
                             }
                             options={levelOptions}
                             disabled={isFormDisabled}
+                            label={"Mức độ tin nhắn"}
+                        />
+                    </div>
+
+                    <div className="mt-4">
+                        <Checkbox
+                            checked={formData.shouldShowReminderModal}
+                            onChange={handleReminderModalChange}
+                            label="Hiển thị popup nhắc nhở"
                         />
                     </div>
 

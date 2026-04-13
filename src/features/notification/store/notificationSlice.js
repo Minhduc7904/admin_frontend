@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { notificationApi } from '../../../core/api';
+import { notificationApi, studentApi } from '../../../core/api';
 import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
 const initialState = {
@@ -34,6 +34,8 @@ const initialState = {
   loadingMarkAllRead: false,
   loadingDelete: false,
   loadingSend: false,
+  studentsForBroadcast: [],
+  loadingStudentsForBroadcast: false,
   error: null,
   filters: {
     search: '',
@@ -125,6 +127,16 @@ export const sendNotificationAsync = createAsyncThunk(
       showSuccess: true,
       successTitle: 'Gửi thông báo thành công',
       errorTitle: 'Lỗi gửi thông báo',
+    });
+  }
+);
+
+export const getAllStudentsForNotificationAsync = createAsyncThunk(
+  'notification/getAllStudentsForNotification',
+  async (params, thunkAPI) => {
+    return handleAsyncThunk(() => studentApi.getAll(params), thunkAPI, {
+      showSuccess: false,
+      errorTitle: 'Loi tai danh sach hoc sinh',
     });
   }
 );
@@ -341,6 +353,23 @@ const notificationSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Get students for broadcast notification
+      .addCase(getAllStudentsForNotificationAsync.pending, (state) => {
+        state.studentsForBroadcast = [];
+        state.loadingStudentsForBroadcast = true;
+        state.error = null;
+      })
+      .addCase(getAllStudentsForNotificationAsync.fulfilled, (state, action) => {
+        state.loadingStudentsForBroadcast = false;
+        state.studentsForBroadcast = action.payload.data;
+        state.error = null;
+      })
+      .addCase(getAllStudentsForNotificationAsync.rejected, (state, action) => {
+        state.studentsForBroadcast = [];
+        state.loadingStudentsForBroadcast = false;
+        state.error = action.payload;
+      })
+
       // Send notification
       .addCase(sendNotificationAsync.pending, (state) => {
         state.loadingSend = true;
@@ -392,6 +421,8 @@ export const selectLoadingMarkRead = (state) => state.notification.loadingMarkRe
 export const selectLoadingMarkAllRead = (state) => state.notification.loadingMarkAllRead;
 export const selectLoadingDelete = (state) => state.notification.loadingDelete;
 export const selectLoadingSend = (state) => state.notification.loadingSend;
+export const selectStudentsForBroadcast = (state) => state.notification.studentsForBroadcast;
+export const selectLoadingStudentsForBroadcast = (state) => state.notification.loadingStudentsForBroadcast;
 export const selectNotificationError = (state) => state.notification.error;
 export const selectNotificationFilters = (state) => state.notification.filters;
 export const selectUserNotificationsFilters = (state) => state.notification.userNotificationsFilters;
