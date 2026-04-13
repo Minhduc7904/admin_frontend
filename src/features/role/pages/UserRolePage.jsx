@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
 import { ROUTES } from '../../../core/constants';
 import {
+    getAllRolesAsync,
     getUserRolesAsync,
     clearUserRoles,
+    selectRoles,
     selectUserRoles,
     selectRoleLoadingGet,
+    selectRoleLoadingAssign,
     selectRoleLoadingDelete,
+    assignRoleToUserAsync,
     removeRoleFromUserAsync
 } from '../store/roleSlice';
 import {
@@ -30,7 +34,9 @@ export const UserRolePage = ({ userId, userType = 'admin', loading: parentLoadin
     const navigate = useNavigate();
 
     const userRoles = useAppSelector(selectUserRoles);
+    const roles = useAppSelector(selectRoles);
     const loadingRoles = useAppSelector(selectRoleLoadingGet);
+    const loadingAssign = useAppSelector(selectRoleLoadingAssign);
     const loadingDelete = useAppSelector(selectRoleLoadingDelete);
 
     const [openAddRolePanel, setOpenAddRolePanel] = useState(false);
@@ -41,6 +47,8 @@ export const UserRolePage = ({ userId, userType = 'admin', loading: parentLoadin
         if (userId) {
             dispatch(getUserRolesAsync(userId));
         }
+
+        dispatch(getAllRolesAsync({ limit: 1000 }));
 
         return () => {
             dispatch(clearUserRoles());
@@ -142,6 +150,22 @@ export const UserRolePage = ({ userId, userType = 'admin', loading: parentLoadin
         setOpenAddRolePanel(true);
     };
 
+    const handleAssignRole = async ({ roleId, expiresAt }) => {
+        if (!userId || !roleId) return;
+        try {
+            await dispatch(assignRoleToUserAsync({
+                userId,
+                roleId,
+                expiresAt,
+            })).unwrap();
+
+            await dispatch(getUserRolesAsync(userId)).unwrap();
+            setOpenAddRolePanel(false);
+        } catch (error) {
+            console.error('Error assigning role to user:', error);
+        }
+    };
+
     const userTypeText = userType === 'student' ? 'học sinh' : 'quản trị viên';
 
     if (!userId) {
@@ -173,8 +197,12 @@ export const UserRolePage = ({ userId, userType = 'admin', loading: parentLoadin
             >
                 <AddRole
                     userId={userId}
-                    onClose={() => setOpenAddRolePanel(false)}
+                    roles={roles}
+                    loadingRoles={loadingRoles}
                     userRoleIds={userRoles.map(userRole => userRole.roleId)}
+                    onAssign={handleAssignRole}
+                    onCancel={() => setOpenAddRolePanel(false)}
+                    loading={loadingAssign}
                 />
             </RightPanel>
 

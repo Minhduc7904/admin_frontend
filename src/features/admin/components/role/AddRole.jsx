@@ -15,7 +15,7 @@ export const AddRole = ({
 
     // Chỉ lấy role CHƯA được gán
     const availableRoles = useMemo(() => {
-        return roles.filter(r => !userRoleIds.includes(r.roleId));
+        return roles.filter((r) => Number(r.roleId) !== 1 && !userRoleIds.includes(r.roleId));
     }, [roles, userRoleIds]);
 
     const roleOptions = useMemo(() => {
