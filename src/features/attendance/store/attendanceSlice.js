@@ -226,11 +226,16 @@ export const toggleParentNotifiedAsync = createAsyncThunk(
 export const sendAttendanceToParentAsync = createAsyncThunk(
     "attendance/sendToParent",
     async (id, thunkAPI) => {
-        return handleAsyncThunk(() => attendanceApi.sendToParent(id), thunkAPI, {
-            showSuccess: true,
-            successTitle: "Đã gửi thông báo cho phụ huynh",
-            errorTitle: "Lỗi gửi thông báo cho phụ huynh",
-        });
+        try {
+            const response = await attendanceApi.sendToParent(id);
+            return response.data ? response.data : response;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(
+                error?.data || {
+                    message: error?.message || "Loi gui thong bao cho phu huynh",
+                }
+            );
+        }
     }
 );
 

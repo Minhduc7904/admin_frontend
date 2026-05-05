@@ -20,6 +20,7 @@ export const ProfileInfo = () => {
         lastName: profile?.lastName || '',
         email: profile?.email || '',
         username: profile?.username || '',
+        adminZaloOaId: profile?.adminZaloOaId || '',
         gender: profile?.gender || '',
         dateOfBirth: profile?.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
     });
@@ -35,6 +36,7 @@ export const ProfileInfo = () => {
                 lastName: profile.lastName || '',
                 email: profile.email || '',
                 username: profile.username || '',
+                adminZaloOaId: profile.adminZaloOaId || '',
                 gender: profile.gender || '',
                 dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
             });
@@ -99,6 +101,7 @@ export const ProfileInfo = () => {
             lastName: profile?.lastName || '',
             email: profile?.email || '',
             username: profile?.username || '',
+            adminZaloOaId: profile?.adminZaloOaId || '',
             gender: profile?.gender || '',
             dateOfBirth: profile?.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
         });
@@ -188,6 +191,18 @@ export const ProfileInfo = () => {
                                 helperText="Không thể thay đổi"
                             />
                         </div>
+                    </div>
+
+                    {/* Zalo OA ID */}
+                    <div>
+                        <Input
+                            label="Zalo OA ID"
+                            name="adminZaloOaId"
+                            value={formData.adminZaloOaId}
+                            onChange={handleChange}
+                            disabled={!isEditing || loading}
+                            placeholder="Nhập Zalo OA ID"
+                        />
                     </div>
 
                     {/* Gender and Date of Birth - Grid Layout */}

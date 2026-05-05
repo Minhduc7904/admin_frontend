@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Plus, Users, Download, Calendar } from 'lucide-react';
 
@@ -24,6 +24,7 @@ import {
 } from '../../attendance/components';
 
 import { useSearch } from '../../../shared/hooks';
+import { notify } from '../../../shared/utils';
 
 import {
     getAllAttendancesAsync,
@@ -53,12 +54,14 @@ import {
     selectAttendanceLoadingSendToParent,
     setFilters,
 } from '../../attendance/store/attendanceSlice';
+import { selectProfile } from '../../profile/store/profileSlice';
 import { ROUTES } from '../../../core/constants';
 /**
  * ClassAttendance - Điểm danh của một lớp
  */
 export const ClassAttendance = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { id } = useParams();
     const classId = Number(id);
 
@@ -67,6 +70,7 @@ export const ClassAttendance = () => {
     const pagination = useSelector(selectAttendancePagination);
     const filters = useSelector(selectAttendanceFilters);
     const statistics = useSelector(selectAttendanceStatistics);
+    const profile = useSelector(selectProfile);
 
     const loadingGet = useSelector(selectAttendanceLoadingGet);
     const loadingCreate = useSelector(selectAttendanceLoadingCreate);
@@ -91,6 +95,7 @@ export const ClassAttendance = () => {
     const [isExportPanelOpen, setIsExportPanelOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleteOtherInWeekModalOpen, setIsDeleteOtherInWeekModalOpen] = useState(false);
+    const [isMissingZaloOaModalOpen, setIsMissingZaloOaModalOpen] = useState(false);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
@@ -371,19 +376,94 @@ export const ClassAttendance = () => {
     };
 
     /* ===================== SEND TO PARENT (ZALO) ===================== */
+    const getSendToParentResult = (payload) => {
+        return payload?.data?.messageText || payload?.data?.sent !== undefined
+            ? payload.data
+            : payload;
+    };
+
+    const copyAttendanceMessage = async (messageText) => {
+        if (!messageText) return false;
+
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(messageText);
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = messageText;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+
+            notify.success('Đã copy thông tin điểm danh', 'Đã copy');
+            return true;
+        } catch (err) {
+            console.error('Copy attendance message failed:', err);
+            notify.error('Không thể copy thông tin điểm danh vào bộ nhớ đệm', 'Copy thất bại');
+            return false;
+        }
+    };
+
     const handleSendToParent = async (attendance) => {
         if (!attendance?.student?.hasParentZaloId) return;
 
         setSendToParentAttendanceId(attendance.attendanceId);
+        let responsePayload = null;
+
         try {
-            await dispatch(sendAttendanceToParentAsync(attendance.attendanceId)).unwrap();
+            responsePayload = await dispatch(sendAttendanceToParentAsync(attendance.attendanceId)).unwrap();
         } catch (err) {
-            console.error('Send attendance to parent failed:', err);
+            responsePayload = err;
         } finally {
+            const result = getSendToParentResult(responsePayload);
+
+            if (result?.messageText) {
+                await copyAttendanceMessage(result.messageText);
+            }
+
+            if (result?.sent === false) {
+                notify.error(
+                    result.errorMessage || result.message || 'Zalo API từ chối gửi thông báo cho phụ huynh',
+                    'Gửi Zalo thất bại'
+                );
+            } else if (result?.sent === true) {
+                notify.success('Đã gửi thông báo cho phụ huynh', 'Gửi Zalo thành công');
+            } else if (!result?.messageText) {
+                notify.error(
+                    result?.message || 'Không thể gửi thông báo cho phụ huynh',
+                    'Gửi Zalo thất bại'
+                );
+            }
+
             setSendToParentAttendanceId((prev) =>
                 prev === attendance.attendanceId ? null : prev
             );
         }
+    };
+
+    const handleOpenParentZaloChat = (attendance) => {
+        const uid = attendance?.student?.parentZaloId;
+        const oaid = profile?.adminZaloOaId;
+
+        if (!uid) return;
+
+        if (!oaid) {
+            setIsMissingZaloOaModalOpen(true);
+            return;
+        }
+
+        const url = `https://oa.zalo.me/chat?uid=${encodeURIComponent(uid)}&oaid=${encodeURIComponent(oaid)}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
+    const handleNavigateToProfile = () => {
+        setIsMissingZaloOaModalOpen(false);
+        navigate(ROUTES.PROFILE_INFO);
     };
 
     /* ===================== UPDATE STATUS ===================== */
@@ -547,6 +627,7 @@ export const ClassAttendance = () => {
                             onExport={handleExportAttendance}
                             onToggleParentNotified={handleToggleParentNotified}
                             onSendToParent={handleSendToParent}
+                            onOpenParentZaloChat={handleOpenParentZaloChat}
                             onStatusChange={handleAttendanceStatusChange}
                             statusLoading={loadingUpdateStatus}
                             statusUpdatingAttendanceId={statusUpdatingAttendanceId}
@@ -609,6 +690,25 @@ export const ClassAttendance = () => {
                 cancelText="Hủy"
                 variant="danger"
                 loading={loadingDeleteOtherInWeek}
+            />
+
+            <ConfirmModal
+                isOpen={isMissingZaloOaModalOpen}
+                onClose={() => setIsMissingZaloOaModalOpen(false)}
+                onConfirm={handleNavigateToProfile}
+                title="Chưa đăng kí Zalo OA"
+                message={
+                    <>
+                        Bạn chưa đăng kí Zalo OA cho tài khoản admin.
+                        <br />
+                        <span className="block mt-2">
+                            Vui lòng cập nhật Zalo OA ID trong hồ sơ cá nhân để mở chat phụ huynh.
+                        </span>
+                    </>
+                }
+                confirmText="Đăng kí ngay"
+                cancelText="Hủy"
+                variant="warning"
             />
 
             {/* ===== BULK ATTENDANCE MODAL ===== */}

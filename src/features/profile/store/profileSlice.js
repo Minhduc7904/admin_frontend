@@ -98,7 +98,20 @@ const profileSlice = createSlice({
       })
       .addCase(updateProfileAsync.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = action.payload.data;
+        if (state.profile) {
+          const submittedData = action.meta.arg || {};
+          const updatedData = action.payload?.data || {};
+
+          Object.keys(submittedData).forEach((key) => {
+            const nextValue = Object.prototype.hasOwnProperty.call(updatedData, key)
+              ? updatedData[key]
+              : submittedData[key];
+
+            if (state.profile[key] !== nextValue) {
+              state.profile[key] = nextValue;
+            }
+          });
+        }
         state.error = null;
       })
       .addCase(updateProfileAsync.rejected, (state, action) => {

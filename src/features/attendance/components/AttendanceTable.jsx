@@ -45,6 +45,7 @@ export const AttendanceTable = ({
     onExport,
     onToggleParentNotified,
     onSendToParent,
+    onOpenParentZaloChat,
     onStatusChange,
     loading,
     tuitionMonth,
@@ -98,19 +99,31 @@ export const AttendanceTable = ({
         });
     };
 
-    const renderParentZaloBadge = (hasParentZaloId) => {
-        const linked = !!hasParentZaloId;
+    const renderParentZaloBadge = (attendance) => {
+        const linked = !!attendance.student?.hasParentZaloId;
+        const canOpenChat = linked && !!attendance.student?.parentZaloId && !!onOpenParentZaloChat;
 
         return (
-            <span
+            <button
+                type="button"
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                    linked ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                    canOpenChat
+                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:ring-1 hover:ring-emerald-300 cursor-pointer'
+                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
                 }`}
+                aria-disabled={!canOpenChat}
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (canOpenChat) {
+                        onOpenParentZaloChat(attendance);
+                    }
+                }}
                 title={linked ? 'Đã liên kết Zalo phụ huynh' : 'Chưa liên kết Zalo phụ huynh'}
             >
                 <MessageCircle size={11} />
                 {linked ? 'Đã liên kết Zalo PH' : 'Chưa liên kết Zalo PH'}
-            </span>
+            </button>
         );
     };
 
@@ -211,14 +224,18 @@ export const AttendanceTable = ({
                 <div className="flex items-center gap-2">
                     <User size={14} className="text-foreground-light" />
                     <div>
-                        <Link to={ROUTES.STUDENT_DETAIL(attendance.studentId)} className="hover:underline cursor-pointer">
-                            <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <Link
+                                to={ROUTES.STUDENT_DETAIL(attendance.studentId)}
+                                className="hover:underline cursor-pointer"
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 <span className="text-sm font-medium text-foreground">
                                     {attendance.student.fullName || 'N/A'}
                                 </span>
-                                {renderParentZaloBadge(attendance.student?.hasParentZaloId)}
-                            </div>
-                        </Link>
+                            </Link>
+                            {renderParentZaloBadge(attendance)}
+                        </div>
                         {attendance.student.studentId && (
                             <>
                                 <p className="text-xs text-foreground-light">
