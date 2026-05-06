@@ -8,6 +8,7 @@ import auditLogReducer from "../../features/adminAuditLog/store/auditLogSlice";
 import mediaReducer from "../../features/media/store/mediaSlice";
 import mediaUsageReducer from "../../features/mediaUsage/store/mediaUsageSlice";
 import mediaFolderReducer from "../../features/mediaFolder/store/mediaFolderSlice";
+import seoMediaReducer from "../../features/seoMedia/store/seoMediaSlice";
 import adminReducer from "../../features/admin/store/adminSlice";
 import superAdminReducer from "../../features/superAdmin/store/superAdminSlice";
 import { userReducer } from "../../features/user/store/userSlice";
@@ -51,6 +52,7 @@ export const store = configureStore({
     media: mediaReducer,
     mediaUsage: mediaUsageReducer,
     mediaFolder: mediaFolderReducer,
+    seoMedia: seoMediaReducer,
     admin: adminReducer,
     superAdmin: superAdminReducer,
     user: userReducer,

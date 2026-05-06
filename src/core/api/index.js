@@ -36,3 +36,4 @@ export { competitionApi } from './competitionApi';
 export { competitionSubmitApi } from './competitionSubmitApi';
 export { sectionApi } from './sectionApi';
 export { markdownApi } from './markdownApi';
+export { seoMediaApi } from './seoMediaApi';

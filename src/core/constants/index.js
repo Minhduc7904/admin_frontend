@@ -202,6 +202,24 @@ export const API_ENDPOINTS = {
     ADMIN_RAW_CONTENT: (id) => `/media/admin/${id}/raw-content`,
     MY_RAW_CONTENT: (id) => `/media/${id}/raw-content/my`,
   },
+  SEO_MEDIA: {
+    SLOTS: {
+      CREATE: '/seo-media/slots',
+      LIST: '/seo-media/slots',
+      BY_CODE: (code) => `/seo-media/slots/code/${code}`,
+      DETAIL: (slotId) => `/seo-media/slots/${slotId}`,
+      UPDATE: (slotId) => `/seo-media/slots/${slotId}`,
+      DELETE: (slotId) => `/seo-media/slots/${slotId}`,
+      REORDER_ITEMS: (slotId) => `/seo-media/slots/${slotId}/items/reorder`,
+    },
+    ITEMS: {
+      CREATE: '/seo-media/items',
+      BY_SLOT: (slotId) => `/seo-media/slots/${slotId}/items`,
+      UPDATE: (itemId) => `/seo-media/items/${itemId}`,
+      DELETE: (itemId) => `/seo-media/items/${itemId}`,
+    },
+    UPLOAD_IMAGE: '/seo-media/upload-image',
+  },
   MEDIA_FOLDERS: {
     CREATE: "/media-folders",
     LIST: "/media-folders",
