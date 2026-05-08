@@ -35,6 +35,8 @@ export const ROUTES = {
   AUDIT_LOGS: '/audit-logs',
   MEDIA: '/media',
   MEDIA_FOLDERS: '/media-folders',
+  SEO_SLOTS: '/seo/slots',
+  SEO_PAGES: '/seo/pages',
   ADMINS: '/admins',
   ADMIN_DETAIL: (id = ':id') => `/admins/${id}`,
   ADMIN_ROLES: (id = ':id') => `/admins/${id}/roles`,

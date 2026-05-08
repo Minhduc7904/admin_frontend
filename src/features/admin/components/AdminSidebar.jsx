@@ -14,6 +14,8 @@ import {
   CreditCard,
   FileQuestion,
   Trophy,
+  Globe2,
+  ImageUp,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -253,6 +255,23 @@ export const AdminSidebar = () => {
           href: ROUTES.MEDIA_FOLDERS,
           icon: File,
           permission: PERMISSIONS.ADMIN_PAGE.MEDIA_FOLDERS,
+        },
+      ],
+    },
+    {
+      label: 'SEO',
+      items: [
+        {
+          key: 'seoSlots',
+          name: 'SEO slots',
+          href: ROUTES.SEO_SLOTS,
+          icon: Globe2,
+        },
+        {
+          key: 'seoPages',
+          name: 'SEO theo page',
+          href: ROUTES.SEO_PAGES,
+          icon: ImageUp,
         },
       ],
     },

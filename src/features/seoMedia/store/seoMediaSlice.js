@@ -4,6 +4,7 @@ import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
 const initialState = {
   slots: [],
+  slotsByPageKey: {},
   items: [],
   currentSlot: null,
   currentItem: null,
@@ -22,6 +23,11 @@ const initialState = {
   filters: {
     search: '',
     isActive: null,
+  },
+  pageMedia: {
+    activePageKey: 'home',
+    selectedSlotId: null,
+    viewMode: 'desktop',
   },
 };
 
@@ -171,6 +177,18 @@ const seoMediaSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setSeoPageMediaActivePageKey: (state, action) => {
+      state.pageMedia.activePageKey = action.payload;
+      state.pageMedia.selectedSlotId = null;
+      state.items = [];
+    },
+    setSeoPageMediaSelectedSlotId: (state, action) => {
+      state.pageMedia.selectedSlotId = action.payload;
+      state.items = [];
+    },
+    setSeoPageMediaViewMode: (state, action) => {
+      state.pageMedia.viewMode = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -181,14 +199,26 @@ const seoMediaSlice = createSlice({
       })
       .addCase(getSlotsAsync.fulfilled, (state, action) => {
         state.loading = false;
-        state.slots = action.payload.data || [];
+        const slots = action.payload.data || [];
+        const pageKey = action.meta.arg?.pageKey;
+
+        if (pageKey) {
+          state.slotsByPageKey[pageKey] = slots;
+        } else {
+          state.slots = slots;
+        }
         if (action.payload.meta) {
           state.pagination = { ...state.pagination, ...action.payload.meta };
         }
       })
       .addCase(getSlotsAsync.rejected, (state, action) => {
         state.loading = false;
-        state.slots = [];
+        const pageKey = action.meta.arg?.pageKey;
+        if (pageKey) {
+          state.slotsByPageKey[pageKey] = [];
+        } else {
+          state.slots = [];
+        }
         state.error = action.payload;
       })
 
@@ -199,7 +229,16 @@ const seoMediaSlice = createSlice({
       })
       .addCase(createSlotAsync.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload?.data) state.slots.unshift(action.payload.data);
+        const slot = action.payload?.data;
+        if (slot) {
+          state.slots.unshift(slot);
+          if (slot.pageKey) {
+            state.slotsByPageKey[slot.pageKey] = [
+              slot,
+              ...(state.slotsByPageKey[slot.pageKey] || []),
+            ];
+          }
+        }
       })
       .addCase(createSlotAsync.rejected, (state, action) => {
         state.loading = false;
@@ -229,9 +268,27 @@ const seoMediaSlice = createSlice({
       .addCase(updateSlotAsync.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.data) {
-          const idx = state.slots.findIndex((s) => s.slotId === action.payload.data.slotId);
-          if (idx !== -1) state.slots[idx] = action.payload.data;
-          if (state.currentSlot?.slotId === action.payload.data.slotId) state.currentSlot = action.payload.data;
+          const slot = action.payload.data;
+          const idx = state.slots.findIndex((s) => s.slotId === slot.slotId);
+          if (idx !== -1) state.slots[idx] = slot;
+
+          Object.keys(state.slotsByPageKey).forEach((pageKey) => {
+            state.slotsByPageKey[pageKey] = state.slotsByPageKey[pageKey].filter(
+              (item) => item.slotId !== slot.slotId
+            );
+          });
+          if (slot.pageKey) {
+            const pageSlots = state.slotsByPageKey[slot.pageKey] || [];
+            const pageIdx = pageSlots.findIndex((item) => item.slotId === slot.slotId);
+            if (pageIdx !== -1) {
+              pageSlots[pageIdx] = slot;
+              state.slotsByPageKey[slot.pageKey] = pageSlots;
+            } else {
+              state.slotsByPageKey[slot.pageKey] = [slot, ...pageSlots];
+            }
+          }
+
+          if (state.currentSlot?.slotId === slot.slotId) state.currentSlot = slot;
         }
       })
       .addCase(updateSlotAsync.rejected, (state, action) => {
@@ -249,6 +306,11 @@ const seoMediaSlice = createSlice({
         // optionally remove from list depending on API response
         if (action.meta?.arg) {
           state.slots = state.slots.filter((s) => s.slotId !== action.meta.arg);
+          Object.keys(state.slotsByPageKey).forEach((pageKey) => {
+            state.slotsByPageKey[pageKey] = state.slotsByPageKey[pageKey].filter(
+              (slot) => slot.slotId !== action.meta.arg
+            );
+          });
         }
       })
       .addCase(deleteSlotAsync.rejected, (state, action) => {
@@ -346,10 +408,19 @@ const seoMediaSlice = createSlice({
   },
 });
 
-export const { setFilters, clearCurrentSlot, clearCurrentItem, clearError } = seoMediaSlice.actions;
+export const {
+  setFilters,
+  clearCurrentSlot,
+  clearCurrentItem,
+  clearError,
+  setSeoPageMediaActivePageKey,
+  setSeoPageMediaSelectedSlotId,
+  setSeoPageMediaViewMode,
+} = seoMediaSlice.actions;
 
 // Selectors
 export const selectSeoSlots = (state) => state.seoMedia.slots;
+export const selectSeoSlotsByPageKey = (state) => state.seoMedia.slotsByPageKey;
 export const selectSeoItems = (state) => state.seoMedia.items;
 export const selectSeoCurrentSlot = (state) => state.seoMedia.currentSlot;
 export const selectSeoCurrentItem = (state) => state.seoMedia.currentItem;
@@ -358,5 +429,9 @@ export const selectSeoLoading = (state) => state.seoMedia.loading;
 export const selectSeoLoadingItem = (state) => state.seoMedia.loadingItem;
 export const selectSeoUploadLoading = (state) => state.seoMedia.loadingUpload;
 export const selectSeoError = (state) => state.seoMedia.error;
+export const selectSeoPageMediaState = (state) => state.seoMedia.pageMedia;
+export const selectSeoPageMediaActivePageKey = (state) => state.seoMedia.pageMedia.activePageKey;
+export const selectSeoPageMediaSelectedSlotId = (state) => state.seoMedia.pageMedia.selectedSlotId;
+export const selectSeoPageMediaViewMode = (state) => state.seoMedia.pageMedia.viewMode;
 
 export default seoMediaSlice.reducer;

@@ -4,6 +4,7 @@ import { PermissionList } from '../features/permission/pages';
 import { AuditLogList } from '../features/adminAuditLog/pages';
 import { MediaPage } from '../features/media/pages';
 import { MediaFolderPage } from '../features/mediaFolder/pages';
+import { SeoPageMediaPage, SeoSlotPage } from '../features/seoMedia/pages';
 import { AdminList } from '../features/admin/pages/AdminList';
 import { AdminDetail } from '../features/admin/pages/AdminDetail';
 import { AdminRole } from '../features/admin/pages/AdminRole';
@@ -136,6 +137,19 @@ export const adminRouter = [
                     {
                         path: ROUTES.MEDIA_FOLDERS,
                         element: <MediaFolderPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute />,
+                children: [
+                    {
+                        path: ROUTES.SEO_SLOTS,
+                        element: <SeoSlotPage />,
+                    },
+                    {
+                        path: ROUTES.SEO_PAGES,
+                        element: <SeoPageMediaPage />,
                     },
                 ],
             },
