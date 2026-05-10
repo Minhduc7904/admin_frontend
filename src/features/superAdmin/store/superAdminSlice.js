@@ -12,6 +12,9 @@ const initialState = {
     loadingCleanupUnusedMediaOlderThan30Days: false,
     errorCleanupUnusedMediaOlderThan30Days: null,
     cleanupUnusedMediaOlderThan30DaysResult: null,
+    loadingGenerateMissingExamSlugs: false,
+    errorGenerateMissingExamSlugs: null,
+    generateMissingExamSlugsResult: null,
 };
 
 export const resetPasswordByDateRangeAsync = createAsyncThunk(
@@ -51,6 +54,21 @@ export const cleanupUnusedMediaOlderThan30DaysAsync = createAsyncThunk(
     }
 );
 
+export const generateMissingExamSlugsAsync = createAsyncThunk(
+    "superAdmin/generateMissingExamSlugs",
+    async (payload, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.generateMissingExamSlugs(payload),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Tao slug cho exam chua co slug thanh cong",
+                errorTitle: "Loi tao slug cho exam chua co slug",
+            }
+        );
+    }
+);
+
 export const superAdminSlice = createSlice({
     name: "superAdmin",
     initialState,
@@ -66,6 +84,10 @@ export const superAdminSlice = createSlice({
         clearCleanupUnusedMediaOlderThan30DaysState: (state) => {
             state.errorCleanupUnusedMediaOlderThan30Days = null;
             state.cleanupUnusedMediaOlderThan30DaysResult = null;
+        },
+        clearGenerateMissingExamSlugsState: (state) => {
+            state.errorGenerateMissingExamSlugs = null;
+            state.generateMissingExamSlugsResult = null;
         },
     },
     extraReducers: (builder) => {
@@ -105,6 +127,18 @@ export const superAdminSlice = createSlice({
             .addCase(cleanupUnusedMediaOlderThan30DaysAsync.rejected, (state, action) => {
                 state.loadingCleanupUnusedMediaOlderThan30Days = false;
                 state.errorCleanupUnusedMediaOlderThan30Days = action.payload;
+            })
+            .addCase(generateMissingExamSlugsAsync.pending, (state) => {
+                state.loadingGenerateMissingExamSlugs = true;
+                state.errorGenerateMissingExamSlugs = null;
+            })
+            .addCase(generateMissingExamSlugsAsync.fulfilled, (state, action) => {
+                state.loadingGenerateMissingExamSlugs = false;
+                state.generateMissingExamSlugsResult = action.payload || null;
+            })
+            .addCase(generateMissingExamSlugsAsync.rejected, (state, action) => {
+                state.loadingGenerateMissingExamSlugs = false;
+                state.errorGenerateMissingExamSlugs = action.payload;
             });
     },
 });
@@ -113,6 +147,7 @@ export const {
     clearResetPasswordByDateRangeState,
     clearUpdateAdminDirectState,
     clearCleanupUnusedMediaOlderThan30DaysState,
+    clearGenerateMissingExamSlugsState,
 } = superAdminSlice.actions;
 
 export const selectSuperAdminLoadingResetPasswordByDateRange = (state) =>
@@ -135,5 +170,12 @@ export const selectSuperAdminErrorCleanupUnusedMediaOlderThan30Days = (state) =>
     state.superAdmin.errorCleanupUnusedMediaOlderThan30Days;
 export const selectSuperAdminCleanupUnusedMediaOlderThan30DaysResult = (state) =>
     state.superAdmin.cleanupUnusedMediaOlderThan30DaysResult;
+
+export const selectSuperAdminLoadingGenerateMissingExamSlugs = (state) =>
+    state.superAdmin.loadingGenerateMissingExamSlugs;
+export const selectSuperAdminErrorGenerateMissingExamSlugs = (state) =>
+    state.superAdmin.errorGenerateMissingExamSlugs;
+export const selectSuperAdminGenerateMissingExamSlugsResult = (state) =>
+    state.superAdmin.generateMissingExamSlugsResult;
 
 export default superAdminSlice.reducer;

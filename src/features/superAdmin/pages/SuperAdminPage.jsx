@@ -2,6 +2,7 @@ import {
     ResetPasswordByDateRangeApiCard,
     CleanupUnusedMediaOlderThan30DaysApiCard,
     UpdateAdminDirectApiCard,
+    GenerateMissingExamSlugsApiCard,
 } from '../component';
 
 export const SuperAdminPage = () => {
@@ -15,6 +16,7 @@ export const SuperAdminPage = () => {
             </div>
 
             <ResetPasswordByDateRangeApiCard />
+            <GenerateMissingExamSlugsApiCard />
             <CleanupUnusedMediaOlderThan30DaysApiCard />
             <UpdateAdminDirectApiCard />
         </div>

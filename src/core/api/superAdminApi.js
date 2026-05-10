@@ -29,4 +29,12 @@ export const superAdminApi = {
             data
         );
     },
+
+    /**
+     * Generate slug for all exams that are missing slug.
+     * POST /super-admin/exams/generate-missing-slugs
+     */
+    generateMissingExamSlugs: (data = {}) => {
+        return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.GENERATE_MISSING_EXAM_SLUGS, data);
+    },
 };

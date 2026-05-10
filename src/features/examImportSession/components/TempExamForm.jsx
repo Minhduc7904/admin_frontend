@@ -1,5 +1,6 @@
 import { FileText } from 'lucide-react';
-import { Input, Button, Dropdown, Textarea } from '../../../shared/components';
+import { Input, Button, Dropdown } from '../../../shared/components';
+import { MarkdownEditorPreview } from '../../../shared/components/markdown/MarkdownEditorPreview';
 import { SubjectSearchSelect } from '../../subject/components/SubjectSearchSelect';
 import { GRADE_OPTIONS } from '../../../core/constants/grade-constants';
 
@@ -41,15 +42,19 @@ export const TempExamForm = ({
                 </div>
 
                 <div>
-                    <Textarea
-                        error={errors.description}
-                        name="description"
-                        label="Mô tả"
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Mô tả
+                    </label>
+                    <MarkdownEditorPreview
                         value={formData.description}
-                        onChange={onChange}
-                        placeholder="Nhập mô tả đề thi"
-                        rows={3}
+                        onChange={(value) => onChange({ target: { name: 'description', value } })}
+                        height="260px"
+                        editable={true}
+                        maxLength={2000}
                     />
+                    {errors.description && (
+                        <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
