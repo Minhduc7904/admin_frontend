@@ -125,6 +125,7 @@ export const API_ENDPOINTS = {
     CLEANUP_UNUSED_MEDIA_OLDER_THAN_30_DAYS:
       "/super-admin/cleanup-unused-media-older-than-30-days",
     GENERATE_MISSING_EXAM_SLUGS: "/super-admin/exams/generate-missing-slugs",
+    REGENERATE_QUESTION_SLUGS: "/super-admin/questions/regenerate-slugs",
   },
   STUDENTS: {
     LIST: "/students",

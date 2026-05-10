@@ -15,6 +15,9 @@ const initialState = {
     loadingGenerateMissingExamSlugs: false,
     errorGenerateMissingExamSlugs: null,
     generateMissingExamSlugsResult: null,
+    loadingRegenerateQuestionSlugs: false,
+    errorRegenerateQuestionSlugs: null,
+    regenerateQuestionSlugsResult: null,
 };
 
 export const resetPasswordByDateRangeAsync = createAsyncThunk(
@@ -69,6 +72,21 @@ export const generateMissingExamSlugsAsync = createAsyncThunk(
     }
 );
 
+export const regenerateQuestionSlugsAsync = createAsyncThunk(
+    "superAdmin/regenerateQuestionSlugs",
+    async (payload, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.regenerateQuestionSlugs(payload),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Regenerate slug cho question thanh cong",
+                errorTitle: "Loi regenerate slug cho question",
+            }
+        );
+    }
+);
+
 export const superAdminSlice = createSlice({
     name: "superAdmin",
     initialState,
@@ -88,6 +106,10 @@ export const superAdminSlice = createSlice({
         clearGenerateMissingExamSlugsState: (state) => {
             state.errorGenerateMissingExamSlugs = null;
             state.generateMissingExamSlugsResult = null;
+        },
+        clearRegenerateQuestionSlugsState: (state) => {
+            state.errorRegenerateQuestionSlugs = null;
+            state.regenerateQuestionSlugsResult = null;
         },
     },
     extraReducers: (builder) => {
@@ -139,6 +161,18 @@ export const superAdminSlice = createSlice({
             .addCase(generateMissingExamSlugsAsync.rejected, (state, action) => {
                 state.loadingGenerateMissingExamSlugs = false;
                 state.errorGenerateMissingExamSlugs = action.payload;
+            })
+            .addCase(regenerateQuestionSlugsAsync.pending, (state) => {
+                state.loadingRegenerateQuestionSlugs = true;
+                state.errorRegenerateQuestionSlugs = null;
+            })
+            .addCase(regenerateQuestionSlugsAsync.fulfilled, (state, action) => {
+                state.loadingRegenerateQuestionSlugs = false;
+                state.regenerateQuestionSlugsResult = action.payload || null;
+            })
+            .addCase(regenerateQuestionSlugsAsync.rejected, (state, action) => {
+                state.loadingRegenerateQuestionSlugs = false;
+                state.errorRegenerateQuestionSlugs = action.payload;
             });
     },
 });
@@ -148,6 +182,7 @@ export const {
     clearUpdateAdminDirectState,
     clearCleanupUnusedMediaOlderThan30DaysState,
     clearGenerateMissingExamSlugsState,
+    clearRegenerateQuestionSlugsState,
 } = superAdminSlice.actions;
 
 export const selectSuperAdminLoadingResetPasswordByDateRange = (state) =>
@@ -177,5 +212,12 @@ export const selectSuperAdminErrorGenerateMissingExamSlugs = (state) =>
     state.superAdmin.errorGenerateMissingExamSlugs;
 export const selectSuperAdminGenerateMissingExamSlugsResult = (state) =>
     state.superAdmin.generateMissingExamSlugsResult;
+
+export const selectSuperAdminLoadingRegenerateQuestionSlugs = (state) =>
+    state.superAdmin.loadingRegenerateQuestionSlugs;
+export const selectSuperAdminErrorRegenerateQuestionSlugs = (state) =>
+    state.superAdmin.errorRegenerateQuestionSlugs;
+export const selectSuperAdminRegenerateQuestionSlugsResult = (state) =>
+    state.superAdmin.regenerateQuestionSlugsResult;
 
 export default superAdminSlice.reducer;

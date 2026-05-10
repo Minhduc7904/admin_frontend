@@ -37,4 +37,12 @@ export const superAdminApi = {
     generateMissingExamSlugs: (data = {}) => {
         return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.GENERATE_MISSING_EXAM_SLUGS, data);
     },
+
+    /**
+     * Regenerate slug for questions whose slug matches question-123.
+     * POST /super-admin/questions/regenerate-slugs
+     */
+    regenerateQuestionSlugs: (data = {}) => {
+        return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.REGENERATE_QUESTION_SLUGS, data);
+    },
 };
