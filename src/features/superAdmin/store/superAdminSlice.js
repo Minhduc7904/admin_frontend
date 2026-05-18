@@ -18,6 +18,9 @@ const initialState = {
     loadingRegenerateQuestionSlugs: false,
     errorRegenerateQuestionSlugs: null,
     regenerateQuestionSlugsResult: null,
+    loadingSeedDefaultTags: false,
+    errorSeedDefaultTags: null,
+    seedDefaultTagsResult: null,
 };
 
 export const resetPasswordByDateRangeAsync = createAsyncThunk(
@@ -87,6 +90,21 @@ export const regenerateQuestionSlugsAsync = createAsyncThunk(
     }
 );
 
+export const seedDefaultTagsAsync = createAsyncThunk(
+    "superAdmin/seedDefaultTags",
+    async (payload, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.seedDefaultTags(payload),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Seed tag mặc định thành công",
+                errorTitle: "Lỗi seed tag mặc định",
+            }
+        );
+    }
+);
+
 export const superAdminSlice = createSlice({
     name: "superAdmin",
     initialState,
@@ -110,6 +128,10 @@ export const superAdminSlice = createSlice({
         clearRegenerateQuestionSlugsState: (state) => {
             state.errorRegenerateQuestionSlugs = null;
             state.regenerateQuestionSlugsResult = null;
+        },
+        clearSeedDefaultTagsState: (state) => {
+            state.errorSeedDefaultTags = null;
+            state.seedDefaultTagsResult = null;
         },
     },
     extraReducers: (builder) => {
@@ -173,6 +195,18 @@ export const superAdminSlice = createSlice({
             .addCase(regenerateQuestionSlugsAsync.rejected, (state, action) => {
                 state.loadingRegenerateQuestionSlugs = false;
                 state.errorRegenerateQuestionSlugs = action.payload;
+            })
+            .addCase(seedDefaultTagsAsync.pending, (state) => {
+                state.loadingSeedDefaultTags = true;
+                state.errorSeedDefaultTags = null;
+            })
+            .addCase(seedDefaultTagsAsync.fulfilled, (state, action) => {
+                state.loadingSeedDefaultTags = false;
+                state.seedDefaultTagsResult = action.payload || null;
+            })
+            .addCase(seedDefaultTagsAsync.rejected, (state, action) => {
+                state.loadingSeedDefaultTags = false;
+                state.errorSeedDefaultTags = action.payload;
             });
     },
 });
@@ -183,6 +217,7 @@ export const {
     clearCleanupUnusedMediaOlderThan30DaysState,
     clearGenerateMissingExamSlugsState,
     clearRegenerateQuestionSlugsState,
+    clearSeedDefaultTagsState,
 } = superAdminSlice.actions;
 
 export const selectSuperAdminLoadingResetPasswordByDateRange = (state) =>
@@ -219,5 +254,12 @@ export const selectSuperAdminErrorRegenerateQuestionSlugs = (state) =>
     state.superAdmin.errorRegenerateQuestionSlugs;
 export const selectSuperAdminRegenerateQuestionSlugsResult = (state) =>
     state.superAdmin.regenerateQuestionSlugsResult;
+
+export const selectSuperAdminLoadingSeedDefaultTags = (state) =>
+    state.superAdmin.loadingSeedDefaultTags;
+export const selectSuperAdminErrorSeedDefaultTags = (state) =>
+    state.superAdmin.errorSeedDefaultTags;
+export const selectSuperAdminSeedDefaultTagsResult = (state) =>
+    state.superAdmin.seedDefaultTagsResult;
 
 export default superAdminSlice.reducer;

@@ -14,6 +14,8 @@ import superAdminReducer from "../../features/superAdmin/store/superAdminSlice";
 import { userReducer } from "../../features/user/store/userSlice";
 import studentReducer from "../../features/student/store/studentSlice";
 import subjectReducer from "../../features/subject/store/subjectSlice";
+import tagReducer from "../../features/tag/store/tagSlice";
+import documentReducer from "../../features/document/store/documentSlice";
 import chapterReducer from "../../features/chapter/store/chapterSlice";
 import courseReducer from "../../features/course/store/courseSlice";
 import courseClassSlice from "../../features/courseClass/store/courseClassSlice";
@@ -58,6 +60,8 @@ export const store = configureStore({
     user: userReducer,
     student: studentReducer,
     subject: subjectReducer,
+    tag: tagReducer,
+    document: documentReducer,
     chapter: chapterReducer,
     course: courseReducer,
     courseClass: courseClassSlice,

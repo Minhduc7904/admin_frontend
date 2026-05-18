@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 import { Upload, Check, Video, Music, FileText, File, X } from 'lucide-react'
 import { Spinner } from '../../../../shared/components/loading'
-import { Button } from '../../../../shared/components'
+import { Button, Input } from '../../../../shared/components'
 import { formatFileSize } from '../../utils/media.utils'
 
 const getMediaIcon = (mimeType) => {
@@ -68,10 +68,12 @@ export const UploadTab = ({ state, handlers, meta, multiple = false }) => {
         uploadSuccess,
         uploadedMediaData,
         uploadedMediaList,
+        pendingAltTexts,
+        altError,
     } = state
 
-    const { dragEnter, dragOver, dragLeave, drop, fileChange, upload, reset } = handlers
-    const { accept, label, maxSize } = meta
+    const { dragEnter, dragOver, dragLeave, drop, fileChange, upload, reset, setAltText } = handlers
+    const { accept, label, maxSize, requiresAlt } = meta
 
     const handleInputChange = (e) => {
         fileChange(e)
@@ -79,7 +81,7 @@ export const UploadTab = ({ state, handlers, meta, multiple = false }) => {
         if (fileInputRef.current) fileInputRef.current.value = ''
     }
 
-    const removePending = (idx) => {
+    const removePending = () => {
         // rebuild without this index — trigger via fake event is not ideal;
         // instead we call reset to clear all (simplest UX)
         reset()
@@ -164,6 +166,22 @@ export const UploadTab = ({ state, handlers, meta, multiple = false }) => {
                         ) : (
                             <div className="text-sm text-foreground-light">
                                 {pendingFiles.length} file đã chọn
+                            </div>
+                        )}
+
+                        {requiresAlt && (
+                            <div className="space-y-3">
+                                {pendingFiles.map((file, idx) => (
+                                    <Input
+                                        key={`${file.name}-${idx}`}
+                                        label={pendingFiles.length > 1 ? `Alt cho ảnh ${idx + 1}` : 'Alt ảnh'}
+                                        value={pendingAltTexts[idx] || ''}
+                                        onChange={(e) => setAltText(idx, e.target.value)}
+                                        placeholder="Nhập mô tả ảnh cho SEO..."
+                                        required
+                                    />
+                                ))}
+                                {altError && <p className="text-sm text-red-500">{altError}</p>}
                             </div>
                         )}
 

@@ -4,6 +4,7 @@ import axios from "axios";
 import {
   getPresignedUploadUrlAsync,
   postUploadCompleteAsync,
+  updateMediaAsync,
   selectMediaLoadingGetPresignedUrl,
   selectMediaLoadingCompleteUpload,
 } from "../store/mediaSlice";
@@ -18,6 +19,8 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
   // --- Pending (selected but not yet uploaded) ---
   const [pendingFiles, setPendingFiles] = useState([]);   // File[]
   const [pendingPreviews, setPendingPreviews] = useState([]); // string[] (objectURLs)
+  const [pendingAltTexts, setPendingAltTexts] = useState([]);
+  const [altError, setAltError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
   // --- Upload progress ---
@@ -32,11 +35,11 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
 
   const acceptedTypes = useMemo(() => {
     switch (type) {
-      case "IMAGE":    return { accept: "image/*", maxSize: 5, label: "ảnh" };
-      case "VIDEO":    return { accept: "video/*", maxSize: 100, label: "video" };
-      case "AUDIO":    return { accept: "audio/*", maxSize: 20, label: "audio" };
-      case "DOCUMENT": return { accept: ".pdf,.doc,.docx,.xls,.xlsx", maxSize: 10, label: "tài liệu" };
-      default:         return { accept: "*/*", maxSize: 100, label: "tất cả" };
+      case "IMAGE":    return { accept: "image/*", maxSize: 50, label: "ảnh", requiresAlt: true };
+      case "VIDEO":    return { accept: "video/*", maxSize: 1000, label: "video" };
+      case "AUDIO":    return { accept: "audio/*", maxSize: 200, label: "audio" };
+      case "DOCUMENT": return { accept: ".pdf,.doc,.docx,.xls,.xlsx", maxSize: 1000, label: "tài liệu" };
+      default:         return { accept: "*/*", maxSize: 1000, label: "tất cả" };
     }
   }, [type]);
 
@@ -65,6 +68,8 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
     const chosen = multiple ? files : [files[0]];
     setPendingFiles(chosen);
     setPendingPreviews(buildPreviews(chosen));
+    setPendingAltTexts(chosen.map(() => ""));
+    setAltError("");
 
     // Reset result state
     setUploadSuccess(false);
@@ -77,7 +82,7 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
   /**
    * Upload a single File, returns media result or null
    */
-  const processFile = async (file, localPreview) => {
+  const processFile = async (file, localPreview, altText) => {
     try {
       const presigned = await dispatch(
         getPresignedUploadUrlAsync({
@@ -104,9 +109,25 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
         })
       ).unwrap();
 
+      let result = completed.data;
+
+      if (type === "IMAGE" && altText?.trim()) {
+        try {
+          const updated = await dispatch(
+            updateMediaAsync({
+              id: result.mediaId,
+              data: { alt: altText.trim() },
+            })
+          ).unwrap();
+          if (updated?.data) result = updated.data;
+        } catch {
+          // Keep the uploaded media even if the non-critical alt update fails.
+        }
+      }
+
       return localPreview
-        ? { ...completed.data, _localPreview: localPreview }
-        : completed.data;
+        ? { ...result, _localPreview: localPreview }
+        : result;
     } catch (error) {
       console.error("Upload thất bại:", error);
       return null;
@@ -118,6 +139,10 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
    */
   const handleUpload = async () => {
     if (!pendingFiles.length || isUploading) return;
+    if (type === "IMAGE" && pendingAltTexts.some((alt) => !alt.trim())) {
+      setAltError("Vui lòng nhập alt cho tất cả ảnh trước khi tải lên");
+      return;
+    }
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -126,7 +151,7 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
     const uploadedList = [];
 
     for (let i = 0; i < pendingFiles.length; i++) {
-      const result = await processFile(pendingFiles[i], pendingPreviews[i]);
+      const result = await processFile(pendingFiles[i], pendingPreviews[i], pendingAltTexts[i]);
       if (result) {
         uploadedList.push(result);
         setUploadedCount(i + 1);
@@ -154,6 +179,8 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
     revokePreviews(pendingPreviews);
     setPendingFiles([]);
     setPendingPreviews([]);
+    setPendingAltTexts([]);
+    setAltError("");
     setIsUploading(false);
     setUploadProgress(0);
     setUploadedCount(0);
@@ -177,6 +204,8 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
       // pending
       pendingFiles,
       pendingPreviews,
+      pendingAltTexts,
+      altError,
       isDragging,
       // progress
       isUploading,
@@ -199,6 +228,10 @@ export const useMediaUpload = ({ type, folderId, onUploaded, multiple = false })
       dragOver:  (e) => e.preventDefault(),
       drop: handleDrop,
       upload: handleUpload,
+      setAltText: (index, value) => {
+        setPendingAltTexts((prev) => prev.map((alt, i) => (i === index ? value : alt)));
+        if (altError) setAltError("");
+      },
       reset,
     },
     acceptedTypes,

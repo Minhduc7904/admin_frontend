@@ -45,4 +45,12 @@ export const superAdminApi = {
     regenerateQuestionSlugs: (data = {}) => {
         return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.REGENERATE_QUESTION_SLUGS, data);
     },
+
+    /**
+     * Seed default tags by upsert.
+     * POST /super-admin/tags/seed-defaults
+     */
+    seedDefaultTags: (data = {}) => {
+        return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.SEED_DEFAULT_TAGS, data);
+    },
 };

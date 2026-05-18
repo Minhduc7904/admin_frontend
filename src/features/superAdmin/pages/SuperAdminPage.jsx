@@ -4,6 +4,7 @@ import {
     UpdateAdminDirectApiCard,
     GenerateMissingExamSlugsApiCard,
     RegenerateQuestionSlugsApiCard,
+    SeedDefaultTagsApiCard,
 } from '../component';
 
 export const SuperAdminPage = () => {
@@ -19,6 +20,7 @@ export const SuperAdminPage = () => {
             <ResetPasswordByDateRangeApiCard />
             <GenerateMissingExamSlugsApiCard />
             <RegenerateQuestionSlugsApiCard />
+            <SeedDefaultTagsApiCard />
             <CleanupUnusedMediaOlderThan30DaysApiCard />
             <UpdateAdminDirectApiCard />
         </div>

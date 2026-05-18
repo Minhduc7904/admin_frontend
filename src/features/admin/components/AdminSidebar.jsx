@@ -16,6 +16,7 @@ import {
   Trophy,
   Globe2,
   ImageUp,
+  Tags,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -240,6 +241,26 @@ export const AdminSidebar = () => {
     },
 
     {
+      label: 'Tài liệu',
+      items: [
+        {
+          key: 'tags',
+          name: 'Quản lý tag',
+          href: ROUTES.TAGS,
+          icon: Tags,
+          permission: PERMISSIONS.ADMIN_PAGE.TAGS,
+        },
+        {
+          key: 'documents',
+          name: 'Quản lý tài liệu',
+          href: ROUTES.DOCUMENTS,
+          icon: FileText,
+          permission: PERMISSIONS.ADMIN_PAGE.DOCUMENTS,
+        },
+      ],
+    },
+
+    {
       label: 'Tài nguyên',
       items: [
         {
@@ -279,3 +300,4 @@ export const AdminSidebar = () => {
 
   return <Sidebar sections={sections} />;
 };
+

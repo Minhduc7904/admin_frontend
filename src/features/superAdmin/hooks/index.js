@@ -3,3 +3,4 @@ export * from './useUpdateAdminDirect';
 export * from './useCleanupUnusedMediaOlderThan30Days';
 export * from './useGenerateMissingExamSlugs';
 export * from './useRegenerateQuestionSlugs';
+export * from './useSeedDefaultTags';

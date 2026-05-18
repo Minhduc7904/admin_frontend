@@ -33,6 +33,8 @@ import {
 } from '../features/courseClass/pages';
 import { CourseClassDetailLayout } from '../features/courseClass/layouts';
 import { SubjectPage } from '../features/subject/pages/SubjectPage';
+import { TagPage } from '../features/tag/pages';
+import { CreateDocumentPage, DocumentDetail, DocumentListPage, EditDocumentPage } from '../features/document/pages';
 import { StudentList, StudentDetail, StudentRole, StudentMedia, StudentClasses, StudentCourses, StudentAttendance } from '../features/student/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
@@ -186,6 +188,51 @@ export const adminRouter = [
                     {
                         path: ROUTES.SUBJECTS,
                         element: <SubjectPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.TAGS} />,
+                children: [
+                    {
+                        path: ROUTES.TAGS,
+                        element: <TagPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.DOCUMENTS} />,
+                children: [
+                    {
+                        path: ROUTES.DOCUMENTS,
+                        element: <DocumentListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.DOCUMENT_CREATE} />,
+                children: [
+                    {
+                        path: ROUTES.DOCUMENT_CREATE,
+                        element: <CreateDocumentPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.DOCUMENT_DETAIL} />,
+                children: [
+                    {
+                        path: ROUTES.DOCUMENT_DETAIL(':id'),
+                        element: <DocumentDetail />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.DOCUMENT_EDIT} />,
+                children: [
+                    {
+                        path: ROUTES.DOCUMENT_EDIT(':id'),
+                        element: <EditDocumentPage />,
                     },
                 ],
             },

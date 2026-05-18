@@ -18,6 +18,8 @@ export { classStudentApi } from './classStudentApi';
 export { attendanceApi } from './attendanceApi';
 export { courseEnrollmentApi } from './courseEnrollmentApi';
 export { subjectApi } from './subjectApi';
+export { tagApi } from './tagApi';
+export { documentApi } from './documentApi';
 export { chapterApi } from './chapterApi';
 export { learningItemApi } from './learningItemApi';
 export { lessonApi } from './lessonApi';
