@@ -76,7 +76,7 @@ const hasSeoData = (document) =>
     ].some(Boolean);
 
 const mapDocumentToFormData = (document) => {
-    const content = document?.processedContent || document?.content || '';
+    const content = document?.processedMarkdownContent || document?.content || '';
     const thumbnailMediaId = getUsageMediaId(document, 'documentThumbnail');
 
     return {

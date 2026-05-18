@@ -14,7 +14,9 @@ export const EditDocumentContent = ({ onClose, documentContent, onSuccess }) => 
     const loadingUpdate = useSelector(selectDocumentContentLoadingUpdate)
     const [errors, setErrors] = useState({})
 
-    const [content, setContent] = useState(documentContent?.content || '')
+    const [processedMarkdownContent, setProcessedMarkdownContent] = useState(
+        documentContent?.processedMarkdownContent || ''
+    )
     const [mediaIds, setMediaIds] = useState([])
     const [openMediaPicker, setOpenMediaPicker] = useState(false)
 
@@ -39,7 +41,7 @@ export const EditDocumentContent = ({ onClose, documentContent, onSuccess }) => 
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        const validationErrors = validateForm(content)
+        const validationErrors = validateForm(processedMarkdownContent)
 
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors)
@@ -47,7 +49,7 @@ export const EditDocumentContent = ({ onClose, documentContent, onSuccess }) => 
         }
 
         const data = {
-            content: content.trim(),
+            content: processedMarkdownContent.trim(),
         }
 
         if (mediaIds && mediaIds.length > 0) {
@@ -79,8 +81,8 @@ export const EditDocumentContent = ({ onClose, documentContent, onSuccess }) => 
                         error={errors.content}
                         label="Nội dung tài liệu"
                         name="content"
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
+                        value={processedMarkdownContent}
+                        onChange={(e) => setProcessedMarkdownContent(e.target.value)}
                         placeholder="Nhập nội dung tài liệu..."
                         rows={8}
                         required
