@@ -25,6 +25,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
         subjectId: '',
         description: '',
         visibility: COURSE_VISIBILITIES.DRAFT,
+        isEnded: 'false',
         teacherId: '',
     })
 
@@ -39,6 +40,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             subjectId: course.subjectId?.toString() || '',
             description: course.description || '',
             visibility: course.visibility || COURSE_VISIBILITIES.DRAFT,
+            isEnded: course.isEnded ? 'true' : 'false',
             teacherId: course.teacherId?.toString() || '',
         })
     }, [course])
@@ -98,6 +100,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             subjectId: formData.subjectId ? parseInt(formData.subjectId) : undefined,
             description: formData.description?.trim() || undefined,
             visibility: formData.visibility,
+            isEnded: formData.isEnded === 'true',
             teacherId: formData.teacherId ? parseInt(formData.teacherId) : undefined,
         }
 
@@ -117,6 +120,11 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
         { value: COURSE_VISIBILITIES.DRAFT, label: 'Bản nháp' },
         { value: COURSE_VISIBILITIES.PUBLISHED, label: 'Đã xuất bản' },
         { value: COURSE_VISIBILITIES.PRIVATE, label: 'Riêng tư' },
+    ]
+
+    const progressOptions = [
+        { value: 'false', label: 'Đang diễn ra' },
+        { value: 'true', label: 'Đã kết thúc' },
     ]
 
     if (!course) return null
@@ -183,6 +191,16 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                         setFormData((prev) => ({ ...prev, visibility: value }))
                     }
                     options={visibilityOptions}
+                />
+
+                <Dropdown
+                    label="Tiến độ"
+                    required
+                    value={formData.isEnded}
+                    onChange={(value) =>
+                        setFormData((prev) => ({ ...prev, isEnded: value }))
+                    }
+                    options={progressOptions}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
