@@ -11,6 +11,7 @@ export const studentApi = {
      * @param {string} params.sortBy - Sort field
      * @param {string} params.sortOrder - Sort order (asc/desc)
      * @param {string} params.grade - Grade filter
+     * @param {number} params.highSchoolGraduationYear - High school graduation year filter
      * @param {boolean} params.isActive - Active status filter
      * @returns {Promise<Object>} Students list with pagination
      */
@@ -23,6 +24,7 @@ export const studentApi = {
      * @param {Object} params - Search parameters
      * @param {string} params.search - Search keyword
      * @param {number} params.grade - Grade filter (1-12)
+     * @param {number} params.highSchoolGraduationYear - High school graduation year filter
      * @param {boolean} params.isActive - Active status filter
      * @returns {Promise<Object>} Students search results
      */

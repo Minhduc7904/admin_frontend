@@ -85,6 +85,7 @@ export const StudentList = () => {
     const [itemsPerPage, setItemsPerPage] = useState(pagination.limit || 10)
 
     const [selectedGrade, setSelectedGrade] = useState(filters.grade || '')
+    const [selectedGraduationYear, setSelectedGraduationYear] = useState(filters.highSchoolGraduationYear || '')
     const [selectedIsActive, setSelectedIsActive] = useState(filters.isActive || '')
     const [selectedHasParentZaloId, setSelectedHasParentZaloId] = useState(filters.hasParentZaloId || '')
     const [fromDate, setFromDate] = useState(filters.fromDate || '')
@@ -114,6 +115,7 @@ export const StudentList = () => {
         itemsPerPage,
         debouncedSearch,
         selectedGrade,
+        selectedGraduationYear,
         selectedIsActive,
         selectedHasParentZaloId,
         fromDate,
@@ -129,6 +131,7 @@ export const StudentList = () => {
         }
     }, [
         selectedGrade,
+        selectedGraduationYear,
         selectedIsActive,
         fromDate,
         toDate,
@@ -143,6 +146,7 @@ export const StudentList = () => {
             limit: itemsPerPage,
             search: debouncedSearch || undefined,
             grade: selectedGrade || undefined,
+            highSchoolGraduationYear: selectedGraduationYear || undefined,
             fromDate: fromDate || undefined,
             toDate: toDate || undefined,
             sortBy: sort.field,
@@ -161,6 +165,7 @@ export const StudentList = () => {
     const loadStats = () => {
         const params = {
             grade: selectedGrade || undefined,
+            highSchoolGraduationYear: selectedGraduationYear || undefined,
             fromDate: fromDate || undefined,
             toDate: toDate || undefined,
         }
@@ -203,6 +208,11 @@ export const StudentList = () => {
     const handleGradeChange = (value) => {
         setSelectedGrade(value)
         resetPageAndSetFilter({ grade: value })
+    }
+
+    const handleGraduationYearChange = (value) => {
+        setSelectedGraduationYear(value)
+        resetPageAndSetFilter({ highSchoolGraduationYear: value })
     }
 
     const handleIsActiveChange = (value) => {
@@ -302,6 +312,8 @@ export const StudentList = () => {
                     onSearchChange={handleSearchChangeWrapper}
                     grade={selectedGrade}
                     onGradeChange={handleGradeChange}
+                    highSchoolGraduationYear={selectedGraduationYear}
+                    onHighSchoolGraduationYearChange={handleGraduationYearChange}
                     isActive={selectedIsActive}
                     onIsActiveChange={handleIsActiveChange}
                     hasParentZaloId={selectedHasParentZaloId}

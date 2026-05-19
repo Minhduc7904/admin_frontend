@@ -33,6 +33,30 @@ export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
         );
     };
 
+    const getProgressBadge = (isEnded) => {
+        const badges = {
+            true: {
+                label: 'Đã kết thúc',
+                className: 'bg-gray-100 text-gray-700'
+            },
+            false: {
+                label: 'Đang diễn ra',
+                className: 'bg-green-100 text-green-700'
+            },
+        };
+
+        const badge = badges[isEnded] || {
+            label: 'Chưa cập nhật',
+            className: 'bg-yellow-100 text-yellow-700'
+        };
+
+        return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className}`}>
+                {badge.label}
+            </span>
+        );
+    };
+
     const columns = [
         {
             key: 'courseId',
@@ -126,6 +150,11 @@ export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
             key: 'visibility',
             label: 'Trạng thái',
             render: (course) => getVisibilityBadge(course.visibility)
+        },
+        {
+            key: 'progress',
+            label: 'Tiến độ',
+            render: (course) => getProgressBadge(course.isEnded)
         },
         {
             key: 'actions',

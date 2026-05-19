@@ -133,6 +133,10 @@ export const API_ENDPOINTS = {
     GENERATE_MISSING_EXAM_SLUGS: "/super-admin/exams/generate-missing-slugs",
     REGENERATE_QUESTION_SLUGS: "/super-admin/questions/regenerate-slugs",
     SEED_DEFAULT_TAGS: "/super-admin/tags/seed-defaults",
+    PROMOTE_STUDENT_GRADE_BY_GRADUATION_YEAR:
+      "/super-admin/students/promote-grade/by-graduation-year",
+    UPDATE_STUDENT_GRADUATION_YEAR_BY_GRADE:
+      "/super-admin/students/graduation-year/by-grade",
   },
   STUDENTS: {
     LIST: "/students",

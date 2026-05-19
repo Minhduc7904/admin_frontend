@@ -75,6 +75,10 @@ export const StudentProfileOverview = ({ student, loading }) => {
                                 <GraduationCap className="w-3 h-3" />
                                 Khối {student.grade}
                             </span>
+                            <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-white/10 text-white border border-white/10">
+                                <GraduationCap className="w-3 h-3" />
+                                TN {student.highSchoolGraduationYear || '-'}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -83,6 +87,7 @@ export const StudentProfileOverview = ({ student, loading }) => {
                     <DataPill icon={AtSign} label="Username" value={student.username} />
                     <DataPill icon={Mail} label="Email" value={student.email} />
                     <DataPill icon={School} label="Trường" value={student.school || 'Chưa cập nhật'} />
+                    <DataPill icon={GraduationCap} label="Năm TN cấp 3" value={student.highSchoolGraduationYear || 'Chưa cập nhật'} />
                     <DataPill icon={Phone} label="SĐT học sinh" value={student.studentPhone || 'Chưa cập nhật'} />
                 </div>
             </div>

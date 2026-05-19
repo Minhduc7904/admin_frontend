@@ -6,6 +6,7 @@ import { TIME_RANGE_OPTIONS } from '../../../core/constants/options'
 import { getDateRange } from '../../../shared/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { CourseClassSearchMultiSelect } from '../../courseClass/components/CourseClassSearchMultiSelect'
+import { getHighSchoolGraduationYearOptions } from '../utils/graduationYear'
 
 const TIME_RANGE_OPTIONS_WITH_DEFAULT = [
     { value: '', label: 'Tùy chọn' },
@@ -18,11 +19,15 @@ const PARENT_ZALO_OPTIONS = [
     { value: 'false', label: 'Chưa đăng ký PH Zalo' },
 ]
 
+const HIGH_SCHOOL_GRADUATION_YEAR_OPTIONS = getHighSchoolGraduationYearOptions()
+
 export const StudentFilters = ({
     search,
     onSearchChange,
     grade,
     onGradeChange,
+    highSchoolGraduationYear,
+    onHighSchoolGraduationYearChange,
     isActive,
     onIsActiveChange,
     hasParentZaloId,
@@ -57,7 +62,7 @@ export const StudentFilters = ({
         <div className="mb-4 bg-white border border-border rounded-sm p-4 space-y-4">
             {/* ===== Row 1: Search + main filters ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-5">
+                <div className="lg:col-span-4">
                     <SearchInput
                         value={search}
                         onChange={onSearchChange}
@@ -76,6 +81,15 @@ export const StudentFilters = ({
 
                 <div className="lg:col-span-2">
                     <Dropdown
+                        value={highSchoolGraduationYear}
+                        onChange={onHighSchoolGraduationYearChange}
+                        options={HIGH_SCHOOL_GRADUATION_YEAR_OPTIONS}
+                        placeholder="Năm tốt nghiệp"
+                    />
+                </div>
+
+                <div className="lg:col-span-2">
+                    <Dropdown
                         value={isActive}
                         onChange={onIsActiveChange}
                         options={IS_ACTIVE_OPTIONS}
@@ -83,7 +97,7 @@ export const StudentFilters = ({
                     />
                 </div>
 
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-2">
                     <Dropdown
                         value={hasParentZaloId}
                         onChange={onHasParentZaloIdChange}

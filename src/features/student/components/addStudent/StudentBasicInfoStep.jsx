@@ -103,6 +103,18 @@ export const StudentBasicInfoStep = ({
                 error={errors.grade}
             />
 
+            <Input
+                error={errors.highSchoolGraduationYear}
+                name="highSchoolGraduationYear"
+                label="Năm tốt nghiệp cấp 3"
+                type="number"
+                value={formData.highSchoolGraduationYear}
+                onChange={onChange}
+                placeholder="VD: 2026"
+                min={1900}
+                max={2200}
+            />
+
             {/* School */}
             <Input
                 name="school"

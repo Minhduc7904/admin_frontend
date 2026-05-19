@@ -15,6 +15,7 @@ import {
 } from '../../store/studentSlice';
 import { StudentBasicInfoStep } from './StudentBasicInfoStep';
 import { StudentEnrollmentStep } from './StudentEnrollmentStep';
+import { getSuggestedHighSchoolGraduationYear } from '../../utils/graduationYear';
 
 /* ===================== HELPERS ===================== */
 const toSlug = (str) =>
@@ -124,6 +125,16 @@ export const AddStudent = ({ onClose, loadStudents }) => {
         if (!formData.firstName?.trim()) errors.firstName = 'Tên không được để trống';
         if (!formData.lastName?.trim()) errors.lastName = 'Họ không được để trống';
         if (!formData.grade) errors.grade = 'Khối lớp không được để trống';
+        if (
+            formData.highSchoolGraduationYear &&
+            (
+                !Number.isInteger(Number(formData.highSchoolGraduationYear)) ||
+                Number(formData.highSchoolGraduationYear) < 1900 ||
+                Number(formData.highSchoolGraduationYear) > 2200
+            )
+        ) {
+            errors.highSchoolGraduationYear = 'Năm tốt nghiệp phải là số từ 1900 đến 2200';
+        }
 
         if (formData.studentPhone && !/^[0-9]{10,11}$/.test(formData.studentPhone))
             errors.studentPhone = 'SĐT không hợp lệ (10–11 số)';
@@ -154,6 +165,9 @@ export const AddStudent = ({ onClose, loadStudents }) => {
             firstName: formData.firstName.trim(),
             lastName: formData.lastName.trim(),
             grade: Number(formData.grade),
+            highSchoolGraduationYear: formData.highSchoolGraduationYear
+                ? Number(formData.highSchoolGraduationYear)
+                : undefined,
             school: formData.school?.trim() || undefined,
             studentPhone: formData.studentPhone?.trim() || undefined,
             parentPhone: formData.parentPhone?.trim() || undefined,
@@ -170,12 +184,15 @@ export const AddStudent = ({ onClose, loadStudents }) => {
             confirmPassword: '',
             firstName: '',
             lastName: '',
+            grade: '',
+            highSchoolGraduationYear: '',
             school: '',
             studentPhone: '',
             parentPhone: '',
         }));
         if (loadStudents) await loadStudents();
         setCurrentStep(1);
+        onClose?.();
     };
 
     /* ===================== STEP 2 SELECTION ===================== */
@@ -195,7 +212,10 @@ export const AddStudent = ({ onClose, loadStudents }) => {
     };
 
     const onGradeChange = (value) => {
-        dispatch(setAddStudentFormData({ grade: value }));
+        dispatch(setAddStudentFormData({
+            grade: value,
+            highSchoolGraduationYear: getSuggestedHighSchoolGraduationYear(value),
+        }));
     }
 
     /* ===================== RENDER ===================== */

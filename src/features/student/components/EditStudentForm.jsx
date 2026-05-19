@@ -14,6 +14,7 @@ export const EditStudentForm = ({ student, onClose }) => {
         lastName: '',
         email: '',
         grade: '',
+        highSchoolGraduationYear: '',
         school: '',
         studentPhone: '',
         parentPhone: '',
@@ -28,6 +29,7 @@ export const EditStudentForm = ({ student, onClose }) => {
                 lastName: student.lastName || '',
                 email: student.email || '',
                 grade: student.grade?.toString() || '',
+                highSchoolGraduationYear: student.highSchoolGraduationYear?.toString() || '',
                 school: student.school || '',
                 studentPhone: student.studentPhone || '',
                 parentPhone: student.parentPhone || '',
@@ -68,6 +70,17 @@ export const EditStudentForm = ({ student, onClose }) => {
 
         if (!formData.grade) {
             newErrors.grade = 'Khối lớp không được để trống';
+        }
+
+        if (
+            formData.highSchoolGraduationYear &&
+            (
+                !Number.isInteger(Number(formData.highSchoolGraduationYear)) ||
+                Number(formData.highSchoolGraduationYear) < 1900 ||
+                Number(formData.highSchoolGraduationYear) > 2200
+            )
+        ) {
+            newErrors.highSchoolGraduationYear = 'Năm tốt nghiệp phải là số từ 1900 đến 2200';
         }
 
         if (formData.studentPhone && !/^[0-9]{10,11}$/.test(formData.studentPhone)) {
@@ -116,6 +129,11 @@ export const EditStudentForm = ({ student, onClose }) => {
             }
             if (formData.grade !== originalData.grade) {
                 updateData.grade = parseInt(formData.grade);
+            }
+            if (formData.highSchoolGraduationYear !== originalData.highSchoolGraduationYear) {
+                updateData.highSchoolGraduationYear = formData.highSchoolGraduationYear
+                    ? parseInt(formData.highSchoolGraduationYear)
+                    : undefined;
             }
             if ((formData.school?.trim() || '') !== (originalData.school || '')) {
                 updateData.school = formData.school?.trim() || undefined;
@@ -213,6 +231,20 @@ export const EditStudentForm = ({ student, onClose }) => {
                         onChange={(value) => setFormData(prev => ({ ...prev, grade: value }))}
                         options={gradeOptions}
                         error={errors.grade}
+                    />
+                </div>
+
+                <div>
+                    <Input
+                        error={errors.highSchoolGraduationYear}
+                        name="highSchoolGraduationYear"
+                        label="Năm tốt nghiệp cấp 3"
+                        type="number"
+                        value={formData.highSchoolGraduationYear}
+                        onChange={handleChange}
+                        placeholder="VD: 2026"
+                        min={1900}
+                        max={2200}
                     />
                 </div>
 

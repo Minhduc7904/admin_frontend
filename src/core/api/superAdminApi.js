@@ -53,4 +53,26 @@ export const superAdminApi = {
     seedDefaultTags: (data = {}) => {
         return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.SEED_DEFAULT_TAGS, data);
     },
+
+    /**
+     * Promote student grade by high school graduation year.
+     * POST /super-admin/students/promote-grade/by-graduation-year
+     */
+    promoteStudentGradeByGraduationYear: (data) => {
+        return axiosClient.post(
+            API_ENDPOINTS.SUPER_ADMIN.PROMOTE_STUDENT_GRADE_BY_GRADUATION_YEAR,
+            data
+        );
+    },
+
+    /**
+     * Update high school graduation year for students by grade.
+     * POST /super-admin/students/graduation-year/by-grade
+     */
+    updateStudentGraduationYearByGrade: (data) => {
+        return axiosClient.post(
+            API_ENDPOINTS.SUPER_ADMIN.UPDATE_STUDENT_GRADUATION_YEAR_BY_GRADE,
+            data
+        );
+    },
 };

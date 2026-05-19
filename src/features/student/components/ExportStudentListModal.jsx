@@ -15,6 +15,7 @@ import { IS_ACTIVE_OPTIONS } from '../../../core/constants/is-active.constants'
 import { TIME_RANGE_OPTIONS } from '../../../core/constants/options'
 import { getDateRange } from '../../../shared/utils'
 import { CourseClassSearchMultiSelect } from '../../courseClass/components/CourseClassSearchMultiSelect'
+import { getHighSchoolGraduationYearOptions } from '../utils/graduationYear'
 
 import {
     selectStudentExportExcelOptions,
@@ -25,6 +26,8 @@ const TIME_RANGE_OPTIONS_WITH_DEFAULT = [
     { value: '', label: 'Tùy chọn' },
     ...TIME_RANGE_OPTIONS,
 ]
+
+const HIGH_SCHOOL_GRADUATION_YEAR_OPTIONS = getHighSchoolGraduationYearOptions()
 
 export const ExportStudentListModal = ({
     isOpen,
@@ -112,6 +115,13 @@ export const ExportStudentListModal = ({
                             />
 
                             <Dropdown
+                                value={exportOptions.highSchoolGraduationYear}
+                                onChange={updateOption('highSchoolGraduationYear')}
+                                options={HIGH_SCHOOL_GRADUATION_YEAR_OPTIONS}
+                                placeholder="Năm tốt nghiệp"
+                            />
+
+                            <Dropdown
                                 value={
                                     exportOptions.isActive === true
                                         ? 'true'
@@ -190,6 +200,7 @@ export const ExportStudentListModal = ({
                                 <Checkbox label="SĐT phụ huynh" checked={exportOptions.includeParentPhone} onChange={handleCheckboxChange('includeParentPhone')} />
                                 <Checkbox label="SĐT học sinh" checked={exportOptions.includeStudentPhone} onChange={handleCheckboxChange('includeStudentPhone')} />
                                 <Checkbox label="Khối" checked={exportOptions.includeGrade} onChange={handleCheckboxChange('includeGrade')} />
+                                <Checkbox label="Năm tốt nghiệp cấp 3" checked={exportOptions.includeHighSchoolGraduationYear} onChange={handleCheckboxChange('includeHighSchoolGraduationYear')} />
                                 <Checkbox label="Email" checked={exportOptions.includeEmail} onChange={handleCheckboxChange('includeEmail')} />
                                 <Checkbox label="Trạng thái" checked={exportOptions.includeIsActive} onChange={handleCheckboxChange('includeIsActive')} />
                                 <Checkbox label="Ngày tạo" checked={exportOptions.includeCreatedAt} onChange={handleCheckboxChange('includeCreatedAt')} />

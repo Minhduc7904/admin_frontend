@@ -69,6 +69,33 @@ const VisibilityBadge = ({ visibility }) => {
     )
 }
 
+const ProgressBadge = ({ isEnded }) => {
+    const badges = {
+        true: {
+            label: 'Đã kết thúc',
+            className: 'bg-gray-50 text-gray-700',
+        },
+        false: {
+            label: 'Đang diễn ra',
+            className: 'bg-green-50 text-green-700',
+        },
+    }
+
+    const badge = badges[isEnded] || {
+        label: 'Chưa cập nhật',
+        className: 'bg-yellow-50 text-yellow-700',
+    }
+
+    return (
+        <span
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${badge.className}`}
+        >
+            <Clock className="w-3 h-3" />
+            {badge.label}
+        </span>
+    )
+}
+
 export const CourseInfoTab = ({ course, loading, onEdit }) => {
     if (loading) {
         return <SkeletonCard count={2} className="rounded-sm" />
@@ -130,6 +157,12 @@ export const CourseInfoTab = ({ course, loading, onEdit }) => {
                                 label="Trạng thái"
                                 value=""
                                 badge={<VisibilityBadge visibility={course.visibility} />}
+                            />
+                            <InfoRow
+                                icon={Clock}
+                                label="Tiến độ"
+                                value=""
+                                badge={<ProgressBadge isEnded={course.isEnded} />}
                             />
                         </div>
                     </div>

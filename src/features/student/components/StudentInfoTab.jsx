@@ -87,6 +87,11 @@ export const StudentInfoTab = ({ student, loading, onEdit }) => {
                             <InfoRow icon={AtSign} label="Tên đăng nhập" value={student.username} />
                             <InfoRow icon={Mail} label="Email" value={student.email} />
                             <InfoRow icon={GraduationCap} label="Khối lớp" value={`Khối ${student.grade}`} />
+                            <InfoRow
+                                icon={GraduationCap}
+                                label="Năm tốt nghiệp cấp 3"
+                                value={student.highSchoolGraduationYear || 'Chưa cập nhật'}
+                            />
                         </div>
                     </div>
 

@@ -21,6 +21,12 @@ const initialState = {
     loadingSeedDefaultTags: false,
     errorSeedDefaultTags: null,
     seedDefaultTagsResult: null,
+    loadingPromoteStudentGradeByGraduationYear: false,
+    errorPromoteStudentGradeByGraduationYear: null,
+    promoteStudentGradeByGraduationYearResult: null,
+    loadingUpdateStudentGraduationYearByGrade: false,
+    errorUpdateStudentGraduationYearByGrade: null,
+    updateStudentGraduationYearByGradeResult: null,
 };
 
 export const resetPasswordByDateRangeAsync = createAsyncThunk(
@@ -105,6 +111,36 @@ export const seedDefaultTagsAsync = createAsyncThunk(
     }
 );
 
+export const promoteStudentGradeByGraduationYearAsync = createAsyncThunk(
+    "superAdmin/promoteStudentGradeByGraduationYear",
+    async (payload, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.promoteStudentGradeByGraduationYear(payload),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Tang khoi hoc sinh theo nam tot nghiep thanh cong",
+                errorTitle: "Loi tang khoi hoc sinh theo nam tot nghiep",
+            }
+        );
+    }
+);
+
+export const updateStudentGraduationYearByGradeAsync = createAsyncThunk(
+    "superAdmin/updateStudentGraduationYearByGrade",
+    async (payload, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.updateStudentGraduationYearByGrade(payload),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Cap nhat nam tot nghiep hoc sinh theo khoi thanh cong",
+                errorTitle: "Loi cap nhat nam tot nghiep hoc sinh theo khoi",
+            }
+        );
+    }
+);
+
 export const superAdminSlice = createSlice({
     name: "superAdmin",
     initialState,
@@ -132,6 +168,14 @@ export const superAdminSlice = createSlice({
         clearSeedDefaultTagsState: (state) => {
             state.errorSeedDefaultTags = null;
             state.seedDefaultTagsResult = null;
+        },
+        clearPromoteStudentGradeByGraduationYearState: (state) => {
+            state.errorPromoteStudentGradeByGraduationYear = null;
+            state.promoteStudentGradeByGraduationYearResult = null;
+        },
+        clearUpdateStudentGraduationYearByGradeState: (state) => {
+            state.errorUpdateStudentGraduationYearByGrade = null;
+            state.updateStudentGraduationYearByGradeResult = null;
         },
     },
     extraReducers: (builder) => {
@@ -207,6 +251,30 @@ export const superAdminSlice = createSlice({
             .addCase(seedDefaultTagsAsync.rejected, (state, action) => {
                 state.loadingSeedDefaultTags = false;
                 state.errorSeedDefaultTags = action.payload;
+            })
+            .addCase(promoteStudentGradeByGraduationYearAsync.pending, (state) => {
+                state.loadingPromoteStudentGradeByGraduationYear = true;
+                state.errorPromoteStudentGradeByGraduationYear = null;
+            })
+            .addCase(promoteStudentGradeByGraduationYearAsync.fulfilled, (state, action) => {
+                state.loadingPromoteStudentGradeByGraduationYear = false;
+                state.promoteStudentGradeByGraduationYearResult = action.payload || null;
+            })
+            .addCase(promoteStudentGradeByGraduationYearAsync.rejected, (state, action) => {
+                state.loadingPromoteStudentGradeByGraduationYear = false;
+                state.errorPromoteStudentGradeByGraduationYear = action.payload;
+            })
+            .addCase(updateStudentGraduationYearByGradeAsync.pending, (state) => {
+                state.loadingUpdateStudentGraduationYearByGrade = true;
+                state.errorUpdateStudentGraduationYearByGrade = null;
+            })
+            .addCase(updateStudentGraduationYearByGradeAsync.fulfilled, (state, action) => {
+                state.loadingUpdateStudentGraduationYearByGrade = false;
+                state.updateStudentGraduationYearByGradeResult = action.payload || null;
+            })
+            .addCase(updateStudentGraduationYearByGradeAsync.rejected, (state, action) => {
+                state.loadingUpdateStudentGraduationYearByGrade = false;
+                state.errorUpdateStudentGraduationYearByGrade = action.payload;
             });
     },
 });
@@ -218,6 +286,8 @@ export const {
     clearGenerateMissingExamSlugsState,
     clearRegenerateQuestionSlugsState,
     clearSeedDefaultTagsState,
+    clearPromoteStudentGradeByGraduationYearState,
+    clearUpdateStudentGraduationYearByGradeState,
 } = superAdminSlice.actions;
 
 export const selectSuperAdminLoadingResetPasswordByDateRange = (state) =>
@@ -261,5 +331,19 @@ export const selectSuperAdminErrorSeedDefaultTags = (state) =>
     state.superAdmin.errorSeedDefaultTags;
 export const selectSuperAdminSeedDefaultTagsResult = (state) =>
     state.superAdmin.seedDefaultTagsResult;
+
+export const selectSuperAdminLoadingPromoteStudentGradeByGraduationYear = (state) =>
+    state.superAdmin.loadingPromoteStudentGradeByGraduationYear;
+export const selectSuperAdminErrorPromoteStudentGradeByGraduationYear = (state) =>
+    state.superAdmin.errorPromoteStudentGradeByGraduationYear;
+export const selectSuperAdminPromoteStudentGradeByGraduationYearResult = (state) =>
+    state.superAdmin.promoteStudentGradeByGraduationYearResult;
+
+export const selectSuperAdminLoadingUpdateStudentGraduationYearByGrade = (state) =>
+    state.superAdmin.loadingUpdateStudentGraduationYearByGrade;
+export const selectSuperAdminErrorUpdateStudentGraduationYearByGrade = (state) =>
+    state.superAdmin.errorUpdateStudentGraduationYearByGrade;
+export const selectSuperAdminUpdateStudentGraduationYearByGradeResult = (state) =>
+    state.superAdmin.updateStudentGraduationYearByGradeResult;
 
 export default superAdminSlice.reducer;

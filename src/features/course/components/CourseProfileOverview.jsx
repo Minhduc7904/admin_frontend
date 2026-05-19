@@ -1,4 +1,4 @@
-import { BookOpen, User, Calendar, Eye, DollarSign, Tag } from 'lucide-react';
+import { BookOpen, User, Calendar, Eye, DollarSign, Tag, Clock } from 'lucide-react';
 import { SkeletonText } from '../../../shared/components/loading';
 
 const StatusBadge = ({ visibility }) => {
@@ -22,6 +22,31 @@ const StatusBadge = ({ visibility }) => {
     return (
         <span className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wide ${badge.className}`}>
             <Eye className="w-3 h-3" />
+            {badge.label}
+        </span>
+    );
+};
+
+const ProgressBadge = ({ isEnded }) => {
+    const badges = {
+        true: {
+            label: 'Đã kết thúc',
+            className: 'bg-gray-500/15 text-gray-300'
+        },
+        false: {
+            label: 'Đang diễn ra',
+            className: 'bg-green-500/15 text-green-500'
+        },
+    };
+
+    const badge = badges[isEnded] || {
+        label: 'Chưa cập nhật',
+        className: 'bg-yellow-500/15 text-yellow-500'
+    };
+
+    return (
+        <span className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wide ${badge.className}`}>
+            <Clock className="w-3 h-3" />
             {badge.label}
         </span>
     );
@@ -87,6 +112,7 @@ export const CourseProfileOverview = ({ course, loading }) => {
                         )}
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                             <StatusBadge visibility={course.visibility} />
+                            <ProgressBadge isEnded={course.isEnded} />
                             {course.isFree && (
                                 <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-green-500/15 text-green-500 border border-green-500/20">
                                     <Tag className="w-3 h-3" />

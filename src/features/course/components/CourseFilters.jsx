@@ -7,6 +7,8 @@ export const CourseFilters = ({
     onGradeChange,
     visibility,
     onVisibilityChange,
+    isEnded,
+    onIsEndedChange,
     academicYear,
     onAcademicYearChange
 }) => {
@@ -31,6 +33,11 @@ export const CourseFilters = ({
         { value: 'DRAFT', label: 'Bản nháp' },
         { value: 'PUBLISHED', label: 'Đã xuất bản' },
         { value: 'PRIVATE', label: 'Riêng tư' },
+    ];
+
+    const progressOptions = [
+        { value: 'false', label: 'Đang diễn ra' },
+        { value: 'true', label: 'Đã kết thúc' },
     ];
 
     // Generate academic year options (current year ± 2 years)
@@ -69,6 +76,14 @@ export const CourseFilters = ({
                         onChange={onVisibilityChange}
                         options={visibilityOptions}
                         placeholder="Chọn trạng thái"
+                    />
+                </div>
+                <div className="w-48">
+                    <Dropdown
+                        value={isEnded}
+                        onChange={onIsEndedChange}
+                        options={progressOptions}
+                        placeholder="Tiến độ"
                     />
                 </div>
                 <div className="w-48">

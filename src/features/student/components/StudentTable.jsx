@@ -44,9 +44,14 @@ export const StudentTable = ({
             sortDirection: sort?.field === 'grade' ? sort.direction : null,
             onSort: (direction) => onSortChange('grade', direction),
             render: (student) => (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                    Khối {student.grade}
-                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                        Khối {student.grade}
+                    </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        TN {student.highSchoolGraduationYear || '-'}
+                    </span>
+                </div>
             ),
         },
         {

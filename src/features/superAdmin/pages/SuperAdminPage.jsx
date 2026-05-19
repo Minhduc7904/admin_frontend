@@ -5,6 +5,8 @@ import {
     GenerateMissingExamSlugsApiCard,
     RegenerateQuestionSlugsApiCard,
     SeedDefaultTagsApiCard,
+    PromoteStudentGradeByGraduationYearApiCard,
+    UpdateStudentGraduationYearByGradeApiCard,
 } from '../component';
 
 export const SuperAdminPage = () => {
@@ -18,6 +20,8 @@ export const SuperAdminPage = () => {
             </div>
 
             <ResetPasswordByDateRangeApiCard />
+            <PromoteStudentGradeByGraduationYearApiCard />
+            <UpdateStudentGraduationYearByGradeApiCard />
             <GenerateMissingExamSlugsApiCard />
             <RegenerateQuestionSlugsApiCard />
             <SeedDefaultTagsApiCard />

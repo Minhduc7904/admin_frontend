@@ -20,6 +20,7 @@ export const CourseList = ({
     search,
     grade,
     visibility,
+    isEnded,
     academicYear,
 
     // pagination state
@@ -33,6 +34,7 @@ export const CourseList = ({
     onSearchChange,
     onGradeChange,
     onVisibilityChange,
+    onIsEndedChange,
     onAcademicYearChange,
     onPageChange,
     onItemsPerPageChange,
@@ -101,6 +103,8 @@ export const CourseList = ({
                     onGradeChange={onGradeChange}
                     visibility={visibility}
                     onVisibilityChange={onVisibilityChange}
+                    isEnded={isEnded}
+                    onIsEndedChange={onIsEndedChange}
                     academicYear={academicYear}
                     onAcademicYearChange={onAcademicYearChange}
                 />

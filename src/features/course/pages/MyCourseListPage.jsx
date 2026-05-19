@@ -48,6 +48,7 @@ export const MyCourseListPage = ({
     const currentPage = pagination.page
     const itemsPerPage = pagination.limit
     const visibility = filters.visibility || ''
+    const isEnded = filters.isEnded || ''
     const academicYear = filters.academicYear || ''
 
     /* ===================== EFFECT ===================== */
@@ -60,12 +61,14 @@ export const MyCourseListPage = ({
         debouncedSearch,
         grade,
         visibility,
+        isEnded,
         academicYear,
         teacherId,
     ])
 
     /* ===================== DATA ===================== */
     const loadCourses = () => {
+        const normalizedIsEnded = isEnded === 'true' ? true : false
         dispatch(
             getMyCoursesAsync({
                 page: currentPage,
@@ -73,6 +76,7 @@ export const MyCourseListPage = ({
                 search: debouncedSearch || undefined,
                 grade: grade || undefined,
                 visibility: visibility || undefined,
+                isEnded: normalizedIsEnded,
                 academicYear: academicYear || undefined,
                 teacherId: teacherId || undefined,
             }),
@@ -99,6 +103,11 @@ export const MyCourseListPage = ({
     const handleAcademicYearChange = (value) => {
         dispatch(setMyCoursesPagination({ page: 1 }))
         dispatch(setMyCoursesFilters({ academicYear: value }))
+    }
+
+    const handleIsEndedChange = (value) => {
+        dispatch(setMyCoursesPagination({ page: 1 }))
+        dispatch(setMyCoursesFilters({ isEnded: value }))
     }
 
     const handlePageChange = (page) => {
@@ -164,6 +173,7 @@ export const MyCourseListPage = ({
             grade={grade}
             visibility={visibility}
             academicYear={academicYear}
+            isEnded={isEnded}
 
             /* pagination */
             currentPage={currentPage}
@@ -177,6 +187,7 @@ export const MyCourseListPage = ({
             onGradeChange={handleGradeChange}
             onVisibilityChange={handleVisibilityChange}
             onAcademicYearChange={handleAcademicYearChange}
+            onIsEndedChange={handleIsEndedChange}
             onPageChange={handlePageChange}
             onItemsPerPageChange={handleItemsPerPageChange}
             onView={handleView}
