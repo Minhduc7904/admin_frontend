@@ -35,6 +35,12 @@ import { CourseClassDetailLayout } from '../features/courseClass/layouts';
 import { SubjectPage } from '../features/subject/pages/SubjectPage';
 import { TagPage } from '../features/tag/pages';
 import { CreateDocumentPage, DocumentDetail, DocumentListPage, EditDocumentPage } from '../features/document/pages';
+import {
+    CreateTeacherProfilePage,
+    EditTeacherProfilePage,
+    TeacherProfileDetail,
+    TeacherProfileListPage,
+} from '../features/teacherProfile/pages';
 import { StudentList, StudentDetail, StudentRole, StudentMedia, StudentClasses, StudentCourses, StudentAttendance } from '../features/student/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
@@ -233,6 +239,42 @@ export const adminRouter = [
                     {
                         path: ROUTES.DOCUMENT_EDIT(':id'),
                         element: <EditDocumentPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.TEACHER_PROFILES} />,
+                children: [
+                    {
+                        path: ROUTES.TEACHER_PROFILES,
+                        element: <TeacherProfileListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.TEACHER_PROFILE_CREATE} />,
+                children: [
+                    {
+                        path: ROUTES.TEACHER_PROFILE_CREATE,
+                        element: <CreateTeacherProfilePage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.TEACHER_PROFILE_DETAIL} />,
+                children: [
+                    {
+                        path: ROUTES.TEACHER_PROFILE_DETAIL(':id'),
+                        element: <TeacherProfileDetail />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.TEACHER_PROFILE_EDIT} />,
+                children: [
+                    {
+                        path: ROUTES.TEACHER_PROFILE_EDIT(':id'),
+                        element: <EditTeacherProfilePage />,
                     },
                 ],
             },

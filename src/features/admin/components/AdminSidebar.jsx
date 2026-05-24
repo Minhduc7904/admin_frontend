@@ -17,6 +17,7 @@ import {
   Globe2,
   ImageUp,
   Tags,
+  UserRoundCheck,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -256,6 +257,13 @@ export const AdminSidebar = () => {
           href: ROUTES.DOCUMENTS,
           icon: FileText,
           permission: PERMISSIONS.ADMIN_PAGE.DOCUMENTS,
+        },
+        {
+          key: 'teacherProfiles',
+          name: 'SEO profile giáo viên',
+          href: ROUTES.TEACHER_PROFILES,
+          icon: UserRoundCheck,
+          permission: PERMISSIONS.ADMIN_PAGE.TEACHER_PROFILES,
         },
       ],
     },

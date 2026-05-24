@@ -20,6 +20,7 @@ export { courseEnrollmentApi } from './courseEnrollmentApi';
 export { subjectApi } from './subjectApi';
 export { tagApi } from './tagApi';
 export { documentApi } from './documentApi';
+export { teacherProfileApi } from './teacherProfileApi';
 export { chapterApi } from './chapterApi';
 export { learningItemApi } from './learningItemApi';
 export { lessonApi } from './lessonApi';
