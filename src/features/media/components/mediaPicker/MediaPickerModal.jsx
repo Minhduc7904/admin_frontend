@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { X, Folder, Image as ImageIcon, Upload, Check } from 'lucide-react'
 
 import { Modal } from '../../../../shared/components/ui'
@@ -83,6 +83,34 @@ export const MediaPickerModal = ({
         folders.loadRootFolders()
     }, [isOpen])
 
+    const selectedMediaItems = useMemo(() => {
+        const selectedIds = multiple
+            ? selection.selectedMediaIds
+            : selection.selectedMediaId
+                ? [selection.selectedMediaId]
+                : []
+
+        if (!selectedIds.length) return []
+
+        const mediaById = new Map()
+        library.media.forEach((media) => mediaById.set(media.mediaId, media))
+        upload.state.uploadedMediaList.forEach((media) => mediaById.set(media.mediaId, media))
+        if (upload.state.uploadedMediaData?.mediaId) {
+            mediaById.set(upload.state.uploadedMediaData.mediaId, upload.state.uploadedMediaData)
+        }
+
+        return selectedIds
+            .map((mediaId) => mediaById.get(mediaId))
+            .filter(Boolean)
+    }, [
+        library.media,
+        multiple,
+        selection.selectedMediaId,
+        selection.selectedMediaIds,
+        upload.state.uploadedMediaData,
+        upload.state.uploadedMediaList,
+    ])
+
     if (!isOpen) return null
 
     /* -----------------
@@ -90,9 +118,9 @@ export const MediaPickerModal = ({
     ----------------- */
     const handleSave = () => {
         if (multiple) {
-            onSave(selection.selectedMediaIds)
+            onSave(selection.selectedMediaIds, selectedMediaItems)
         } else {
-            onSave(selection.selectedMediaId)
+            onSave(selection.selectedMediaId, selectedMediaItems[0] || null)
         }
     }
 

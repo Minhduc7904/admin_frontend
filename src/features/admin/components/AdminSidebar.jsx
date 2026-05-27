@@ -295,12 +295,14 @@ export const AdminSidebar = () => {
           name: 'SEO slots',
           href: ROUTES.SEO_SLOTS,
           icon: Globe2,
+          permission: PERMISSIONS.ADMIN_PAGE.SEO_SLOTS
         },
         {
           key: 'seoPages',
           name: 'SEO theo page',
           href: ROUTES.SEO_PAGES,
           icon: ImageUp,
+          permission: PERMISSIONS.ADMIN_PAGE.SEO_MEDIA
         },
       ],
     },
