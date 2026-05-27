@@ -3,3 +3,5 @@ export * from './TeacherProfileFilters';
 export * from './TeacherProfileTable';
 export * from './TeacherProfileCreatePreview';
 export * from './TeacherProfileDetailContent';
+export * from './TeacherProfileImageField';
+export * from './TeacherProfileScheduleImagesField';

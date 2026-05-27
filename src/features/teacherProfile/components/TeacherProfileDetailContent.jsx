@@ -9,43 +9,129 @@ const InfoItem = ({ label, value }) => (
     </div>
 );
 
+const getInitials = (name = '') =>
+    name
+        .trim()
+        .split(/\s+/)
+        .slice(-2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase() || '?';
+
+const ProfileImage = ({ teacherProfile }) =>
+    teacherProfile.profileImageUrl ? (
+        <img
+            src={teacherProfile.profileImageUrl}
+            alt={teacherProfile.displayName}
+            className="aspect-square w-full rounded-sm border border-border object-cover"
+        />
+    ) : (
+        <div className="flex aspect-square w-full items-center justify-center rounded-sm border border-border bg-gray-50 text-3xl font-semibold text-foreground-light">
+            {getInitials(teacherProfile.displayName)}
+        </div>
+    );
+
+const ScheduleImages = ({
+    title = 'Ảnh lịch dạy',
+    emptyMessage = 'Chưa có ảnh lịch dạy.',
+    altPrefix = 'Ảnh lịch dạy',
+    mediaIdLabel = 'Schedule image media IDs',
+    mediaIds = [],
+    imageUrls = [],
+}) => {
+    const hasImages = mediaIds.length > 0 || imageUrls.length > 0;
+
+    return (
+        <section className="rounded-sm border border-border bg-white p-5">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">{title}</h2>
+            {hasImages ? (
+                <div className="space-y-4">
+                    {imageUrls.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {imageUrls.map((url, index) => (
+                                <a
+                                    key={`${url}-${index}`}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="block overflow-hidden rounded-sm border border-border bg-gray-50"
+                                >
+                                    <img
+                                        src={url}
+                                        alt={`${altPrefix} ${index + 1}`}
+                                        className="aspect-video w-full object-cover"
+                                    />
+                                </a>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {mediaIds.map((mediaId) => (
+                                <div
+                                    key={mediaId}
+                                    className="flex aspect-video items-center justify-center rounded-sm border border-border bg-gray-50 text-sm font-medium text-foreground-light"
+                                >
+                                    Media #{mediaId}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {mediaIds.length > 0 && (
+                        <dl className="text-sm">
+                            <InfoItem label={mediaIdLabel} value={mediaIds.map((mediaId) => `#${mediaId}`).join(', ')} />
+                        </dl>
+                    )}
+                </div>
+            ) : (
+                <p className="text-sm text-foreground-light">{emptyMessage}</p>
+            )}
+        </section>
+    );
+};
+
 export const TeacherProfileDetailContent = ({ teacherProfile }) => {
     return (
         <div className="space-y-6">
             <section className="rounded-sm border border-border bg-white p-5">
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <Badge variant="info" size="small">
-                        {TEACHER_PROFILE_VISIBILITY_LABELS[teacherProfile.visibility] || teacherProfile.visibility}
-                    </Badge>
-                    <Badge variant={teacherProfile.isFeatured ? 'primary' : 'secondary'} size="small">
-                        {teacherProfile.isFeatured ? 'Nổi bật' : 'Không nổi bật'}
-                    </Badge>
-                </div>
-                <h1 className="text-2xl font-bold text-foreground">{teacherProfile.displayName}</h1>
-                <p className="mt-1 font-mono text-sm text-foreground-light">{teacherProfile.slug}</p>
-                {teacherProfile.headline && (
-                    <p className="mt-3 text-sm font-medium text-foreground">{teacherProfile.headline}</p>
-                )}
-                {teacherProfile.shortDescription && (
-                    <p className="mt-2 text-sm text-foreground-light">{teacherProfile.shortDescription}</p>
-                )}
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-[160px_minmax(0,1fr)]">
+                    <ProfileImage teacherProfile={teacherProfile} />
+                    <div className="min-w-0">
+                        <div className="mb-3 flex flex-wrap items-center gap-2">
+                            <Badge variant="info" size="small">
+                                {TEACHER_PROFILE_VISIBILITY_LABELS[teacherProfile.visibility] || teacherProfile.visibility}
+                            </Badge>
+                            <Badge variant={teacherProfile.isFeatured ? 'primary' : 'secondary'} size="small">
+                                {teacherProfile.isFeatured ? 'Nổi bật' : 'Không nổi bật'}
+                            </Badge>
+                        </div>
+                        <h1 className="text-2xl font-bold text-foreground">{teacherProfile.displayName}</h1>
+                        <p className="mt-1 font-mono text-sm text-foreground-light">{teacherProfile.slug}</p>
+                        {teacherProfile.headline && (
+                            <p className="mt-3 text-sm font-medium text-foreground">{teacherProfile.headline}</p>
+                        )}
+                        {teacherProfile.shortDescription && (
+                            <p className="mt-2 text-sm text-foreground-light">{teacherProfile.shortDescription}</p>
+                        )}
 
-                <div className="mt-5 grid grid-cols-2 gap-4 rounded-sm border border-border p-4 text-sm md:grid-cols-4">
-                    <div>
-                        <div className="text-foreground-light">Lượt xem</div>
-                        <div className="font-semibold text-foreground">{teacherProfile.viewCount || 0}</div>
-                    </div>
-                    <div>
-                        <div className="text-foreground-light">SEO score</div>
-                        <div className="font-semibold text-foreground">{teacherProfile.seoScore ?? '-'}</div>
-                    </div>
-                    <div>
-                        <div className="text-foreground-light">Thứ tự</div>
-                        <div className="font-semibold text-foreground">{teacherProfile.sortOrder ?? '-'}</div>
-                    </div>
-                    <div>
-                        <div className="text-foreground-light">Cập nhật</div>
-                        <div className="font-semibold text-foreground">{formatDateTime(teacherProfile.updatedAt)}</div>
+                        <div className="mt-5 grid grid-cols-2 gap-4 rounded-sm border border-border p-4 text-sm md:grid-cols-4">
+                            <div>
+                                <div className="text-foreground-light">Lượt xem</div>
+                                <div className="font-semibold text-foreground">{teacherProfile.viewCount || 0}</div>
+                            </div>
+                            <div>
+                                <div className="text-foreground-light">SEO score</div>
+                                <div className="font-semibold text-foreground">{teacherProfile.seoScore ?? '-'}</div>
+                            </div>
+                            <div>
+                                <div className="text-foreground-light">Thứ tự</div>
+                                <div className="font-semibold text-foreground">{teacherProfile.sortOrder ?? '-'}</div>
+                            </div>
+                            <div>
+                                <div className="text-foreground-light">Cập nhật</div>
+                                <div className="font-semibold text-foreground">{formatDateTime(teacherProfile.updatedAt)}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -68,6 +154,19 @@ export const TeacherProfileDetailContent = ({ teacherProfile }) => {
                             <InfoItem label="Thành tích" value={teacherProfile.achievements} />
                         </dl>
                     </section>
+
+                    <ScheduleImages
+                        mediaIds={teacherProfile.scheduleImageMediaIds || []}
+                        imageUrls={teacherProfile.scheduleImageUrls || []}
+                    />
+                    <ScheduleImages
+                        title="Ảnh lớp học"
+                        emptyMessage="Chưa có ảnh lớp học."
+                        altPrefix="Ảnh lớp học"
+                        mediaIdLabel="Classroom image media IDs"
+                        mediaIds={teacherProfile.classroomImageMediaIds || []}
+                        imageUrls={teacherProfile.classroomImageUrls || []}
+                    />
 
                     <section className="rounded-sm border border-border bg-white p-5">
                         <h2 className="mb-4 text-lg font-semibold text-foreground">Tiểu sử</h2>

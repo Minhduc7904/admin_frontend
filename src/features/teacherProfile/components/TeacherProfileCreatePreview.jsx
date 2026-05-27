@@ -9,6 +9,72 @@ const getMissingFields = (formData) => {
     return missing;
 };
 
+const getInitials = (name = '') =>
+    name
+        .trim()
+        .split(/\s+/)
+        .slice(-2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase() || '?';
+
+const PreviewImage = ({ formData }) => {
+    if (formData.profileImageUrl) {
+        return (
+            <img
+                src={formData.profileImageUrl}
+                alt={formData.displayName || 'Ảnh giáo viên'}
+                className="h-20 w-20 rounded-sm border border-slate-200 object-cover"
+            />
+        );
+    }
+
+    return (
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-sm border border-slate-200 bg-slate-50 text-center text-sm font-semibold text-slate-500">
+            {formData.profileImageMediaId ? `#${formData.profileImageMediaId}` : getInitials(formData.displayName)}
+        </div>
+    );
+};
+
+const ScheduleImagePreview = ({
+    title = 'Ảnh lịch dạy',
+    emptyMessage = 'Chưa chọn ảnh lịch dạy.',
+    altPrefix = 'Ảnh lịch dạy',
+    mediaIds = [],
+    imageUrls = [],
+}) => {
+    const hasImages = imageUrls.length > 0 || mediaIds.length > 0;
+
+    return (
+        <section className="space-y-3">
+            <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
+            {hasImages ? (
+                <div className="grid grid-cols-2 gap-3">
+                    {imageUrls.map((url, index) => (
+                        <img
+                            key={`${url}-${index}`}
+                            src={url}
+                            alt={`${altPrefix} ${index + 1}`}
+                            className="aspect-video w-full rounded-sm border border-slate-200 object-cover"
+                        />
+                    ))}
+                    {imageUrls.length === 0 &&
+                        mediaIds.map((mediaId) => (
+                            <div
+                                key={mediaId}
+                                className="flex aspect-video items-center justify-center rounded-sm border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500"
+                            >
+                                #{mediaId}
+                            </div>
+                        ))}
+                </div>
+            ) : (
+                <p className="text-sm text-slate-500">{emptyMessage}</p>
+            )}
+        </section>
+    );
+};
+
 export const TeacherProfileCreatePreview = ({ formData }) => {
     const missingFields = getMissingFields(formData);
 
@@ -28,14 +94,17 @@ export const TeacherProfileCreatePreview = ({ formData }) => {
                         </Badge>
                     </div>
 
-                    <div>
-                        <div className="text-sm font-semibold text-blue-700">Preview hồ sơ giáo viên</div>
-                        <h2 className="mt-2 text-2xl font-bold text-blue-900">
-                            {formData.displayName || 'Tên giáo viên'}
-                        </h2>
-                        <p className="mt-1 text-sm text-slate-500">
-                            {formData.headline || 'Headline sẽ hiển thị tại đây'}
-                        </p>
+                    <div className="flex items-center gap-4">
+                        <PreviewImage formData={formData} />
+                        <div className="min-w-0">
+                            <div className="text-sm font-semibold text-blue-700">Preview hồ sơ giáo viên</div>
+                            <h2 className="mt-2 break-words text-2xl font-bold text-blue-900">
+                                {formData.displayName || 'Tên giáo viên'}
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-500">
+                                {formData.headline || 'Headline sẽ hiển thị tại đây'}
+                            </p>
+                        </div>
                     </div>
 
                     <div className="rounded-sm border border-slate-200 bg-slate-50 p-4">
@@ -88,6 +157,18 @@ export const TeacherProfileCreatePreview = ({ formData }) => {
                         </div>
                     </dl>
                 </section>
+
+                <ScheduleImagePreview
+                    mediaIds={formData.scheduleImageMediaIds}
+                    imageUrls={formData.scheduleImageUrls}
+                />
+                <ScheduleImagePreview
+                    title="Ảnh lớp học"
+                    emptyMessage="Chưa chọn ảnh lớp học."
+                    altPrefix="Ảnh lớp học"
+                    mediaIds={formData.classroomImageMediaIds}
+                    imageUrls={formData.classroomImageUrls}
+                />
 
                 <section className="space-y-3">
                     <h3 className="text-sm font-semibold text-slate-700">SEO</h3>

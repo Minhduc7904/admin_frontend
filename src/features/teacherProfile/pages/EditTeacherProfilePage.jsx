@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
 import { InlineLoading } from '../../../shared/components';
 import { Spinner } from '../../../shared/components/loading';
+import { MediaPickerModal } from '../../media/components/mediaPicker/MediaPickerModal';
 import { TeacherProfileCreatePreview, TeacherProfileForm } from '../components';
 import { useTeacherProfileForm } from '../hooks/useTeacherProfileForm';
 import {
@@ -57,6 +58,12 @@ const EditTeacherProfileContent = ({ teacherProfile }) => {
                         onChange={form.handleChange}
                         onSwitchChange={form.handleSwitchChange}
                         onModeSwitchChange={form.handleModeSwitchChange}
+                        onOpenImagePicker={form.openImagePicker}
+                        onClearProfileImage={form.clearProfileImage}
+                        onOpenScheduleImagePicker={form.openScheduleImagePicker}
+                        onClearScheduleImages={form.clearScheduleImages}
+                        onOpenClassroomImagePicker={form.openClassroomImagePicker}
+                        onClearClassroomImages={form.clearClassroomImages}
                         onSubmit={form.submit}
                         onCancel={() => navigate(ROUTES.TEACHER_PROFILE_DETAIL(teacherProfile.teacherProfileId))}
                         submitLabel="Cập nhật hồ sơ"
@@ -65,6 +72,35 @@ const EditTeacherProfileContent = ({ teacherProfile }) => {
 
                 <TeacherProfileCreatePreview formData={form.formData} />
             </div>
+
+            <MediaPickerModal
+                isOpen={form.isImagePickerOpen}
+                onClose={form.closeImagePicker}
+                onSave={form.saveProfileImage}
+                selectedMediaId={form.formData.profileImageMediaId || null}
+                title="Chọn ảnh giáo viên"
+                type="IMAGE"
+            />
+
+            <MediaPickerModal
+                isOpen={form.isScheduleImagePickerOpen}
+                onClose={form.closeScheduleImagePicker}
+                onSave={form.saveScheduleImages}
+                selectedMediaId={form.formData.scheduleImageMediaIds}
+                title="Chọn ảnh lịch dạy"
+                type="IMAGE"
+                multiple
+            />
+
+            <MediaPickerModal
+                isOpen={form.isClassroomImagePickerOpen}
+                onClose={form.closeClassroomImagePicker}
+                onSave={form.saveClassroomImages}
+                selectedMediaId={form.formData.classroomImageMediaIds}
+                title="Chọn ảnh lớp học"
+                type="IMAGE"
+                multiple
+            />
 
             {form.loading && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 backdrop-blur-sm">

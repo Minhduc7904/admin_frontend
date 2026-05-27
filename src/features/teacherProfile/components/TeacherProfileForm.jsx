@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Button, Input, Select, Switch, Tabs, Textarea } from '../../../shared/components/ui';
 import { TEACHER_PROFILE_VISIBILITY_OPTIONS } from '../constants/teacherProfile.constants';
+import { TeacherProfileImageField } from './TeacherProfileImageField';
+import { TeacherProfileScheduleImagesField } from './TeacherProfileScheduleImagesField';
 
 const FORM_TABS = [
     { key: 'basic', label: 'Cơ bản' },
@@ -29,6 +31,12 @@ export const TeacherProfileForm = ({
     onChange,
     onSwitchChange,
     onModeSwitchChange,
+    onOpenImagePicker,
+    onClearProfileImage,
+    onOpenScheduleImagePicker,
+    onClearScheduleImages,
+    onOpenClassroomImagePicker,
+    onClearClassroomImages,
     onSubmit,
     onCancel,
     submitLabel = 'Tạo hồ sơ giáo viên',
@@ -63,6 +71,13 @@ export const TeacherProfileForm = ({
                             value={formData.headline}
                             onChange={onChange}
                             placeholder="VD: Giáo viên Toán THPT 10 năm kinh nghiệm"
+                        />
+                        <TeacherProfileImageField
+                            value={formData.profileImageMediaId}
+                            imageUrl={formData.profileImageUrl}
+                            error={errors.profileImageMediaId}
+                            onOpen={onOpenImagePicker}
+                            onClear={onClearProfileImage}
                         />
                         <Textarea
                             label="Mô tả ngắn"
@@ -120,6 +135,23 @@ export const TeacherProfileForm = ({
                             onChange={onChange}
                             rows={4}
                             maxLength={2000}
+                        />
+                        <TeacherProfileScheduleImagesField
+                            mediaIds={formData.scheduleImageMediaIds}
+                            imageUrls={formData.scheduleImageUrls}
+                            error={errors.scheduleImageMediaIds}
+                            onOpen={onOpenScheduleImagePicker}
+                            onClear={onClearScheduleImages}
+                        />
+                        <TeacherProfileScheduleImagesField
+                            label="Ảnh lớp học"
+                            emptyTitle="Chưa chọn ảnh lớp học"
+                            altPrefix="Ảnh lớp học"
+                            mediaIds={formData.classroomImageMediaIds}
+                            imageUrls={formData.classroomImageUrls}
+                            error={errors.classroomImageMediaIds}
+                            onOpen={onOpenClassroomImagePicker}
+                            onClear={onClearClassroomImages}
                         />
                         <Textarea
                             label="Chứng chỉ"

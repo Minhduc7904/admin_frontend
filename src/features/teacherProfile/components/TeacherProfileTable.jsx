@@ -9,6 +9,15 @@ const getVisibilityVariant = (visibility) => {
     return 'secondary';
 };
 
+const getInitials = (name = '') =>
+    name
+        .trim()
+        .split(/\s+/)
+        .slice(-2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase() || '?';
+
 export const TeacherProfileTable = ({ teacherProfiles, loading, onView, onDelete }) => {
     const columns = [
         {
@@ -22,12 +31,25 @@ export const TeacherProfileTable = ({ teacherProfiles, loading, onView, onDelete
             key: 'displayName',
             label: 'Giáo viên',
             render: (profile) => (
-                <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-foreground">{profile.displayName}</div>
-                    <div className="truncate font-mono text-xs text-foreground-light">{profile.slug}</div>
-                    {profile.headline && (
-                        <div className="mt-1 max-w-md truncate text-xs text-foreground-light">{profile.headline}</div>
+                <div className="flex min-w-0 items-center gap-3">
+                    {profile.profileImageUrl ? (
+                        <img
+                            src={profile.profileImageUrl}
+                            alt={profile.displayName}
+                            className="h-12 w-12 rounded-sm border border-border object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border border-border bg-gray-50 text-sm font-semibold text-foreground-light">
+                            {getInitials(profile.displayName)}
+                        </div>
                     )}
+                    <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-foreground">{profile.displayName}</div>
+                        <div className="truncate font-mono text-xs text-foreground-light">{profile.slug}</div>
+                        {profile.headline && (
+                            <div className="mt-1 max-w-md truncate text-xs text-foreground-light">{profile.headline}</div>
+                        )}
+                    </div>
                 </div>
             ),
         },
