@@ -27,6 +27,9 @@ const initialState = {
     loadingUpdateStudentGraduationYearByGrade: false,
     errorUpdateStudentGraduationYearByGrade: null,
     updateStudentGraduationYearByGradeResult: null,
+    loadingHardDeleteStudentsByGraduationYearGradeExcludedCourses: false,
+    errorHardDeleteStudentsByGraduationYearGradeExcludedCourses: null,
+    hardDeleteStudentsByGraduationYearGradeExcludedCoursesResult: null,
 };
 
 export const resetPasswordByDateRangeAsync = createAsyncThunk(
@@ -74,8 +77,8 @@ export const generateMissingExamSlugsAsync = createAsyncThunk(
             thunkAPI,
             {
                 showSuccess: true,
-                successTitle: "Tao slug cho exam chua co slug thanh cong",
-                errorTitle: "Loi tao slug cho exam chua co slug",
+                successTitle: "Tạo slug cho exam chưa có slug thành công",
+                errorTitle: "Lỗi tạo slug cho exam chưa có slug",
             }
         );
     }
@@ -89,8 +92,8 @@ export const regenerateQuestionSlugsAsync = createAsyncThunk(
             thunkAPI,
             {
                 showSuccess: true,
-                successTitle: "Regenerate slug cho question thanh cong",
-                errorTitle: "Loi regenerate slug cho question",
+                successTitle: "Regenerate slug cho question thành công",
+                errorTitle: "Lỗi regenerate slug cho question",
             }
         );
     }
@@ -119,8 +122,8 @@ export const promoteStudentGradeByGraduationYearAsync = createAsyncThunk(
             thunkAPI,
             {
                 showSuccess: true,
-                successTitle: "Tang khoi hoc sinh theo nam tot nghiep thanh cong",
-                errorTitle: "Loi tang khoi hoc sinh theo nam tot nghiep",
+                successTitle: "Tăng khối học sinh theo năm tốt nghiệp thành công",
+                errorTitle: "Lỗi tăng khối học sinh theo năm tốt nghiệp",
             }
         );
     }
@@ -134,8 +137,23 @@ export const updateStudentGraduationYearByGradeAsync = createAsyncThunk(
             thunkAPI,
             {
                 showSuccess: true,
-                successTitle: "Cap nhat nam tot nghiep hoc sinh theo khoi thanh cong",
-                errorTitle: "Loi cap nhat nam tot nghiep hoc sinh theo khoi",
+                successTitle: "Cập nhật năm tốt nghiệp học sinh theo khối thành công",
+                errorTitle: "Lỗi cập nhật năm tốt nghiệp học sinh theo khối",
+            }
+        );
+    }
+);
+
+export const hardDeleteStudentsByGraduationYearGradeExcludedCoursesAsync = createAsyncThunk(
+    "superAdmin/hardDeleteStudentsByGraduationYearGradeExcludedCourses",
+    async (payload, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.hardDeleteStudentsByGraduationYearGradeExcludedCourses(payload),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Xóa cứng học sinh theo năm tốt nghiệp và khối thành công",
+                errorTitle: "Lỗi xóa cứng học sinh theo năm tốt nghiệp và khối",
             }
         );
     }
@@ -176,6 +194,10 @@ export const superAdminSlice = createSlice({
         clearUpdateStudentGraduationYearByGradeState: (state) => {
             state.errorUpdateStudentGraduationYearByGrade = null;
             state.updateStudentGraduationYearByGradeResult = null;
+        },
+        clearHardDeleteStudentsByGraduationYearGradeExcludedCoursesState: (state) => {
+            state.errorHardDeleteStudentsByGraduationYearGradeExcludedCourses = null;
+            state.hardDeleteStudentsByGraduationYearGradeExcludedCoursesResult = null;
         },
     },
     extraReducers: (builder) => {
@@ -275,6 +297,18 @@ export const superAdminSlice = createSlice({
             .addCase(updateStudentGraduationYearByGradeAsync.rejected, (state, action) => {
                 state.loadingUpdateStudentGraduationYearByGrade = false;
                 state.errorUpdateStudentGraduationYearByGrade = action.payload;
+            })
+            .addCase(hardDeleteStudentsByGraduationYearGradeExcludedCoursesAsync.pending, (state) => {
+                state.loadingHardDeleteStudentsByGraduationYearGradeExcludedCourses = true;
+                state.errorHardDeleteStudentsByGraduationYearGradeExcludedCourses = null;
+            })
+            .addCase(hardDeleteStudentsByGraduationYearGradeExcludedCoursesAsync.fulfilled, (state, action) => {
+                state.loadingHardDeleteStudentsByGraduationYearGradeExcludedCourses = false;
+                state.hardDeleteStudentsByGraduationYearGradeExcludedCoursesResult = action.payload || null;
+            })
+            .addCase(hardDeleteStudentsByGraduationYearGradeExcludedCoursesAsync.rejected, (state, action) => {
+                state.loadingHardDeleteStudentsByGraduationYearGradeExcludedCourses = false;
+                state.errorHardDeleteStudentsByGraduationYearGradeExcludedCourses = action.payload;
             });
     },
 });
@@ -288,6 +322,7 @@ export const {
     clearSeedDefaultTagsState,
     clearPromoteStudentGradeByGraduationYearState,
     clearUpdateStudentGraduationYearByGradeState,
+    clearHardDeleteStudentsByGraduationYearGradeExcludedCoursesState,
 } = superAdminSlice.actions;
 
 export const selectSuperAdminLoadingResetPasswordByDateRange = (state) =>
@@ -345,5 +380,12 @@ export const selectSuperAdminErrorUpdateStudentGraduationYearByGrade = (state) =
     state.superAdmin.errorUpdateStudentGraduationYearByGrade;
 export const selectSuperAdminUpdateStudentGraduationYearByGradeResult = (state) =>
     state.superAdmin.updateStudentGraduationYearByGradeResult;
+
+export const selectSuperAdminLoadingHardDeleteStudentsByGraduationYearGradeExcludedCourses = (state) =>
+    state.superAdmin.loadingHardDeleteStudentsByGraduationYearGradeExcludedCourses;
+export const selectSuperAdminErrorHardDeleteStudentsByGraduationYearGradeExcludedCourses = (state) =>
+    state.superAdmin.errorHardDeleteStudentsByGraduationYearGradeExcludedCourses;
+export const selectSuperAdminHardDeleteStudentsByGraduationYearGradeExcludedCoursesResult = (state) =>
+    state.superAdmin.hardDeleteStudentsByGraduationYearGradeExcludedCoursesResult;
 
 export default superAdminSlice.reducer;

@@ -141,6 +141,8 @@ export const API_ENDPOINTS = {
       "/super-admin/students/promote-grade/by-graduation-year",
     UPDATE_STUDENT_GRADUATION_YEAR_BY_GRADE:
       "/super-admin/students/graduation-year/by-grade",
+    HARD_DELETE_STUDENTS_BY_GRADUATION_YEAR_GRADE_EXCLUDED_COURSES:
+      "/super-admin/students/hard-delete-by-graduation-year-grade-excluded-courses",
   },
   STUDENTS: {
     LIST: "/students",

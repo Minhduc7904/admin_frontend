@@ -78,7 +78,7 @@ export const CleanupUnusedMediaOlderThan30DaysApiCard = () => {
             onToggle={() => setIsOpen((prev) => !prev)}
             method="POST"
             path="/super-admin/cleanup-unused-media-older-than-30-days"
-            description="Tim va xoa media khong co usage va da tao qua 30 ngay"
+            description="Tìm và xóa media không có usage và đã tạo quá 30 ngày"
             methodClassName="bg-rose-600"
             headerClassName="bg-rose-50 hover:bg-rose-100"
             pathClassName="text-rose-800"
@@ -103,7 +103,7 @@ export const CleanupUnusedMediaOlderThan30DaysApiCard = () => {
                 <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Response</h2>
 
                 {!result ? (
-                    <ApiResponsePlaceholder message="Chua co du lieu phan hoi. Hay bam Execute." />
+                    <ApiResponsePlaceholder message="Chưa có dữ liệu phản hồi. Hãy bấm Execute." />
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -146,7 +146,7 @@ export const CleanupUnusedMediaOlderThan30DaysApiCard = () => {
                                     columns={resultColumns}
                                     data={Array.isArray(responseResults) ? responseResults : []}
                                     loading={false}
-                                    emptyMessage="Khong co ban ghi ket qua"
+                                    emptyMessage="Không có bản ghi kết quả"
                                 />
                             </div>
                         </div>

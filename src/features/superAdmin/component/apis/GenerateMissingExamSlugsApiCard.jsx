@@ -98,7 +98,7 @@ export const GenerateMissingExamSlugsApiCard = () => {
             onToggle={() => setIsOpen((prev) => !prev)}
             method="POST"
             path="/super-admin/exams/generate-missing-slugs"
-            description="Generate slug cho tat ca exam chua co slug"
+            description="Tạo slug cho tất cả exam chưa có slug"
             methodClassName="bg-sky-600"
             headerClassName="bg-sky-50 hover:bg-sky-100"
             pathClassName="text-sky-800"
@@ -123,7 +123,7 @@ export const GenerateMissingExamSlugsApiCard = () => {
                 <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Response</h2>
 
                 {!result ? (
-                    <ApiResponsePlaceholder message="Chua co du lieu phan hoi. Hay bam Execute." />
+                    <ApiResponsePlaceholder message="Chưa có dữ liệu phản hồi. Hãy bấm Execute." />
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -158,7 +158,7 @@ export const GenerateMissingExamSlugsApiCard = () => {
                                     columns={resultColumns}
                                     data={Array.isArray(responseResults) ? responseResults : []}
                                     loading={false}
-                                    emptyMessage="Khong co ban ghi ket qua"
+                                    emptyMessage="Không có bản ghi kết quả"
                                 />
                             </div>
                         </div>

@@ -6,3 +6,4 @@ export * from './RegenerateQuestionSlugsApiCard';
 export * from './SeedDefaultTagsApiCard';
 export * from './PromoteStudentGradeByGraduationYearApiCard';
 export * from './UpdateStudentGraduationYearByGradeApiCard';
+export * from './HardDeleteStudentsByGraduationYearGradeExcludedCoursesApiCard';

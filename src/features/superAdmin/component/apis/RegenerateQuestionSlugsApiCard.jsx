@@ -101,7 +101,7 @@ export const RegenerateQuestionSlugsApiCard = () => {
             onToggle={() => setIsOpen((prev) => !prev)}
             method="POST"
             path="/super-admin/questions/regenerate-slugs"
-            description="Regenerate slug cho question co slug dang question-123"
+            description="Regenerate slug cho question có slug dạng question-123"
             methodClassName="bg-teal-600"
             headerClassName="bg-teal-50 hover:bg-teal-100"
             pathClassName="text-teal-800"
@@ -126,7 +126,7 @@ export const RegenerateQuestionSlugsApiCard = () => {
                 <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Response</h2>
 
                 {!result ? (
-                    <ApiResponsePlaceholder message="Chua co du lieu phan hoi. Hay bam Execute." />
+                    <ApiResponsePlaceholder message="Chưa có dữ liệu phản hồi. Hãy bấm Execute." />
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -163,7 +163,7 @@ export const RegenerateQuestionSlugsApiCard = () => {
                                     columns={resultColumns}
                                     data={Array.isArray(responseResults) ? responseResults : []}
                                     loading={false}
-                                    emptyMessage="Khong co ban ghi ket qua"
+                                    emptyMessage="Không có bản ghi kết quả"
                                 />
                             </div>
                         </div>

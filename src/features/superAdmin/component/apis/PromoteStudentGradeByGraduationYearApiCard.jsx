@@ -40,12 +40,12 @@ export const PromoteStudentGradeByGraduationYearApiCard = () => {
         const year = Number(highSchoolGraduationYear);
 
         if (!highSchoolGraduationYear) {
-            setFormError('Vui long nhap highSchoolGraduationYear.');
+            setFormError('Vui lòng nhập highSchoolGraduationYear.');
             return;
         }
 
         if (!Number.isInteger(year) || year < 1900 || year > 2200) {
-            setFormError('highSchoolGraduationYear phai la so nguyen tu 1900 den 2200.');
+            setFormError('highSchoolGraduationYear phải là số nguyên từ 1900 đến 2200.');
             return;
         }
 
@@ -86,7 +86,7 @@ export const PromoteStudentGradeByGraduationYearApiCard = () => {
             onToggle={() => setIsOpen((prev) => !prev)}
             method="POST"
             path="/super-admin/students/promote-grade/by-graduation-year"
-            description="Tang khoi hoc sinh theo nam tot nghiep cap 3"
+            description="Tăng khối học sinh theo năm tốt nghiệp cấp 3"
             methodClassName="bg-blue-600"
             headerClassName="bg-blue-50 hover:bg-blue-100"
             pathClassName="text-blue-800"
@@ -100,7 +100,7 @@ export const PromoteStudentGradeByGraduationYearApiCard = () => {
                     min={1900}
                     max={2200}
                     required
-                    helperText="Chi tang khoi cho hoc sinh co nam tot nghiep nay va dang duoi lop 12."
+                    helperText="Chỉ tăng khối cho học sinh có năm tốt nghiệp này và đang dưới lớp 12."
                 />
 
                 <ApiErrorAlert message={formError || error} />
@@ -122,7 +122,7 @@ export const PromoteStudentGradeByGraduationYearApiCard = () => {
                 <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Response</h2>
 
                 {!result ? (
-                    <ApiResponsePlaceholder message="Chua co du lieu phan hoi. Hay nhap nam tot nghiep va bam Execute." />
+                    <ApiResponsePlaceholder message="Chưa có dữ liệu phản hồi. Hãy nhập năm tốt nghiệp và bấm Execute." />
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -165,7 +165,7 @@ export const PromoteStudentGradeByGraduationYearApiCard = () => {
                                     columns={resultColumns}
                                     data={responseResults}
                                     loading={false}
-                                    emptyMessage="Response khong co danh sach results"
+                                    emptyMessage="Response không có danh sách results"
                                 />
                             </div>
                         </div>
