@@ -137,6 +137,8 @@ export const API_ENDPOINTS = {
     GENERATE_MISSING_EXAM_SLUGS: "/super-admin/exams/generate-missing-slugs",
     REGENERATE_QUESTION_SLUGS: "/super-admin/questions/regenerate-slugs",
     SEED_DEFAULT_TAGS: "/super-admin/tags/seed-defaults",
+    SYNC_PERMISSIONS_FROM_CODES:
+      "/super-admin/permissions/sync-from-codes",
     PROMOTE_STUDENT_GRADE_BY_GRADUATION_YEAR:
       "/super-admin/students/promote-grade/by-graduation-year",
     UPDATE_STUDENT_GRADUATION_YEAR_BY_GRADE:
