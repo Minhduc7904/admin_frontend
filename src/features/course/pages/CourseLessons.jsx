@@ -419,6 +419,7 @@ export const CourseLessons = () => {
                     {selectedItem?.type === 'lesson' ? (
                         <LessonDetail
                             lesson={currentLesson}
+                            courseId={courseId}
                             onAddLearningItem={handleAddLearningItem}
                             onEdit={() => handleEditLesson(currentLesson)}
                             onDelete={() => handleDeleteLesson(currentLesson)}
@@ -490,12 +491,18 @@ export const CourseLessons = () => {
                 onClose={handleCloseEditLesson}
                 title="Chỉnh sửa bài học"
                 subtitle={editingLesson?.title}
+                width="w-[760px]"
             >
-                <EditLesson
-                    onClose={handleCloseEditLesson}
-                    lesson={editingLesson}
-                    canSelectTeacher={true}
-                />
+                {editingLesson && (
+                    <EditLesson
+                        key={editingLesson.lessonId}
+                        onClose={handleCloseEditLesson}
+                        lesson={editingLesson}
+                        courseId={courseId}
+                        canSelectTeacher={true}
+                        loadLessons={loadLessons}
+                    />
+                )}
             </RightPanel>
 
             {/* Add Content Panels */}

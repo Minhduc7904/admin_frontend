@@ -27,6 +27,17 @@ const initialState = {
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
+    lessonVisibilityClasses: [],
+    lessonVisibilityClassesPagination: {
+        page: 1,
+        limit: 1000,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    loadingLessonVisibilityClasses: false,
+    loadingSwitchLessonVisibilityClassIds: [],
     error: null,
     filters: {
         search: "",
@@ -46,6 +57,46 @@ const initialState = {
 // ======================
 // Async thunks
 // ======================
+
+const getResponseData = (payload) => payload?.data ?? payload;
+
+const getCourseClassLessonRecord = (payload) => {
+    const data = getResponseData(payload);
+    return data?.courseClassLesson || data?.classLesson || data?.record || data;
+};
+
+const upsertCourseClassLessonRecord = (courseClass, rawRecord) => {
+    const record = {
+        ...rawRecord,
+        classId: rawRecord?.classId ?? rawRecord?.courseClassId,
+        lessonId: rawRecord?.lessonId ?? rawRecord?.lesson?.lessonId,
+    };
+
+    if (!courseClass || !record.classId || !record.lessonId) {
+        return;
+    }
+
+    courseClass.courseClassLesson = record;
+
+    if (!Array.isArray(courseClass.courseClassLessons)) {
+        courseClass.courseClassLessons = [];
+    }
+
+    const index = courseClass.courseClassLessons.findIndex(
+        (item) =>
+            Number(item.classId ?? item.courseClassId) === Number(record.classId) &&
+            Number(item.lessonId) === Number(record.lessonId)
+    );
+
+    if (index >= 0) {
+        courseClass.courseClassLessons[index] = {
+            ...courseClass.courseClassLessons[index],
+            ...record,
+        };
+    } else {
+        courseClass.courseClassLessons.push(record);
+    }
+};
 
 export const getAllCourseClassesAsync = createAsyncThunk(
     "courseClass/getAll",
@@ -117,6 +168,35 @@ export const deleteCourseClassAsync = createAsyncThunk(
             successTitle: "Xóa lớp học thành công",
             errorTitle: "Lỗi xóa lớp học",
         });
+    }
+);
+
+export const getCourseClassesForLessonVisibilityAsync = createAsyncThunk(
+    "courseClass/getForLessonVisibility",
+    async ({ courseId }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => courseClassApi.getForLessonVisibility(courseId),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: "Lỗi tải danh sách lớp học trong khóa",
+            }
+        );
+    }
+);
+
+export const switchCourseClassLessonVisibilityAsync = createAsyncThunk(
+    "courseClass/switchLessonVisibility",
+    async (data, thunkAPI) => {
+        return handleAsyncThunk(
+            () => courseClassApi.switchLessonVisibility(data),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Cập nhật hiển thị bài học thành công",
+                errorTitle: "Lỗi cập nhật hiển thị bài học",
+            }
+        );
     }
 );
 
@@ -207,7 +287,7 @@ export const courseClassSlice = createSlice({
                 state.loadingCreate = true;
                 state.error = null;
             })
-            .addCase(createCourseClassAsync.fulfilled, (state, action) => {
+            .addCase(createCourseClassAsync.fulfilled, (state) => {
                 state.loadingCreate = false;
             })
             .addCase(createCourseClassAsync.rejected, (state, action) => {
@@ -254,6 +334,52 @@ export const courseClassSlice = createSlice({
             .addCase(deleteCourseClassAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+
+            // Classes in course for lesson visibility switches
+            .addCase(getCourseClassesForLessonVisibilityAsync.pending, (state) => {
+                state.lessonVisibilityClasses = [];
+                state.loadingLessonVisibilityClasses = true;
+                state.error = null;
+            })
+            .addCase(getCourseClassesForLessonVisibilityAsync.fulfilled, (state, action) => {
+                state.loadingLessonVisibilityClasses = false;
+                state.lessonVisibilityClasses = action.payload.data || [];
+                state.lessonVisibilityClassesPagination =
+                    action.payload.meta || initialState.lessonVisibilityClassesPagination;
+            })
+            .addCase(getCourseClassesForLessonVisibilityAsync.rejected, (state, action) => {
+                state.lessonVisibilityClasses = [];
+                state.loadingLessonVisibilityClasses = false;
+                state.error = action.payload;
+            })
+
+            // Switch class-lesson visibility
+            .addCase(switchCourseClassLessonVisibilityAsync.pending, (state, action) => {
+                const classId = action.meta.arg.classId;
+                state.loadingSwitchLessonVisibilityClassIds.push(classId);
+                state.error = null;
+            })
+            .addCase(switchCourseClassLessonVisibilityAsync.fulfilled, (state, action) => {
+                const classId = action.meta.arg.classId;
+                const record = {
+                    ...action.meta.arg,
+                    ...getCourseClassLessonRecord(action.payload),
+                };
+
+                state.loadingSwitchLessonVisibilityClassIds =
+                    state.loadingSwitchLessonVisibilityClassIds.filter((id) => id !== classId);
+
+                const courseClass = state.lessonVisibilityClasses.find(
+                    (item) => Number(item.classId) === Number(classId)
+                );
+                upsertCourseClassLessonRecord(courseClass, record);
+            })
+            .addCase(switchCourseClassLessonVisibilityAsync.rejected, (state, action) => {
+                const classId = action.meta.arg.classId;
+                state.loadingSwitchLessonVisibilityClassIds =
+                    state.loadingSwitchLessonVisibilityClassIds.filter((id) => id !== classId);
+                state.error = action.payload;
             });
     },
 });
@@ -285,5 +411,10 @@ export const selectMyCourseClasses = (state) => state.courseClass.myClasses;
 export const selectMyCourseClassPagination = (state) => state.courseClass.myClassesPagination;
 export const selectMyCourseClassLoadingGet = (state) => state.courseClass.loadingGet;
 export const selectMyCourseClassFilters = (state) => state.courseClass.myClassesFilters;
+export const selectLessonVisibilityClasses = (state) => state.courseClass.lessonVisibilityClasses;
+export const selectLessonVisibilityClassesLoading = (state) =>
+    state.courseClass.loadingLessonVisibilityClasses;
+export const selectSwitchLessonVisibilityClassIds = (state) =>
+    state.courseClass.loadingSwitchLessonVisibilityClassIds;
 
 export default courseClassSlice.reducer;

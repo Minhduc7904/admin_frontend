@@ -301,12 +301,16 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/course-classes/${id}`,
     DELETE: (id) => `/course-classes/${id}`,
   },
+  COURSE_CLASS_LESSONS: {
+    SWITCH: "/course-class-lessons/switch",
+  },
   COURSE_ENROLLMENTS: {
     LIST: "/course-enrollments",
     DETAIL: (id) => `/course-enrollments/${id}`,
     CREATE: "/course-enrollments",
     UPDATE: (id) => `/course-enrollments/${id}`,
     DELETE: (id) => `/course-enrollments/${id}`,
+    EXPORT_LIST: "/course-enrollments/export/excel",
   },
   CLASS_SESSIONS: {
     LIST: "/class-sessions",

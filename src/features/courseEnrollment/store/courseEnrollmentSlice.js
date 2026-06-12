@@ -17,6 +17,7 @@ const initialState = {
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
+    loadingExport: false,
     error: null,
     filters: {
         search: "",
@@ -26,11 +27,61 @@ const initialState = {
         sortBy: "createdAt",
         sortOrder: "desc",
     },
+    exportOptions: {
+        search: "",
+        status: "",
+        enrolledAtFrom: "",
+        enrolledAtTo: "",
+        courseVisibility: "",
+        sortBy: "enrolledAt",
+        sortOrder: "desc",
+
+        includeSchool: true,
+        includeGender: true,
+        includeDateOfBirth: true,
+        includeUsername: true,
+        includeParentPhone: true,
+        includeStudentPhone: false,
+        includeGrade: true,
+        includeHighSchoolGraduationYear: true,
+        includeEmail: true,
+        includeIsActive: true,
+        includeCreatedAt: true,
+    },
 };
 
 // ======================
 // Async thunks
 // ======================
+
+const compactExportParams = (params) => {
+    return Object.entries(params).reduce((acc, [key, value]) => {
+        if (value === "" || value === null || value === undefined) {
+            return acc;
+        }
+
+        acc[key] = value;
+        return acc;
+    }, {});
+};
+
+const getFilenameFromContentDisposition = (contentDisposition, fallback) => {
+    if (!contentDisposition) {
+        return fallback;
+    }
+
+    const encodedFilenameMatch = contentDisposition.match(/filename\*=UTF-8''([^;\n]*)/i);
+    if (encodedFilenameMatch?.[1]) {
+        return decodeURIComponent(encodedFilenameMatch[1].replace(/['"]/g, ""));
+    }
+
+    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+    if (filenameMatch?.[1]) {
+        return decodeURIComponent(filenameMatch[1].replace(/['"]/g, ""));
+    }
+
+    return fallback;
+};
 
 export const getAllEnrollmentsAsync = createAsyncThunk(
     "courseEnrollment/getAll",
@@ -85,6 +136,37 @@ export const deleteEnrollmentAsync = createAsyncThunk(
     }
 );
 
+export const exportCourseEnrollmentListAsync = createAsyncThunk(
+    "courseEnrollment/exportList",
+    async (options = {}, thunkAPI) => {
+        return handleAsyncThunk(async () => {
+            const response = await courseEnrollmentApi.exportList(
+                compactExportParams(options)
+            );
+
+            const blob = response.data || response;
+            const filename = getFilenameFromContentDisposition(
+                response.headers?.["content-disposition"],
+                `Danh_sach_hoc_sinh_dang_ky_khoa_hoc_${new Date().getTime()}.xlsx`
+            );
+
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            return { success: true };
+        }, thunkAPI, {
+            successTitle: "Xuất danh sách đăng ký khóa học thành công",
+            errorTitle: "Lỗi xuất danh sách đăng ký khóa học",
+        });
+    }
+);
+
 // ======================
 // Slice
 // ======================
@@ -101,6 +183,12 @@ export const courseEnrollmentSlice = createSlice({
         },
         clearCurrentEnrollment: (state) => {
             state.currentEnrollment = null;
+        },
+        setCourseEnrollmentExportExcelOptions: (state, action) => {
+            state.exportOptions = { ...state.exportOptions, ...action.payload };
+        },
+        resetCourseEnrollmentExportExcelOptions: (state) => {
+            state.exportOptions = initialState.exportOptions;
         },
     },
     extraReducers: (builder) => {
@@ -187,6 +275,19 @@ export const courseEnrollmentSlice = createSlice({
             .addCase(deleteEnrollmentAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+
+            // Export list
+            .addCase(exportCourseEnrollmentListAsync.pending, (state) => {
+                state.loadingExport = true;
+                state.error = null;
+            })
+            .addCase(exportCourseEnrollmentListAsync.fulfilled, (state) => {
+                state.loadingExport = false;
+            })
+            .addCase(exportCourseEnrollmentListAsync.rejected, (state, action) => {
+                state.loadingExport = false;
+                state.error = action.payload;
             });
     },
 });
@@ -199,6 +300,8 @@ export const {
     setFilters,
     resetFilters,
     clearCurrentEnrollment,
+    setCourseEnrollmentExportExcelOptions,
+    resetCourseEnrollmentExportExcelOptions,
 } = courseEnrollmentSlice.actions;
 
 export const selectEnrollments = (state) => state.courseEnrollment.enrollments;
@@ -214,9 +317,13 @@ export const selectEnrollmentLoadingUpdate = (state) =>
     state.courseEnrollment.loadingUpdate;
 export const selectEnrollmentLoadingDelete = (state) =>
     state.courseEnrollment.loadingDelete;
+export const selectEnrollmentLoadingExport = (state) =>
+    state.courseEnrollment.loadingExport;
 export const selectEnrollmentError = (state) =>
     state.courseEnrollment.error;
 export const selectEnrollmentFilters = (state) =>
     state.courseEnrollment.filters;
+export const selectCourseEnrollmentExportExcelOptions = (state) =>
+    state.courseEnrollment.exportOptions;
 
 export default courseEnrollmentSlice.reducer;
