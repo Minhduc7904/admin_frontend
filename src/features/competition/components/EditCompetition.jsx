@@ -126,12 +126,15 @@ export const EditCompetition = ({ competitionId, onClose, onSuccess }) => {
             return;
         }
 
+        const startDate = vnDateTimeLocalToISO(formData.startDate);
+        const endDate = vnDateTimeLocalToISO(formData.endDate);
+
         const payload = {
             title: formData.title.trim(),
             subtitle: formData.subtitle?.trim() || undefined,
             policies: formData.policies?.trim() || undefined,
-            startDate: vnDateTimeLocalToISO(formData.startDate),
-            endDate: vnDateTimeLocalToISO(formData.endDate),
+            ...(startDate ? { startDate } : {}),
+            ...(endDate ? { endDate } : {}),
             durationMinutes: formData.durationMinutes ? Number(formData.durationMinutes) : undefined,
             maxAttempts: formData.maxAttempts ? Number(formData.maxAttempts) : undefined,
             visibility: formData.visibility,

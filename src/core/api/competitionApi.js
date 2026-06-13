@@ -68,8 +68,8 @@ export const competitionApi = {
      * @param {string} data.subtitle - Competition subtitle
      * @param {number} data.examId - Exam ID
      * @param {string} data.policies - Competition policies
-     * @param {string} data.startDate - Start date
-     * @param {string} data.endDate - End date
+     * @param {string} [data.startDate] - Start date
+     * @param {string} [data.endDate] - End date
      * @param {number} data.durationMinutes - Duration in minutes
      * @param {number} data.maxAttempts - Maximum attempts
      * @param {string} data.visibility - Visibility status
