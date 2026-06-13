@@ -9,7 +9,6 @@ import { LessonClassVisibilitySwitches } from "./LessonClassVisibilitySwitches";
 export const EditLesson = ({
     onClose,
     lesson,
-    courseId,
     canSelectTeacher = true,
     loadLessons
 }) => {
@@ -27,8 +26,6 @@ export const EditLesson = ({
     });
 
     const [selectedChapters, setSelectedChapters] = useState(lesson?.chapters || []);
-    const effectiveCourseId = courseId || lesson?.courseId;
-
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({
@@ -183,8 +180,8 @@ export const EditLesson = ({
                 </div>
 
                 <LessonClassVisibilitySwitches
-                    courseId={effectiveCourseId}
                     lessonId={lesson?.lessonId}
+                    courseClassLessons={lesson?.courseClassLessons}
                 />
             </div>
 

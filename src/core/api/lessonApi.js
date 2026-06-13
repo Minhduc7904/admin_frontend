@@ -22,10 +22,12 @@ export const lessonApi = {
     /**
      * Get lesson by ID
      * @param {number} id - Lesson ID
+     * @param {Object} params - Query parameters
+     * @param {number} params.courseId - Course ID for class visibility relations
      * @returns {Promise<Object>} Lesson data
      */
-    getById: (id) => {
-        return axiosClient.get(API_ENDPOINTS.LESSONS.DETAIL(id));
+    getById: (id, params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.LESSONS.DETAIL(id), { params });
     },
 
     /**
