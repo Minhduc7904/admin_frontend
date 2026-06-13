@@ -183,6 +183,7 @@ export const PERMISSIONS = {
     CREATE: 'course-enrollment:create',
     UPDATE: 'course-enrollment:update',
     DELETE: 'course-enrollment:delete',
+    EXPORT_EXCEL: 'course-enrollment:export-excel',
   },
   NOTIFICATION: {
     GET_MY: 'notification:get-my',

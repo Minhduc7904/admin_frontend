@@ -1,13 +1,15 @@
 import { updateLessonAsync, selectLessonLoadingUpdate } from "../store/lessonSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input, Button, Dropdown, Textarea, Checkbox } from "../../../shared/components";
 import { AdminSearchSelect } from "../../admin/components/AdminSearchSelect";
 import { ChapterMultiSearchSelect } from "../../chapter/components";
+import { LessonClassVisibilitySwitches } from "./LessonClassVisibilitySwitches";
 
 export const EditLesson = ({
     onClose,
     lesson,
+    courseId,
     canSelectTeacher = true,
     loadLessons
 }) => {
@@ -24,22 +26,8 @@ export const EditLesson = ({
         allowTrial: lesson?.allowTrial || false,
     });
 
-    const [selectedAdmin, setSelectedAdmin] = useState(null);
     const [selectedChapters, setSelectedChapters] = useState(lesson?.chapters || []);
-
-    useEffect(() => {
-        if (lesson) {
-            setFormData({
-                title: lesson.title || '',
-                description: lesson.description || '',
-                teacherId: lesson.teacherId || '',
-                chapterIds: lesson.chapters?.map(c => c.chapterId) || [],
-                visibility: lesson.visibility || 'DRAFT',
-                allowTrial: lesson.allowTrial || false,
-            });
-            setSelectedChapters(lesson.chapters || []);
-        }
-    }, [lesson]);
+    const effectiveCourseId = courseId || lesson?.courseId;
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -165,7 +153,6 @@ export const EditLesson = ({
                             placeholder="Tìm kiếm giáo viên..."
                             value={formData.teacherId}
                             onSelect={(admin) => {
-                                setSelectedAdmin(admin);
                                 setFormData(prev => ({
                                     ...prev,
                                     teacherId: admin?.adminId || ''
@@ -194,6 +181,11 @@ export const EditLesson = ({
                         helperText="Chọn các chương mà bài học này thuộc về"
                     />
                 </div>
+
+                <LessonClassVisibilitySwitches
+                    courseId={effectiveCourseId}
+                    lessonId={lesson?.lessonId}
+                />
             </div>
 
             <div className="px-6 py-4 border-t border-border bg-gray-50 flex justify-end gap-3">

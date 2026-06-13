@@ -21,4 +21,11 @@ export const courseEnrollmentApi = {
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.COURSE_ENROLLMENTS.DELETE(id));
     },
+
+    exportList: (options = {}) => {
+        return axiosClient.get(API_ENDPOINTS.COURSE_ENROLLMENTS.EXPORT_LIST, {
+            params: options,
+            responseType: 'blob',
+        });
+    },
 };

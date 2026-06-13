@@ -29,4 +29,18 @@ export const courseClassApi = {
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.COURSE_CLASSES.DELETE(id));
     },
+
+    getForLessonVisibility: (courseId) => {
+        return axiosClient.get(API_ENDPOINTS.COURSE_CLASSES.LIST, {
+            params: {
+                courseId,
+                page: 1,
+                limit: 1000,
+            },
+        });
+    },
+
+    switchLessonVisibility: (data) => {
+        return axiosClient.put(API_ENDPOINTS.COURSE_CLASS_LESSONS.SWITCH, data);
+    },
 };

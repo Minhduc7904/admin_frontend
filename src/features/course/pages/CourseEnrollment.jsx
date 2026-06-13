@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Plus } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 
 import {
     Button,
@@ -16,15 +16,19 @@ import {
     EnrollmentFilters,
     EnrollmentForm,
     EnrollmentDeleteModal,
+    ExportCourseEnrollmentListModal,
 } from '../components';
 
 import { useSearch } from '../../../shared/hooks';
+import { CanAccess } from '../../../shared/components/permissions';
+import { PERMISSIONS } from '../../../core/constants';
 
 import {
     getAllEnrollmentsAsync,
     createEnrollmentAsync,
     updateEnrollmentAsync,
     deleteEnrollmentAsync,
+    exportCourseEnrollmentListAsync,
     selectEnrollments,
     selectEnrollmentPagination,
     selectEnrollmentFilters,
@@ -32,6 +36,7 @@ import {
     selectEnrollmentLoadingCreate,
     selectEnrollmentLoadingUpdate,
     selectEnrollmentLoadingDelete,
+    selectEnrollmentLoadingExport,
     setFilters,
 } from '../../courseEnrollment/store/courseEnrollmentSlice';
 
@@ -56,6 +61,7 @@ export const CourseEnrollment = () => {
     const loadingCreate = useSelector(selectEnrollmentLoadingCreate);
     const loadingUpdate = useSelector(selectEnrollmentLoadingUpdate);
     const loadingDelete = useSelector(selectEnrollmentLoadingDelete);
+    const loadingExport = useSelector(selectEnrollmentLoadingExport);
 
     /* ===================== LOCAL STATE ===================== */
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
@@ -66,6 +72,7 @@ export const CourseEnrollment = () => {
     const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(false);
     const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     const [selectedEnrollment, setSelectedEnrollment] = useState(null);
 
@@ -74,12 +81,7 @@ export const CourseEnrollment = () => {
         status: 'ACTIVE',
     });
 
-    /* ===================== LOAD DATA ===================== */
-    useEffect(() => {
-        loadEnrollments();
-    }, [courseId, currentPage, itemsPerPage, debouncedSearch, filters.status]);
-
-    const loadEnrollments = () => {
+    const loadEnrollments = useCallback(() => {
         dispatch(
             getAllEnrollmentsAsync({
                 courseId,
@@ -89,7 +91,12 @@ export const CourseEnrollment = () => {
                 status: filters.status || undefined,
             })
         );
-    };
+    }, [courseId, currentPage, debouncedSearch, dispatch, filters.status, itemsPerPage]);
+
+    /* ===================== LOAD DATA ===================== */
+    useEffect(() => {
+        loadEnrollments();
+    }, [loadEnrollments]);
 
     /* ===================== FILTER ===================== */
     const handleSearchChangeWrapper = (value) => {
@@ -182,6 +189,26 @@ export const CourseEnrollment = () => {
         }
     };
 
+    /* ===================== EXPORT ===================== */
+    const handleOpenExportModal = () => {
+        setIsExportModalOpen(true);
+    };
+
+    const handleExport = async (options) => {
+        try {
+            await dispatch(
+                exportCourseEnrollmentListAsync({
+                    ...options,
+                    courseId,
+                })
+            ).unwrap();
+
+            setIsExportModalOpen(false);
+        } catch (err) {
+            console.error('Export course enrollment list failed:', err);
+        }
+    };
+
     /* ===================== PAGINATION ===================== */
     const handlePageChange = (page) => setCurrentPage(page);
 
@@ -202,10 +229,24 @@ export const CourseEnrollment = () => {
                             Danh sách học viên tham gia khóa học
                         </p>
                     </div>
-                    <Button onClick={handleOpenCreate}>
-                        <Plus size={16} />
-                        Thêm học viên
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <CanAccess permission={PERMISSIONS.COURSE_ENROLLMENT.EXPORT_EXCEL}>
+                            <Button
+                                variant="outline"
+                                onClick={handleOpenExportModal}
+                                disabled={loadingExport}
+                                loading={loadingExport}
+                            >
+                                <Download size={16} />
+                                Xuất Excel
+                            </Button>
+                        </CanAccess>
+
+                        <Button onClick={handleOpenCreate}>
+                            <Plus size={16} />
+                            Thêm học viên
+                        </Button>
+                    </div>
                 </div>
 
                 <EnrollmentFilters
@@ -293,6 +334,18 @@ export const CourseEnrollment = () => {
                     loading={loadingUpdate}
                 />
             </RightPanel>
+
+            {/* ===== EXPORT MODAL ===== */}
+            <ExportCourseEnrollmentListModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                onConfirm={handleExport}
+                loading={loadingExport}
+                initialFilters={{
+                    search,
+                    status: filters.status,
+                }}
+            />
         </>
     );
 };

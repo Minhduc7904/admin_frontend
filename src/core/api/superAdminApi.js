@@ -75,4 +75,26 @@ export const superAdminApi = {
             data
         );
     },
+
+    /**
+     * Xóa cứng học sinh theo năm tốt nghiệp cấp 3 và khối, trừ học sinh được
+     * bảo vệ bởi danh sách khóa học truyền vào.
+     *
+     * POST /super-admin/students/hard-delete-by-graduation-year-grade-excluded-courses
+     *
+     * Rule quan trọng:
+     * - Đây là thao tác xóa cứng, không thể khôi phục bằng soft delete.
+     * - courseIds bắt buộc là mảng không rỗng và mọi ID phải tồn tại.
+     * - Chỉ học sinh khớp cả highSchoolGraduationYear và grade mới là ứng viên xóa.
+     * - Học sinh đang đăng ký khóa học hoặc nằm trong lớp thuộc courseIds sẽ được giữ lại.
+     * - Dữ liệu liên quan được xóa trong transaction; lỗi xóa file avatar sau DB commit
+     *   sẽ được trả trong avatarFileResults.
+     */
+    hardDeleteStudentsByGraduationYearGradeExcludedCourses: (data) => {
+        return axiosClient.post(
+            API_ENDPOINTS.SUPER_ADMIN
+                .HARD_DELETE_STUDENTS_BY_GRADUATION_YEAR_GRADE_EXCLUDED_COURSES,
+            data
+        );
+    },
 };

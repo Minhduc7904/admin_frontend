@@ -6,3 +6,4 @@ export * from './useRegenerateQuestionSlugs';
 export * from './useSeedDefaultTags';
 export * from './usePromoteStudentGradeByGraduationYear';
 export * from './useUpdateStudentGraduationYearByGrade';
+export * from './useHardDeleteStudentsByGraduationYearGradeExcludedCourses';

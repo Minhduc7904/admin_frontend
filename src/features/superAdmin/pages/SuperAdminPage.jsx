@@ -7,6 +7,7 @@ import {
     SeedDefaultTagsApiCard,
     PromoteStudentGradeByGraduationYearApiCard,
     UpdateStudentGraduationYearByGradeApiCard,
+    HardDeleteStudentsByGraduationYearGradeExcludedCoursesApiCard,
 } from '../component';
 
 export const SuperAdminPage = () => {
@@ -22,6 +23,7 @@ export const SuperAdminPage = () => {
             <ResetPasswordByDateRangeApiCard />
             <PromoteStudentGradeByGraduationYearApiCard />
             <UpdateStudentGraduationYearByGradeApiCard />
+            <HardDeleteStudentsByGraduationYearGradeExcludedCoursesApiCard />
             <GenerateMissingExamSlugsApiCard />
             <RegenerateQuestionSlugsApiCard />
             <SeedDefaultTagsApiCard />

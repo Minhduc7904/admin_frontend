@@ -10,6 +10,7 @@ export { EnrollmentFilters } from './EnrollmentFilters';
 export { EnrollmentTable } from './EnrollmentTable';
 export { EnrollmentForm } from './EnrollmentForm';
 export { EnrollmentDeleteModal } from './EnrollmentDeleteModal';
+export { ExportCourseEnrollmentListModal } from './ExportCourseEnrollmentListModal';
 export { CourseStudentsAttendanceFilters } from './CourseStudentsAttendanceFilters';
 export { CourseStudentsAttendanceTable } from './CourseStudentsAttendanceTable';
 export { CourseSearchMultiSelect } from './CourseSearchMultiSelect';

@@ -1,6 +1,7 @@
 // src/features/course/components/LessonDetail.jsx
 import { Edit, Trash2, BookOpen, Calendar, User, Eye, EyeOff, FileText, Video, Youtube, FileCheck, Tag, Plus } from 'lucide-react'
 import { Button } from '../../../shared/components'
+import { LessonClassVisibilitySwitches } from '../../lesson/components'
 
 const VISIBILITY_CONFIG = {
     DRAFT: {
@@ -42,6 +43,7 @@ const formatDate = (dateString) => {
 
 export const LessonDetail = ({
     lesson,
+    courseId,
     onEdit,
     onDelete,
     onAddLearningItem,
@@ -154,6 +156,12 @@ export const LessonDetail = ({
                         </div>
                     </div>
                 )}
+
+                <LessonClassVisibilitySwitches
+                    courseId={courseId || lesson.courseId}
+                    lessonId={lesson.lessonId}
+                    maxHeightClassName="max-h-96"
+                />
 
                 {/* Add Learning Item */}
                 <Button

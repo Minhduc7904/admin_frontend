@@ -135,6 +135,8 @@ export const EditCompetition = ({ competitionId, onClose, onSuccess }) => {
             policies: formData.policies?.trim() || undefined,
             ...(startDate ? { startDate } : {}),
             ...(endDate ? { endDate } : {}),
+            startDate: vnDateTimeLocalToISO(formData.startDate),
+            endDate: formData.endDate ? vnDateTimeLocalToISO(formData.endDate) : null,
             durationMinutes: formData.durationMinutes ? Number(formData.durationMinutes) : undefined,
             maxAttempts: formData.maxAttempts ? Number(formData.maxAttempts) : undefined,
             visibility: formData.visibility,

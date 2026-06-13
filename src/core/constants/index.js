@@ -137,10 +137,14 @@ export const API_ENDPOINTS = {
     GENERATE_MISSING_EXAM_SLUGS: "/super-admin/exams/generate-missing-slugs",
     REGENERATE_QUESTION_SLUGS: "/super-admin/questions/regenerate-slugs",
     SEED_DEFAULT_TAGS: "/super-admin/tags/seed-defaults",
+    SYNC_PERMISSIONS_FROM_CODES:
+      "/super-admin/permissions/sync-from-codes",
     PROMOTE_STUDENT_GRADE_BY_GRADUATION_YEAR:
       "/super-admin/students/promote-grade/by-graduation-year",
     UPDATE_STUDENT_GRADUATION_YEAR_BY_GRADE:
       "/super-admin/students/graduation-year/by-grade",
+    HARD_DELETE_STUDENTS_BY_GRADUATION_YEAR_GRADE_EXCLUDED_COURSES:
+      "/super-admin/students/hard-delete-by-graduation-year-grade-excluded-courses",
   },
   STUDENTS: {
     LIST: "/students",
@@ -299,12 +303,16 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/course-classes/${id}`,
     DELETE: (id) => `/course-classes/${id}`,
   },
+  COURSE_CLASS_LESSONS: {
+    SWITCH: "/course-class-lessons/switch",
+  },
   COURSE_ENROLLMENTS: {
     LIST: "/course-enrollments",
     DETAIL: (id) => `/course-enrollments/${id}`,
     CREATE: "/course-enrollments",
     UPDATE: (id) => `/course-enrollments/${id}`,
     DELETE: (id) => `/course-enrollments/${id}`,
+    EXPORT_LIST: "/course-enrollments/export/excel",
   },
   CLASS_SESSIONS: {
     LIST: "/class-sessions",

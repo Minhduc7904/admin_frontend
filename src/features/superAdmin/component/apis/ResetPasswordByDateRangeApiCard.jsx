@@ -33,12 +33,12 @@ export const ResetPasswordByDateRangeApiCard = () => {
 
     const handleExecute = async () => {
         if (!fromDate || !toDate) {
-            setFormError('Vui long nhap day du fromDate va toDate.');
+            setFormError('Vui lòng nhập đầy đủ fromDate và toDate.');
             return;
         }
 
         if (fromDate > toDate) {
-            setFormError('fromDate phai nho hon hoac bang toDate.');
+            setFormError('fromDate phải nhỏ hơn hoặc bằng toDate.');
             return;
         }
 
@@ -95,7 +95,7 @@ export const ResetPasswordByDateRangeApiCard = () => {
             onToggle={() => setIsOpen((prev) => !prev)}
             method="POST"
             path="/super-admin/reset-password-by-date-range"
-            description="Reset password theo khoang ngay tao tai khoan"
+            description="Reset password theo khoảng ngày tạo tài khoản"
             methodClassName="bg-green-600"
             headerClassName="bg-green-50 hover:bg-green-100"
             pathClassName="text-green-800"
@@ -141,7 +141,7 @@ export const ResetPasswordByDateRangeApiCard = () => {
                 <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Response</h2>
 
                 {!result ? (
-                    <ApiResponsePlaceholder message="Chua co du lieu phan hoi. Hay nhap ngay va bam Execute." />
+                    <ApiResponsePlaceholder message="Chưa có dữ liệu phản hồi. Hãy nhập ngày và bấm Execute." />
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -178,7 +178,7 @@ export const ResetPasswordByDateRangeApiCard = () => {
                                     columns={resultColumns}
                                     data={responseResults}
                                     loading={false}
-                                    emptyMessage="Khong co ban ghi ket qua"
+                                    emptyMessage="Không có bản ghi kết quả"
                                 />
                             </div>
                         </div>

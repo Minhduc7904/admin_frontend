@@ -536,6 +536,10 @@ export const PERMISSION_DEFINITIONS = {
                 name: 'Xóa đăng ký',
                 description: 'Hủy đăng ký khóa học',
             },
+            exportExcel: {
+                name: 'Xuất Excel đăng ký khóa học',
+                description: 'Xuất danh sách đăng ký khóa học ra file Excel',
+            },
         },
     },
 

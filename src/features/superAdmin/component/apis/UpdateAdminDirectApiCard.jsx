@@ -76,25 +76,25 @@ export const UpdateAdminDirectApiCard = () => {
 
     const validate = () => {
         if (!formData.adminId.trim()) {
-            return 'Vui long nhap adminId.';
+            return 'Vui lòng nhập adminId.';
         }
 
         const adminId = Number(formData.adminId);
         if (!Number.isInteger(adminId) || adminId <= 0) {
-            return 'adminId phai la so nguyen duong.';
+            return 'adminId phải là số nguyên dương.';
         }
 
         if (formData.subjectId.trim()) {
             const subjectId = Number(formData.subjectId);
             if (!Number.isInteger(subjectId) || subjectId <= 0) {
-                return 'subjectId phai la so nguyen duong.';
+                return 'subjectId phải là số nguyên dương.';
             }
         }
 
         if (formData.email.trim()) {
             const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
             if (!isValidEmail) {
-                return 'Email khong hop le.';
+                return 'Email không hợp lệ.';
             }
         }
 
@@ -126,7 +126,7 @@ export const UpdateAdminDirectApiCard = () => {
             onToggle={() => setIsOpen((prev) => !prev)}
             method="POST"
             path="/super-admin/update-admin-direct"
-            description="Cap nhat truc tiep thong tin Admin va User"
+            description="Cập nhật trực tiếp thông tin Admin và User"
             methodClassName="bg-indigo-600"
             headerClassName="bg-indigo-50 hover:bg-indigo-100"
             pathClassName="text-indigo-800"
@@ -208,7 +208,7 @@ export const UpdateAdminDirectApiCard = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        placeholder="Nhap mat khau moi"
+                        placeholder="Nhập mật khẩu mới"
                     />
                     <Input
                         type="number"
@@ -243,7 +243,7 @@ export const UpdateAdminDirectApiCard = () => {
                 <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Response</h2>
 
                 {!result ? (
-                    <ApiResponsePlaceholder message="Chua co du lieu phan hoi. Hay nhap adminId va bam Execute." />
+                    <ApiResponsePlaceholder message="Chưa có dữ liệu phản hồi. Hãy nhập adminId và bấm Execute." />
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
