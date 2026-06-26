@@ -48,11 +48,15 @@ export const seoMediaApi = {
     return axiosClient.delete(API_ENDPOINTS.SEO_MEDIA.ITEMS.DELETE(itemId));
   },
 
-  // Upload image (multipart/form-data)
-  uploadImage(formData) {
-    return axiosClient.post(API_ENDPOINTS.SEO_MEDIA.UPLOAD_IMAGE, formData, {
+  // Upload SEO image/video to SEO media bucket (multipart/form-data)
+  uploadMedia(formData) {
+    return axiosClient.post(API_ENDPOINTS.SEO_MEDIA.UPLOAD_MEDIA, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+  },
+
+  getBucketMedia(params = {}) {
+    return axiosClient.get(API_ENDPOINTS.SEO_MEDIA.BUCKET_MEDIA, { params });
   },
 };
 

@@ -263,7 +263,8 @@ export const API_ENDPOINTS = {
       UPDATE: (itemId) => `/seo-media/items/${itemId}`,
       DELETE: (itemId) => `/seo-media/items/${itemId}`,
     },
-    UPLOAD_IMAGE: '/seo-media/upload-image',
+    UPLOAD_MEDIA: '/seo-media/upload-media',
+    BUCKET_MEDIA: '/seo-media/bucket/media',
   },
   MEDIA_FOLDERS: {
     CREATE: "/media-folders",

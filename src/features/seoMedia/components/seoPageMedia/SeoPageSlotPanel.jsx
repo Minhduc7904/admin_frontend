@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { ImagePlus, Images, X } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Input, Select } from '../../../../shared/components/ui';
-import { MediaPickerModal } from '../../../media/components';
-import { getMediaByIdAsync } from '../../../media/store/mediaSlice';
 import { getSeoPageByPageKey, getSlotAcceptConfig } from '../../constants/seoMedia.constant';
 import {
   createItemAsync,
@@ -17,41 +15,14 @@ import {
   selectSeoSlotsByPageKey,
   setSeoPageMediaSelectedSlotId,
 } from '../../store/seoMediaSlice';
-
-const getPickerMediaType = (slotType) => {
-  if (slotType === 'video') return 'VIDEO';
-  return 'IMAGE';
-};
-
-const getMediaName = (media) => media?.originalName || media?.fileName || `media-${media?.mediaId || ''}`;
-
-const getMediaPublicUrl = (media) => {
-  if (!media) return '';
-  if (media.publicUrl) return media.publicUrl;
-  if (media.url) return media.url;
-  if (media.viewUrl) return media.viewUrl;
-  if (media.objectKey) return media.objectKey.startsWith('/') ? media.objectKey : `/${media.objectKey}`;
-  return '';
-};
-
-const isAcceptedSeoMediaItem = (media, acceptConfig) => {
-  if (!media) return false;
-  if (media.mimeType && acceptConfig.mimeTypes.includes(media.mimeType)) return true;
-
-  const lowerName = getMediaName(media).toLowerCase();
-  return acceptConfig.extensions.some((extension) => lowerName.endsWith(extension));
-};
-
-const buildSeoMediaPayload = (media) => ({
-  bucketName: media.bucketName,
-  objectKey: media.objectKey,
-  publicUrl: getMediaPublicUrl(media),
-  originalName: getMediaName(media),
-  mimeType: media.mimeType,
-  fileSize: media.fileSize,
-  width: media.width,
-  height: media.height,
-});
+import { SeoMediaPickerModal } from './SeoMediaPickerModal';
+import {
+  buildSeoMediaPayload,
+  getMediaKey,
+  getMediaName,
+  getSeoMediaType,
+  isAcceptedSeoMediaItem,
+} from '../../utils/seoMediaPicker.utils';
 
 const getSlotRemainingCount = (slot, itemCount) => {
   if (!slot || slot.maxItems === null || slot.maxItems === undefined) return null;
@@ -62,13 +33,13 @@ const getSlotSizeText = (slot) => {
   if (slot?.recommendedWidth && slot?.recommendedHeight) {
     return `${slot.recommendedWidth} x ${slot.recommendedHeight}`;
   }
-  return 'Chua cau hinh';
+  return 'Chưa cấu hình';
 };
 
 const getSlotLimitText = (slot) => {
   if (!slot) return '-';
-  if (slot.maxItems === null || slot.maxItems === undefined) return `Toi thieu ${slot.minItems || 0}`;
-  return `${slot.minItems || 0} - ${slot.maxItems} anh`;
+  if (slot.maxItems === null || slot.maxItems === undefined) return `Tối thiểu ${slot.minItems || 0}`;
+  return `${slot.minItems || 0} - ${slot.maxItems} media`;
 };
 
 export const SeoPageSlotPanel = () => {
@@ -88,13 +59,12 @@ export const SeoPageSlotPanel = () => {
     [selectedSlot?.type],
   );
   const selectedSlotMediaType = useMemo(
-    () => getPickerMediaType(selectedSlot?.type),
+    () => getSeoMediaType(selectedSlot?.type),
     [selectedSlot?.type],
   );
   const remainingSlotCount = getSlotRemainingCount(selectedSlot, items.length);
 
-  const [openMediaPicker, setOpenMediaPicker] = useState(false);
-  const [selectedMediaIds, setSelectedMediaIds] = useState([]);
+  const [openSeoMediaPicker, setOpenSeoMediaPicker] = useState(false);
   const [selectedMediaItems, setSelectedMediaItems] = useState([]);
   const [alt, setAlt] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
@@ -118,7 +88,6 @@ export const SeoPageSlotPanel = () => {
 
   const handleSlotChange = (value) => {
     const nextSlot = slots.find((slot) => String(slot.slotId) === String(value)) || null;
-    setSelectedMediaIds([]);
     setSelectedMediaItems([]);
     setMediaError('');
     setLinkUrl('');
@@ -131,61 +100,49 @@ export const SeoPageSlotPanel = () => {
     label: slot.name,
   }));
 
-  const handleMediaSelect = (mediaIds, mediaItems = []) => {
-    const nextMediaIds = Array.isArray(mediaIds) ? mediaIds : mediaIds ? [mediaIds] : [];
-    setSelectedMediaIds(nextMediaIds);
-    setSelectedMediaItems(Array.isArray(mediaItems) ? mediaItems : mediaItems ? [mediaItems] : []);
+  const handleSaveSeoMediaSelection = (mediaItems) => {
+    setSelectedMediaItems(mediaItems);
     setMediaError('');
-    setOpenMediaPicker(false);
+    setOpenSeoMediaPicker(false);
+  };
+
+  const handleRemoveSelectedMedia = (media) => {
+    const mediaKey = getMediaKey(media);
+    setSelectedMediaItems((current) => current.filter((item) => getMediaKey(item) !== mediaKey));
+    setMediaError('');
   };
 
   const handleClearSelectedMedia = () => {
-    setSelectedMediaIds([]);
     setSelectedMediaItems([]);
     setMediaError('');
   };
 
-  const loadSelectedMediaItems = async () => {
-    const mediaById = new Map(selectedMediaItems.map((media) => [media.mediaId, media]));
-    const mediaItems = [];
+  const handleAddSelectedMedia = async () => {
+    if (!selectedSlot?.slotId || selectedMediaItems.length === 0 || itemLoading) return;
 
-    for (const mediaId of selectedMediaIds) {
-      const existingMedia = mediaById.get(mediaId);
-      if (existingMedia) {
-        mediaItems.push(existingMedia);
-        continue;
-      }
-
-      const response = await dispatch(getMediaByIdAsync(mediaId)).unwrap();
-      if (response?.data) mediaItems.push(response.data);
+    if (remainingSlotCount !== null && selectedMediaItems.length > remainingSlotCount) {
+      setMediaError(`Slot này chỉ còn được thêm ${remainingSlotCount} media.`);
+      return;
     }
 
-    return mediaItems;
-  };
+    const invalidMedia = selectedMediaItems.find((media) => !isAcceptedSeoMediaItem(media, selectedSlotAcceptConfig));
+    if (invalidMedia) {
+      setMediaError(`Media "${getMediaName(invalidMedia)}" không đúng định dạng ${selectedSlotAcceptConfig.label}.`);
+      return;
+    }
 
-  const handleAddSelectedMedia = async () => {
-    if (!selectedSlot?.slotId || selectedMediaIds.length === 0 || itemLoading) return;
+    const missingRequired = selectedMediaItems.find((media) => {
+      const payload = buildSeoMediaPayload(media);
+      return !payload.objectKey || !payload.originalName || !payload.mimeType || !payload.fileSize;
+    });
 
-    if (remainingSlotCount !== null && selectedMediaIds.length > remainingSlotCount) {
-      setMediaError(`Slot nay chi con duoc them ${remainingSlotCount} media.`);
+    if (missingRequired) {
+      setMediaError(`Media "${getMediaName(missingRequired)}" thiếu objectKey, mimeType hoặc fileSize.`);
       return;
     }
 
     try {
-      const mediaItems = await loadSelectedMediaItems();
-
-      if (mediaItems.length !== selectedMediaIds.length) {
-        setMediaError('Khong tai duoc day du thong tin media da chon.');
-        return;
-      }
-
-      const invalidMedia = mediaItems.find((media) => !isAcceptedSeoMediaItem(media, selectedSlotAcceptConfig));
-      if (invalidMedia) {
-        setMediaError(`Media "${getMediaName(invalidMedia)}" khong dung dinh dang ${selectedSlotAcceptConfig.label}.`);
-        return;
-      }
-
-      await Promise.all(mediaItems.map((media, index) => dispatch(createItemAsync({
+      await Promise.all(selectedMediaItems.map((media, index) => dispatch(createItemAsync({
         slotId: selectedSlot.slotId,
         ...buildSeoMediaPayload(media),
         sortOrder: items.length + index,
@@ -200,6 +157,7 @@ export const SeoPageSlotPanel = () => {
       }));
     } catch (error) {
       console.error('Create SEO media item failed:', error);
+      setMediaError('Không thêm được media vào slot SEO.');
     }
   };
 
@@ -212,7 +170,7 @@ export const SeoPageSlotPanel = () => {
 
         <div className="p-4 space-y-4">
           <Select
-            label="Chon slot"
+            label="Chọn slot"
             name="slot"
             value={selectedSlotId || ''}
             onChange={(e) => handleSlotChange(e.target.value)}
@@ -222,11 +180,11 @@ export const SeoPageSlotPanel = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="border border-border rounded-sm px-3 py-2">
-              <div className="text-xs text-foreground-light">So luong</div>
+              <div className="text-xs text-foreground-light">Số lượng</div>
               <div className="text-sm font-semibold text-foreground mt-1">{getSlotLimitText(selectedSlot)}</div>
             </div>
             <div className="border border-border rounded-sm px-3 py-2">
-              <div className="text-xs text-foreground-light">Kich thuoc</div>
+              <div className="text-xs text-foreground-light">Kích thước</div>
               <div className="text-sm font-semibold text-foreground mt-1">{getSlotSizeText(selectedSlot)}</div>
             </div>
           </div>
@@ -236,12 +194,12 @@ export const SeoPageSlotPanel = () => {
             name="alt"
             value={alt}
             onChange={(e) => setAlt(e.target.value)}
-            placeholder="Mo ta anh"
+            placeholder="Mô tả ảnh hoặc video"
             disabled={!selectedSlot}
           />
 
           <Input
-            label="Link khi click anh"
+            label="Link khi click media"
             name="linkUrl"
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
@@ -253,29 +211,32 @@ export const SeoPageSlotPanel = () => {
             <div className="mx-auto w-10 h-10 rounded-sm bg-white border border-border flex items-center justify-center">
               <Images size={18} className="text-foreground-light" />
             </div>
+
             <div className="text-sm font-medium text-foreground mt-3">
-              {selectedMediaIds.length > 0
-                ? `Da chon ${selectedMediaIds.length} media`
-                : 'Chon media tu thu vien'}
+              {selectedMediaItems.length > 0
+                ? `Đã chọn ${selectedMediaItems.length} media SEO`
+                : 'Chọn hoặc upload media trong SEO bucket'}
             </div>
             <div className="text-xs text-foreground-light mt-1">{selectedSlotAcceptConfig.label}</div>
 
             {selectedMediaItems.length > 0 && (
               <div className="mt-3 space-y-1 text-left">
-                {selectedMediaItems.slice(0, 4).map((media) => (
+                {selectedMediaItems.map((media) => (
                   <div
-                    key={media.mediaId}
-                    className="truncate rounded-sm border border-border bg-white px-2 py-1 text-xs text-foreground-light"
+                    key={getMediaKey(media)}
+                    className="flex items-center justify-between gap-2 rounded-sm border border-border bg-white px-2 py-1 text-xs text-foreground-light"
                     title={getMediaName(media)}
                   >
-                    {getMediaName(media)}
+                    <span className="truncate">{getMediaName(media)}</span>
+                    <button
+                      type="button"
+                      className="text-foreground-light hover:text-red-600"
+                      onClick={() => handleRemoveSelectedMedia(media)}
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 ))}
-                {selectedMediaItems.length > 4 && (
-                  <div className="text-xs text-foreground-light">
-                    +{selectedMediaItems.length - 4} media khac
-                  </div>
-                )}
               </div>
             )}
 
@@ -284,12 +245,12 @@ export const SeoPageSlotPanel = () => {
                 type="button"
                 variant="outline"
                 disabled={!selectedSlot || itemLoading}
-                onClick={() => setOpenMediaPicker(true)}
+                onClick={() => setOpenSeoMediaPicker(true)}
               >
                 <Images size={16} />
-                Chon media
+                Chọn media SEO
               </Button>
-              {selectedMediaIds.length > 0 && (
+              {selectedMediaItems.length > 0 && (
                 <Button
                   type="button"
                   variant="outline"
@@ -297,7 +258,7 @@ export const SeoPageSlotPanel = () => {
                   onClick={handleClearSelectedMedia}
                 >
                   <X size={16} />
-                  Bo chon
+                  Bỏ chọn
                 </Button>
               )}
             </div>
@@ -311,29 +272,31 @@ export const SeoPageSlotPanel = () => {
 
           {!slots.length && (
             <div className="px-3 py-2 rounded-sm bg-gray-50 text-xs text-foreground-light">
-              {loading ? 'Dang tai slot...' : 'Page nay chua co slot. Hay tao slot o trang Quan ly SEO slots truoc.'}
+              {loading ? 'Đang tải slot...' : 'Page này chưa có slot. Hãy tạo slot ở trang Quản lý SEO slots trước.'}
             </div>
           )}
 
           <Button
             className="w-full"
             loading={itemLoading}
-            disabled={!selectedSlot || selectedMediaIds.length === 0 || itemLoading}
+            disabled={!selectedSlot || selectedMediaItems.length === 0 || itemLoading}
             onClick={handleAddSelectedMedia}
           >
             <ImagePlus size={16} />
-            Them {selectedMediaIds.length || ''} media vao slot
+            Thêm {selectedMediaItems.length || ''} media vào slot
           </Button>
         </div>
       </section>
 
-      <MediaPickerModal
-        isOpen={openMediaPicker}
-        onClose={() => setOpenMediaPicker(false)}
-        onSave={handleMediaSelect}
-        selectedMediaId={selectedMediaIds}
-        title="Chon media SEO"
-        type={selectedSlotMediaType}
+      <SeoMediaPickerModal
+        isOpen={openSeoMediaPicker}
+        onClose={() => setOpenSeoMediaPicker(false)}
+        onSave={handleSaveSeoMediaSelection}
+        selectedItems={selectedMediaItems}
+        title="Chọn media SEO"
+        mediaType={selectedSlotMediaType}
+        acceptConfig={selectedSlotAcceptConfig}
+        remainingCount={remainingSlotCount}
         multiple
       />
     </>

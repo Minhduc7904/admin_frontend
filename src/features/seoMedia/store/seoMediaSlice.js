@@ -150,13 +150,23 @@ export const deleteItemAsync = createAsyncThunk(
   }
 );
 
-export const uploadSeoImageAsync = createAsyncThunk(
-  'seoMedia/uploadImage',
+export const uploadSeoMediaAsync = createAsyncThunk(
+  'seoMedia/uploadMedia',
   async (formData, thunkAPI) => {
-    return handleAsyncThunk(() => seoMediaApi.uploadImage(formData), thunkAPI, {
-      successTitle: 'Tải ảnh',
-      successMessage: 'SEO image uploaded successfully',
-      errorTitle: 'Tải ảnh thất bại',
+    return handleAsyncThunk(() => seoMediaApi.uploadMedia(formData), thunkAPI, {
+      successTitle: 'Tải media',
+      successMessage: 'SEO media uploaded successfully',
+      errorTitle: 'Tải media thất bại',
+    });
+  }
+);
+
+export const getSeoBucketMediaAsync = createAsyncThunk(
+  'seoMedia/getBucketMedia',
+  async (params = {}, thunkAPI) => {
+    return handleAsyncThunk(() => seoMediaApi.getBucketMedia(params), thunkAPI, {
+      showSuccess: false,
+      errorTitle: 'Lỗi lấy media trong bucket SEO',
     });
   }
 );
@@ -392,16 +402,16 @@ const seoMediaSlice = createSlice({
         state.error = action.payload;
       })
 
-      // Upload image
-      .addCase(uploadSeoImageAsync.pending, (state) => {
+      // Upload SEO media
+      .addCase(uploadSeoMediaAsync.pending, (state) => {
         state.loadingUpload = true;
         state.error = null;
       })
-      .addCase(uploadSeoImageAsync.fulfilled, (state, action) => {
+      .addCase(uploadSeoMediaAsync.fulfilled, (state) => {
         state.loadingUpload = false;
         // return metadata only, user will create item using returned metadata
       })
-      .addCase(uploadSeoImageAsync.rejected, (state, action) => {
+      .addCase(uploadSeoMediaAsync.rejected, (state, action) => {
         state.loadingUpload = false;
         state.error = action.payload;
       });
