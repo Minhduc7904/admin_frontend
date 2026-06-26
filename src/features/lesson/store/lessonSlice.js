@@ -3,6 +3,7 @@ import { lessonApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 import { createLessonLearningItemAsync, deleteLessonLearningItemAsync } from "../../lessonLearningitem/store/lessonLearningItemSlice";
 import { createLearningItemAsync } from "../../learningItem/store/learningItemSlice";
+import { switchCourseClassLessonVisibilityAsync } from "../../courseClass/store/courseClassSlice";
 const initialState = {
     lessons: [],
     currentLesson: null,
@@ -15,6 +16,7 @@ const initialState = {
         hasNext: false,
     },
     loadingGet: false,
+    loadingGetById: false,
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
@@ -41,8 +43,11 @@ export const getAllLessonsAsync = createAsyncThunk(
 
 export const getLessonByIdAsync = createAsyncThunk(
     "lesson/getById",
-    async (id, thunkAPI) => {
-        return handleAsyncThunk(() => lessonApi.getById(id), thunkAPI, {
+    async (params, thunkAPI) => {
+        const id = typeof params === "object" ? params.id : params;
+        const query = typeof params === "object" ? { courseId: params.courseId } : {};
+
+        return handleAsyncThunk(() => lessonApi.getById(id, query), thunkAPI, {
             showSuccess: false,
             errorTitle: "Lỗi tải thông tin bài học",
         });
@@ -92,6 +97,44 @@ export const searchLessonsAsync = createAsyncThunk(
     }
 );
 
+const getResponseData = (payload) => payload?.data ?? payload;
+
+const getCourseClassLessonRecord = (payload) => {
+    const data = getResponseData(payload);
+    return data?.courseClassLesson || data?.classLesson || data?.record || data;
+};
+
+const upsertCourseClassLessonRecord = (lesson, rawRecord) => {
+    const record = {
+        ...rawRecord,
+        classId: rawRecord?.classId ?? rawRecord?.courseClassId,
+        lessonId: rawRecord?.lessonId ?? rawRecord?.lesson?.lessonId,
+    };
+
+    if (!lesson || !record.classId || !record.lessonId) {
+        return;
+    }
+
+    if (!Array.isArray(lesson.courseClassLessons)) {
+        lesson.courseClassLessons = [];
+    }
+
+    const index = lesson.courseClassLessons.findIndex(
+        (item) =>
+            Number(item.classId ?? item.courseClassId) === Number(record.classId) &&
+            Number(item.lessonId) === Number(record.lessonId)
+    );
+
+    if (index >= 0) {
+        lesson.courseClassLessons[index] = {
+            ...lesson.courseClassLessons[index],
+            ...record,
+        };
+    } else {
+        lesson.courseClassLessons.push(record);
+    }
+};
+
 export const lessonSlice = createSlice({
     name: "lesson",
     initialState,
@@ -135,17 +178,17 @@ export const lessonSlice = createSlice({
             // Get lesson by ID
             .addCase(getLessonByIdAsync.pending, (state) => {
                 state.currentLesson = null;
-                state.loadingGet = true;
+                state.loadingGetById = true;
                 state.error = null;
             })
             .addCase(getLessonByIdAsync.fulfilled, (state, action) => {
-                state.loadingGet = false;
+                state.loadingGetById = false;
                 state.currentLesson = action.payload.data;
                 state.error = null;
             })
             .addCase(getLessonByIdAsync.rejected, (state, action) => {
                 state.currentLesson = null;
-                state.loadingGet = false;
+                state.loadingGetById = false;
                 state.error = action.payload;
             })
 
@@ -154,7 +197,7 @@ export const lessonSlice = createSlice({
                 state.loadingCreate = true;
                 state.error = null;
             })
-            .addCase(createLessonAsync.fulfilled, (state, action) => {
+            .addCase(createLessonAsync.fulfilled, (state) => {
                 state.loadingCreate = false;
                 state.error = null;
             })
@@ -252,6 +295,22 @@ export const lessonSlice = createSlice({
                     state.currentLesson.learningItemsCount = 
                         state.currentLesson.learningItemsCount - 1;
                 }
+            })
+
+            .addCase(switchCourseClassLessonVisibilityAsync.fulfilled, (state, action) => {
+                const record = {
+                    ...action.meta.arg,
+                    ...getCourseClassLessonRecord(action.payload),
+                };
+
+                if (state.currentLesson?.lessonId === record.lessonId) {
+                    upsertCourseClassLessonRecord(state.currentLesson, record);
+                }
+
+                const lesson = state.lessons.find(
+                    (item) => Number(item.lessonId) === Number(record.lessonId)
+                );
+                upsertCourseClassLessonRecord(lesson, record);
             });
     },
 });
@@ -268,6 +327,7 @@ export const selectLessons = (state) => state.lesson.lessons;
 export const selectCurrentLesson = (state) => state.lesson.currentLesson;
 export const selectLessonPagination = (state) => state.lesson.pagination;
 export const selectLessonLoadingGet = (state) => state.lesson.loadingGet;
+export const selectLessonLoadingGetById = (state) => state.lesson.loadingGetById;
 export const selectLessonLoadingCreate = (state) => state.lesson.loadingCreate;
 export const selectLessonLoadingUpdate = (state) => state.lesson.loadingUpdate;
 export const selectLessonLoadingDelete = (state) => state.lesson.loadingDelete;

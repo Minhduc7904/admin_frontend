@@ -43,7 +43,6 @@ const formatDate = (dateString) => {
 
 export const LessonDetail = ({
     lesson,
-    courseId,
     onEdit,
     onDelete,
     onAddLearningItem,
@@ -158,8 +157,8 @@ export const LessonDetail = ({
                 )}
 
                 <LessonClassVisibilitySwitches
-                    courseId={courseId || lesson.courseId}
                     lessonId={lesson.lessonId}
+                    courseClassLessons={lesson.courseClassLessons}
                     maxHeightClassName="max-h-96"
                 />
 

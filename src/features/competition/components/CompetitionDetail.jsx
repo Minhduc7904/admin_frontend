@@ -40,11 +40,11 @@ const VisibilityBadge = ({ visibility }) => {
 
 const StatusBadge = ({ competition }) => {
     const now = new Date();
-    const start = new Date(competition.startDate);
-    const end = new Date(competition.endDate);
-    if (now < start)
+    const start = competition.startDate ? new Date(competition.startDate) : null;
+    const end = competition.endDate ? new Date(competition.endDate) : null;
+    if (start && now < start)
         return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Sắp diễn ra</span>;
-    if (now <= end)
+    if (!end || now <= end)
         return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Đang diễn ra</span>;
     return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Đã kết thúc</span>;
 };
@@ -118,7 +118,7 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
                         )}
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                             <VisibilityBadge visibility={competition.visibility} />
-                            {competition.startDate && competition.endDate && (
+                            {(competition.startDate || competition.endDate) && (
                                 <StatusBadge competition={competition} />
                             )}
                         </div>
@@ -241,7 +241,10 @@ export const CompetitionDetail = ({ competitionId, onEdit, onExamClick }) => {
                         <InfoRow
                             icon={Calendar}
                             label="Thời gian kết thúc"
-                            value={formatDate(competition.endDate)}
+                            value={competition.endDate
+                                ? formatDate(competition.endDate)
+                                : <span className="text-foreground-lighter italic">Không giới hạn</span>
+                            }
                         />
                         <InfoRow
                             icon={Clock}

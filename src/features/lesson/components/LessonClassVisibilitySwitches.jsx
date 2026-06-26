@@ -1,85 +1,90 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Loader2 } from "lucide-react";
 
 import { Switch } from "../../../shared/components";
 import {
-    getCourseClassesForLessonVisibilityAsync,
-    selectLessonVisibilityClasses,
-    selectLessonVisibilityClassesLoading,
     selectSwitchLessonVisibilityClassIds,
     switchCourseClassLessonVisibilityAsync,
 } from "../../courseClass/store/courseClassSlice";
 
-const getCourseClassLessonConfig = (courseClass, lessonId) => {
-    const relationLists = [
-        courseClass?.courseClassLessons,
-        courseClass?.classLessons,
-        courseClass?.lessonVisibilities,
-    ].filter(Array.isArray);
+const getClassId = (courseClassLesson) =>
+    courseClassLesson?.classId ?? courseClassLesson?.courseClassId ?? courseClassLesson?.courseClass?.classId;
 
-    const directConfigs = [
-        courseClass?.courseClassLesson,
-        courseClass?.classLesson,
-        courseClass?.lessonVisibility,
-    ].filter(Boolean);
+const getClassName = (courseClassLesson) => {
+    const courseClass = courseClassLesson?.courseClass || courseClassLesson?.class;
+    const classId = getClassId(courseClassLesson);
 
-    const candidates = [
-        ...directConfigs,
-        ...relationLists.flat(),
-    ];
-
-    return candidates.find((item) => {
-        const itemLessonId = item.lessonId ?? item.lesson?.lessonId;
-        return Number(itemLessonId) === Number(lessonId);
-    });
+    return (
+        courseClass?.className ||
+        courseClass?.name ||
+        courseClassLesson?.className ||
+        courseClassLesson?.name ||
+        `Lớp #${classId}`
+    );
 };
 
-const isClassLessonVisible = (courseClass, lessonId) => {
-    const config = getCourseClassLessonConfig(courseClass, lessonId);
+const getClassMeta = (courseClassLesson) => {
+    const courseClass = courseClassLesson?.courseClass || courseClassLesson?.class;
 
-    if (!config || config.isVisible === undefined || config.isVisible === null) {
-        return true;
-    }
+    return {
+        weeklySchedule: courseClass?.weeklySchedule || courseClassLesson?.weeklySchedule,
+        room: courseClass?.room || courseClassLesson?.room,
+    };
+};
 
-    return Boolean(config.isVisible);
+const getResponseData = (payload) => payload?.data ?? payload;
+
+const getCourseClassLessonRecord = (payload) => {
+    const data = getResponseData(payload);
+    return data?.courseClassLesson || data?.classLesson || data?.record || data;
 };
 
 export const LessonClassVisibilitySwitches = ({
-    courseId,
     lessonId,
+    courseClassLessons,
     maxHeightClassName = "max-h-80",
 }) => {
     const dispatch = useDispatch();
-    const lessonVisibilityClasses = useSelector(selectLessonVisibilityClasses);
-    const loadingLessonVisibilityClasses = useSelector(selectLessonVisibilityClassesLoading);
     const loadingSwitchClassIds = useSelector(selectSwitchLessonVisibilityClassIds);
+    const [visibilityOverrides, setVisibilityOverrides] = useState({});
+    const items = (courseClassLessons || []).map((item) => {
+        const classId = getClassId(item);
+        const override = visibilityOverrides[`${lessonId}:${classId}`];
 
-    useEffect(() => {
-        if (!courseId || !lessonId) return;
+        return override ? { ...item, ...override } : item;
+    });
 
-        dispatch(
-            getCourseClassesForLessonVisibilityAsync({
-                courseId,
-            })
-        );
-    }, [dispatch, courseId, lessonId]);
+    const handleClassVisibilityChange = async (courseClassLesson, checked) => {
+        const classId = getClassId(courseClassLesson);
+        if (!classId || !lessonId) return;
 
-    const handleClassVisibilityChange = async (courseClass, checked) => {
         try {
-            await dispatch(
+            const response = await dispatch(
                 switchCourseClassLessonVisibilityAsync({
-                    classId: courseClass.classId,
+                    classId,
                     lessonId,
+                    displayOrder: courseClassLesson.displayOrder,
                     isVisible: checked,
                 })
             ).unwrap();
+            const record = {
+                ...courseClassLesson,
+                classId,
+                lessonId,
+                isVisible: checked,
+                ...getCourseClassLessonRecord(response),
+            };
+
+            setVisibilityOverrides((prev) => ({
+                ...prev,
+                [`${lessonId}:${classId}`]: record,
+            }));
         } catch (error) {
             console.error("Error updating lesson visibility by class:", error);
         }
     };
 
-    if (!courseId || !lessonId) {
+    if (!lessonId) {
         return null;
     }
 
@@ -91,37 +96,34 @@ export const LessonClassVisibilitySwitches = ({
                 </p>
             </div>
 
-            {loadingLessonVisibilityClasses ? (
-                <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Đang tải danh sách lớp...
-                </div>
-            ) : lessonVisibilityClasses.length === 0 ? (
+            {items.length === 0 ? (
                 <div className="px-4 py-6 text-center text-sm text-muted-foreground">
                     Chưa có lớp học nào trong khóa này
                 </div>
             ) : (
                 <div className={`${maxHeightClassName} overflow-y-auto divide-y divide-border`}>
-                    {lessonVisibilityClasses.map((courseClass) => {
-                        const checked = isClassLessonVisible(courseClass, lessonId);
-                        const switchLoading = loadingSwitchClassIds.includes(courseClass.classId);
+                    {items.map((courseClassLesson) => {
+                        const classId = getClassId(courseClassLesson);
+                        const checked = Boolean(courseClassLesson.isVisible);
+                        const switchLoading = loadingSwitchClassIds.includes(classId);
+                        const { weeklySchedule, room } = getClassMeta(courseClassLesson);
 
                         return (
                             <div
-                                key={courseClass.classId}
+                                key={classId}
                                 className="px-4 py-3 flex items-center justify-between gap-4"
                             >
                                 <div className="min-w-0">
                                     <p className="text-sm font-medium text-foreground truncate">
-                                        {courseClass.className || `Lớp #${courseClass.classId}`}
+                                        {getClassName(courseClassLesson)}
                                     </p>
                                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
-                                        <span>#{courseClass.classId}</span>
-                                        {courseClass.weeklySchedule && (
-                                            <span>{courseClass.weeklySchedule}</span>
+                                        <span>#{classId}</span>
+                                        {weeklySchedule && (
+                                            <span>{weeklySchedule}</span>
                                         )}
-                                        {courseClass.room && (
-                                            <span>Phòng {courseClass.room}</span>
+                                        {room && (
+                                            <span>Phòng {room}</span>
                                         )}
                                     </div>
                                 </div>
@@ -135,7 +137,7 @@ export const LessonClassVisibilitySwitches = ({
                                         loading={switchLoading}
                                         disabled={switchLoading}
                                         onChange={(nextChecked) =>
-                                            handleClassVisibilityChange(courseClass, nextChecked)
+                                            handleClassVisibilityChange(courseClassLesson, nextChecked)
                                         }
                                     />
                                 </div>

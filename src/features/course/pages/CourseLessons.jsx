@@ -1,9 +1,18 @@
 // src/features/course/pages/CourseLessons.jsx
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { selectCurrentCourse, selectCourseLoadingGet } from '../store/courseSlice';
-import { getAllLessonsAsync, selectLessonFilters, deleteLessonAsync, selectLessonLoadingDelete, selectLessons } from '../../lesson/store/lessonSlice';
+import {
+    getAllLessonsAsync,
+    getLessonByIdAsync,
+    selectCurrentLesson,
+    selectLessonFilters,
+    deleteLessonAsync,
+    selectLessonLoadingDelete,
+    selectLessonLoadingGetById,
+    selectLessons,
+} from '../../lesson/store/lessonSlice';
 import { getAllLessonLearningItemsAsync, deleteLessonLearningItemAsync, selectLessonLearningItemLoadingDelete, selectLessonLearningItems } from '../../lessonLearningitem/store/lessonLearningItemSlice';
 import { LessonList } from '../components/LessonList';
 import { LessonDetail } from '../components/LessonDetail';
@@ -15,7 +24,7 @@ import { AddVideoContent, EditVideoContent } from '../../videoContent/components
 import { AddYoutubeContent, EditYoutubeContent } from '../../youtubeContent/components';
 import { AddHomeworkContent, EditHomeworkContent } from '../../homeworkContent/components';
 import { Button, RightPanel, PageLoading, ConfirmModal } from '../../../shared/components';
-import { Plus, BookOpen, FileText } from 'lucide-react';
+import { Plus, BookOpen, FileText, Loader2 } from 'lucide-react';
 import { 
     deleteDocumentContentAsync, 
     selectDocumentContentLoadingDelete, 
@@ -47,6 +56,8 @@ export const CourseLessons = () => {
     const loadingDeleteLesson = useSelector(selectLessonLoadingDelete);
     const loadingDetachLearningItem = useSelector(selectLessonLearningItemLoadingDelete);
     const lessons = useSelector(selectLessons);
+    const lessonDetail = useSelector(selectCurrentLesson);
+    const loadingLessonDetail = useSelector(selectLessonLoadingGetById);
     const loadingDeleteDocumentContent = useSelector(selectDocumentContentLoadingDelete);
     const loadingDeleteVideoContent = useSelector(selectVideoContentLoadingDelete);
     const loadingDeleteYoutubeContent = useSelector(selectYoutubeContentLoadingDelete);
@@ -114,9 +125,23 @@ export const CourseLessons = () => {
         setSelectedLessonForLearningItem(null);
     };
 
-    const handleEditLesson = (lesson) => {
+    const handleEditLesson = async (lesson) => {
         setEditingLesson(lesson);
         setOpenEditLesson(true);
+
+        if (!lesson?.lessonId) return;
+
+        try {
+            const lessonWithClassLessons = await loadLessonDetail(lesson.lessonId);
+            if (lessonWithClassLessons) {
+                setEditingLesson({
+                    ...lesson,
+                    ...lessonWithClassLessons,
+                });
+            }
+        } catch (error) {
+            console.error('Error loading lesson detail for edit:', error);
+        }
     };
 
     const handleCloseEditLesson = () => {
@@ -159,16 +184,48 @@ export const CourseLessons = () => {
         }
     }, [dispatch, selectedLessonForLearningItem]);
 
+    const selectedLessonId = selectedItem?.type === 'lesson'
+        ? selectedItem.data?.lessonId
+        : selectedItem?.lessonId;
+
+    const loadLessonDetail = useCallback(async (lessonId = selectedLessonId) => {
+        if (!courseId || !lessonId) return null;
+
+        const response = await dispatch(
+            getLessonByIdAsync({
+                id: lessonId,
+                courseId,
+            })
+        ).unwrap();
+
+        return response?.data || response;
+    }, [dispatch, courseId, selectedLessonId]);
+
+    useEffect(() => {
+        if (selectedLessonId) {
+            loadLessonDetail(selectedLessonId).catch((error) => {
+                console.error('Error loading lesson detail:', error);
+            });
+        }
+    }, [selectedLessonId, loadLessonDetail]);
+
     // Get current lesson from Redux store (reactive to updates)
     const currentLesson = useMemo(() => {
-        if (selectedItem?.type === 'lesson') {
-            return lessons.find(l => l.lessonId === selectedItem.data.lessonId) || selectedItem.data;
+        if (!selectedLessonId) return null;
+
+        const listLesson = lessons.find(l => l.lessonId === selectedLessonId) || lessonMap[selectedLessonId];
+        const selectedLesson = selectedItem?.type === 'lesson' ? selectedItem.data : null;
+
+        if (lessonDetail?.lessonId === selectedLessonId) {
+            return {
+                ...listLesson,
+                ...selectedLesson,
+                ...lessonDetail,
+            };
         }
-        if (selectedItem?.type === 'learningItem') {
-            return lessons.find(l => l.lessonId === selectedItem.lessonId) || lessonMap[selectedItem.lessonId];
-        }
-        return null;
-    }, [lessons, selectedItem, lessonMap]);
+
+        return listLesson || selectedLesson;
+    }, [lessonDetail, lessons, selectedItem, selectedLessonId, lessonMap]);
 
     // Get current learning item from Redux store (reactive to updates)
     const currentLearningItemsInLesson = useSelector(selectLessonLearningItems(selectedItem?.lessonId || 0));
@@ -417,13 +474,19 @@ export const CourseLessons = () => {
                 {/* Right Content - Detail View */}
                 <div className="flex-1 overflow-y-auto bg-white">
                     {selectedItem?.type === 'lesson' ? (
-                        <LessonDetail
-                            lesson={currentLesson}
-                            courseId={courseId}
-                            onAddLearningItem={handleAddLearningItem}
-                            onEdit={() => handleEditLesson(currentLesson)}
-                            onDelete={() => handleDeleteLesson(currentLesson)}
-                        />
+                        loadingLessonDetail && !currentLesson?.courseClassLessons ? (
+                            <div className="flex items-center justify-center h-full gap-2 text-sm text-muted-foreground">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Đang tải thông tin bài học...
+                            </div>
+                        ) : (
+                            <LessonDetail
+                                lesson={currentLesson}
+                                onAddLearningItem={handleAddLearningItem}
+                                onEdit={() => handleEditLesson(currentLesson)}
+                                onDelete={() => handleDeleteLesson(currentLesson)}
+                            />
+                        )
                     ) : selectedItem?.type === 'learningItem' ? (
                         <LearningItemDetail
                             courseId={courseId}
@@ -498,7 +561,6 @@ export const CourseLessons = () => {
                         key={editingLesson.lessonId}
                         onClose={handleCloseEditLesson}
                         lesson={editingLesson}
-                        courseId={courseId}
                         canSelectTeacher={true}
                         loadLessons={loadLessons}
                     />

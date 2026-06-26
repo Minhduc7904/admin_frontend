@@ -30,16 +30,16 @@ export const CompetitionTable = ({ competitions, onView, onEdit, onDelete, onVie
 
     const getStatusBadge = (competition) => {
         const now = new Date();
-        const startDate = new Date(competition.startDate);
-        const endDate = new Date(competition.endDate);
+        const startDate = competition.startDate ? new Date(competition.startDate) : null;
+        const endDate = competition.endDate ? new Date(competition.endDate) : null;
 
-        if (now < startDate) {
+        if (startDate && now < startDate) {
             return (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                     Sắp diễn ra
                 </span>
             );
-        } else if (now >= startDate && now <= endDate) {
+        } else if (!endDate || now <= endDate) {
             return (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                     Đang diễn ra
@@ -127,7 +127,7 @@ export const CompetitionTable = ({ competitions, onView, onEdit, onDelete, onVie
                     </div>
                     <div className="flex items-center gap-1 text-foreground-light">
                         <Calendar size={12} />
-                        <span>Kết thúc: {formatDateTime(competition.endDate)}</span>
+                        <span>Kết thúc: {competition.endDate ? formatDateTime(competition.endDate) : 'Không giới hạn'}</span>
                     </div>
                 </div>
             )
