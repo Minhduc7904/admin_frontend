@@ -55,6 +55,14 @@ export const superAdminApi = {
     },
 
     /**
+     * Sync all permission codes from source constants into DB.
+     * POST /super-admin/permissions/sync-from-codes
+     */
+    syncPermissionsFromCodes: () => {
+        return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.SYNC_PERMISSIONS_FROM_CODES);
+    },
+
+    /**
      * Promote student grade by high school graduation year.
      * POST /super-admin/students/promote-grade/by-graduation-year
      */

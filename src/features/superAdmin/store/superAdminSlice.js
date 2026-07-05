@@ -21,6 +21,9 @@ const initialState = {
     loadingSeedDefaultTags: false,
     errorSeedDefaultTags: null,
     seedDefaultTagsResult: null,
+    loadingSyncPermissionsFromCodes: false,
+    errorSyncPermissionsFromCodes: null,
+    syncPermissionsFromCodesResult: null,
     loadingPromoteStudentGradeByGraduationYear: false,
     errorPromoteStudentGradeByGraduationYear: null,
     promoteStudentGradeByGraduationYearResult: null,
@@ -114,6 +117,21 @@ export const seedDefaultTagsAsync = createAsyncThunk(
     }
 );
 
+export const syncPermissionsFromCodesAsync = createAsyncThunk(
+    "superAdmin/syncPermissionsFromCodes",
+    async (_, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.syncPermissionsFromCodes(),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Đồng bộ permission codes thành công",
+                errorTitle: "Lỗi đồng bộ permission codes",
+            }
+        );
+    }
+);
+
 export const promoteStudentGradeByGraduationYearAsync = createAsyncThunk(
     "superAdmin/promoteStudentGradeByGraduationYear",
     async (payload, thunkAPI) => {
@@ -186,6 +204,10 @@ export const superAdminSlice = createSlice({
         clearSeedDefaultTagsState: (state) => {
             state.errorSeedDefaultTags = null;
             state.seedDefaultTagsResult = null;
+        },
+        clearSyncPermissionsFromCodesState: (state) => {
+            state.errorSyncPermissionsFromCodes = null;
+            state.syncPermissionsFromCodesResult = null;
         },
         clearPromoteStudentGradeByGraduationYearState: (state) => {
             state.errorPromoteStudentGradeByGraduationYear = null;
@@ -274,6 +296,18 @@ export const superAdminSlice = createSlice({
                 state.loadingSeedDefaultTags = false;
                 state.errorSeedDefaultTags = action.payload;
             })
+            .addCase(syncPermissionsFromCodesAsync.pending, (state) => {
+                state.loadingSyncPermissionsFromCodes = true;
+                state.errorSyncPermissionsFromCodes = null;
+            })
+            .addCase(syncPermissionsFromCodesAsync.fulfilled, (state, action) => {
+                state.loadingSyncPermissionsFromCodes = false;
+                state.syncPermissionsFromCodesResult = action.payload || null;
+            })
+            .addCase(syncPermissionsFromCodesAsync.rejected, (state, action) => {
+                state.loadingSyncPermissionsFromCodes = false;
+                state.errorSyncPermissionsFromCodes = action.payload;
+            })
             .addCase(promoteStudentGradeByGraduationYearAsync.pending, (state) => {
                 state.loadingPromoteStudentGradeByGraduationYear = true;
                 state.errorPromoteStudentGradeByGraduationYear = null;
@@ -320,6 +354,7 @@ export const {
     clearGenerateMissingExamSlugsState,
     clearRegenerateQuestionSlugsState,
     clearSeedDefaultTagsState,
+    clearSyncPermissionsFromCodesState,
     clearPromoteStudentGradeByGraduationYearState,
     clearUpdateStudentGraduationYearByGradeState,
     clearHardDeleteStudentsByGraduationYearGradeExcludedCoursesState,
@@ -366,6 +401,13 @@ export const selectSuperAdminErrorSeedDefaultTags = (state) =>
     state.superAdmin.errorSeedDefaultTags;
 export const selectSuperAdminSeedDefaultTagsResult = (state) =>
     state.superAdmin.seedDefaultTagsResult;
+
+export const selectSuperAdminLoadingSyncPermissionsFromCodes = (state) =>
+    state.superAdmin.loadingSyncPermissionsFromCodes;
+export const selectSuperAdminErrorSyncPermissionsFromCodes = (state) =>
+    state.superAdmin.errorSyncPermissionsFromCodes;
+export const selectSuperAdminSyncPermissionsFromCodesResult = (state) =>
+    state.superAdmin.syncPermissionsFromCodesResult;
 
 export const selectSuperAdminLoadingPromoteStudentGradeByGraduationYear = (state) =>
     state.superAdmin.loadingPromoteStudentGradeByGraduationYear;

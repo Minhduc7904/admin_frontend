@@ -5,6 +5,7 @@ import {
     GenerateMissingExamSlugsApiCard,
     RegenerateQuestionSlugsApiCard,
     SeedDefaultTagsApiCard,
+    SyncPermissionsFromCodesApiCard,
     PromoteStudentGradeByGraduationYearApiCard,
     UpdateStudentGraduationYearByGradeApiCard,
     HardDeleteStudentsByGraduationYearGradeExcludedCoursesApiCard,
@@ -27,6 +28,7 @@ export const SuperAdminPage = () => {
             <GenerateMissingExamSlugsApiCard />
             <RegenerateQuestionSlugsApiCard />
             <SeedDefaultTagsApiCard />
+            <SyncPermissionsFromCodesApiCard />
             <CleanupUnusedMediaOlderThan30DaysApiCard />
             <UpdateAdminDirectApiCard />
         </div>
