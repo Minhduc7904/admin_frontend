@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { User, Trophy, RefreshCw, CheckCircle2, XCircle, BarChart2, RotateCcw, Pencil, Trash2 } from 'lucide-react';
+import { User, Trophy, RefreshCw, CheckCircle2, XCircle, BarChart2, RotateCcw, Pencil, Trash2, Download } from 'lucide-react';
 import {
     deleteCompetitionSubmitAsync,
     getAllCompetitionSubmitsAsync,
@@ -10,6 +10,7 @@ import {
     selectCompetitionSubmitPagination,
     selectCompetitionSubmitLoadingGet,
     selectCompetitionSubmitLoadingRegrade,
+    selectCompetitionSubmitLoadingExport,
 } from '../../competitionSubmit/store/competitionSubmitSlice';
 import { EditCompetitionSubmitPanel } from '../../competitionSubmit/components/EditCompetitionSubmitPanel';
 import {
@@ -22,6 +23,9 @@ import { SearchInput, Dropdown, Table, ConfirmModal } from '../../../shared/comp
 import { Pagination } from '../../../shared/components/ui/Pagination';
 import { CompetitionSubmitDetail } from '../../competitionSubmit/components/CompetitionSubmitDetail';
 import { StackedBarChart, PercentPieChart } from '../../../shared/components/stat';
+import { ExportCompetitionSubmitExcelModal } from './ExportCompetitionSubmitExcelModal';
+import { CanAccess } from '../../../shared/components/permissions';
+import { PERMISSIONS } from '../../../core/constants';
 
 /* ── Constants ──────────────────────────────────────────────────── */
 
@@ -84,6 +88,7 @@ const ScoreCell = ({ score, totalScore }) => {
 
 export const CompetitionLeaderboard = ({ competition }) => {
     const dispatch = useDispatch();
+    const competitionId = competition?.competitionId;
     const submits = useSelector(selectCompetitionSubmits);
     const pagination = useSelector(selectCompetitionSubmitPagination);
     const loading = useSelector(selectCompetitionSubmitLoadingGet);
@@ -91,9 +96,11 @@ export const CompetitionLeaderboard = ({ competition }) => {
     const loadingStats = useSelector(selectCompetitionLoadingQuestionStats);
     const loadingRegrade = useSelector(selectCompetitionSubmitLoadingRegrade);
     const loadingDelete = useSelector(selectCompetitionSubmitLoadingDelete);
+    const loadingExport = useSelector(selectCompetitionSubmitLoadingExport);
     const [regradingId, setRegradingId] = useState(null);
     const [editingSubmit, setEditingSubmit] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [openExportExcel, setOpenExportExcel] = useState(false);
 
     const [activeTab, setActiveTab] = useState('submits'); // 'submits' | 'stats'
     const [status, setStatus] = useState('');
@@ -106,7 +113,7 @@ export const CompetitionLeaderboard = ({ competition }) => {
     const [selectedSubmitId, setSelectedSubmitId] = useState(null);
     const [sort, setSort] = useState({ field: 'startedAt', direction: 'desc' });
     // Track whether stats have been fetched at least once to avoid re-fetching on tab switch
-    const [statsFetched, setStatsFetched] = useState(false);
+    const statsFetchedRef = useRef(false);
 
     const handleSortChange = (field, direction) => {
         setSort({ field, direction });
@@ -114,9 +121,9 @@ export const CompetitionLeaderboard = ({ competition }) => {
     };
 
     const loadSubmits = useCallback(() => {
-        if (!competition?.competitionId) return;
+        if (!competitionId) return;
         dispatch(getAllCompetitionSubmitsAsync({
-            competitionId: competition.competitionId,
+            competitionId,
             search: debouncedSearch || undefined,
             status: status || undefined,
             isGraded: isGraded !== '' ? isGraded : undefined,
@@ -127,25 +134,29 @@ export const CompetitionLeaderboard = ({ competition }) => {
             sortBy: sort.field,
             sortOrder: sort.direction,
         }));
-    }, [dispatch, competition?.competitionId, debouncedSearch, status, isGraded, startedFrom, startedTo, page, limit, sort]);
+    }, [dispatch, competitionId, debouncedSearch, status, isGraded, startedFrom, startedTo, page, limit, sort]);
 
     const loadStats = useCallback(() => {
-        if (!competition?.competitionId) return;
-        dispatch(getCompetitionQuestionStatsAsync(competition.competitionId));
-        setStatsFetched(true);
-    }, [dispatch, competition?.competitionId]);
+        if (!competitionId) return;
+        dispatch(getCompetitionQuestionStatsAsync(competitionId));
+        statsFetchedRef.current = true;
+    }, [dispatch, competitionId]);
 
     // Keep backward compat alias used by refresh button
     const load = activeTab === 'stats' ? loadStats : loadSubmits;
 
     useEffect(() => { loadSubmits(); }, [loadSubmits]);
 
+    useEffect(() => {
+        statsFetchedRef.current = false;
+    }, [competitionId]);
+
     // Only fetch stats when switching to stats tab for the first time
     useEffect(() => {
-        if (activeTab === 'stats' && !statsFetched) {
+        if (activeTab === 'stats' && !statsFetchedRef.current) {
             loadStats();
         }
-    }, [activeTab, statsFetched, loadStats]);
+    }, [activeTab, loadStats]);
 
     const applyFilter = (setter) => (val) => { setter(val); setPage(1); };
 
@@ -285,14 +296,27 @@ export const CompetitionLeaderboard = ({ competition }) => {
                         </p>
                     </div>
                 </div>
-                <button
-                    onClick={load}
-                    disabled={activeTab === 'stats' ? loadingStats : loading}
-                    title="Tải lại"
-                    className="p-1.5 rounded hover:bg-gray-100 text-foreground-light transition-colors disabled:opacity-50"
-                >
-                    <RefreshCw size={14} className={(activeTab === 'stats' ? loadingStats : loading) ? 'animate-spin' : ''} />
-                </button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <CanAccess permission={PERMISSIONS.COMPETITION_SUBMIT.EXPORT_EXCEL}>
+                        <button
+                            onClick={() => setOpenExportExcel(true)}
+                            disabled={loadingExport}
+                            title="Xuất Excel"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-border bg-white hover:bg-gray-50 text-xs font-medium text-foreground-light hover:text-foreground transition-colors disabled:opacity-50"
+                        >
+                            <Download size={14} />
+                            Excel
+                        </button>
+                    </CanAccess>
+                    <button
+                        onClick={load}
+                        disabled={activeTab === 'stats' ? loadingStats : loading}
+                        title="Tải lại"
+                        className="p-1.5 rounded hover:bg-gray-100 text-foreground-light transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={14} className={(activeTab === 'stats' ? loadingStats : loading) ? 'animate-spin' : ''} />
+                    </button>
+                </div>
             </div>
 
             {/* Tabs */}
@@ -697,6 +721,21 @@ export const CompetitionLeaderboard = ({ competition }) => {
                 submitId={selectedSubmitId}
                 isOpen={!!selectedSubmitId}
                 onClose={() => setSelectedSubmitId(null)}
+            />
+
+            <ExportCompetitionSubmitExcelModal
+                isOpen={openExportExcel}
+                onClose={() => setOpenExportExcel(false)}
+                competition={competition}
+                currentFilters={{
+                    search: debouncedSearch || '',
+                    status,
+                    isGraded: isGraded === '' ? undefined : isGraded === 'true',
+                    startedFrom,
+                    startedTo,
+                    sortBy: sort.field,
+                    sortOrder: sort.direction,
+                }}
             />
 
             <EditCompetitionSubmitPanel

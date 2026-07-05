@@ -76,4 +76,17 @@ export const competitionSubmitApi = {
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.COMPETITION_SUBMITS.DELETE(id));
     },
+
+    /**
+     * GET /competition-submits/export/excel
+     * Xuất danh sách điểm bài nộp competition ra file Excel.
+     * @param {Object} params - Query filters and export options
+     * @returns {Promise<Blob>} Exported file blob
+     */
+    exportExcel: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.COMPETITION_SUBMITS.EXPORT_EXCEL, {
+            params,
+            responseType: 'blob',
+        });
+    },
 };

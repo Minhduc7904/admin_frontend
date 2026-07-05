@@ -19,6 +19,9 @@ export const PERMISSIONS = {
     UPDATE: 'competition:update',
     DELETE: 'competition:delete',
   },
+  COMPETITION_SUBMIT: {
+    EXPORT_EXCEL: 'competition-submit:export-excel',
+  },
   QUESTION: {
     GET_MY_QUESTIONS: 'question:get-my-questions',
     SEARCH: 'question:search',

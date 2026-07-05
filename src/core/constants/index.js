@@ -512,6 +512,7 @@ export const API_ENDPOINTS = {
     FULL_DETAIL: (id) => `/competition-submits/${id}/detail`,
     REGRADE: (id) => `/competition-submits/${id}/regrade`,
     DELETE: (id) => `/competition-submits/${id}`,
+    EXPORT_EXCEL: "/competition-submits/export/excel",
   },
   SECTIONS: {
     LIST: "/sections",

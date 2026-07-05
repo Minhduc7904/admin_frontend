@@ -20,6 +20,7 @@ const initialState = {
     loadingRegrade: false,
     loadingUpdate: false,
     loadingDelete: false,
+    loadingExport: false,
     error: null,
     filters: {
         competitionId: '',
@@ -31,6 +32,43 @@ const initialState = {
         startedTo: '',
         sortBy: 'createdAt',
         sortOrder: 'desc',
+    },
+    exportExcelOptions: {
+        search: '',
+        page: '',
+        limit: '',
+        sortBy: '',
+        sortOrder: '',
+        grade: '',
+        highSchoolGraduationYear: '',
+        isActive: undefined,
+        hasParentZaloId: '',
+        classIds: [],
+        fromDate: '',
+        toDate: '',
+        includeSchool: true,
+        includeGender: true,
+        includeDateOfBirth: true,
+        includeUsername: true,
+        includeParentPhone: true,
+        includeStudentPhone: true,
+        includeGrade: true,
+        includeHighSchoolGraduationYear: true,
+        includeEmail: true,
+        includeIsActive: true,
+        includeCreatedAt: true,
+        includeClasses: true,
+        competitionId: '',
+        studentId: '',
+        status: '',
+        attemptNumber: '',
+        isGraded: '',
+        startedFrom: '',
+        startedTo: '',
+        submittedFrom: '',
+        submittedTo: '',
+        includeCompetitionSubmitColumns: true,
+        includeQuestionColumns: true,
     },
 };
 
@@ -122,6 +160,45 @@ export const updateCompetitionSubmitAsync = createAsyncThunk(
     }
 );
 
+export const exportCompetitionSubmitExcelAsync = createAsyncThunk(
+    'competitionSubmit/exportExcel',
+    async (params = {}, thunkAPI) => {
+        return handleAsyncThunk(async () => {
+            const response = await competitionSubmitApi.exportExcel(params);
+            const blob = response.data || response;
+
+            const contentDisposition = response.headers?.['content-disposition'];
+            let filename = 'competition_submits_export.xlsx';
+
+            if (contentDisposition) {
+                const utf8FilenameMatch = contentDisposition.match(/filename\*=UTF-8''([^;\n]*)/);
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+
+                if (utf8FilenameMatch?.[1]) {
+                    filename = decodeURIComponent(utf8FilenameMatch[1]);
+                } else if (filenameMatch?.[1]) {
+                    filename = decodeURIComponent(filenameMatch[1].replace(/['"]/g, ''));
+                }
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            return { success: true };
+        }, thunkAPI, {
+            successTitle: 'Xuất Excel thành công',
+            successMessage: 'File điểm bài nộp competition đã được tải xuống',
+            errorTitle: 'Xuất Excel thất bại',
+        });
+    }
+);
+
 /* ── Slice ──────────────────────────────────────────────────────── */
 
 const competitionSubmitSlice = createSlice({
@@ -145,6 +222,12 @@ const competitionSubmitSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
+        },
+        setCompetitionSubmitExportExcelOptions: (state, action) => {
+            state.exportExcelOptions = { ...state.exportExcelOptions, ...action.payload };
+        },
+        resetCompetitionSubmitExportExcelOptions: (state) => {
+            state.exportExcelOptions = initialState.exportExcelOptions;
         },
     },
     extraReducers: (builder) => {
@@ -294,6 +377,19 @@ const competitionSubmitSlice = createSlice({
             .addCase(deleteCompetitionSubmitAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+            /* ── Export Excel ─────────────────────────────────────────────── */
+            .addCase(exportCompetitionSubmitExcelAsync.pending, (state) => {
+                state.loadingExport = true;
+                state.error = null;
+            })
+            .addCase(exportCompetitionSubmitExcelAsync.fulfilled, (state) => {
+                state.loadingExport = false;
+                state.error = null;
+            })
+            .addCase(exportCompetitionSubmitExcelAsync.rejected, (state, action) => {
+                state.loadingExport = false;
+                state.error = action.payload;
             });
     },
 });
@@ -305,6 +401,8 @@ export const {
     clearCurrentSubmit,
     clearCurrentSubmitDetail,
     clearError,
+    setCompetitionSubmitExportExcelOptions,
+    resetCompetitionSubmitExportExcelOptions,
 } = competitionSubmitSlice.actions;
 
 /* ── Selectors ──────────────────────────────────────────────────── */
@@ -320,6 +418,8 @@ export const selectCurrentCompetitionSubmitDetail = (state) => state.competition
 export const selectCompetitionSubmitLoadingRegrade = (state) => state.competitionSubmit.loadingRegrade;
 export const selectCompetitionSubmitLoadingUpdate = (state) => state.competitionSubmit.loadingUpdate;
 export const selectCompetitionSubmitLoadingDelete = (state) => state.competitionSubmit.loadingDelete;
+export const selectCompetitionSubmitLoadingExport = (state) => state.competitionSubmit.loadingExport;
 export const selectCompetitionSubmitError = (state) => state.competitionSubmit.error;
+export const selectCompetitionSubmitExportExcelOptions = (state) => state.competitionSubmit.exportExcelOptions;
 
 export default competitionSubmitSlice.reducer;
