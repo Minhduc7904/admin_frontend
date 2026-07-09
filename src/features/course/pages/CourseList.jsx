@@ -20,6 +20,7 @@ export const CourseList = ({
     search,
     grade,
     visibility,
+    courseType,
     isEnded,
     academicYear,
 
@@ -34,6 +35,7 @@ export const CourseList = ({
     onSearchChange,
     onGradeChange,
     onVisibilityChange,
+    onCourseTypeChange,
     onIsEndedChange,
     onAcademicYearChange,
     onPageChange,
@@ -103,6 +105,8 @@ export const CourseList = ({
                     onGradeChange={onGradeChange}
                     visibility={visibility}
                     onVisibilityChange={onVisibilityChange}
+                    courseType={courseType}
+                    onCourseTypeChange={onCourseTypeChange}
                     isEnded={isEnded}
                     onIsEndedChange={onIsEndedChange}
                     academicYear={academicYear}

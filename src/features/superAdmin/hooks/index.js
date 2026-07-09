@@ -5,6 +5,7 @@ export * from './useGenerateMissingExamSlugs';
 export * from './useRegenerateQuestionSlugs';
 export * from './useSeedDefaultTags';
 export * from './useSyncPermissionsFromCodes';
+export * from './useSyncSeoMediaSlotsFromPageSlots';
 export * from './usePromoteStudentGradeByGraduationYear';
 export * from './useUpdateStudentGraduationYearByGrade';
 export * from './useHardDeleteStudentsByGraduationYearGradeExcludedCourses';

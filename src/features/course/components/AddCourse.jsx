@@ -1,10 +1,11 @@
-import { createCourseAsync, getAllCoursesAsync, selectCourseLoadingCreate } from "../store/courseSlice";
+import { createCourseAsync, selectCourseLoadingCreate } from "../store/courseSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { Input, Button, Dropdown, Textarea, CurrencyInput } from "../../../shared/components";
 import { AdminSearchSelect } from "../../admin/components/AdminSearchSelect";
 import { SubjectSearchSelect } from "../../subject/components/SubjectSearchSelect";
 import { COURSE_VISIBILITIES } from "../constanst/course-visibility.constants";
+import { COURSE_TYPES, COURSE_TYPE_OPTIONS } from "../constanst/course-type.constants";
 import { GRADE_OPTIONS } from "../../../core/constants/grade-constants";
 import { ACADEMIC_YEARS_OPTIONS } from "../../../core/constants/academic-year.constants";
 import { useNavigate } from "react-router-dom";
@@ -24,12 +25,10 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
         description: '',
         priceVND: '0',
         compareAtVND: '',
+        courseType: COURSE_TYPES.OFFLINE,
         visibility: COURSE_VISIBILITIES.DRAFT,
         teacherId: defaultTeacherId || '',
     });
-
-    const [selectedAdmin, setSelectedAdmin] = useState(null);
-    const [selectedSubject, setSelectedSubject] = useState(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -98,6 +97,7 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
             description: formData.description?.trim() || undefined,
             priceVND: parseFloat(formData.priceVND),
             compareAtVND: formData.compareAtVND ? parseFloat(formData.compareAtVND) : undefined,
+            courseType: formData.courseType || COURSE_TYPES.OFFLINE,
             visibility: formData.visibility,
             teacherId: formData.teacherId ? parseInt(formData.teacherId) : undefined,
         };
@@ -209,6 +209,14 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
                     </div>
                 </div>
 
+                <Dropdown
+                    label="Loại khóa học"
+                    required
+                    value={formData.courseType}
+                    onChange={(value) => setFormData(prev => ({ ...prev, courseType: value }))}
+                    options={COURSE_TYPE_OPTIONS}
+                />
+
                 {/* Subject and Teacher Selection */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -217,7 +225,6 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
                             placeholder="Tìm kiếm môn học..."
                             value={formData.subjectId}
                             onSelect={(subject) => {
-                                setSelectedSubject(subject);
                                 setFormData(prev => ({
                                     ...prev,
                                     subjectId: subject?.subjectId || ''
@@ -233,7 +240,6 @@ export const AddCourse = ({ onClose, defaultTeacherId = null, canSelectTeacher =
                                 placeholder="Tìm kiếm giáo viên..."
                                 value={formData.teacherId}
                                 onSelect={(admin) => {
-                                    setSelectedAdmin(admin);
                                     setFormData(prev => ({
                                         ...prev,
                                         teacherId: admin?.adminId || ''

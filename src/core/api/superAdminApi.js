@@ -63,6 +63,16 @@ export const superAdminApi = {
     },
 
     /**
+     * Sync SEO media slots from PAGE_SEO_MEDIA_SLOTS constants into DB.
+     * POST /super-admin/seo-media/slots/sync-from-page-slots
+     */
+    syncSeoMediaSlotsFromPageSlots: () => {
+        return axiosClient.post(
+            API_ENDPOINTS.SUPER_ADMIN.SYNC_SEO_MEDIA_SLOTS_FROM_PAGE_SLOTS
+        );
+    },
+
+    /**
      * Promote student grade by high school graduation year.
      * POST /super-admin/students/promote-grade/by-graduation-year
      */

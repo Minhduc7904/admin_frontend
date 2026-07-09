@@ -1,4 +1,5 @@
 import { SearchInput, Dropdown } from '../../../shared/components/ui';
+import { COURSE_TYPE_FILTER_OPTIONS } from '../constanst/course-type.constants';
 
 export const CourseFilters = ({
     search,
@@ -7,6 +8,8 @@ export const CourseFilters = ({
     onGradeChange,
     visibility,
     onVisibilityChange,
+    courseType,
+    onCourseTypeChange,
     isEnded,
     onIsEndedChange,
     academicYear,
@@ -76,6 +79,14 @@ export const CourseFilters = ({
                         onChange={onVisibilityChange}
                         options={visibilityOptions}
                         placeholder="Chọn trạng thái"
+                    />
+                </div>
+                <div className="w-48">
+                    <Dropdown
+                        value={courseType}
+                        onChange={onCourseTypeChange}
+                        options={COURSE_TYPE_FILTER_OPTIONS}
+                        placeholder="Loại khóa"
                     />
                 </div>
                 <div className="w-48">

@@ -40,3 +40,4 @@ export { competitionSubmitApi } from './competitionSubmitApi';
 export { sectionApi } from './sectionApi';
 export { markdownApi } from './markdownApi';
 export { seoMediaApi } from './seoMediaApi';
+export { achievementBoardApi } from './achievementBoardApi';

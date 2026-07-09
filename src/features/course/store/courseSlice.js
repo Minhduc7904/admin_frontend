@@ -32,6 +32,7 @@ const initialState = {
     search: "",
     grade: "",
     visibility: "",
+    courseType: "",
     academicYear: "",
     teacherId: "",
     isEnded: "false",
@@ -42,6 +43,7 @@ const initialState = {
     search: "",
     grade: "",
     visibility: "",
+    courseType: "",
     academicYear: "",
     isEnded: "false",
     sortBy: "createdAt",
@@ -139,6 +141,17 @@ export const updateCoursePricingAsync = createAsyncThunk(
       showSuccess: true,
       successTitle: "Cập nhật thông tin giá khóa học thành công",
       errorTitle: "Lỗi cập nhật thông tin giá khóa học",
+    });
+  }
+);
+
+export const updateCourseMediaAsync = createAsyncThunk(
+  "course/updateMedia",
+  async ({ id, data }, thunkAPI) => {
+    return handleAsyncThunk(() => courseApi.updateMedia(id, data), thunkAPI, {
+      showSuccess: true,
+      successTitle: "Cập nhật media khóa học thành công",
+      errorTitle: "Lỗi cập nhật media khóa học",
     });
   }
 );
@@ -396,6 +409,23 @@ export const courseSlice = createSlice({
         state.error = null;
       })
       .addCase(updateCoursePricingAsync.rejected, (state, action) => {
+        state.loadingUpdate = false;
+        state.error = action.payload;
+      })
+      // Update course media
+      .addCase(updateCourseMediaAsync.pending, (state) => {
+        state.loadingUpdate = true;
+        state.error = null;
+      })
+      .addCase(updateCourseMediaAsync.fulfilled, (state, action) => {
+        state.loadingUpdate = false;
+        if (state.currentCourse) {
+          state.currentCourse.media = action.payload.data;
+          state.currentCourse.thumbnail = action.payload.data?.thumbnail || null;
+        }
+        state.error = null;
+      })
+      .addCase(updateCourseMediaAsync.rejected, (state, action) => {
         state.loadingUpdate = false;
         state.error = action.payload;
       })

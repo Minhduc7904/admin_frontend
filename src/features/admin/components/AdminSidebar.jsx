@@ -304,6 +304,13 @@ export const AdminSidebar = () => {
           icon: ImageUp,
           permission: PERMISSIONS.ADMIN_PAGE.SEO_MEDIA
         },
+        {
+          key: 'achievementBoards',
+          name: 'Bảng thành tích',
+          href: ROUTES.ACHIEVEMENT_BOARDS,
+          icon: Trophy,
+          permission: PERMISSIONS.ADMIN_PAGE.SEO_MEDIA
+        },
       ],
     },
   ];

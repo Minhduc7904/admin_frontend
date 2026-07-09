@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Input, Button, Dropdown, Checkbox } from '../../../../shared/components/ui'
+import { Input, Button } from '../../../../shared/components/ui'
 import {
     updateCoursePricingAsync,
     getCourseByIdAsync,
     selectCourseLoadingUpdate,
 } from '../../store/courseSlice'
-import { PAYMENT_TYPES, PAYMENT_TYPE_OPTIONS } from '../../constanst/payment-type.constants'
 
 export const EditCoursePricing = ({ course, onClose, disabled = false }) => {
     const dispatch = useDispatch()
@@ -16,11 +15,6 @@ export const EditCoursePricing = ({ course, onClose, disabled = false }) => {
     const [formData, setFormData] = useState({
         priceVND: '',
         compareAtVND: '',
-        hasTuitionFee: true,
-        paymentType: PAYMENT_TYPES.MONTHLY,
-        autoRenew: false,
-        blockUnpaid: false,
-        gracePeriodDays: '',
     })
 
     useEffect(() => {
@@ -29,14 +23,6 @@ export const EditCoursePricing = ({ course, onClose, disabled = false }) => {
         setFormData({
             priceVND: course.priceVND?.toString() ?? '',
             compareAtVND: course.compareAtVND?.toString() ?? '',
-            hasTuitionFee: course.hasTuitionFee ?? true,
-            paymentType: course.paymentType ?? 'MONTHLY',
-            autoRenew: course.autoRenew ?? false,
-            blockUnpaid: course.blockUnpaid ?? false,
-            gracePeriodDays:
-                course.gracePeriodDays !== null && course.gracePeriodDays !== undefined
-                    ? course.gracePeriodDays.toString()
-                    : '',
         })
     }, [course])
 
@@ -67,10 +53,6 @@ export const EditCoursePricing = ({ course, onClose, disabled = false }) => {
             }
         }
 
-        if (formData.gracePeriodDays && parseInt(formData.gracePeriodDays) < 0) {
-            errors.gracePeriodDays = 'Số ngày ân hạn phải ≥ 0'
-        }
-
         return errors
     }
 
@@ -88,13 +70,6 @@ export const EditCoursePricing = ({ course, onClose, disabled = false }) => {
             compareAtVND: formData.compareAtVND
                 ? parseFloat(formData.compareAtVND)
                 : undefined,
-            hasTuitionFee: formData.hasTuitionFee,
-            paymentType: formData.paymentType,
-            autoRenew: formData.autoRenew,
-            blockUnpaid: formData.blockUnpaid,
-            gracePeriodDays: formData.gracePeriodDays
-                ? parseInt(formData.gracePeriodDays)
-                : null,
         }
 
         try {
@@ -134,51 +109,6 @@ export const EditCoursePricing = ({ course, onClose, disabled = false }) => {
                     disabled={disabled}
                     min={0}
                     helperText="Để trống nếu không giảm giá"
-                />
-
-                <Dropdown
-                    label="Hình thức thanh toán"
-                    value={formData.paymentType}
-                    onChange={(value) =>
-                        setFormData((prev) => ({ ...prev, paymentType: value }))
-                    }
-                    options={PAYMENT_TYPE_OPTIONS}
-                    disabled={disabled}
-                />
-
-                {/* ✅ CHECKBOX AREA */}
-                <div className="space-y-3">
-                    <Checkbox
-                        id="autoRenew"
-                        checked={formData.autoRenew}
-                        onChange={(checked) =>
-                            setFormData((prev) => ({ ...prev, autoRenew: checked }))
-                        }
-                        label="Tự động gia hạn"
-                        className={disabled ? 'opacity-50 pointer-events-none' : ''}
-                    />
-
-                    <Checkbox
-                        id="blockUnpaid"
-                        checked={formData.blockUnpaid}
-                        onChange={(checked) =>
-                            setFormData((prev) => ({ ...prev, blockUnpaid: checked }))
-                        }
-                        label="Chặn học khi chưa đóng học phí"
-                        className={disabled ? 'opacity-50 pointer-events-none' : ''}
-                    />
-                </div>
-
-                <Input
-                    name="gracePeriodDays"
-                    label="Số ngày ân hạn"
-                    type="number"
-                    value={formData.gracePeriodDays}
-                    onChange={handleInputChange}
-                    error={errors.gracePeriodDays}
-                    disabled={disabled}
-                    min={0}
-                    helperText="Số ngày cho phép học sau khi hết hạn thanh toán"
                 />
             </div>
 

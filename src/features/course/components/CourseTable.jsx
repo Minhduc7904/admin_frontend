@@ -1,5 +1,7 @@
-import { Eye, Edit, Trash2, Archive, FileText } from 'lucide-react';
+import { Eye, Edit, Trash2 } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
+import { COURSE_TYPES, getCourseTypeLabel } from '../constanst/course-type.constants';
+import { getMediaViewUrl } from '../utils/courseMedia';
 
 export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
     const formatPrice = (price) => {
@@ -57,6 +59,21 @@ export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
         );
     };
 
+    const getCourseTypeBadge = (courseType) => {
+        const type = courseType || COURSE_TYPES.OFFLINE;
+        const classes = {
+            ONLINE: 'bg-sky-100 text-sky-700',
+            OFFLINE: 'bg-orange-100 text-orange-700',
+            ALL: 'bg-purple-100 text-purple-700',
+        };
+
+        return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classes[type] || classes.OFFLINE}`}>
+                {getCourseTypeLabel(type)}
+            </span>
+        );
+    };
+
     const columns = [
         {
             key: 'courseId',
@@ -69,15 +86,26 @@ export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
             key: 'title',
             label: 'Tiêu đề khóa học',
             render: (course) => (
-                <div className="flex flex-col max-w-md">
-                    <span className="text-sm font-semibold text-foreground truncate">
-                        {course.title}
-                    </span>
-                    {course.subtitle && (
-                        <span className="text-xs text-foreground-lighter truncate">
-                            {course.subtitle}
-                        </span>
+                <div className="flex max-w-md items-center gap-3">
+                    {getMediaViewUrl(course.thumbnail) ? (
+                        <img
+                            src={getMediaViewUrl(course.thumbnail)}
+                            alt={course.thumbnail?.alt || course.title}
+                            className="h-11 w-16 rounded-sm object-cover"
+                        />
+                    ) : (
+                        <div className="h-11 w-16 rounded-sm bg-gray-100" />
                     )}
+                    <div className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-semibold text-foreground">
+                            {course.title}
+                        </span>
+                        {course.subtitle && (
+                            <span className="truncate text-xs text-foreground-lighter">
+                                {course.subtitle}
+                            </span>
+                        )}
+                    </div>
                 </div>
             )
         },
@@ -102,6 +130,11 @@ export const CourseTable = ({ courses, onView, onEdit, onDelete, loading }) => {
                     <span className="italic text-foreground-lighter">-</span>
                 )
             )
+        },
+        {
+            key: 'courseType',
+            label: 'Loại',
+            render: (course) => getCourseTypeBadge(course.courseType)
         },
         {
             key: 'academicYear',

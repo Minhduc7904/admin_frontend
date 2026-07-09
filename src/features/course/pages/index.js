@@ -6,3 +6,4 @@ export { CourseEnrollment } from './CourseEnrollment';
 export { CourseStudentsAttendance } from './CourseStudentsAttendance';
 export { CourseLessons } from './CourseLessons';
 export { CoursePricing } from './CoursePricing';
+export { CourseMedia } from './CourseMedia';

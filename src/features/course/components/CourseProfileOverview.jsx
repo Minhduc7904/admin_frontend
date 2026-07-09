@@ -1,5 +1,8 @@
-import { BookOpen, User, Calendar, Eye, DollarSign, Tag, Clock } from 'lucide-react';
+import { createElement } from 'react';
+import { BookOpen, User, Calendar, Eye, Tag, Clock, Monitor } from 'lucide-react';
 import { SkeletonText } from '../../../shared/components/loading';
+import { getCourseTypeLabel } from '../constanst/course-type.constants';
+import { getCourseMedia, getMediaViewUrl } from '../utils/courseMedia';
 
 const StatusBadge = ({ visibility }) => {
     const badges = {
@@ -56,7 +59,7 @@ const DataPill = ({ icon: Icon, label, value }) => (
     <div className="bg-white/10 rounded-md p-3 border border-white/10">
         <p className="text-xs uppercase tracking-[0.2em] text-white/60 mb-1">{label}</p>
         <div className="flex items-center gap-2 text-white text-sm font-medium">
-            <Icon className="w-4 h-4 text-white/70" />
+            {createElement(Icon, { className: 'w-4 h-4 text-white/70' })}
             <span>{value || 'Chưa cập nhật'}</span>
         </div>
     </div>
@@ -89,9 +92,22 @@ export const CourseProfileOverview = ({ course, loading }) => {
         );
     }
 
+    const courseMedia = getCourseMedia(course);
+    const heroImageUrl = getMediaViewUrl(courseMedia.banner) || getMediaViewUrl(courseMedia.thumbnail);
+
     return (
-        <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 rounded-xl p-6 text-white shadow-lg border border-white/10">
-            <div className="flex flex-col gap-6">
+        <section className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 p-6 text-white shadow-lg">
+            {heroImageUrl && (
+                <>
+                    <img
+                        src={heroImageUrl}
+                        alt={courseMedia.banner?.alt || courseMedia.thumbnail?.alt || course.title}
+                        className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-blue-950/75" />
+                </>
+            )}
+            <div className="relative flex flex-col gap-6">
                 {/* Header */}
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -148,6 +164,7 @@ export const CourseProfileOverview = ({ course, loading }) => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <DataPill icon={User} label="Giáo viên" value={course.teacherName} />
                     <DataPill icon={BookOpen} label="Môn học" value={course.subjectName} />
+                    <DataPill icon={Monitor} label="Loại khóa" value={getCourseTypeLabel(course.courseType)} />
                     <DataPill icon={Calendar} label="Năm học" value={course.academicYear} />
                     <DataPill 
                         icon={Calendar} 

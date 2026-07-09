@@ -5,6 +5,7 @@ import { AuditLogList } from '../features/adminAuditLog/pages';
 import { MediaPage } from '../features/media/pages';
 import { MediaFolderPage } from '../features/mediaFolder/pages';
 import { SeoPageMediaPage, SeoSlotPage } from '../features/seoMedia/pages';
+import { AchievementBoardPage } from '../features/achievementBoard/pages';
 import { AdminList } from '../features/admin/pages/AdminList';
 import { AdminDetail } from '../features/admin/pages/AdminDetail';
 import { AdminRole } from '../features/admin/pages/AdminRole';
@@ -18,7 +19,8 @@ import {
     CourseEnrollment,
     CourseStudentsAttendance,
     CourseLessons,
-    CoursePricing
+    CoursePricing,
+    CourseMedia
 } from '../features/course/pages';
 import { CourseDetailLayout } from '../features/course/layouts';
 import {
@@ -158,6 +160,10 @@ export const adminRouter = [
                     {
                         path: ROUTES.SEO_PAGES,
                         element: <SeoPageMediaPage />,
+                    },
+                    {
+                        path: ROUTES.ACHIEVEMENT_BOARDS,
+                        element: <AchievementBoardPage />,
                     },
                 ],
             },
@@ -426,6 +432,10 @@ export const adminRouter = [
                             {
                                 path: 'lessons',
                                 element: <CourseLessons />
+                            },
+                            {
+                                path: 'media',
+                                element: <CourseMedia />
                             },
                         ],
                     },

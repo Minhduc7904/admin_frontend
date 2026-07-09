@@ -37,6 +37,7 @@ export const ROUTES = {
   MEDIA_FOLDERS: '/media-folders',
   SEO_SLOTS: '/seo/slots',
   SEO_PAGES: '/seo/pages',
+  ACHIEVEMENT_BOARDS: '/seo/achievement-boards',
   ADMINS: '/admins',
   ADMIN_DETAIL: (id = ':id') => `/admins/${id}`,
   ADMIN_ROLES: (id = ':id') => `/admins/${id}/roles`,
@@ -71,6 +72,7 @@ export const ROUTES = {
   COURSE_STUDENTS: (id = ':id') => `/courses/${id}/students`,
   COURSE_ATTENDANCE: (id = ':id') => `/courses/${id}/attendance`,
   COURSE_LESSONS: (id = ':id') => `/courses/${id}/lessons`,
+  COURSE_MEDIA: (id = ':id') => `/courses/${id}/media`,
   CLASSES: '/classes',
   MY_CLASSES: '/my-classes',
   CLASS_DETAIL: (id = ':id') => `/classes/${id}`,
@@ -139,6 +141,8 @@ export const API_ENDPOINTS = {
     SEED_DEFAULT_TAGS: "/super-admin/tags/seed-defaults",
     SYNC_PERMISSIONS_FROM_CODES:
       "/super-admin/permissions/sync-from-codes",
+    SYNC_SEO_MEDIA_SLOTS_FROM_PAGE_SLOTS:
+      "/super-admin/seo-media/slots/sync-from-page-slots",
     PROMOTE_STUDENT_GRADE_BY_GRADUATION_YEAR:
       "/super-admin/students/promote-grade/by-graduation-year",
     UPDATE_STUDENT_GRADUATION_YEAR_BY_GRADE:
@@ -266,6 +270,18 @@ export const API_ENDPOINTS = {
     UPLOAD_MEDIA: '/seo-media/upload-media',
     BUCKET_MEDIA: '/seo-media/bucket/media',
   },
+  ACHIEVEMENT_BOARDS: {
+    LIST: "/achievement-boards",
+    CREATE: "/achievement-boards",
+    DETAIL: (id) => `/achievement-boards/${id}`,
+    UPDATE: (id) => `/achievement-boards/${id}`,
+    DELETE: (id) => `/achievement-boards/${id}`,
+    ROW_TEMPLATE: "/achievement-boards/rows/template",
+    IMPORT_ROWS: (id) => `/achievement-boards/${id}/rows/import-excel`,
+    UPDATE_ROW: (rowId) => `/achievement-boards/rows/${rowId}`,
+    DELETE_ROW: (rowId) => `/achievement-boards/rows/${rowId}`,
+    PUBLIC_SEO: "/achievement-boards/public/seo",
+  },
   MEDIA_FOLDERS: {
     CREATE: "/media-folders",
     LIST: "/media-folders",
@@ -291,6 +307,7 @@ export const API_ENDPOINTS = {
     CREATE: "/courses",
     UPDATE_BASIC_INFO: (id) => `/courses/${id}/basic-info`,
     UPDATE_PRICING: (id) => `/courses/${id}/pricing`,
+    UPDATE_MEDIA: (id) => `/courses/${id}/media`,
     DELETE: (id) => `/courses/${id}`,
     STUDENTS_ATTENDANCE: (id) => `/courses/${id}/students-attendance`,
     STUDENTS_ATTENDANCE_EXPORT: (id) => `/courses/${id}/students-attendance/export`,

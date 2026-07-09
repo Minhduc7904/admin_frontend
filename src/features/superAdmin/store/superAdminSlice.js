@@ -24,6 +24,9 @@ const initialState = {
     loadingSyncPermissionsFromCodes: false,
     errorSyncPermissionsFromCodes: null,
     syncPermissionsFromCodesResult: null,
+    loadingSyncSeoMediaSlotsFromPageSlots: false,
+    errorSyncSeoMediaSlotsFromPageSlots: null,
+    syncSeoMediaSlotsFromPageSlotsResult: null,
     loadingPromoteStudentGradeByGraduationYear: false,
     errorPromoteStudentGradeByGraduationYear: null,
     promoteStudentGradeByGraduationYearResult: null,
@@ -132,6 +135,21 @@ export const syncPermissionsFromCodesAsync = createAsyncThunk(
     }
 );
 
+export const syncSeoMediaSlotsFromPageSlotsAsync = createAsyncThunk(
+    "superAdmin/syncSeoMediaSlotsFromPageSlots",
+    async (_, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.syncSeoMediaSlotsFromPageSlots(),
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Đồng bộ SEO media slots thành công",
+                errorTitle: "Lỗi đồng bộ SEO media slots",
+            }
+        );
+    }
+);
+
 export const promoteStudentGradeByGraduationYearAsync = createAsyncThunk(
     "superAdmin/promoteStudentGradeByGraduationYear",
     async (payload, thunkAPI) => {
@@ -208,6 +226,10 @@ export const superAdminSlice = createSlice({
         clearSyncPermissionsFromCodesState: (state) => {
             state.errorSyncPermissionsFromCodes = null;
             state.syncPermissionsFromCodesResult = null;
+        },
+        clearSyncSeoMediaSlotsFromPageSlotsState: (state) => {
+            state.errorSyncSeoMediaSlotsFromPageSlots = null;
+            state.syncSeoMediaSlotsFromPageSlotsResult = null;
         },
         clearPromoteStudentGradeByGraduationYearState: (state) => {
             state.errorPromoteStudentGradeByGraduationYear = null;
@@ -308,6 +330,18 @@ export const superAdminSlice = createSlice({
                 state.loadingSyncPermissionsFromCodes = false;
                 state.errorSyncPermissionsFromCodes = action.payload;
             })
+            .addCase(syncSeoMediaSlotsFromPageSlotsAsync.pending, (state) => {
+                state.loadingSyncSeoMediaSlotsFromPageSlots = true;
+                state.errorSyncSeoMediaSlotsFromPageSlots = null;
+            })
+            .addCase(syncSeoMediaSlotsFromPageSlotsAsync.fulfilled, (state, action) => {
+                state.loadingSyncSeoMediaSlotsFromPageSlots = false;
+                state.syncSeoMediaSlotsFromPageSlotsResult = action.payload || null;
+            })
+            .addCase(syncSeoMediaSlotsFromPageSlotsAsync.rejected, (state, action) => {
+                state.loadingSyncSeoMediaSlotsFromPageSlots = false;
+                state.errorSyncSeoMediaSlotsFromPageSlots = action.payload;
+            })
             .addCase(promoteStudentGradeByGraduationYearAsync.pending, (state) => {
                 state.loadingPromoteStudentGradeByGraduationYear = true;
                 state.errorPromoteStudentGradeByGraduationYear = null;
@@ -355,6 +389,7 @@ export const {
     clearRegenerateQuestionSlugsState,
     clearSeedDefaultTagsState,
     clearSyncPermissionsFromCodesState,
+    clearSyncSeoMediaSlotsFromPageSlotsState,
     clearPromoteStudentGradeByGraduationYearState,
     clearUpdateStudentGraduationYearByGradeState,
     clearHardDeleteStudentsByGraduationYearGradeExcludedCoursesState,
@@ -408,6 +443,13 @@ export const selectSuperAdminErrorSyncPermissionsFromCodes = (state) =>
     state.superAdmin.errorSyncPermissionsFromCodes;
 export const selectSuperAdminSyncPermissionsFromCodesResult = (state) =>
     state.superAdmin.syncPermissionsFromCodesResult;
+
+export const selectSuperAdminLoadingSyncSeoMediaSlotsFromPageSlots = (state) =>
+    state.superAdmin.loadingSyncSeoMediaSlotsFromPageSlots;
+export const selectSuperAdminErrorSyncSeoMediaSlotsFromPageSlots = (state) =>
+    state.superAdmin.errorSyncSeoMediaSlotsFromPageSlots;
+export const selectSuperAdminSyncSeoMediaSlotsFromPageSlotsResult = (state) =>
+    state.superAdmin.syncSeoMediaSlotsFromPageSlotsResult;
 
 export const selectSuperAdminLoadingPromoteStudentGradeByGraduationYear = (state) =>
     state.superAdmin.loadingPromoteStudentGradeByGraduationYear;

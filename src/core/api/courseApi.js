@@ -30,6 +30,10 @@ export const courseApi = {
         return axiosClient.put(API_ENDPOINTS.COURSES.UPDATE_PRICING(id), data);
     },
 
+    updateMedia: (id, data) => {
+        return axiosClient.put(API_ENDPOINTS.COURSES.UPDATE_MEDIA(id), data);
+    },
+
     delete: (id) => {
         return axiosClient.delete(API_ENDPOINTS.COURSES.DELETE(id));
     },

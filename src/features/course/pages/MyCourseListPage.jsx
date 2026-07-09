@@ -48,6 +48,7 @@ export const MyCourseListPage = ({
     const currentPage = pagination.page
     const itemsPerPage = pagination.limit
     const visibility = filters.visibility || ''
+    const courseType = filters.courseType || ''
     const isEnded = filters.isEnded || ''
     const academicYear = filters.academicYear || ''
 
@@ -61,6 +62,7 @@ export const MyCourseListPage = ({
         debouncedSearch,
         grade,
         visibility,
+        courseType,
         isEnded,
         academicYear,
         teacherId,
@@ -76,6 +78,7 @@ export const MyCourseListPage = ({
                 search: debouncedSearch || undefined,
                 grade: grade || undefined,
                 visibility: visibility || undefined,
+                courseType: courseType || undefined,
                 isEnded: normalizedIsEnded,
                 academicYear: academicYear || undefined,
                 teacherId: teacherId || undefined,
@@ -98,6 +101,11 @@ export const MyCourseListPage = ({
     const handleVisibilityChange = (value) => {
         dispatch(setMyCoursesPagination({ page: 1 }))
         dispatch(setMyCoursesFilters({ visibility: value }))
+    }
+
+    const handleCourseTypeChange = (value) => {
+        dispatch(setMyCoursesPagination({ page: 1 }))
+        dispatch(setMyCoursesFilters({ courseType: value }))
     }
 
     const handleAcademicYearChange = (value) => {
@@ -172,6 +180,7 @@ export const MyCourseListPage = ({
             search={search}
             grade={grade}
             visibility={visibility}
+            courseType={courseType}
             academicYear={academicYear}
             isEnded={isEnded}
 
@@ -186,6 +195,7 @@ export const MyCourseListPage = ({
             onSearchChange={handleSearch}
             onGradeChange={handleGradeChange}
             onVisibilityChange={handleVisibilityChange}
+            onCourseTypeChange={handleCourseTypeChange}
             onAcademicYearChange={handleAcademicYearChange}
             onIsEndedChange={handleIsEndedChange}
             onPageChange={handlePageChange}

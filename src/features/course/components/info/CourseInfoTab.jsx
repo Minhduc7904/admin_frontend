@@ -1,3 +1,4 @@
+import { createElement } from 'react'
 import {
     BookOpen,
     User,
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react'
 import { SkeletonCard } from '../../../../shared/components/loading'
 import { Button } from '../../../../shared/components'
+import { getCourseTypeLabel } from '../../constanst/course-type.constants'
 
 const formatDateTime = (value) => {
     if (!value) return 'Chưa cập nhật'
@@ -27,7 +29,7 @@ const formatDateTime = (value) => {
 const InfoRow = ({ icon: Icon, label, value, badge }) => (
     <div className="flex items-center gap-3 py-2">
         <div className="flex items-center justify-center w-9 h-9 rounded-sm bg-gray-50 text-foreground-light">
-            <Icon className="w-4 h-4" />
+            {createElement(Icon, { className: 'w-4 h-4' })}
         </div>
         <div className="flex-1 min-w-0">
             <p className="text-xs text-foreground-light">{label}</p>
@@ -146,6 +148,11 @@ export const CourseInfoTab = ({ course, loading, onEdit }) => {
                                 icon={BookOpen}
                                 label="Môn học"
                                 value={course.subjectName}
+                            />
+                            <InfoRow
+                                icon={BookOpen}
+                                label="Loại khóa học"
+                                value={getCourseTypeLabel(course.courseType)}
                             />
                             <InfoRow
                                 icon={User}

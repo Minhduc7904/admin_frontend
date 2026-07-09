@@ -11,7 +11,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getCourseByIdAsync,
-    clearCurrentCourse,
     selectCurrentCourse,
     selectCourseLoadingGet,
 } from '../store/courseSlice';
@@ -96,6 +95,14 @@ export const CourseDetailLayout = () => {
                 ),
                 onActivate: () =>
                     navigate(ROUTES.COURSE_LESSONS(courseId) + queryString),
+            },
+            {
+                label: 'Media',
+                isActive: location.pathname.startsWith(
+                    ROUTES.COURSE_MEDIA(courseId)
+                ),
+                onActivate: () =>
+                    navigate(ROUTES.COURSE_MEDIA(courseId) + queryString),
             },
         ];
     }, [courseId, location.pathname, navigate, isMyCourses]);

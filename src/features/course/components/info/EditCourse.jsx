@@ -4,6 +4,7 @@ import { Input, Button, Dropdown, Textarea, CurrencyInput } from '../../../../sh
 import { AdminSearchSelect } from '../../../admin/components/AdminSearchSelect'
 import { SubjectSearchSelect } from '../../../subject/components/SubjectSearchSelect'
 import { COURSE_VISIBILITIES } from '../../constanst/course-visibility.constants'
+import { COURSE_TYPES, COURSE_TYPE_OPTIONS } from '../../constanst/course-type.constants'
 import { GRADE_OPTIONS } from '../../../../core/constants/grade-constants'
 import { ACADEMIC_YEARS_OPTIONS } from '../../../../core/constants/academic-year.constants'
 import {
@@ -24,6 +25,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
         grade: '',
         subjectId: '',
         description: '',
+        courseType: COURSE_TYPES.OFFLINE,
         visibility: COURSE_VISIBILITIES.DRAFT,
         isEnded: 'false',
         teacherId: '',
@@ -39,6 +41,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             grade: course.grade?.toString() || '',
             subjectId: course.subjectId?.toString() || '',
             description: course.description || '',
+            courseType: course.courseType || COURSE_TYPES.OFFLINE,
             visibility: course.visibility || COURSE_VISIBILITIES.DRAFT,
             isEnded: course.isEnded ? 'true' : 'false',
             teacherId: course.teacherId?.toString() || '',
@@ -99,6 +102,7 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
             grade: formData.grade ? parseInt(formData.grade) : undefined,
             subjectId: formData.subjectId ? parseInt(formData.subjectId) : undefined,
             description: formData.description?.trim() || undefined,
+            courseType: formData.courseType || COURSE_TYPES.OFFLINE,
             visibility: formData.visibility,
             isEnded: formData.isEnded === 'true',
             teacherId: formData.teacherId ? parseInt(formData.teacherId) : undefined,
@@ -180,6 +184,16 @@ export const EditCourse = ({ course, onClose, disableTeacherEdit = false }) => {
                     onChange={handleChange}
                     placeholder="Mô tả chi tiết về khóa học..."
                     rows={4}
+                />
+
+                <Dropdown
+                    label="Loại khóa học"
+                    required
+                    value={formData.courseType}
+                    onChange={(value) =>
+                        setFormData((prev) => ({ ...prev, courseType: value }))
+                    }
+                    options={COURSE_TYPE_OPTIONS}
                 />
 
 
