@@ -230,6 +230,11 @@ export const PERMISSIONS = {
     EXPORT_EXCEL: 'tuition-payment:export-excel',
     IMPORT_EXCEL: 'tuition-payment:import-excel',
   },
+  ONLINE_COURSE_INVOICE: {
+    GET_ALL: 'online-course-invoice:get-all',
+    GET_BY_ID: 'online-course-invoice:get-by-id',
+    CONFIRM_MANUAL_PAYMENT: 'online-course-invoice:confirm-manual-payment',
+  },
   MY_TUITION_PAYMENT_STATS: 'my-tuition-payment:stats',
   TEMP_EXAM: {
     GET_BY_SESSION: 'temp-exam:get-by-session',

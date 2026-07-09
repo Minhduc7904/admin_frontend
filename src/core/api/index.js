@@ -32,6 +32,7 @@ export { homeworkSubmitApi } from './homeworkSubmitApi';
 export { lessonLearningItemApi } from './lessonLearningItemApi';
 export { notificationApi } from './notificationApi';
 export { tuitionPaymentApi } from './tuitionPaymentApi';
+export { onlineCourseInvoiceApi } from './onlineCourseInvoiceApi';
 export { questionApi } from './questionApi';
 export { statementApi } from './statementApi';
 export { examApi } from './examApi';

@@ -84,6 +84,7 @@ export const ROUTES = {
   BROADCAST_NOTIFICATIONS: '/notifications/broadcast',
   NOTIFICATION_LOGS: '/notifications/logs',
   TUITION_PAYMENTS: '/tuition-payments',
+  ONLINE_COURSE_INVOICES: '/online-course-invoices',
   EXAM_IMPORT_SESSIONS: '/exam-import-sessions',
   EXAM_IMPORT_SESSION_DETAIL: (id = ':id') => `/exam-import-sessions/${id}`,
   EXAM_IMPORT_SESSION_UPLOAD: (id = ':id') => `/exam-import-sessions/${id}/upload`,
@@ -442,6 +443,12 @@ export const API_ENDPOINTS = {
     EXPORT_EXCEL_EXAMPLE: "/tuition-payments/export/excel/example",
     IMPORT_EXCEL_PREVIEW: "/tuition-payments/import/excel/preview",
     EXPORT_LIST: "/tuition-payments/export/excel",
+  },
+  ONLINE_COURSE_INVOICES: {
+    ADMIN_LIST: "/online-course-invoices/admin",
+    ADMIN_DETAIL: (invoiceId) => `/online-course-invoices/admin/${invoiceId}`,
+    CONFIRM_BANK_TRANSFER: (invoiceId) =>
+      `/online-course-invoices/admin/${invoiceId}/confirm-bank-transfer`,
   },
   EXAM_IMPORT_SESSION: {
     LIST: "/exam-import-sessions",

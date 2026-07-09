@@ -51,6 +51,7 @@ import { Outlet } from 'react-router-dom';
 import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
+import { OnlineCourseInvoiceListPage } from '../features/onlineCourseInvoice/pages';
 import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
 import { ExamListPage, MyExamListPage } from '../features/exam/pages';
@@ -335,6 +336,15 @@ export const adminRouter = [
                     {
                         path: ROUTES.TUITION_PAYMENTS,
                         element: <TuitionPaymentList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ONLINE_COURSE_INVOICE.GET_ALL} />,
+                children: [
+                    {
+                        path: ROUTES.ONLINE_COURSE_INVOICES,
+                        element: <OnlineCourseInvoiceListPage />,
                     },
                 ],
             },
