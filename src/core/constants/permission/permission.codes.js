@@ -94,6 +94,13 @@ export const PERMISSIONS = {
     UPDATE: 'teacher-profile:update',
     DELETE: 'teacher-profile:delete',
   },
+  NEWS_ARTICLE: {
+    GET_ALL: 'news-article:get-all',
+    GET_BY_ID: 'news-article:get-by-id',
+    CREATE: 'news-article:create',
+    UPDATE: 'news-article:update',
+    DELETE: 'news-article:delete',
+  },
   LESSON: {
     GET_ALL: 'lesson:get-all',
     GET_BY_ID: 'lesson:get-by-id',

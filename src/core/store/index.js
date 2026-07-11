@@ -13,10 +13,12 @@ import adminReducer from "../../features/admin/store/adminSlice";
 import superAdminReducer from "../../features/superAdmin/store/superAdminSlice";
 import { userReducer } from "../../features/user/store/userSlice";
 import studentReducer from "../../features/student/store/studentSlice";
+import studentPointLogReducer from "../../features/studentPointLog/store/studentPointLogSlice";
 import subjectReducer from "../../features/subject/store/subjectSlice";
 import tagReducer from "../../features/tag/store/tagSlice";
 import documentReducer from "../../features/document/store/documentSlice";
 import teacherProfileReducer from "../../features/teacherProfile/store/teacherProfileSlice";
+import newsArticleReducer from "../../features/newsArticle/store/newsArticleSlice";
 import chapterReducer from "../../features/chapter/store/chapterSlice";
 import courseReducer from "../../features/course/store/courseSlice";
 import courseClassSlice from "../../features/courseClass/store/courseClassSlice";
@@ -60,10 +62,12 @@ export const store = configureStore({
     superAdmin: superAdminReducer,
     user: userReducer,
     student: studentReducer,
+    studentPointLog: studentPointLogReducer,
     subject: subjectReducer,
     tag: tagReducer,
     document: documentReducer,
     teacherProfile: teacherProfileReducer,
+    newsArticle: newsArticleReducer,
     chapter: chapterReducer,
     course: courseReducer,
     courseClass: courseClassSlice,

@@ -19,6 +19,7 @@ import {
   ImageUp,
   Tags,
   UserRoundCheck,
+  Newspaper,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -252,6 +253,13 @@ export const AdminSidebar = () => {
     {
       label: 'Tài liệu',
       items: [
+        {
+          key: 'newsArticles',
+          name: 'Quản lý tin tức',
+          href: ROUTES.NEWS_ARTICLES,
+          icon: Newspaper,
+          permission: PERMISSIONS.NEWS_ARTICLE.GET_ALL,
+        },
         {
           key: 'tags',
           name: 'Quản lý tag',

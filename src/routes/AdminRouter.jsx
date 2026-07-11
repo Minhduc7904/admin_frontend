@@ -43,7 +43,14 @@ import {
     TeacherProfileDetail,
     TeacherProfileListPage,
 } from '../features/teacherProfile/pages';
+import {
+    CreateNewsArticlePage,
+    EditNewsArticlePage,
+    NewsArticleDetailPage,
+    NewsArticleListPage,
+} from '../features/newsArticle/pages';
 import { StudentList, StudentDetail, StudentRole, StudentMedia, StudentClasses, StudentCourses, StudentAttendance } from '../features/student/pages';
+import { StudentPointLogPage } from '../features/studentPointLog/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
 import { ROUTES } from '../core/constants';
@@ -340,6 +347,42 @@ export const adminRouter = [
                 ],
             },
             {
+                element: <ProtectedRoute permission={PERMISSIONS.NEWS_ARTICLE.GET_ALL} />,
+                children: [
+                    {
+                        path: ROUTES.NEWS_ARTICLES,
+                        element: <NewsArticleListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.NEWS_ARTICLE.CREATE} />,
+                children: [
+                    {
+                        path: ROUTES.NEWS_ARTICLE_CREATE,
+                        element: <CreateNewsArticlePage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.NEWS_ARTICLE.GET_BY_ID} />,
+                children: [
+                    {
+                        path: ROUTES.NEWS_ARTICLE_DETAIL(':id'),
+                        element: <NewsArticleDetailPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.NEWS_ARTICLE.UPDATE} />,
+                children: [
+                    {
+                        path: ROUTES.NEWS_ARTICLE_EDIT(':id'),
+                        element: <EditNewsArticlePage />,
+                    },
+                ],
+            },
+            {
                 element: <ProtectedRoute permission={PERMISSIONS.ONLINE_COURSE_INVOICE.GET_ALL} />,
                 children: [
                     {
@@ -543,6 +586,10 @@ export const adminRouter = [
                             {
                                 path: 'attendance',
                                 element: <StudentAttendance />,
+                            },
+                            {
+                                path: 'point-logs',
+                                element: <StudentPointLogPage />,
                             },
                             {
                                 path: 'roles',

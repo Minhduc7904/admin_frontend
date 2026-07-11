@@ -1,15 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
+    Navigate,
     Outlet,
     useLocation,
     useNavigate,
     useParams,
-    Navigate,
 } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
 import {
     getStudentByIdAsync,
-    clearCurrentStudent,
     selectCurrentStudent,
     selectStudentLoadingGet,
 } from '../store/studentSlice';
@@ -31,63 +30,53 @@ export const StudentProfileLayout = () => {
 
     const invalidId = Number.isNaN(studentId) || studentId <= 0;
 
-    // Fetch student data
     useEffect(() => {
         if (!invalidId && studentId !== student?.studentId) {
             dispatch(getStudentByIdAsync(studentId));
         }
     }, [dispatch, studentId, invalidId, student?.studentId]);
 
-    // Tabs config
     const tabs = useMemo(
         () => [
             {
                 label: 'Thông tin',
-                isActive:
-                    location.pathname === ROUTES.STUDENT_DETAIL(studentId),
-                onActivate: () =>
-                    navigate(ROUTES.STUDENT_DETAIL(studentId)),
+                isActive: location.pathname === ROUTES.STUDENT_DETAIL(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_DETAIL(studentId)),
             },
             {
                 label: 'Lớp học',
-                isActive:
-                    location.pathname === ROUTES.STUDENT_CLASSES(studentId),
-                onActivate: () =>
-                    navigate(ROUTES.STUDENT_CLASSES(studentId)),
+                isActive: location.pathname === ROUTES.STUDENT_CLASSES(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_CLASSES(studentId)),
             },
             {
                 label: 'Khóa học',
-                isActive:
-                    location.pathname === ROUTES.STUDENT_COURSES(studentId),
-                onActivate: () =>
-                    navigate(ROUTES.STUDENT_COURSES(studentId)),
+                isActive: location.pathname === ROUTES.STUDENT_COURSES(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_COURSES(studentId)),
             },
             {
                 label: 'Điểm danh',
-                isActive:
-                    location.pathname === ROUTES.STUDENT_ATTENDANCE(studentId),
-                onActivate: () =>
-                    navigate(ROUTES.STUDENT_ATTENDANCE(studentId)),
+                isActive: location.pathname === ROUTES.STUDENT_ATTENDANCE(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_ATTENDANCE(studentId)),
+            },
+            {
+                label: 'Lịch sử điểm',
+                isActive: location.pathname === ROUTES.STUDENT_POINT_LOGS(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_POINT_LOGS(studentId)),
             },
             {
                 label: 'Vai trò',
-                isActive:
-                    location.pathname === ROUTES.STUDENT_ROLES(studentId),
-                onActivate: () =>
-                    navigate(ROUTES.STUDENT_ROLES(studentId)),
+                isActive: location.pathname === ROUTES.STUDENT_ROLES(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_ROLES(studentId)),
             },
             {
                 label: 'Media',
-                isActive:
-                    location.pathname === ROUTES.STUDENT_MEDIA(studentId),
-                onActivate: () =>
-                    navigate(ROUTES.STUDENT_MEDIA(studentId)),
+                isActive: location.pathname === ROUTES.STUDENT_MEDIA(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_MEDIA(studentId)),
             },
         ],
         [studentId, location.pathname, navigate]
     );
 
-    // Guard invalid route
     if (invalidId) {
         return <Navigate to={ROUTES.NOT_FOUND} replace />;
     }

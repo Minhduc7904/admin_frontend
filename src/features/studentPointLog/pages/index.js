@@ -1,0 +1,1 @@
+export { StudentPointLogPage } from "./StudentPointLogPage";
