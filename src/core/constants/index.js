@@ -4,8 +4,8 @@ export const API_BASE_URL =
 
 // Storage Keys
 export const STORAGE_KEYS = {
-  ACCESS_TOKEN: "access_token",
-  REFRESH_TOKEN: "refresh_token",
+  ACCESS_TOKEN: "admin_access_token",
+  REFRESH_TOKEN: "admin_refresh_token",
   USER_INFO: "user_info",
   USER: "user",
   SIDEBAR_OPEN: "sidebar_open",
