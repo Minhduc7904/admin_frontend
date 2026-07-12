@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Input, Button, Dropdown } from '../../../shared/components';
 import { updateStudentAsync, getStudentByIdAsync } from '../store/studentSlice';
+import { STUDENT_TYPE_OPTIONS } from '../constants/studentType.constants';
 
 export const EditStudentForm = ({ student, onClose }) => {
     const dispatch = useDispatch();
@@ -14,6 +15,7 @@ export const EditStudentForm = ({ student, onClose }) => {
         lastName: '',
         email: '',
         grade: '',
+        studentType: 'OFFLINE',
         highSchoolGraduationYear: '',
         school: '',
         studentPhone: '',
@@ -29,6 +31,7 @@ export const EditStudentForm = ({ student, onClose }) => {
                 lastName: student.lastName || '',
                 email: student.email || '',
                 grade: student.grade?.toString() || '',
+                studentType: student.studentType || 'OFFLINE',
                 highSchoolGraduationYear: student.highSchoolGraduationYear?.toString() || '',
                 school: student.school || '',
                 studentPhone: student.studentPhone || '',
@@ -129,6 +132,9 @@ export const EditStudentForm = ({ student, onClose }) => {
             }
             if (formData.grade !== originalData.grade) {
                 updateData.grade = parseInt(formData.grade);
+            }
+            if (formData.studentType !== originalData.studentType) {
+                updateData.studentType = formData.studentType;
             }
             if (formData.highSchoolGraduationYear !== originalData.highSchoolGraduationYear) {
                 updateData.highSchoolGraduationYear = formData.highSchoolGraduationYear
@@ -231,6 +237,15 @@ export const EditStudentForm = ({ student, onClose }) => {
                         onChange={(value) => setFormData(prev => ({ ...prev, grade: value }))}
                         options={gradeOptions}
                         error={errors.grade}
+                    />
+                </div>
+
+                <div>
+                    <Dropdown
+                        label="Hình thức học"
+                        value={formData.studentType}
+                        onChange={(value) => setFormData((prev) => ({ ...prev, studentType: value }))}
+                        options={STUDENT_TYPE_OPTIONS}
                     />
                 </div>
 

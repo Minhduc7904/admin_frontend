@@ -165,6 +165,7 @@ export const AddStudent = ({ onClose, loadStudents }) => {
             firstName: formData.firstName.trim(),
             lastName: formData.lastName.trim(),
             grade: Number(formData.grade),
+            studentType: formData.studentType || 'OFFLINE',
             highSchoolGraduationYear: formData.highSchoolGraduationYear
                 ? Number(formData.highSchoolGraduationYear)
                 : undefined,
@@ -185,6 +186,7 @@ export const AddStudent = ({ onClose, loadStudents }) => {
             firstName: '',
             lastName: '',
             grade: '',
+            studentType: 'OFFLINE',
             highSchoolGraduationYear: '',
             school: '',
             studentPhone: '',

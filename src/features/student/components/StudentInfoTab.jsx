@@ -2,6 +2,7 @@ import { Mail, User, AtSign, ShieldCheck, CalendarDays, Activity, Clock3, Gradua
 import { SkeletonCard } from '../../../shared/components/loading';
 import { Button } from '../../../shared/components';
 import { Edit } from 'lucide-react';
+import { STUDENT_TYPE_LABELS } from '../constants/studentType.constants';
 
 const formatDateTime = (value) => {
     if (!value) return 'Chưa cập nhật';
@@ -87,6 +88,7 @@ export const StudentInfoTab = ({ student, loading, onEdit }) => {
                             <InfoRow icon={AtSign} label="Tên đăng nhập" value={student.username} />
                             <InfoRow icon={Mail} label="Email" value={student.email} />
                             <InfoRow icon={GraduationCap} label="Khối lớp" value={`Khối ${student.grade}`} />
+                            <InfoRow icon={GraduationCap} label="Hình thức học" value={STUDENT_TYPE_LABELS[student.studentType] || STUDENT_TYPE_LABELS.OFFLINE} />
                             <InfoRow
                                 icon={GraduationCap}
                                 label="Năm tốt nghiệp cấp 3"

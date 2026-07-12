@@ -1,6 +1,7 @@
 import { GraduationCap, UserCheck, AtSign, Mail, School, Phone } from 'lucide-react';
 import { SkeletonAvatar, SkeletonText } from '../../../shared/components/loading';
 import { UserAvatar } from '../../../shared/components/avatar';
+import { STUDENT_TYPE_LABELS } from '../constants/studentType.constants';
 
 const StatusBadge = ({ active }) => (
     <span
@@ -78,6 +79,10 @@ export const StudentProfileOverview = ({ student, loading }) => {
                             <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-white/10 text-white border border-white/10">
                                 <GraduationCap className="w-3 h-3" />
                                 TN {student.highSchoolGraduationYear || '-'}
+                            </span>
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full border ${student.studentType === 'ONLINE' ? 'border-violet-300/30 bg-violet-500/20 text-violet-100' : 'border-amber-300/30 bg-amber-500/20 text-amber-100'}`}>
+                                <GraduationCap className="w-3 h-3" />
+                                {STUDENT_TYPE_LABELS[student.studentType] || STUDENT_TYPE_LABELS.OFFLINE}
                             </span>
                         </div>
                     </div>

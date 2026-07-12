@@ -85,6 +85,7 @@ export const StudentList = () => {
     const [itemsPerPage, setItemsPerPage] = useState(pagination.limit || 10)
 
     const [selectedGrade, setSelectedGrade] = useState(filters.grade || '')
+    const [selectedStudentType, setSelectedStudentType] = useState(filters.studentType || '')
     const [selectedGraduationYear, setSelectedGraduationYear] = useState(filters.highSchoolGraduationYear || '')
     const [selectedIsActive, setSelectedIsActive] = useState(filters.isActive || '')
     const [selectedHasParentZaloId, setSelectedHasParentZaloId] = useState(filters.hasParentZaloId || '')
@@ -115,6 +116,7 @@ export const StudentList = () => {
         itemsPerPage,
         debouncedSearch,
         selectedGrade,
+        selectedStudentType,
         selectedGraduationYear,
         selectedIsActive,
         selectedHasParentZaloId,
@@ -146,6 +148,7 @@ export const StudentList = () => {
             limit: itemsPerPage,
             search: debouncedSearch || undefined,
             grade: selectedGrade || undefined,
+            studentType: selectedStudentType || undefined,
             highSchoolGraduationYear: selectedGraduationYear || undefined,
             fromDate: fromDate || undefined,
             toDate: toDate || undefined,
@@ -208,6 +211,11 @@ export const StudentList = () => {
     const handleGradeChange = (value) => {
         setSelectedGrade(value)
         resetPageAndSetFilter({ grade: value })
+    }
+
+    const handleStudentTypeChange = (value) => {
+        setSelectedStudentType(value)
+        resetPageAndSetFilter({ studentType: value })
     }
 
     const handleGraduationYearChange = (value) => {
@@ -312,6 +320,8 @@ export const StudentList = () => {
                     onSearchChange={handleSearchChangeWrapper}
                     grade={selectedGrade}
                     onGradeChange={handleGradeChange}
+                    studentType={selectedStudentType}
+                    onStudentTypeChange={handleStudentTypeChange}
                     highSchoolGraduationYear={selectedGraduationYear}
                     onHighSchoolGraduationYearChange={handleGraduationYearChange}
                     isActive={selectedIsActive}

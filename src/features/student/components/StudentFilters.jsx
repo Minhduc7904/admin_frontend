@@ -7,6 +7,7 @@ import { getDateRange } from '../../../shared/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { CourseClassSearchMultiSelect } from '../../courseClass/components/CourseClassSearchMultiSelect'
 import { getHighSchoolGraduationYearOptions } from '../utils/graduationYear'
+import { STUDENT_TYPE_FILTER_OPTIONS } from '../constants/studentType.constants'
 
 const TIME_RANGE_OPTIONS_WITH_DEFAULT = [
     { value: '', label: 'Tùy chọn' },
@@ -26,6 +27,8 @@ export const StudentFilters = ({
     onSearchChange,
     grade,
     onGradeChange,
+    studentType,
+    onStudentTypeChange,
     highSchoolGraduationYear,
     onHighSchoolGraduationYearChange,
     isActive,
@@ -62,7 +65,7 @@ export const StudentFilters = ({
         <div className="mb-4 bg-white border border-border rounded-sm p-4 space-y-4">
             {/* ===== Row 1: Search + main filters ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-2">
                     <SearchInput
                         value={search}
                         onChange={onSearchChange}
@@ -76,6 +79,15 @@ export const StudentFilters = ({
                         onChange={onGradeChange}
                         options={GRADE_OPTIONS}
                         placeholder="Khối học"
+                    />
+                </div>
+
+                <div className="lg:col-span-2">
+                    <Dropdown
+                        value={studentType}
+                        onChange={onStudentTypeChange}
+                        options={STUDENT_TYPE_FILTER_OPTIONS}
+                        placeholder="Loại học sinh"
                     />
                 </div>
 

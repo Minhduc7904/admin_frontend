@@ -1,6 +1,7 @@
 import { Eye, UserX, UserCheck, ClipboardCheck } from 'lucide-react';
 import { ActionMenu, Table } from '../../../shared/components/ui';
 import { COURSE_ENROLLMENT_STATUS_CONFIG } from '../../courseEnrollment/constants/course-enrollment.constant';
+import { STUDENT_TYPE_LABELS } from '../constants/studentType.constants';
 
 /* ===================== STUDENT TABLE ===================== */
 export const StudentTable = ({
@@ -53,6 +54,20 @@ export const StudentTable = ({
                     </span>
                 </div>
             ),
+        },
+        {
+            key: 'studentType',
+            label: 'Hình thức học',
+            sortDirection: sort?.field === 'studentType' ? sort.direction : null,
+            onSort: (direction) => onSortChange('studentType', direction),
+            render: (student) => {
+                const isOnline = student.studentType === 'ONLINE';
+                return (
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isOnline ? 'bg-violet-100 text-violet-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {STUDENT_TYPE_LABELS[student.studentType] || STUDENT_TYPE_LABELS.OFFLINE}
+                    </span>
+                );
+            },
         },
         {
             key: 'school',

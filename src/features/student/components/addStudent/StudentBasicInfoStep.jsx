@@ -1,6 +1,7 @@
 import { Input, PasswordInput, Dropdown } from '../../../../shared/components';
 import { Checkbox } from '../../../../shared/components/ui';
 import { GRADE_OPTIONS } from '../../../../core/constants/grade-constants';
+import { STUDENT_TYPE_OPTIONS } from '../../constants/studentType.constants';
 
 export const StudentBasicInfoStep = ({
     formData,
@@ -101,6 +102,13 @@ export const StudentBasicInfoStep = ({
                 onChange={onGradeChange}
                 options={GRADE_OPTIONS}
                 error={errors.grade}
+            />
+
+            <Dropdown
+                label="Hình thức học"
+                value={formData.studentType || 'OFFLINE'}
+                onChange={(value) => onChange({ target: { name: 'studentType', value } })}
+                options={STUDENT_TYPE_OPTIONS}
             />
 
             <Input
