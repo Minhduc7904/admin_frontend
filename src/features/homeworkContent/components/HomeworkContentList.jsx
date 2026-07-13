@@ -1,7 +1,7 @@
 // src/features/course/components/HomeworkContentList.jsx
-import { useEffect } from 'react'
+import { createElement, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { FileCheck, Plus, Edit, Trash2, Clock, CheckCircle, RefreshCw, ArrowUp, TimerOff } from 'lucide-react'
+import { FileCheck, Plus, Edit, Trash2, Clock, RefreshCw, ArrowUp, TimerOff, Users, Upload, Trophy } from 'lucide-react'
 import { Button } from '../../../shared/components'
 import {
     getAllHomeworkContentsAsync,
@@ -10,17 +10,17 @@ import {
 } from '../../homeworkContent/store/homeworkContentSlice'
 import { formatDateTime } from '../../../shared/utils'
 
-const BooleanBadge = ({ value, icon: Icon, label }) => {
+const BooleanBadge = ({ value, icon, label }) => {
     if (!value) return null
     return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-            <Icon className="w-3 h-3" />
+            {createElement(icon, { className: 'w-3 h-3' })}
             {label}
         </span>
     )
 }
 
-export const HomeworkContentList = ({ learningItemId, onAdd, onEdit, onDelete }) => {
+export const HomeworkContentList = ({ learningItemId, onAdd, onEdit, onDelete, onViewSubmissions }) => {
     const dispatch = useDispatch()
     const homeworks = useSelector(selectHomeworkContents) || []
     const loading = useSelector(selectHomeworkContentLoadingGet)
@@ -74,6 +74,10 @@ export const HomeworkContentList = ({ learningItemId, onAdd, onEdit, onDelete })
 
                                     {/* Metadata row */}
                                     <div className="flex flex-wrap items-center gap-2">
+                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${homework.type === 'FILE_UPLOAD' ? 'bg-violet-50 text-violet-700' : 'bg-amber-50 text-amber-700'}`}>
+                                            {homework.type === 'FILE_UPLOAD' ? <Upload className="w-3 h-3" /> : <Trophy className="w-3 h-3" />}
+                                            {homework.type === 'FILE_UPLOAD' ? 'Nộp file' : 'Competition'}
+                                        </span>
                                         {homework.dueDate && (
                                             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                                                 <Clock className="w-3 h-3" />
@@ -87,6 +91,15 @@ export const HomeworkContentList = ({ learningItemId, onAdd, onEdit, onDelete })
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-0.5 shrink-0">
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => onViewSubmissions?.(homework)}
+                                        className="text-violet-600 hover:bg-violet-50"
+                                        title="Xem bài nộp và điểm"
+                                    >
+                                        <Users className="w-3.5 h-3.5" />
+                                    </Button>
                                     <Button size="sm" variant="ghost" onClick={() => onEdit?.(homework)} className="p-0">
                                         <Edit className="w-3.5 h-3.5" />
                                     </Button>

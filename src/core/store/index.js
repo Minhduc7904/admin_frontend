@@ -45,6 +45,7 @@ import documentContentReducer from "../../features/documentContent/store/documen
 import videoContentReducer from "../../features/videoContent/store/videoContentSlice";
 import youtubeContentReducer from "../../features/youtubeContent/store/youtubeContentSlice";
 import homeworkContentReducer from "../../features/homeworkContent/store/homeworkContentSlice";
+import homeworkSubmitReducer from "../../features/homeworkSubmit/store/homeworkSubmitSlice";
 
 export const store = configureStore({
   reducer: {
@@ -94,5 +95,6 @@ export const store = configureStore({
     videoContent: videoContentReducer,
     youtubeContent: youtubeContentReducer,
     homeworkContent: homeworkContentReducer,
+    homeworkSubmit: homeworkSubmitReducer,
   },
 });

@@ -25,6 +25,7 @@ export const LearningItemDetail = ({
     onAddContent,
     onEditContent,
     onDeleteContent,
+    onViewHomeworkSubmissions,
 }) => {
     const [copiedHomeworkLink, setCopiedHomeworkLink] = useState(false)
 
@@ -194,6 +195,7 @@ export const LearningItemDetail = ({
                             onAdd={() => onAddContent?.('HOMEWORK')}
                             onEdit={(homework) => onEditContent?.('HOMEWORK', homework)}
                             onDelete={(homework) => onDeleteContent?.('HOMEWORK', homework)}
+                            onViewSubmissions={onViewHomeworkSubmissions}
                         />
                     )}
                 </div>

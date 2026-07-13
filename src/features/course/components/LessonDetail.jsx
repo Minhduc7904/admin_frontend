@@ -139,7 +139,7 @@ export const LessonDetail = ({
                         <div className="space-y-1.5">
                             {lesson.chapters.map((chapter) => (
                                 <div key={chapter.chapterId} className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg text-sm">
-                                    <span className="text-xs font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                                    <span className="text-xs font-semibold text-info bg-info/10 px-1.5 py-0.5 rounded">
                                         #{chapter.orderInParent || '?'}
                                     </span>
                                     <span className="text-foreground flex-1 truncate">

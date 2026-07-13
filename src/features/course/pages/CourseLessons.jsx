@@ -23,6 +23,7 @@ import { AddDocumentContent, EditDocumentContent } from '../../documentContent/c
 import { AddVideoContent, EditVideoContent } from '../../videoContent/components';
 import { AddYoutubeContent, EditYoutubeContent } from '../../youtubeContent/components';
 import { AddHomeworkContent, EditHomeworkContent } from '../../homeworkContent/components';
+import { HomeworkSubmissionPanel } from '../../homeworkSubmit/components/HomeworkSubmissionPanel';
 import { Button, RightPanel, PageLoading, ConfirmModal } from '../../../shared/components';
 import { Plus, BookOpen, FileText, Loader2 } from 'lucide-react';
 import { 
@@ -87,6 +88,7 @@ export const CourseLessons = () => {
     const [openEditContent, setOpenEditContent] = useState(false);
     const [editingContent, setEditingContent] = useState(null);
     const [editingContentType, setEditingContentType] = useState(null);
+    const [viewingHomeworkSubmissions, setViewingHomeworkSubmissions] = useState(null);
 
     // Delete/Detach confirm modal state
     const [confirmDeleteLesson, setConfirmDeleteLesson] = useState(false);
@@ -355,6 +357,10 @@ export const CourseLessons = () => {
         setEditingContentType(null);
     };
 
+    const handleViewHomeworkSubmissions = (homework) => {
+        setViewingHomeworkSubmissions(homework);
+    };
+
     const handleEditContentSuccess = () => {
         // Reload content list based on type
         const learningItemId = currentLearningItem?.learningItem?.learningItemId;
@@ -442,7 +448,7 @@ export const CourseLessons = () => {
                     {/* Sidebar Header */}
                     <div className="px-4 py-3 border-b border-border bg-white flex items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
-                            <BookOpen className="w-4 h-4 text-primary" />
+                            <BookOpen className="w-4 h-4 text-info" />
                             <h2 className="text-sm font-semibold text-foreground">Bài học</h2>
                         </div>
                         <Button
@@ -498,6 +504,7 @@ export const CourseLessons = () => {
                             onAddContent={handleAddContent}
                             onEditContent={handleEditContent}
                             onDeleteContent={handleDeleteContent}
+                            onViewHomeworkSubmissions={handleViewHomeworkSubmissions}
                         />
                     ) : (
                         <div className="flex items-center justify-center h-full">
@@ -684,6 +691,19 @@ export const CourseLessons = () => {
                     onClose={handleCloseEditContent}
                     homeworkContent={editingContent}
                     onSuccess={handleEditContentSuccess}
+                />
+            </RightPanel>
+
+            <RightPanel
+                isOpen={Boolean(viewingHomeworkSubmissions)}
+                onClose={() => setViewingHomeworkSubmissions(null)}
+                title="Bài nộp và chấm điểm"
+                width="w-[680px]"
+            >
+                <HomeworkSubmissionPanel
+                    isOpen={Boolean(viewingHomeworkSubmissions)}
+                    homework={viewingHomeworkSubmissions}
+                    onClose={() => setViewingHomeworkSubmissions(null)}
                 />
             </RightPanel>
 

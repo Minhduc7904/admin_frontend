@@ -30,6 +30,14 @@ export const homeworkSubmitApi = {
     },
 
     /**
+     * Get the admin detail used to review a submission. File submissions include
+     * presigned attachment URLs; competition submissions include answers/results.
+     */
+    getAdminDetail: (id) => {
+        return axiosClient.get(API_ENDPOINTS.HOMEWORK_SUBMITS.ADMIN_DETAIL(id));
+    },
+
+    /**
      * Create a new homework submit
      * @param {Object} data - Homework submit data
      * @param {number} data.homeworkContentId - Homework content ID
@@ -56,12 +64,24 @@ export const homeworkSubmitApi = {
      * @param {number} id - Homework submit ID
      * @param {Object} data - Grading data
      * @param {number} data.points - Points awarded
-     * @param {number} data.graderId - Grader admin ID
      * @param {string} data.feedback - Grading feedback (optional)
      * @returns {Promise<Object>} Graded homework submit
      */
     grade: (id, data) => {
-        return axiosClient.patch(API_ENDPOINTS.HOMEWORK_SUBMITS.GRADE(id), data);
+        return axiosClient.patch(API_ENDPOINTS.HOMEWORK_SUBMITS.ADMIN_GRADE(id), data);
+    },
+
+    /** Remove the manual grade from a file homework submission. */
+    ungrade: (id) => {
+        return axiosClient.patch(API_ENDPOINTS.HOMEWORK_SUBMITS.ADMIN_UNGRADE(id));
+    },
+
+    /** Update the teacher's feedback for an image attached to a file homework submission. */
+    updateMediaAlt: (homeworkSubmitId, mediaId, data) => {
+        return axiosClient.patch(
+            API_ENDPOINTS.HOMEWORK_SUBMITS.ADMIN_UPDATE_MEDIA_ALT(homeworkSubmitId, mediaId),
+            data,
+        );
     },
 
     /**

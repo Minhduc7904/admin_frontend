@@ -1,7 +1,7 @@
 // src/features/homeworkContent/components/AddHomeworkContent.jsx
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Input, Textarea, Checkbox } from '../../../shared/components'
+import { Button, Input, Textarea, Checkbox, Dropdown } from '../../../shared/components'
 import { CompetitionSearchSelect } from '../../competition/components'
 import {
     createHomeworkContentAsync,
@@ -14,6 +14,7 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
     const [errors, setErrors] = useState({})
 
     const [formData, setFormData] = useState({
+        type: 'COMPETITION',
         content: '',
         dueDate: '',
         competition: null,
@@ -35,6 +36,19 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
         setFormData(prev => ({
             ...prev,
             [name]: checked
+        }))
+    }
+
+    const handleTypeChange = (type) => {
+        setFormData((prev) => ({
+            ...prev,
+            type,
+            ...(type === 'FILE_UPLOAD' ? {
+                competition: null,
+                updatePointsOnLateSubmit: false,
+                updatePointsOnReSubmit: false,
+                updateMaxPoints: false,
+            } : {}),
         }))
     }
 
@@ -62,13 +76,16 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
 
         const data = {
             learningItemId: Number(learningItemId),
+            type: formData.type,
             content: formData.content.trim(),
             ...(formData.dueDate && { dueDate: new Date(formData.dueDate).toISOString() }),
-            ...(formData.competition && { competitionId: formData.competition.competitionId }),
             allowLateSubmit: formData.allowLateSubmit,
-            updatePointsOnLateSubmit: formData.updatePointsOnLateSubmit,
-            updatePointsOnReSubmit: formData.updatePointsOnReSubmit,
-            updateMaxPoints: formData.updateMaxPoints,
+            ...(formData.type === 'COMPETITION' && {
+                ...(formData.competition && { competitionId: formData.competition.competitionId }),
+                updatePointsOnLateSubmit: formData.updatePointsOnLateSubmit,
+                updatePointsOnReSubmit: formData.updatePointsOnReSubmit,
+                updateMaxPoints: formData.updateMaxPoints,
+            }),
         }
 
         try {
@@ -83,6 +100,19 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <div className="flex-1 px-6 py-4 space-y-6 overflow-y-auto">
+                <Dropdown
+                    label="Hình thức bài tập"
+                    value={formData.type}
+                    onChange={handleTypeChange}
+                    options={[
+                        { value: 'COMPETITION', label: 'Làm bài qua Competition' },
+                        { value: 'FILE_UPLOAD', label: 'Nộp file và nội dung' },
+                    ]}
+                    helperText={formData.type === 'FILE_UPLOAD'
+                        ? 'Giáo viên sẽ xem file học sinh nộp và chấm điểm trực tiếp.'
+                        : 'Điểm được lấy từ lượt làm Competition của học sinh.'}
+                />
+
                 <Textarea
                     error={errors.content}
                     label="Nội dung bài tập"
@@ -103,13 +133,15 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
                     onChange={handleChange}
                 />
 
-                <CompetitionSearchSelect
-                    label="Cuộc thi (tùy chọn)"
-                    placeholder="Tìm kiếm cuộc thi..."
-                    value={formData.competition}
-                    onSelect={(competition) => setFormData(prev => ({ ...prev, competition }))}
-                    error={errors.competition}
-                />
+                {formData.type === 'COMPETITION' && (
+                    <CompetitionSearchSelect
+                        label="Cuộc thi (tùy chọn)"
+                        placeholder="Tìm kiếm cuộc thi..."
+                        value={formData.competition}
+                        onSelect={(competition) => setFormData(prev => ({ ...prev, competition }))}
+                        error={errors.competition}
+                    />
+                )}
 
                 <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-start gap-3">
@@ -129,6 +161,7 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
                         </label>
                     </div>
 
+                    {formData.type === 'COMPETITION' && <>
                     <div className="flex items-start gap-3">
                         <Checkbox
                             id="updatePointsOnLateSubmit"
@@ -179,6 +212,7 @@ export const AddHomeworkContent = ({ onClose, learningItemId, onSuccess }) => {
                             </span>
                         </label>
                     </div>
+                    </>}
                 </div>
             </div>
 

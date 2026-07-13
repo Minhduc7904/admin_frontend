@@ -429,6 +429,11 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/homework-submits/${id}`,
     GRADE: (id) => `/homework-submits/${id}/grade`,
     DELETE: (id) => `/homework-submits/${id}`,
+    ADMIN_DETAIL: (id) => `/admin/homework-submissions/${id}`,
+    ADMIN_GRADE: (id) => `/admin/homework-submissions/${id}/grade`,
+    ADMIN_UNGRADE: (id) => `/admin/homework-submissions/${id}/ungrade`,
+    ADMIN_UPDATE_MEDIA_ALT: (homeworkSubmitId, mediaId) =>
+      `/admin/homework-submissions/${homeworkSubmitId}/media/${mediaId}/alt`,
   },
   LESSON_LEARNING_ITEMS: {
     LIST: "/lesson-learning-items",

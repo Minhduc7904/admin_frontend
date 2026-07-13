@@ -94,7 +94,7 @@ export const LessonList = ({
     if (loading && currentPage === 1) {
         return (
             <div className="p-6 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                <Loader2 className="w-5 h-5 animate-spin text-info" />
             </div>
         );
     }
@@ -152,7 +152,7 @@ export const LessonList = ({
                         {/* Loading more indicator */}
                         {loading && currentPage > 1 && (
                             <div className="flex items-center justify-center py-3">
-                                <LoaderCircle className="animate-spin text-primary mr-2" size={16} />
+                                <LoaderCircle className="animate-spin text-info mr-2" size={16} />
                                 <span className="text-xs text-muted-foreground">Đang tải thêm...</span>
                             </div>
                         )}
