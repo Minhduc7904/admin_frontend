@@ -36,6 +36,9 @@ const initialState = {
     loadingHardDeleteStudentsByGraduationYearGradeExcludedCourses: false,
     errorHardDeleteStudentsByGraduationYearGradeExcludedCourses: null,
     hardDeleteStudentsByGraduationYearGradeExcludedCoursesResult: null,
+    loadingAutoSubmitExpiredCompetitionAttempts: false,
+    errorAutoSubmitExpiredCompetitionAttempts: null,
+    autoSubmitExpiredCompetitionAttemptsResult: null,
 };
 
 export const resetPasswordByDateRangeAsync = createAsyncThunk(
@@ -195,6 +198,20 @@ export const hardDeleteStudentsByGraduationYearGradeExcludedCoursesAsync = creat
     }
 );
 
+export const autoSubmitExpiredCompetitionAttemptsAsync = createAsyncThunk(
+    "superAdmin/autoSubmitExpiredCompetitionAttempts",
+    async (_, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.autoSubmitExpiredCompetitionAttempts(),
+            thunkAPI,
+            {
+                successTitle: "Tự động nộp các lượt thi hết hạn thành công",
+                errorTitle: "Lỗi tự động nộp các lượt thi hết hạn",
+            }
+        );
+    }
+);
+
 export const superAdminSlice = createSlice({
     name: "superAdmin",
     initialState,
@@ -242,6 +259,10 @@ export const superAdminSlice = createSlice({
         clearHardDeleteStudentsByGraduationYearGradeExcludedCoursesState: (state) => {
             state.errorHardDeleteStudentsByGraduationYearGradeExcludedCourses = null;
             state.hardDeleteStudentsByGraduationYearGradeExcludedCoursesResult = null;
+        },
+        clearAutoSubmitExpiredCompetitionAttemptsState: (state) => {
+            state.errorAutoSubmitExpiredCompetitionAttempts = null;
+            state.autoSubmitExpiredCompetitionAttemptsResult = null;
         },
     },
     extraReducers: (builder) => {
@@ -377,6 +398,18 @@ export const superAdminSlice = createSlice({
             .addCase(hardDeleteStudentsByGraduationYearGradeExcludedCoursesAsync.rejected, (state, action) => {
                 state.loadingHardDeleteStudentsByGraduationYearGradeExcludedCourses = false;
                 state.errorHardDeleteStudentsByGraduationYearGradeExcludedCourses = action.payload;
+            })
+            .addCase(autoSubmitExpiredCompetitionAttemptsAsync.pending, (state) => {
+                state.loadingAutoSubmitExpiredCompetitionAttempts = true;
+                state.errorAutoSubmitExpiredCompetitionAttempts = null;
+            })
+            .addCase(autoSubmitExpiredCompetitionAttemptsAsync.fulfilled, (state, action) => {
+                state.loadingAutoSubmitExpiredCompetitionAttempts = false;
+                state.autoSubmitExpiredCompetitionAttemptsResult = action.payload || null;
+            })
+            .addCase(autoSubmitExpiredCompetitionAttemptsAsync.rejected, (state, action) => {
+                state.loadingAutoSubmitExpiredCompetitionAttempts = false;
+                state.errorAutoSubmitExpiredCompetitionAttempts = action.payload;
             });
     },
 });
@@ -393,6 +426,7 @@ export const {
     clearPromoteStudentGradeByGraduationYearState,
     clearUpdateStudentGraduationYearByGradeState,
     clearHardDeleteStudentsByGraduationYearGradeExcludedCoursesState,
+    clearAutoSubmitExpiredCompetitionAttemptsState,
 } = superAdminSlice.actions;
 
 export const selectSuperAdminLoadingResetPasswordByDateRange = (state) =>
@@ -471,5 +505,11 @@ export const selectSuperAdminErrorHardDeleteStudentsByGraduationYearGradeExclude
     state.superAdmin.errorHardDeleteStudentsByGraduationYearGradeExcludedCourses;
 export const selectSuperAdminHardDeleteStudentsByGraduationYearGradeExcludedCoursesResult = (state) =>
     state.superAdmin.hardDeleteStudentsByGraduationYearGradeExcludedCoursesResult;
+export const selectSuperAdminLoadingAutoSubmitExpiredCompetitionAttempts = (state) =>
+    state.superAdmin.loadingAutoSubmitExpiredCompetitionAttempts;
+export const selectSuperAdminErrorAutoSubmitExpiredCompetitionAttempts = (state) =>
+    state.superAdmin.errorAutoSubmitExpiredCompetitionAttempts;
+export const selectSuperAdminAutoSubmitExpiredCompetitionAttemptsResult = (state) =>
+    state.superAdmin.autoSubmitExpiredCompetitionAttemptsResult;
 
 export default superAdminSlice.reducer;

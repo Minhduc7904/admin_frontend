@@ -9,6 +9,7 @@ import {
     MessageSquare,
     Paperclip,
     PenLine,
+    Plus,
     RotateCcw,
     Trophy,
     Upload,
@@ -27,10 +28,12 @@ import {
     selectHomeworkSubmitLoadingDetail,
     selectHomeworkSubmitLoadingGet,
     selectHomeworkSubmitLoadingGrade,
+    selectHomeworkSubmitLoadingUpdateCompetitionFeedback,
     selectHomeworkSubmitLoadingUngrade,
     selectHomeworkSubmitLoadingUpdateMediaAlt,
     selectHomeworkSubmitPagination,
     selectHomeworkSubmits,
+    updateCompetitionHomeworkFeedbackAsync,
 } from '../store/homeworkSubmitSlice';
 import {
     HomeworkSubmissionMediaPreviewModal,
@@ -39,6 +42,8 @@ import {
     isHomeworkSubmissionImage,
     isHomeworkSubmissionPdf,
 } from '../utils/homeworkSubmissionMedia';
+import { CompetitionSubmitDetail } from '../../competitionSubmit/components/CompetitionSubmitDetail';
+import { CompetitionHomeworkSubmitModal } from './CompetitionHomeworkSubmitModal';
 
 const ScoreBadge = ({ points }) => (
     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${points == null ? 'bg-gray-100 text-gray-600' : 'bg-emerald-50 text-emerald-700'}`}>
@@ -69,6 +74,7 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
     const detail = useSelector(selectCurrentHomeworkSubmitDetail);
     const loadingDetail = useSelector(selectHomeworkSubmitLoadingDetail);
     const loadingGrade = useSelector(selectHomeworkSubmitLoadingGrade);
+    const loadingUpdateCompetitionFeedback = useSelector(selectHomeworkSubmitLoadingUpdateCompetitionFeedback);
     const loadingUngrade = useSelector(selectHomeworkSubmitLoadingUngrade);
     const loadingUpdateMediaAlt = useSelector(selectHomeworkSubmitLoadingUpdateMediaAlt);
     const [selectedId, setSelectedId] = useState(null);
@@ -76,6 +82,9 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
     const [errors, setErrors] = useState({});
     const [previewMediaId, setPreviewMediaId] = useState(null);
     const [ungradeSubmitId, setUngradeSubmitId] = useState(null);
+    const [competitionSubmitDetailId, setCompetitionSubmitDetailId] = useState(null);
+    const [competitionSubmitModalTarget, setCompetitionSubmitModalTarget] = useState(null);
+    const [competitionFeedback, setCompetitionFeedback] = useState('');
     const [submissionFilters, setSubmissionFilters] = useState({
         isGraded: '',
         sort: 'submitAt:desc',
@@ -101,6 +110,9 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
         setErrors({});
         setPreviewMediaId(null);
         setUngradeSubmitId(null);
+        setCompetitionSubmitDetailId(null);
+        setCompetitionSubmitModalTarget(null);
+        setCompetitionFeedback('');
         loadSubmits(1);
         return () => dispatch(clearHomeworkSubmitDetail());
     }, [dispatch, isOpen, homework?.homeworkContentId, loadSubmits]);
@@ -117,6 +129,7 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
             feedback: submit.feedback ?? '',
         });
         setErrors({});
+        if (detail?.type === 'COMPETITION') setCompetitionFeedback(submit.feedback ?? '');
     }, [detail]);
 
     const handleGrade = async (event) => {
@@ -161,6 +174,30 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
         } catch (error) {
             console.error('Error ungrading homework submit:', error);
         }
+    };
+
+    const handleUpdateCompetitionFeedback = async (event) => {
+        event.preventDefault();
+        const feedback = competitionFeedback.trim();
+        if (!feedback) {
+            setErrors((current) => ({ ...current, competitionFeedback: 'Nhận xét không được để trống.' }));
+            return;
+        }
+        try {
+            await dispatch(updateCompetitionHomeworkFeedbackAsync({
+                id: submit.homeworkSubmitId,
+                feedback,
+            })).unwrap();
+            setErrors((current) => ({ ...current, competitionFeedback: undefined }));
+            loadSubmits(pagination.page, pagination.limit);
+        } catch (error) {
+            console.error('Error updating competition homework feedback:', error);
+        }
+    };
+
+    const handleCompetitionSubmitModalSuccess = () => {
+        loadSubmits(pagination.page, pagination.limit);
+        if (selectedId) dispatch(getAdminHomeworkSubmitDetailAsync(selectedId));
     };
 
     if (!isOpen) return null;
@@ -287,6 +324,7 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
                                 </form>
                             </>
                         ) : (
+                            <>
                             <section className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
                                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-900">
                                     <Trophy className="h-4 w-4" /> Kết quả Competition
@@ -295,15 +333,35 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
                                     <div className="rounded-lg bg-white p-3"><p className="text-xs text-muted-foreground">Điểm</p><p className="mt-1 font-bold text-foreground">{competitionSubmit?.totalPoints ?? submit.points ?? '-'}{competitionSubmit?.maxPoints != null ? `/${competitionSubmit.maxPoints}` : ''}</p></div>
                                     <div className="rounded-lg bg-white p-3"><p className="text-xs text-muted-foreground">Trạng thái</p><p className="mt-1 font-semibold text-foreground">{competitionSubmit?.status || (submit.points == null ? 'Chưa chấm' : 'Đã chấm')}</p></div>
                                 </div>
-                                <p className="mt-4 text-sm text-amber-900/80">Bài tập Competition nhận điểm từ lượt làm bài; không chấm thủ công tại đây.</p>
+                                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                                    <p className="text-sm text-amber-900/80">Bài tập Competition nhận điểm từ lượt làm bài; không thể chấm hoặc gỡ chấm tại đây.</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {competitionSubmit?.competitionSubmitId && <Button type="button" size="sm" variant="outline" onClick={() => setCompetitionSubmitDetailId(competitionSubmit.competitionSubmitId)}>
+                                            Xem chi tiết bài làm
+                                        </Button>}
+                                        <Button type="button" size="sm" variant="outline" onClick={() => setCompetitionSubmitModalTarget(submit)}>
+                                            Đổi lượt thi
+                                        </Button>
+                                    </div>
+                                </div>
                             </section>
-                        )}
-
-                        {submit.feedback && !isFileUpload && (
-                            <section className="rounded-xl border border-border p-4">
-                                <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><MessageSquare className="h-4 w-4" /> Nhận xét</div>
-                                <p className="whitespace-pre-wrap text-sm">{submit.feedback}</p>
-                            </section>
+                            <form onSubmit={handleUpdateCompetitionFeedback} className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
+                                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-900"><MessageSquare className="h-4 w-4" /> Nhận xét cho học sinh</div>
+                                <Textarea
+                                    label="Nhận xét"
+                                    required
+                                    rows={4}
+                                    value={competitionFeedback}
+                                    error={errors.competitionFeedback}
+                                    onChange={(event) => {
+                                        setCompetitionFeedback(event.target.value);
+                                        setErrors((current) => ({ ...current, competitionFeedback: undefined }));
+                                    }}
+                                    placeholder="Nhập nhận xét để học sinh xem lại..."
+                                />
+                                <div className="mt-3 flex justify-end"><Button type="submit" loading={loadingUpdateCompetitionFeedback} disabled={loadingUpdateCompetitionFeedback}>Lưu nhận xét</Button></div>
+                            </form>
+                            </>
                         )}
                     </div>
                 )}
@@ -318,6 +376,19 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
                 saving={loadingUpdateMediaAlt}
             />}
             {ungradeConfirmModal}
+            <CompetitionSubmitDetail
+                submitId={competitionSubmitDetailId}
+                isOpen={competitionSubmitDetailId != null}
+                onClose={() => setCompetitionSubmitDetailId(null)}
+                allowQuestionEdit={false}
+            />
+            {competitionSubmitModalTarget != null && <CompetitionHomeworkSubmitModal
+                isOpen={competitionSubmitModalTarget != null}
+                onClose={() => setCompetitionSubmitModalTarget(null)}
+                homework={homework}
+                existingSubmit={competitionSubmitModalTarget}
+                onSuccess={handleCompetitionSubmitModalSuccess}
+            />}
             </>
         );
     }
@@ -326,9 +397,12 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
         <>
         <div className="flex h-full flex-col">
             <div className="border-b border-border bg-gray-50 px-6 py-3">
-                <div className="flex items-center gap-2">
-                    {homework?.type === 'FILE_UPLOAD' ? <Upload className="h-4 w-4 text-violet-600" /> : <Trophy className="h-4 w-4 text-amber-600" />}
-                    <span className="text-sm font-medium text-foreground">{homework?.type === 'FILE_UPLOAD' ? 'Bài nộp file' : 'Bài nộp Competition'}</span>
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                        {homework?.type === 'FILE_UPLOAD' ? <Upload className="h-4 w-4 text-violet-600" /> : <Trophy className="h-4 w-4 text-amber-600" />}
+                        <span className="text-sm font-medium text-foreground">{homework?.type === 'FILE_UPLOAD' ? 'Bài nộp file' : 'Bài nộp Competition'}</span>
+                    </div>
+                    {homework?.type === 'COMPETITION' && <Button type="button" size="sm" onClick={() => setCompetitionSubmitModalTarget({})}><Plus className="mr-1 h-4 w-4" /> Tạo từ lượt thi</Button>}
                 </div>
                 <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{homework?.content}</p>
             </div>
@@ -352,7 +426,7 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
                                 </div>
                                 {item.feedback && <p className="mt-3 line-clamp-1 text-xs text-muted-foreground">Nhận xét: {item.feedback}</p>}
                             </button>
-                            {item.points != null && <button type="button" onClick={() => setUngradeSubmitId(item.homeworkSubmitId)} disabled={loadingUngrade} title="Gỡ chấm điểm nhanh" className="rounded-lg p-2 text-warning-dark transition-colors hover:bg-warning-bg disabled:cursor-not-allowed disabled:opacity-50"><RotateCcw className="h-4 w-4" /></button>}
+                            {homework?.type === 'FILE_UPLOAD' && item.points != null && <button type="button" onClick={() => setUngradeSubmitId(item.homeworkSubmitId)} disabled={loadingUngrade} title="Gỡ chấm điểm nhanh" className="rounded-lg p-2 text-warning-dark transition-colors hover:bg-warning-bg disabled:cursor-not-allowed disabled:opacity-50"><RotateCcw className="h-4 w-4" /></button>}
                             </div>
                         ))}
                     </div>
@@ -361,6 +435,13 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
             {pagination.totalPages > 1 && <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={(page) => loadSubmits(page, pagination.limit)} itemsPerPage={pagination.limit} onItemsPerPageChange={(limit) => loadSubmits(1, Number(limit))} totalItems={pagination.total} disabled={loadingList} />}
         </div>
         {ungradeConfirmModal}
+        {competitionSubmitModalTarget != null && <CompetitionHomeworkSubmitModal
+            isOpen={competitionSubmitModalTarget != null}
+            onClose={() => setCompetitionSubmitModalTarget(null)}
+            homework={homework}
+            existingSubmit={competitionSubmitModalTarget?.homeworkSubmitId ? competitionSubmitModalTarget : null}
+            onSuccess={handleCompetitionSubmitModalSuccess}
+        />}
         </>
     );
 };

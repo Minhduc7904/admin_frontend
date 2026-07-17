@@ -9,3 +9,4 @@ export * from './SyncSeoMediaSlotsFromPageSlotsApiCard';
 export * from './PromoteStudentGradeByGraduationYearApiCard';
 export * from './UpdateStudentGraduationYearByGradeApiCard';
 export * from './HardDeleteStudentsByGraduationYearGradeExcludedCoursesApiCard';
+export * from './AutoSubmitExpiredCompetitionAttemptsApiCard';

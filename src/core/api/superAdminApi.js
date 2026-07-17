@@ -115,4 +115,14 @@ export const superAdminApi = {
             data
         );
     },
+
+    /**
+     * Automatically submit expired competition attempts that are still IN_PROGRESS.
+     * POST /super-admin/competitions/auto-submit-expired-attempts
+     */
+    autoSubmitExpiredCompetitionAttempts: () => {
+        return axiosClient.post(
+            API_ENDPOINTS.SUPER_ADMIN.AUTO_SUBMIT_EXPIRED_COMPETITION_ATTEMPTS
+        );
+    },
 };

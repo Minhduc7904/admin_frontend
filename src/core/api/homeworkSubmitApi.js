@@ -49,6 +49,21 @@ export const homeworkSubmitApi = {
         return axiosClient.post(API_ENDPOINTS.HOMEWORK_SUBMITS.CREATE, data);
     },
 
+    /** Create (or replace) a homework submit from a student's submitted competition attempt. */
+    createFromCompetition: (data) => {
+        return axiosClient.post(API_ENDPOINTS.HOMEWORK_SUBMITS.FROM_COMPETITION, data);
+    },
+
+    /** Get submitted competition attempts that can be linked for one student. */
+    getStudentCompetitionAttempts: (studentId) => {
+        return axiosClient.get(API_ENDPOINTS.HOMEWORK_SUBMITS.COMPETITION_ATTEMPTS(studentId));
+    },
+
+    /** Replace the competition attempt linked to an existing homework submit. */
+    updateCompetitionSubmit: (id, data) => {
+        return axiosClient.patch(API_ENDPOINTS.HOMEWORK_SUBMITS.UPDATE_COMPETITION_SUBMIT(id), data);
+    },
+
     /**
      * Update homework submit
      * @param {number} id - Homework submit ID

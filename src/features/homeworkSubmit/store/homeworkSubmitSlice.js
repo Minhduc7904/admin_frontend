@@ -9,8 +9,13 @@ const initialState = {
     loadingGet: false,
     loadingDetail: false,
     loadingGrade: false,
+    loadingUpdateCompetitionFeedback: false,
     loadingUngrade: false,
     loadingUpdateMediaAlt: false,
+    competitionAttempts: [],
+    loadingCompetitionAttempts: false,
+    loadingCreateFromCompetition: false,
+    loadingUpdateCompetitionSubmit: false,
     error: null,
 };
 
@@ -41,6 +46,54 @@ export const gradeHomeworkSubmitAsync = createAsyncThunk(
             successTitle: 'Chấm bài thành công',
             successMessage: 'Điểm và nhận xét đã được lưu cho học sinh.',
             errorTitle: 'Không thể chấm bài',
+        },
+    ),
+);
+
+export const updateCompetitionHomeworkFeedbackAsync = createAsyncThunk(
+    'homeworkSubmit/updateCompetitionFeedback',
+    async ({ id, feedback }, thunkAPI) => handleAsyncThunk(
+        () => homeworkSubmitApi.grade(id, { feedback }),
+        thunkAPI,
+        {
+            successTitle: 'Đã lưu nhận xét',
+            successMessage: 'Nhận xét cho bài tập Competition đã được cập nhật.',
+            errorTitle: 'Không thể cập nhật nhận xét',
+        },
+    ),
+);
+
+export const getStudentCompetitionAttemptsAsync = createAsyncThunk(
+    'homeworkSubmit/getStudentCompetitionAttempts',
+    async (studentId, thunkAPI) => handleAsyncThunk(
+        () => homeworkSubmitApi.getStudentCompetitionAttempts(studentId),
+        thunkAPI,
+        { showSuccess: false, errorTitle: 'Không thể tải danh sách lượt thi đã nộp' },
+    ),
+);
+
+export const createHomeworkSubmitFromCompetitionAsync = createAsyncThunk(
+    'homeworkSubmit/createFromCompetition',
+    async (data, thunkAPI) => handleAsyncThunk(
+        () => homeworkSubmitApi.createFromCompetition(data),
+        thunkAPI,
+        {
+            successTitle: 'Đã tạo bài nộp',
+            successMessage: 'Bài nộp bài tập đã được liên kết từ lượt thi Competition.',
+            errorTitle: 'Không thể tạo bài nộp từ Competition',
+        },
+    ),
+);
+
+export const updateHomeworkSubmitCompetitionAsync = createAsyncThunk(
+    'homeworkSubmit/updateCompetitionSubmit',
+    async ({ id, data }, thunkAPI) => handleAsyncThunk(
+        () => homeworkSubmitApi.updateCompetitionSubmit(id, data),
+        thunkAPI,
+        {
+            successTitle: 'Đã đổi lượt thi',
+            successMessage: 'Bài nộp đã được cập nhật theo lượt thi Competition đã chọn.',
+            errorTitle: 'Không thể đổi lượt thi',
         },
     ),
 );
@@ -124,6 +177,67 @@ const homeworkSubmitSlice = createSlice({
                 state.loadingGrade = false;
                 state.error = action.payload;
             })
+            .addCase(updateCompetitionHomeworkFeedbackAsync.pending, (state) => {
+                state.loadingUpdateCompetitionFeedback = true;
+                state.error = null;
+            })
+            .addCase(updateCompetitionHomeworkFeedbackAsync.fulfilled, (state, action) => {
+                const updated = action.payload.data;
+                state.loadingUpdateCompetitionFeedback = false;
+                if (state.currentDetail?.homeworkSubmit?.homeworkSubmitId === updated?.homeworkSubmitId) {
+                    state.currentDetail.homeworkSubmit = { ...state.currentDetail.homeworkSubmit, ...updated };
+                }
+                const index = state.submits.findIndex((submit) => submit.homeworkSubmitId === updated?.homeworkSubmitId);
+                if (index !== -1) state.submits[index] = { ...state.submits[index], ...updated };
+            })
+            .addCase(updateCompetitionHomeworkFeedbackAsync.rejected, (state, action) => {
+                state.loadingUpdateCompetitionFeedback = false;
+                state.error = action.payload;
+            })
+            .addCase(getStudentCompetitionAttemptsAsync.pending, (state) => {
+                state.loadingCompetitionAttempts = true;
+                state.competitionAttempts = [];
+                state.error = null;
+            })
+            .addCase(getStudentCompetitionAttemptsAsync.fulfilled, (state, action) => {
+                state.loadingCompetitionAttempts = false;
+                state.competitionAttempts = action.payload.data?.competitionSubmits ?? [];
+            })
+            .addCase(getStudentCompetitionAttemptsAsync.rejected, (state, action) => {
+                state.loadingCompetitionAttempts = false;
+                state.error = action.payload;
+            })
+            .addCase(createHomeworkSubmitFromCompetitionAsync.pending, (state) => {
+                state.loadingCreateFromCompetition = true;
+                state.error = null;
+            })
+            .addCase(createHomeworkSubmitFromCompetitionAsync.fulfilled, (state, action) => {
+                state.loadingCreateFromCompetition = false;
+                const submit = action.payload.data?.homeworkSubmit;
+                const index = state.submits.findIndex((item) => item.homeworkSubmitId === submit?.homeworkSubmitId);
+                if (index !== -1) state.submits[index] = { ...state.submits[index], ...submit };
+            })
+            .addCase(createHomeworkSubmitFromCompetitionAsync.rejected, (state, action) => {
+                state.loadingCreateFromCompetition = false;
+                state.error = action.payload;
+            })
+            .addCase(updateHomeworkSubmitCompetitionAsync.pending, (state) => {
+                state.loadingUpdateCompetitionSubmit = true;
+                state.error = null;
+            })
+            .addCase(updateHomeworkSubmitCompetitionAsync.fulfilled, (state, action) => {
+                const submit = action.payload.data?.homeworkSubmit;
+                state.loadingUpdateCompetitionSubmit = false;
+                if (state.currentDetail?.homeworkSubmit?.homeworkSubmitId === submit?.homeworkSubmitId) {
+                    state.currentDetail.homeworkSubmit = { ...state.currentDetail.homeworkSubmit, ...submit };
+                }
+                const index = state.submits.findIndex((item) => item.homeworkSubmitId === submit?.homeworkSubmitId);
+                if (index !== -1) state.submits[index] = { ...state.submits[index], ...submit };
+            })
+            .addCase(updateHomeworkSubmitCompetitionAsync.rejected, (state, action) => {
+                state.loadingUpdateCompetitionSubmit = false;
+                state.error = action.payload;
+            })
             .addCase(ungradeHomeworkSubmitAsync.pending, (state) => {
                 state.loadingUngrade = true;
                 state.error = null;
@@ -178,7 +292,12 @@ export const selectHomeworkSubmitLoadingGet = (state) => state.homeworkSubmit.lo
 export const selectCurrentHomeworkSubmitDetail = (state) => state.homeworkSubmit.currentDetail;
 export const selectHomeworkSubmitLoadingDetail = (state) => state.homeworkSubmit.loadingDetail;
 export const selectHomeworkSubmitLoadingGrade = (state) => state.homeworkSubmit.loadingGrade;
+export const selectHomeworkSubmitLoadingUpdateCompetitionFeedback = (state) => state.homeworkSubmit.loadingUpdateCompetitionFeedback;
 export const selectHomeworkSubmitLoadingUngrade = (state) => state.homeworkSubmit.loadingUngrade;
 export const selectHomeworkSubmitLoadingUpdateMediaAlt = (state) => state.homeworkSubmit.loadingUpdateMediaAlt;
+export const selectHomeworkSubmitCompetitionAttempts = (state) => state.homeworkSubmit.competitionAttempts;
+export const selectHomeworkSubmitLoadingCompetitionAttempts = (state) => state.homeworkSubmit.loadingCompetitionAttempts;
+export const selectHomeworkSubmitLoadingCreateFromCompetition = (state) => state.homeworkSubmit.loadingCreateFromCompetition;
+export const selectHomeworkSubmitLoadingUpdateCompetitionSubmit = (state) => state.homeworkSubmit.loadingUpdateCompetitionSubmit;
 
 export default homeworkSubmitSlice.reducer;

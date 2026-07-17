@@ -155,6 +155,8 @@ export const API_ENDPOINTS = {
       "/super-admin/students/graduation-year/by-grade",
     HARD_DELETE_STUDENTS_BY_GRADUATION_YEAR_GRADE_EXCLUDED_COURSES:
       "/super-admin/students/hard-delete-by-graduation-year-grade-excluded-courses",
+    AUTO_SUBMIT_EXPIRED_COMPETITION_ATTEMPTS:
+      "/super-admin/competitions/auto-submit-expired-attempts",
   },
   STUDENTS: {
     LIST: "/students",
@@ -427,6 +429,11 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/homework-submits/${id}`,
     CREATE: "/homework-submits",
     UPDATE: (id) => `/homework-submits/${id}`,
+    FROM_COMPETITION: "/homework-submits/from-competition",
+    COMPETITION_ATTEMPTS: (studentId) =>
+      `/homework-submits/students/${studentId}/competition-attempts`,
+    UPDATE_COMPETITION_SUBMIT: (id) =>
+      `/homework-submits/${id}/competition-submit`,
     GRADE: (id) => `/homework-submits/${id}/grade`,
     DELETE: (id) => `/homework-submits/${id}`,
     ADMIN_DETAIL: (id) => `/admin/homework-submissions/${id}`,

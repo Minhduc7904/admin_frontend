@@ -9,3 +9,4 @@ export * from './useSyncSeoMediaSlotsFromPageSlots';
 export * from './usePromoteStudentGradeByGraduationYear';
 export * from './useUpdateStudentGraduationYearByGrade';
 export * from './useHardDeleteStudentsByGraduationYearGradeExcludedCourses';
+export * from './useAutoSubmitExpiredCompetitionAttempts';

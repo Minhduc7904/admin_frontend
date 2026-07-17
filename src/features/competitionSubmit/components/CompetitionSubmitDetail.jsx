@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPortal } from 'react-dom';
 import {
@@ -38,7 +38,7 @@ const STATUS_MAP = {
 const StatBadge = ({ icon: Icon, label, value, color = 'bg-gray-100 text-gray-700' }) => (
     <div className={`flex flex-col items-center justify-center rounded-lg px-3 py-2 ${color}`}>
         <div className="flex items-center gap-1 mb-0.5">
-            <Icon size={12} />
+            {createElement(Icon, { size: 12 })}
             <span className="text-[10px] font-medium uppercase tracking-wide">{label}</span>
         </div>
         <span className="text-lg font-bold leading-none">{value}</span>
@@ -230,7 +230,7 @@ const AnswerItem = ({ answer, index, onEdit }) => {
 
 /* ── main component ──────────────────────────────────────────────── */
 
-export const CompetitionSubmitDetail = ({ submitId, isOpen, onClose }) => {
+export const CompetitionSubmitDetail = ({ submitId, isOpen, onClose, allowQuestionEdit = true }) => {
     const dispatch = useDispatch();
     const detail  = useSelector(selectCurrentCompetitionSubmitDetail);
     const loading = useSelector(selectCompetitionSubmitLoadingGetDetail);
@@ -367,7 +367,12 @@ export const CompetitionSubmitDetail = ({ submitId, isOpen, onClose }) => {
                                 </div>
                             ) : (
                                 answers.map((ans, i) => (
-                                    <AnswerItem key={ans.answerId ?? i} answer={ans} index={i} onEdit={setEditQuestionId} />
+                                    <AnswerItem
+                                        key={ans.answerId ?? i}
+                                        answer={ans}
+                                        index={i}
+                                        onEdit={allowQuestionEdit ? setEditQuestionId : undefined}
+                                    />
                                 ))
                             )}
                         </div>
@@ -377,7 +382,7 @@ export const CompetitionSubmitDetail = ({ submitId, isOpen, onClose }) => {
             </div>
 
             {/* Edit Question – stacked above this panel */}
-            {editQuestionId && createPortal(
+            {allowQuestionEdit && editQuestionId && createPortal(
                 <>
                     <div
                         className="fixed inset-0 bg-black bg-opacity-30 z-[80]"
