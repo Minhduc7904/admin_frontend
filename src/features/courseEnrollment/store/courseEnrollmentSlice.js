@@ -24,10 +24,12 @@ const initialState = {
         courseId: "",
         studentId: "",
         status: "",          // active | completed | dropped
-        sortBy: "createdAt",
+        sortBy: "enrolledAt",
         sortOrder: "desc",
     },
     exportOptions: {
+        courseId: "",
+        studentId: "",
         search: "",
         status: "",
         enrolledAtFrom: "",

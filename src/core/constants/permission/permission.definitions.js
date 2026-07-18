@@ -465,6 +465,10 @@ export const PERMISSION_DEFINITIONS = {
                 name: 'Xóa học sinh khỏi lớp',
                 description: 'Xóa học sinh khỏi lớp học',
             },
+            exportExcel: {
+                name: 'Xuất Excel học sinh trong lớp',
+                description: 'Xuất danh sách học sinh trong lớp ra file Excel',
+            },
         },
     },
 

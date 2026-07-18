@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Plus } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 
 import {
     Button,
@@ -16,20 +16,25 @@ import {
     ClassStudentFilters,
     ClassStudentForm,
     ClassStudentDeleteModal,
+    ExportClassStudentExcelModal,
 } from '../../classStudent/components';
 
 import { useSearch } from '../../../shared/hooks';
+import { CanAccess } from '../../../shared/components/permissions';
+import { PERMISSIONS } from '../../../core/constants';
 
 import {
     getAllClassStudentsAsync,
     addStudentToClassAsync,
     removeStudentFromClassAsync,
+    exportClassStudentsExcelAsync,
     selectClassStudents,
     selectClassStudentPagination,
     selectClassStudentFilters,
     selectClassStudentLoadingGet,
     selectClassStudentLoadingCreate,
     selectClassStudentLoadingDelete,
+    selectClassStudentLoadingExport,
     setFilters,
 } from '../../classStudent/store/classStudentSlice';
 
@@ -49,6 +54,7 @@ export const ClassStudents = () => {
     const loadingGet = useSelector(selectClassStudentLoadingGet);
     const loadingCreate = useSelector(selectClassStudentLoadingCreate);
     const loadingDelete = useSelector(selectClassStudentLoadingDelete);
+    const loadingExport = useSelector(selectClassStudentLoadingExport);
 
     /* ===================== LOCAL STATE ===================== */
     const { search, debouncedSearch, handleSearchChange } = useSearch(filters.search, 500);
@@ -58,6 +64,7 @@ export const ClassStudents = () => {
 
     const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     const [selectedClassStudent, setSelectedClassStudent] = useState(null);
 
@@ -65,12 +72,7 @@ export const ClassStudents = () => {
         studentId: '',
     });
 
-    /* ===================== LOAD DATA ===================== */
-    useEffect(() => {
-        loadClassStudents();
-    }, [classId, currentPage, itemsPerPage, debouncedSearch]);
-
-    const loadClassStudents = () => {
+    const loadClassStudents = useCallback(() => {
         dispatch(
             getAllClassStudentsAsync({
                 classId,
@@ -79,7 +81,12 @@ export const ClassStudents = () => {
                 search: debouncedSearch || undefined,
             })
         );
-    };
+    }, [classId, currentPage, debouncedSearch, dispatch, itemsPerPage]);
+
+    /* ===================== LOAD DATA ===================== */
+    useEffect(() => {
+        loadClassStudents();
+    }, [loadClassStudents]);
 
     /* ===================== FILTER ===================== */
     const handleSearchChangeWrapper = (value) => {
@@ -141,6 +148,22 @@ export const ClassStudents = () => {
         }
     };
 
+    /* ===================== EXPORT ===================== */
+    const handleExport = async (options) => {
+        try {
+            await dispatch(
+                exportClassStudentsExcelAsync({
+                    ...options,
+                    classId,
+                })
+            ).unwrap();
+
+            setIsExportModalOpen(false);
+        } catch (err) {
+            console.error('Export class students failed:', err);
+        }
+    };
+
     /* ===================== PAGINATION ===================== */
     const handlePageChange = (page) => setCurrentPage(page);
 
@@ -161,10 +184,24 @@ export const ClassStudents = () => {
                             Quản lý học sinh trong lớp học
                         </p>
                     </div>
-                    <Button onClick={handleOpenCreate}>
-                        <Plus size={16} />
-                        Thêm học sinh
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <CanAccess permission={PERMISSIONS.CLASS_STUDENT.EXPORT_EXCEL}>
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsExportModalOpen(true)}
+                                disabled={loadingExport}
+                                loading={loadingExport}
+                            >
+                                <Download size={16} />
+                                Xuất Excel
+                            </Button>
+                        </CanAccess>
+
+                        <Button onClick={handleOpenCreate}>
+                            <Plus size={16} />
+                            Thêm học sinh
+                        </Button>
+                    </div>
                 </div>
 
                 <ClassStudentFilters
@@ -216,6 +253,15 @@ export const ClassStudents = () => {
                 loading={loadingDelete}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleConfirmDelete}
+            />
+
+            {/* ===== EXPORT MODAL ===== */}
+            <ExportClassStudentExcelModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                onConfirm={handleExport}
+                loading={loadingExport}
+                classId={classId}
             />
 
             {/* ===== CREATE PANEL ===== */}

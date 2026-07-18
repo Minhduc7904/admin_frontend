@@ -342,6 +342,7 @@ export const CourseEnrollment = () => {
                 onConfirm={handleExport}
                 loading={loadingExport}
                 initialFilters={{
+                    courseId,
                     search,
                     status: filters.status,
                 }}

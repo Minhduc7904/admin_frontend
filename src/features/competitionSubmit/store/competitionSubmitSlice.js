@@ -4,6 +4,7 @@ import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
 const initialState = {
     submits: [],
+    studentSubmits: [],
     currentSubmit: null,
     currentSubmitDetail: null,
     pagination: {
@@ -15,12 +16,22 @@ const initialState = {
         hasNext: false,
     },
     loadingGet: false,
+    loadingGetByStudent: false,
     loadingGetById: false,
     loadingGetDetail: false,
     loadingRegrade: false,
     loadingUpdate: false,
     loadingDelete: false,
     loadingExport: false,
+    studentPagination: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+    },
+    studentSummary: null,
     error: null,
     filters: {
         competitionId: '',
@@ -83,6 +94,20 @@ export const getAllCompetitionSubmitsAsync = createAsyncThunk(
             {
                 showSuccess: false,
                 errorTitle: 'Lỗi tải danh sách bài nộp',
+            }
+        );
+    }
+);
+
+export const getStudentCompetitionSubmitsAsync = createAsyncThunk(
+    'competitionSubmit/getByStudent',
+    async ({ studentId, params = {} }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => competitionSubmitApi.getByStudent(studentId, params),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: 'Lỗi tải danh sách lượt thi',
             }
         );
     }
@@ -253,6 +278,22 @@ const competitionSubmitSlice = createSlice({
                 state.loadingGet = false;
                 state.error = action.payload;
             })
+            .addCase(getStudentCompetitionSubmitsAsync.pending, (state) => {
+                state.loadingGetByStudent = true;
+                state.error = null;
+            })
+            .addCase(getStudentCompetitionSubmitsAsync.fulfilled, (state, action) => {
+                const data = action.payload.data ?? {};
+                state.loadingGetByStudent = false;
+                state.studentSubmits = data.competitionSubmits ?? [];
+                state.studentPagination = data.pagination ?? initialState.studentPagination;
+                state.studentSummary = data.student ?? null;
+                state.error = null;
+            })
+            .addCase(getStudentCompetitionSubmitsAsync.rejected, (state, action) => {
+                state.loadingGetByStudent = false;
+                state.error = action.payload;
+            })
 
             /* ── Get By ID ────────────────────────────────────────── */
             .addCase(getCompetitionSubmitByIdAsync.pending, (state) => {
@@ -408,10 +449,14 @@ export const {
 /* ── Selectors ──────────────────────────────────────────────────── */
 
 export const selectCompetitionSubmits = (state) => state.competitionSubmit.submits;
+export const selectStudentCompetitionSubmits = (state) => state.competitionSubmit.studentSubmits;
 export const selectCurrentCompetitionSubmit = (state) => state.competitionSubmit.currentSubmit;
 export const selectCompetitionSubmitPagination = (state) => state.competitionSubmit.pagination;
+export const selectStudentCompetitionSubmitPagination = (state) => state.competitionSubmit.studentPagination;
+export const selectStudentCompetitionSubmitSummary = (state) => state.competitionSubmit.studentSummary;
 export const selectCompetitionSubmitFilters = (state) => state.competitionSubmit.filters;
 export const selectCompetitionSubmitLoadingGet = (state) => state.competitionSubmit.loadingGet;
+export const selectCompetitionSubmitLoadingGetByStudent = (state) => state.competitionSubmit.loadingGetByStudent;
 export const selectCompetitionSubmitLoadingGetById = (state) => state.competitionSubmit.loadingGetById;
 export const selectCompetitionSubmitLoadingGetDetail = (state) => state.competitionSubmit.loadingGetDetail;
 export const selectCurrentCompetitionSubmitDetail = (state) => state.competitionSubmit.currentSubmitDetail;

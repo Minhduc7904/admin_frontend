@@ -51,6 +51,8 @@ export const ROUTES = {
   STUDENT_COURSES: (id = ':id') => `/students/${id}/courses`,
   STUDENT_ATTENDANCE: (id = ':id') => `/students/${id}/attendance`,
   STUDENT_POINT_LOGS: (id = ':id') => `/students/${id}/point-logs`,
+  STUDENT_HOMEWORK_SUBMITS: (id = ':id') => `/students/${id}/homework-submits`,
+  STUDENT_COMPETITION_SUBMITS: (id = ':id') => `/students/${id}/competition-submits`,
   SUBJECTS: '/subjects',
   SUBJECT_DETAIL: (id = ':id') => `/subjects/${id}`,
   TAGS: '/tags',
@@ -360,6 +362,7 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/class-students/${id}`,
     CREATE: "/class-students",
     DELETE: (classId, studentId) => `/class-students/${classId}/${studentId}`,
+    EXPORT_EXCEL: "/class-students/export/excel",
   },
   ATTENDANCES: {
     LIST: "/attendances",
@@ -426,6 +429,7 @@ export const API_ENDPOINTS = {
   },
   HOMEWORK_SUBMITS: {
     LIST: "/homework-submits",
+    BY_STUDENT: (studentId) => `/homework-submits/student/${studentId}`,
     DETAIL: (id) => `/homework-submits/${id}`,
     CREATE: "/homework-submits",
     UPDATE: (id) => `/homework-submits/${id}`,
@@ -562,6 +566,7 @@ export const API_ENDPOINTS = {
   },
   COMPETITION_SUBMITS: {
     LIST: "/competition-submits",
+    BY_STUDENT: (studentId) => `/competition-submits/student/${studentId}`,
     DETAIL: (id) => `/competition-submits/${id}`,
     UPDATE: (id) => `/competition-submits/${id}`,
     FULL_DETAIL: (id) => `/competition-submits/${id}/detail`,

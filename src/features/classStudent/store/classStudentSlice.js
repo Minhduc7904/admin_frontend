@@ -17,6 +17,7 @@ const initialState = {
     loadingCreate: false,
     loadingUpdate: false,
     loadingDelete: false,
+    loadingExport: false,
     error: null,
     filters: {
         search: "",
@@ -26,11 +27,49 @@ const initialState = {
         sortBy: "createdAt",
         sortOrder: "desc",
     },
+    exportOptions: {
+        classId: "",
+        includeStudentPhone: false,
+        includeParentPhone: true,
+        includeSchool: true,
+        includeGender: true,
+        includeDateOfBirth: true,
+        includeEmail: true,
+    },
 };
 
 // ======================
 // Async thunks
 // ======================
+
+const compactExportParams = (params) => {
+    return Object.entries(params).reduce((acc, [key, value]) => {
+        if (value === "" || value === null || value === undefined) {
+            return acc;
+        }
+
+        acc[key] = value;
+        return acc;
+    }, {});
+};
+
+const getFilenameFromContentDisposition = (contentDisposition, fallback) => {
+    if (!contentDisposition) {
+        return fallback;
+    }
+
+    const encodedFilenameMatch = contentDisposition.match(/filename\*=UTF-8''([^;\n]*)/i);
+    if (encodedFilenameMatch?.[1]) {
+        return decodeURIComponent(encodedFilenameMatch[1].replace(/['"]/g, ""));
+    }
+
+    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+    if (filenameMatch?.[1]) {
+        return decodeURIComponent(filenameMatch[1].replace(/['"]/g, ""));
+    }
+
+    return fallback;
+};
 
 export const getAllClassStudentsAsync = createAsyncThunk(
     "classStudent/getAll",
@@ -85,6 +124,37 @@ export const removeStudentFromClassAsync = createAsyncThunk(
     }
 );
 
+export const exportClassStudentsExcelAsync = createAsyncThunk(
+    "classStudent/exportExcel",
+    async (options = {}, thunkAPI) => {
+        return handleAsyncThunk(async () => {
+            const response = await classStudentApi.exportExcel(
+                compactExportParams(options)
+            );
+
+            const blob = response.data || response;
+            const filename = getFilenameFromContentDisposition(
+                response.headers?.["content-disposition"],
+                `Danh_sach_hoc_sinh_lop_${options.classId || "export"}_${new Date().getTime()}.xlsx`
+            );
+
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            return { success: true };
+        }, thunkAPI, {
+            successTitle: "Xuất danh sách học sinh trong lớp thành công",
+            errorTitle: "Lỗi xuất danh sách học sinh trong lớp",
+        });
+    }
+);
+
 // ======================
 // Slice
 // ======================
@@ -101,6 +171,12 @@ export const classStudentSlice = createSlice({
         },
         clearCurrentStudent: (state) => {
             state.currentStudent = null;
+        },
+        setClassStudentExportExcelOptions: (state, action) => {
+            state.exportOptions = { ...state.exportOptions, ...action.payload };
+        },
+        resetClassStudentExportExcelOptions: (state) => {
+            state.exportOptions = initialState.exportOptions;
         },
     },
     extraReducers: (builder) => {
@@ -188,6 +264,19 @@ export const classStudentSlice = createSlice({
             .addCase(removeStudentFromClassAsync.rejected, (state, action) => {
                 state.loadingDelete = false;
                 state.error = action.payload;
+            })
+
+            // Export Excel
+            .addCase(exportClassStudentsExcelAsync.pending, (state) => {
+                state.loadingExport = true;
+                state.error = null;
+            })
+            .addCase(exportClassStudentsExcelAsync.fulfilled, (state) => {
+                state.loadingExport = false;
+            })
+            .addCase(exportClassStudentsExcelAsync.rejected, (state, action) => {
+                state.loadingExport = false;
+                state.error = action.payload;
             });
     },
 });
@@ -200,6 +289,8 @@ export const {
     setFilters,
     resetFilters,
     clearCurrentStudent,
+    setClassStudentExportExcelOptions,
+    resetClassStudentExportExcelOptions,
 } = classStudentSlice.actions;
 
 export const selectClassStudents = (state) => state.classStudent.students;
@@ -215,9 +306,13 @@ export const selectClassStudentLoadingUpdate = (state) =>
     state.classStudent.loadingUpdate;
 export const selectClassStudentLoadingDelete = (state) =>
     state.classStudent.loadingDelete;
+export const selectClassStudentLoadingExport = (state) =>
+    state.classStudent.loadingExport;
 export const selectClassStudentError = (state) =>
     state.classStudent.error;
 export const selectClassStudentFilters = (state) =>
     state.classStudent.filters;
+export const selectClassStudentExportExcelOptions = (state) =>
+    state.classStudent.exportOptions;
 
 export default classStudentSlice.reducer;

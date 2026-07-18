@@ -49,7 +49,17 @@ import {
     NewsArticleDetailPage,
     NewsArticleListPage,
 } from '../features/newsArticle/pages';
-import { StudentList, StudentDetail, StudentRole, StudentMedia, StudentClasses, StudentCourses, StudentAttendance } from '../features/student/pages';
+import {
+    StudentList,
+    StudentDetail,
+    StudentRole,
+    StudentMedia,
+    StudentClasses,
+    StudentCourses,
+    StudentAttendance,
+    StudentHomeworkSubmits,
+    StudentCompetitionSubmits,
+} from '../features/student/pages';
 import { StudentPointLogPage } from '../features/studentPointLog/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
@@ -590,6 +600,14 @@ export const adminRouter = [
                             {
                                 path: 'point-logs',
                                 element: <StudentPointLogPage />,
+                            },
+                            {
+                                path: 'homework-submits',
+                                element: <StudentHomeworkSubmits />,
+                            },
+                            {
+                                path: 'competition-submits',
+                                element: <StudentCompetitionSubmits />,
                             },
                             {
                                 path: 'roles',

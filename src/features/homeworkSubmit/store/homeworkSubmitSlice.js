@@ -4,9 +4,13 @@ import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
 const initialState = {
     submits: [],
+    studentSubmits: [],
     currentDetail: null,
     pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+    studentPagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+    studentSummary: null,
     loadingGet: false,
+    loadingGetByStudent: false,
     loadingDetail: false,
     loadingGrade: false,
     loadingUpdateCompetitionFeedback: false,
@@ -25,6 +29,15 @@ export const getAllHomeworkSubmitsAsync = createAsyncThunk(
         () => homeworkSubmitApi.getAll(params),
         thunkAPI,
         { showSuccess: false, errorTitle: 'Lỗi tải danh sách bài nộp' },
+    ),
+);
+
+export const getStudentHomeworkSubmitsAsync = createAsyncThunk(
+    'homeworkSubmit/getByStudent',
+    async ({ studentId, params = {} }, thunkAPI) => handleAsyncThunk(
+        () => homeworkSubmitApi.getByStudent(studentId, params),
+        thunkAPI,
+        { showSuccess: false, errorTitle: 'Lá»—i táº£i danh sÃ¡ch bÃ i táº­p vá» nhÃ ' },
     ),
 );
 
@@ -145,6 +158,21 @@ const homeworkSubmitSlice = createSlice({
             })
             .addCase(getAllHomeworkSubmitsAsync.rejected, (state, action) => {
                 state.loadingGet = false;
+                state.error = action.payload;
+            })
+            .addCase(getStudentHomeworkSubmitsAsync.pending, (state) => {
+                state.loadingGetByStudent = true;
+                state.error = null;
+            })
+            .addCase(getStudentHomeworkSubmitsAsync.fulfilled, (state, action) => {
+                const data = action.payload.data ?? {};
+                state.loadingGetByStudent = false;
+                state.studentSubmits = data.homeworkSubmits ?? [];
+                state.studentPagination = data.pagination ?? initialState.studentPagination;
+                state.studentSummary = data.student ?? null;
+            })
+            .addCase(getStudentHomeworkSubmitsAsync.rejected, (state, action) => {
+                state.loadingGetByStudent = false;
                 state.error = action.payload;
             })
             .addCase(getAdminHomeworkSubmitDetailAsync.pending, (state) => {
@@ -287,8 +315,12 @@ const homeworkSubmitSlice = createSlice({
 
 export const { clearHomeworkSubmitDetail } = homeworkSubmitSlice.actions;
 export const selectHomeworkSubmits = (state) => state.homeworkSubmit.submits;
+export const selectStudentHomeworkSubmits = (state) => state.homeworkSubmit.studentSubmits;
 export const selectHomeworkSubmitPagination = (state) => state.homeworkSubmit.pagination;
+export const selectStudentHomeworkSubmitPagination = (state) => state.homeworkSubmit.studentPagination;
+export const selectStudentHomeworkSubmitSummary = (state) => state.homeworkSubmit.studentSummary;
 export const selectHomeworkSubmitLoadingGet = (state) => state.homeworkSubmit.loadingGet;
+export const selectHomeworkSubmitLoadingGetByStudent = (state) => state.homeworkSubmit.loadingGetByStudent;
 export const selectCurrentHomeworkSubmitDetail = (state) => state.homeworkSubmit.currentDetail;
 export const selectHomeworkSubmitLoadingDetail = (state) => state.homeworkSubmit.loadingDetail;
 export const selectHomeworkSubmitLoadingGrade = (state) => state.homeworkSubmit.loadingGrade;

@@ -64,6 +64,16 @@ export const StudentProfileLayout = () => {
                 onActivate: () => navigate(ROUTES.STUDENT_POINT_LOGS(studentId)),
             },
             {
+                label: 'Bài tập về nhà',
+                isActive: location.pathname === ROUTES.STUDENT_HOMEWORK_SUBMITS(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_HOMEWORK_SUBMITS(studentId)),
+            },
+            {
+                label: 'Lượt thi',
+                isActive: location.pathname === ROUTES.STUDENT_COMPETITION_SUBMITS(studentId),
+                onActivate: () => navigate(ROUTES.STUDENT_COMPETITION_SUBMITS(studentId)),
+            },
+            {
                 label: 'Vai trò',
                 isActive: location.pathname === ROUTES.STUDENT_ROLES(studentId),
                 onActivate: () => navigate(ROUTES.STUDENT_ROLES(studentId)),
