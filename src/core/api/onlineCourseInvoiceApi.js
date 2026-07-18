@@ -14,6 +14,12 @@ export const onlineCourseInvoiceApi = {
     );
   },
 
+  deleteAdminInvoice(invoiceId) {
+    return axiosClient.delete(
+      API_ENDPOINTS.ONLINE_COURSE_INVOICES.ADMIN_DELETE(invoiceId)
+    );
+  },
+
   confirmBankTransfer(invoiceId, data = {}) {
     return axiosClient.post(
       API_ENDPOINTS.ONLINE_COURSE_INVOICES.CONFIRM_BANK_TRANSFER(invoiceId),

@@ -477,6 +477,7 @@ export const API_ENDPOINTS = {
   ONLINE_COURSE_INVOICES: {
     ADMIN_LIST: "/online-course-invoices/admin",
     ADMIN_DETAIL: (invoiceId) => `/online-course-invoices/admin/${invoiceId}`,
+    ADMIN_DELETE: (invoiceId) => `/online-course-invoices/admin/${invoiceId}`,
     CONFIRM_BANK_TRANSFER: (invoiceId) =>
       `/online-course-invoices/admin/${invoiceId}/confirm-bank-transfer`,
   },

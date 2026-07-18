@@ -8,12 +8,16 @@ import {
     RefreshCw,
     Search,
     ShieldCheck,
+    Trash2,
     XCircle,
 } from 'lucide-react';
 import { onlineCourseInvoiceApi } from '../../../core/api';
+import { PERMISSIONS } from '../../../core/constants';
+import { useHasPermission } from '../../../shared/hooks';
 import {
     ActionMenu,
     Button,
+    ConfirmModal,
     Dropdown,
     Input,
     Modal,
@@ -304,7 +308,7 @@ const ConfirmBankTransferModal = ({ invoice, isOpen, onClose, onConfirm, loading
     );
 };
 
-const InvoiceDetailPanel = ({ invoice, loading, onConfirm }) => {
+const InvoiceDetailPanel = ({ invoice, loading, onConfirm, onDelete, canDelete }) => {
     if (loading) {
         return (
             <div className="p-6 text-sm text-foreground-light">
@@ -405,7 +409,7 @@ const InvoiceDetailPanel = ({ invoice, loading, onConfirm }) => {
                     <InfoLine label="Hết hạn" value={formatDateTime(invoice.expiresAt)} />
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-4 flex flex-wrap gap-2">
                     {canConfirmInvoice(invoice) ? (
                         <Button onClick={() => onConfirm(invoice)}>
                             <Banknote className="h-4 w-4" />
@@ -417,6 +421,10 @@ const InvoiceDetailPanel = ({ invoice, loading, onConfirm }) => {
                             Không cần xác nhận thủ công
                         </div>
                     )}
+                    {canDelete && <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={() => onDelete(invoice)}>
+                        <Trash2 className="h-4 w-4" />
+                        Xóa hóa đơn
+                    </Button>}
                 </div>
             </div>
 
@@ -477,6 +485,9 @@ export const OnlineCourseInvoiceListPage = () => {
     const [loadingDetail, setLoadingDetail] = useState(false);
     const [confirmInvoice, setConfirmInvoice] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
+    const [deleteInvoice, setDeleteInvoice] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const canDeleteInvoice = useHasPermission(PERMISSIONS.ONLINE_COURSE_INVOICE.DELETE);
 
     const queryParams = useMemo(() => ({
         page: meta.page,
@@ -548,6 +559,25 @@ export const OnlineCourseInvoiceListPage = () => {
             setError(err.response?.data?.message || err.message || 'Xác nhận chuyển khoản thất bại');
         } finally {
             setConfirmLoading(false);
+        }
+    };
+
+    const handleDeleteInvoice = async () => {
+        if (!deleteInvoice?.invoiceId) return;
+        setDeleteLoading(true);
+        setError('');
+        try {
+            await onlineCourseInvoiceApi.deleteAdminInvoice(deleteInvoice.invoiceId);
+            if (detailInvoice?.invoiceId === deleteInvoice.invoiceId) {
+                setDetailOpen(false);
+                setDetailInvoice(null);
+            }
+            setDeleteInvoice(null);
+            await loadInvoices();
+        } catch (err) {
+            setError(err.response?.data?.message || err.message || 'Không thể xóa hóa đơn');
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -663,6 +693,14 @@ export const OnlineCourseInvoiceListPage = () => {
                                 label: 'Xác nhận chuyển khoản',
                                 icon: <Banknote size={14} />,
                                 onClick: () => setConfirmInvoice(invoice),
+                            }]
+                            : []),
+                        ...(canDeleteInvoice
+                            ? [{
+                                label: 'Xóa hóa đơn',
+                                icon: <Trash2 size={14} />,
+                                variant: 'danger',
+                                onClick: () => setDeleteInvoice(invoice),
                             }]
                             : []),
                     ]}
@@ -806,6 +844,8 @@ export const OnlineCourseInvoiceListPage = () => {
                     invoice={detailInvoice}
                     loading={loadingDetail}
                     onConfirm={setConfirmInvoice}
+                    onDelete={setDeleteInvoice}
+                    canDelete={canDeleteInvoice}
                 />
             </RightPanel>
 
@@ -819,6 +859,18 @@ export const OnlineCourseInvoiceListPage = () => {
                     loading={confirmLoading}
                 />
             )}
+
+            <ConfirmModal
+                isOpen={Boolean(deleteInvoice)}
+                onClose={() => setDeleteInvoice(null)}
+                onConfirm={handleDeleteInvoice}
+                title="Xóa hóa đơn?"
+                message={<>Hóa đơn <strong>{deleteInvoice?.invoiceCode || `#${deleteInvoice?.invoiceId || ''}`}</strong> sẽ bị xóa. Chỉ có thể xóa hóa đơn chưa thanh toán, chưa có enrollment và không có payment attempt đang xử lý.</>}
+                confirmText="Xóa hóa đơn"
+                cancelText="Hủy"
+                variant="danger"
+                isLoading={deleteLoading}
+            />
         </div>
     );
 };

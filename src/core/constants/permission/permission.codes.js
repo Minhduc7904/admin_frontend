@@ -241,6 +241,7 @@ export const PERMISSIONS = {
     GET_ALL: 'online-course-invoice:get-all',
     GET_BY_ID: 'online-course-invoice:get-by-id',
     CONFIRM_MANUAL_PAYMENT: 'online-course-invoice:confirm-manual-payment',
+    DELETE: 'online-course-invoice:delete',
   },
   MY_TUITION_PAYMENT_STATS: 'my-tuition-payment:stats',
   TEMP_EXAM: {
