@@ -1,5 +1,4 @@
 import { updateQuestionAsync, selectQuestionLoadingUpdate, getQuestionByIdAsync } from "../store/questionSlice";
-import { createStatementAsync, updateStatementAsync, deleteStatementAsync } from "../../statement/store/statementSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { Input, Button, Dropdown, YoutubeInput, Spinner } from "../../../shared/components";
@@ -32,8 +31,6 @@ export const EditQuestion = ({ questionId, onClose, loadQuestions }) => {
         visibility: VISIBILITY.DRAFT,
         chapters: [],
     });
-
-    const [selectedSubject, setSelectedSubject] = useState(null);
 
     // Load question data when component mounts
     useEffect(() => {
@@ -100,8 +97,11 @@ export const EditQuestion = ({ questionId, onClose, loadQuestions }) => {
             errors.type = 'Vui lòng chọn loại câu hỏi';
         }
 
-        if (formData.pointsOrigin && parseFloat(formData.pointsOrigin) <= 0) {
-            errors.pointsOrigin = 'Điểm phải lớn hơn 0';
+        if (formData.pointsOrigin !== '') {
+            const points = Number(formData.pointsOrigin);
+            if (!Number.isFinite(points) || points < 0) {
+                errors.pointsOrigin = 'Điểm phải là số lớn hơn hoặc bằng 0';
+            }
         }
 
         return errors;
@@ -127,7 +127,7 @@ export const EditQuestion = ({ questionId, onClose, loadQuestions }) => {
             difficulty: formData.difficulty || undefined,
             grade: formData.grade ? parseInt(formData.grade) : undefined,
             subjectId: formData.subjectId ? parseInt(formData.subjectId) : undefined,
-            pointsOrigin: formData.pointsOrigin ? parseFloat(formData.pointsOrigin) : undefined,
+            pointsOrigin: formData.pointsOrigin === '' ? undefined : Number(formData.pointsOrigin),
             visibility: formData.visibility,
             chapterIds: formData.chapters && formData.chapters.length > 0 
                 ? formData.chapters.map(ch => ch.chapterId) 
@@ -260,13 +260,14 @@ export const EditQuestion = ({ questionId, onClose, loadQuestions }) => {
                         <Input
                             error={errors.pointsOrigin}
                             name="pointsOrigin"
-                            label="Điểm"
+                            label="Điểm (không bắt buộc)"
                             type="number"
                             value={formData.pointsOrigin}
                             onChange={handleChange}
                             placeholder="VD: 1, 2, 3..."
                             min="0"
                             step="0.1"
+                            helperText="Để trống nếu chưa cần đặt điểm; có thể nhập 0."
                         />
                     </div>
                 </div>
@@ -279,7 +280,6 @@ export const EditQuestion = ({ questionId, onClose, loadQuestions }) => {
                             placeholder="Tìm kiếm môn học..."
                             value={formData.subjectId}
                             onSelect={(subject) => {
-                                setSelectedSubject(subject);
                                 setFormData(prev => ({
                                     ...prev,
                                     subjectId: subject?.subjectId || ''
