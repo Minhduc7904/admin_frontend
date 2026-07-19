@@ -10,12 +10,14 @@ export const AutoSplitTab = ({
     sessionRawContentLoading,
     onSplit,
     loading,
+    canSplit = true,
     splitResult,
 }) => {
     const [splitMethod, setSplitMethod] = useState('session');
     const [customContent, setCustomContent] = useState('');
 
     const handleSplitClick = () => {
+        if (!canSplit) return;
         if (splitMethod === 'session') {
             const content = sessionRawContentData?.rawContent || '';
             onSplit(content, splitMethod);
@@ -64,7 +66,7 @@ export const AutoSplitTab = ({
             <div className="space-y-3">
                 <Button
                     onClick={handleSplitClick}
-                    disabled={loading || !isReadyToSplit()}
+                    disabled={loading || !canSplit || !isReadyToSplit()}
                     variant="primary"
                     className="w-full"
                 >

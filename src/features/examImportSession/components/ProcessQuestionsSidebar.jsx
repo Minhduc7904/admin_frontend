@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, PenLine } from 'lucide-react';
+import { AlertCircle, Sparkles, PenLine } from 'lucide-react';
 import { AutoSplitTab } from './AutoSplitTab';
 import { ManualSplitTab } from './ManualSplitTab';
 
@@ -30,8 +30,8 @@ export const ProcessQuestionsSidebar = ({
     sessionRawContentLoading,
     onSplit,
     loading,
+    canSplit,
     splitResult,
-    onRefreshSessionContent,
     onSplitSuccess,
 }) => {
     const [activeTab, setActiveTab] = useState('manual');
@@ -47,6 +47,18 @@ export const ProcessQuestionsSidebar = ({
                     Chọn phương thức xử lý câu hỏi từ nội dung đề thi
                 </p>
             </div>
+
+            {!canSplit && (
+                <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
+                    <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-600" />
+                    <div>
+                        <p className="text-sm font-semibold">Cần chọn khối trước khi tách câu hỏi</p>
+                        <p className="mt-1 text-xs leading-5 text-amber-800">
+                            Hãy quay lại trang Thông tin đề thi và chọn khối cho đề tạm.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Tab selector */}
             <div className="grid grid-cols-2 gap-3">
@@ -101,7 +113,8 @@ export const ProcessQuestionsSidebar = ({
                             sessionRawContentData={sessionRawContentData}
                             sessionRawContentLoading={sessionRawContentLoading}
                             onSplit={onSplit}
-                            loading={loading}
+                            loading={loading || !canSplit}
+                            canSplit={canSplit}
                             splitResult={splitResult}
                         />
                     )}
@@ -112,6 +125,7 @@ export const ProcessQuestionsSidebar = ({
                             sessionRawContentData={sessionRawContentData}
                             sessionRawContentLoading={sessionRawContentLoading}
                             loading={loading}
+                            canSplit={canSplit}
                             onSplitSuccess={onSplitSuccess}
                         />
                     )}

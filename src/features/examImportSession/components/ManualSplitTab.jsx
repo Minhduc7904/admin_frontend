@@ -79,6 +79,7 @@ export const ManualSplitTab = ({
     sessionRawContentLoading,
     onSplitSuccess,
     loading: externalLoading,
+    canSplit = true,
 }) => {
     const dispatch = useDispatch();
     const [openSections, setOpenSections] = useState({ session: true });
@@ -117,7 +118,7 @@ export const ManualSplitTab = ({
 
     const handleSplitSection = useCallback(async (section) => {
         const content = contents[section.id];
-        if (!content?.trim()) return;
+        if (!canSplit || !content?.trim()) return;
         const pointsOrigin = Number(points[section.id]);
         if (points[section.id] === '' || !Number.isFinite(pointsOrigin) || pointsOrigin < 0) {
             setPointErrors((prev) => ({ ...prev, [section.id]: 'Vui lòng nhập điểm là số lớn hơn hoặc bằng 0.' }));
@@ -158,12 +159,12 @@ export const ManualSplitTab = ({
         } finally {
             setLoadingSections((prev) => ({ ...prev, [section.id]: false }));
         }
-    }, [sessionId, contents, answers, points, dispatch, onSplitSuccess]);
+    }, [sessionId, contents, answers, points, dispatch, onSplitSuccess, canSplit]);
 
     const isReadyToSplit = (sectionId) => {
         const content = contents[sectionId];
         const pointsOrigin = Number(points[sectionId]);
-        return content && content.trim().length > 0 && content.length <= 15000
+        return canSplit && content && content.trim().length > 0 && content.length <= 15000
             && points[sectionId] !== '' && Number.isFinite(pointsOrigin) && pointsOrigin >= 0;
     };
 
@@ -267,7 +268,7 @@ export const ManualSplitTab = ({
                                 {/* Split button */}
                                 <Button
                                     onClick={() => handleSplitSection(section)}
-                                    disabled={isSectionLoading || externalLoading || !isReadyToSplit(section.id)}
+                                    disabled={isSectionLoading || externalLoading || !canSplit || !isReadyToSplit(section.id)}
                                     variant="primary"
                                     className="w-full"
                                 >

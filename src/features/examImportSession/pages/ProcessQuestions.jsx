@@ -31,6 +31,11 @@ import { CreateQuestionModal } from '../components/CreateQuestionModal';
 import { CreateStatementModal } from '../components/CreateStatementModal';
 import { deleteTempStatementAsync, reorderTempStatementsAsync, selectTempStatementLoadingDelete } from '../../tempStatement/store/tempStatementSlice';
 import { ConfirmModal } from '../../../shared/components';
+import {
+    getTempExamBySessionAsync,
+    selectCurrentTempExam,
+    selectTempExamLoadingGet,
+} from '../../examTemp/store/tempExamSlice';
 
 export const ProcessQuestions = () => {
     const { id } = useParams();
@@ -58,25 +63,26 @@ export const ProcessQuestions = () => {
     const statementDeleteLoading = useSelector(selectTempStatementLoadingDelete);
     const sessionRawContentData = useSelector(selectExamImportSessionRawContent);
     const sessionRawContentLoading = useSelector(selectExamImportSessionLoadingRawContent);
+    const tempExam = useSelector(selectCurrentTempExam);
+    const tempExamLoading = useSelector(selectTempExamLoadingGet);
+    const canSplitQuestions = Number.isInteger(Number(tempExam?.grade))
+        && Number(tempExam.grade) >= 1
+        && Number(tempExam.grade) <= 12;
 
     // Load session raw content and temp questions when component mounts
     useEffect(() => {
         if (id) {
             dispatch(getSessionRawContentAsync({ sessionId: id }));
             dispatch(getTempQuestionsBySessionAsync(id));
+            dispatch(getTempExamBySessionAsync(id));
         }
         return () => {
             dispatch(clearTempQuestions());
         };
     }, [id, dispatch]);
 
-    const handleRefreshSessionContent = async () => {
-        if (id) {
-            await dispatch(getSessionRawContentAsync({ sessionId: id }));
-        }
-    };
-
     const handleSplitRequest = (content, method) => {
+        if (!canSplitQuestions) return;
         setPendingSplitData({ content, method, sessionId: id });
         setIsConfirmModalOpen(true);
     };
@@ -255,8 +261,8 @@ export const ProcessQuestions = () => {
                         sessionRawContentLoading={sessionRawContentLoading}
                         onSplit={handleSplitRequest}
                         loading={splitLoading}
+                        canSplit={canSplitQuestions && !tempExamLoading}
                         splitResult={splitResult}
-                        onRefreshSessionContent={handleRefreshSessionContent}
                         onSplitSuccess={handleManualSplitSuccess}
                     />
                 </div>

@@ -61,6 +61,7 @@ export const TempExamForm = ({
                     <div>
                         <Dropdown
                             label="Khối"
+                            required={true}
                             value={formData.grade}
                             onChange={onGradeChange}
                             options={GRADE_OPTIONS}

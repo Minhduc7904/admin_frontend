@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import {
-    selectCurrentExamImportSession,
     selectExamImportSessionLoadingGet,
 } from '../store/examImportSessionSlice';
 import {
@@ -44,7 +43,6 @@ export const ExamImportSessionDetail = () => {
         solutionYoutubeUrl: '',
     });
 
-    const session = useSelector(selectCurrentExamImportSession);
     const sessionLoading = useSelector(selectExamImportSessionLoadingGet);
     
     const tempExam = useSelector(selectCurrentTempExam);
@@ -61,21 +59,6 @@ export const ExamImportSessionDetail = () => {
             dispatch(clearCurrentTempExam());
         };
     }, [id, dispatch]);
-
-    // Populate form data when editing
-    useEffect(() => {
-        if (isEditing && tempExam) {
-            setFormData({
-                title: tempExam.title || '',
-                description: tempExam.description || '',
-                grade: tempExam.grade?.toString() || '',
-                typeOfExam: tempExam.typeOfExam || '',
-                subjectId: tempExam.subjectId?.toString() || '',
-                visibility: tempExam.visibility || VISIBILITY.PRIVATE,
-                solutionYoutubeUrl: tempExam.solutionYoutubeUrl || '',
-            });
-        }
-    }, [isEditing, tempExam]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -100,7 +83,9 @@ export const ExamImportSessionDetail = () => {
             newErrors.title = 'Tiêu đề không được quá 200 ký tự';
         }
 
-        if (data.grade && (parseInt(data.grade) < 1 || parseInt(data.grade) > 12)) {
+        if (!data.grade) {
+            newErrors.grade = 'Vui lòng chọn khối';
+        } else if (parseInt(data.grade) < 1 || parseInt(data.grade) > 12) {
             newErrors.grade = 'Khối phải từ 1 đến 12';
         }
 
@@ -126,7 +111,7 @@ export const ExamImportSessionDetail = () => {
         const payload = {
             title: formData.title.trim(),
             description: formData.description?.trim() || undefined,
-            grade: formData.grade ? Number(formData.grade) : undefined,
+            grade: Number(formData.grade),
             typeOfExam: formData.typeOfExam,
             subjectId: formData.subjectId ? Number(formData.subjectId) : undefined,
             visibility: formData.visibility,
@@ -164,7 +149,7 @@ export const ExamImportSessionDetail = () => {
         const payload = {
             title: formData.title.trim(),
             description: formData.description?.trim() || undefined,
-            grade: formData.grade ? Number(formData.grade) : undefined,
+            grade: Number(formData.grade),
             typeOfExam: formData.typeOfExam,
             subjectId: formData.subjectId ? Number(formData.subjectId) : undefined,
             visibility: formData.visibility,
@@ -211,6 +196,16 @@ export const ExamImportSessionDetail = () => {
     };
 
     const handleEditClick = () => {
+        if (!tempExam) return;
+        setFormData({
+            title: tempExam.title || '',
+            description: tempExam.description || '',
+            grade: tempExam.grade?.toString() || '',
+            typeOfExam: tempExam.typeOfExam || '',
+            subjectId: tempExam.subjectId?.toString() || '',
+            visibility: tempExam.visibility || VISIBILITY.PRIVATE,
+            solutionYoutubeUrl: tempExam.solutionYoutubeUrl || '',
+        });
         setIsEditing(true);
         setShowForm(true);
         setSelectedMedia(null);
