@@ -66,7 +66,7 @@ const SUBMISSION_SORT_OPTIONS = [
     { value: 'points:asc', label: 'Điểm thấp đến cao' },
 ];
 
-export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
+export const HomeworkSubmissionPanel = ({ homework, isOpen, studentId, initialSubmitId = null }) => {
     const dispatch = useDispatch();
     const submits = useSelector(selectHomeworkSubmits);
     const pagination = useSelector(selectHomeworkSubmitPagination);
@@ -95,17 +95,18 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
         const [sortBy, sortOrder] = filters.sort.split(':');
         dispatch(getAllHomeworkSubmitsAsync({
             homeworkContentId: homework.homeworkContentId,
+            studentId: studentId || undefined,
             page,
             limit,
             isGraded: filters.isGraded === '' ? undefined : filters.isGraded === 'true',
             sortBy,
             sortOrder,
         }));
-    }, [dispatch, homework?.homeworkContentId, pagination.limit, submissionFilters]);
+    }, [dispatch, homework?.homeworkContentId, pagination.limit, studentId, submissionFilters]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
-        setSelectedId(null);
+        setSelectedId(initialSubmitId);
         setGrade({ points: '', feedback: '' });
         setErrors({});
         setPreviewMediaId(null);
@@ -115,7 +116,7 @@ export const HomeworkSubmissionPanel = ({ homework, isOpen }) => {
         setCompetitionFeedback('');
         loadSubmits(1);
         return () => dispatch(clearHomeworkSubmitDetail());
-    }, [dispatch, isOpen, homework?.homeworkContentId, loadSubmits]);
+    }, [dispatch, initialSubmitId, isOpen, homework?.homeworkContentId, loadSubmits]);
 
     useEffect(() => {
         if (selectedId) dispatch(getAdminHomeworkSubmitDetailAsync(selectedId));

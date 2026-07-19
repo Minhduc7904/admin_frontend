@@ -25,6 +25,17 @@ export const competitionSubmitApi = {
     },
 
     /**
+     * GET /competition-submits/student/:studentId
+     * Get one student's competition submit list for admin student detail tabs.
+     * @param {number} studentId
+     * @param {Object} params
+     * @returns {Promise}
+     */
+    getByStudent: (studentId, params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.COMPETITION_SUBMITS.BY_STUDENT(studentId), { params });
+    },
+
+    /**
      * GET /competition-submits/:id
      * Lấy chi tiết 1 bài nộp theo ID (bao gồm answers nếu có)
      * @param {number} id - Competition submit ID

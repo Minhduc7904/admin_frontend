@@ -42,7 +42,9 @@ export const roleApi = {
    * @returns {Promise<Object>} Updated role
    */
   update: (id, data) => {
-    return axiosClient.put(API_ENDPOINTS.ROLES.UPDATE(id), data);
+    const roleData = { ...data };
+    delete roleData.permissionIds;
+    return axiosClient.put(API_ENDPOINTS.ROLES.UPDATE(id), roleData);
   },
 
   /**

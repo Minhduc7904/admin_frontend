@@ -39,6 +39,7 @@ export const RoleEdit = () => {
     const loadingUpdate = useSelector(selectRoleLoadingUpdate);
     const loadingToggle = useSelector(selectRoleLoadingToggle);
     const loadingPermissionIds = useSelector(selectRoleLoadingPermissionIds);
+    const roleId = currentRole?.roleId;
 
     // Form state
     const [formData, setFormData] = useState({
@@ -62,6 +63,7 @@ export const RoleEdit = () => {
     useEffect(() => {
         if (!currentRole) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFormData({
             roleName: currentRole.roleName || '',
             description: currentRole.description || '',
@@ -87,12 +89,12 @@ export const RoleEdit = () => {
 
     const handlePermissionToggle = useCallback(
         async (permissionId) => {
-            if (!currentRole?.roleId) return;
+            if (!roleId) return;
 
             try {
                 await dispatch(
                     toggleRolePermissionAsync({
-                        roleId: currentRole.roleId,
+                        roleId,
                         permissionId,
                     })
                 ).unwrap();
@@ -100,7 +102,7 @@ export const RoleEdit = () => {
                 console.error('Error toggling permission:', error);
             }
         },
-        [dispatch, currentRole?.roleId]
+        [dispatch, roleId]
     );
 
     const validate = () => {
@@ -122,7 +124,11 @@ export const RoleEdit = () => {
             await dispatch(
                 updateRoleAsync({
                     id: Number(id),
-                    data: formData,
+                    data: {
+                        roleName: formData.roleName,
+                        description: formData.description,
+                        isAssignable: formData.isAssignable,
+                    },
                 })
             ).unwrap();
             navigate(ROUTES.ROLES);

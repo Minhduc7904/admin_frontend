@@ -5,3 +5,5 @@ export { StudentMedia } from './StudentMedia';
 export { StudentClasses } from './StudentClasses';
 export { StudentCourses } from './StudentCourses';
 export { StudentAttendance } from './StudentAttendance';
+export { StudentHomeworkSubmits } from './StudentHomeworkSubmits';
+export { StudentCompetitionSubmits } from './StudentCompetitionSubmits';

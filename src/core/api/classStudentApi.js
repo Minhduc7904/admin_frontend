@@ -17,4 +17,11 @@ export const classStudentApi = {
     remove: ({ classId, studentId }) => {
         return axiosClient.delete(API_ENDPOINTS.CLASS_STUDENTS.DELETE(classId, studentId));
     },
+
+    exportExcel: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.CLASS_STUDENTS.EXPORT_EXCEL, {
+            params,
+            responseType: 'blob',
+        });
+    },
 };

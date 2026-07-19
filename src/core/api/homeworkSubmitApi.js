@@ -21,6 +21,16 @@ export const homeworkSubmitApi = {
     },
 
     /**
+     * Get paginated homework submits of one student for admin student detail tabs.
+     * @param {number} studentId - Student ID
+     * @param {Object} params - Query parameters
+     * @returns {Promise<Object>} Student homework submits with pagination
+     */
+    getByStudent: (studentId, params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.HOMEWORK_SUBMITS.BY_STUDENT(studentId), { params });
+    },
+
+    /**
      * Get homework submit by ID
      * @param {number} id - Homework submit ID
      * @returns {Promise<Object>} Homework submit data

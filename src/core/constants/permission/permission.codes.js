@@ -293,6 +293,7 @@ export const PERMISSIONS = {
     GET_MY_CLASSES: 'class-student:get-my-classes',
     CREATE: 'class-student:create',
     DELETE: 'class-student:delete',
+    EXPORT_EXCEL: 'class-student:export-excel',
   },
   DOCUMENT_CONTENT: {
     GET_ALL: 'document-content:get-all',

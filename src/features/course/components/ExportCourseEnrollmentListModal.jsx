@@ -63,11 +63,12 @@ export const ExportCourseEnrollmentListModal = ({
 
         dispatch(
             setCourseEnrollmentExportExcelOptions({
+                courseId: initialFilters.courseId || '',
                 search: initialFilters.search || '',
                 status: initialFilters.status || '',
             })
         );
-    }, [dispatch, initialFilters.search, initialFilters.status, isOpen]);
+    }, [dispatch, initialFilters.courseId, initialFilters.search, initialFilters.status, isOpen]);
 
     const updateOption = (field) => (value) => {
         dispatch(setCourseEnrollmentExportExcelOptions({ [field]: value }));
