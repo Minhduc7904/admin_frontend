@@ -47,6 +47,14 @@ export const superAdminApi = {
     },
 
     /**
+     * Backfill default points for unscored questions.
+     * POST /super-admin/questions/backfill-default-points
+     */
+    backfillQuestionDefaultPoints: () => {
+        return axiosClient.post(API_ENDPOINTS.SUPER_ADMIN.BACKFILL_QUESTION_DEFAULT_POINTS);
+    },
+
+    /**
      * Seed default tags by upsert.
      * POST /super-admin/tags/seed-defaults
      */

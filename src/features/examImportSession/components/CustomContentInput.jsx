@@ -57,7 +57,7 @@ const ANSWER_CONFIG = {
     },
 }
 
-const AnswerKeyBar = ({ sectionType, value = '', onChange, disabled }) => {
+export const AnswerKeyBar = ({ sectionType, value = '', onChange, disabled }) => {
     const config = ANSWER_CONFIG[sectionType]
     if (!config) return null
 
@@ -267,6 +267,7 @@ export const CustomContentInput = ({
     sectionType,       // 'trac-nghiem' | 'dung-sai' | 'tra-loi-ngan'
     answerValue = '',
     onAnswerChange,
+    showAnswerInput = true,
 }) => {
     const [viewMode, setViewMode] = useState('text')
 
@@ -309,7 +310,7 @@ export const CustomContentInput = ({
             {viewMode === 'text' ? (
                 <div className="space-y-2">
                     {/* Answer key bar — shown above the editor when sectionType given */}
-                    {sectionType && onAnswerChange && (
+                    {showAnswerInput && sectionType && onAnswerChange && (
                         <AnswerKeyBar
                             sectionType={sectionType}
                             value={answerValue}

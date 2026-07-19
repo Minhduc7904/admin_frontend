@@ -104,10 +104,11 @@ export const examImportSessionApi = {
    * @param {string} [answers]         - Chuỗi đáp án cách nhau bởi dấu cách (tuỳ chọn)
    * @returns {Promise<ManualSplitQuestionsResponseDto>}
    */
-  manualSplit(sessionId, { rawContent, questionType, answers }) {
+  manualSplit(sessionId, { rawContent, questionType, pointsOrigin, answers }) {
     return axiosClient.post(API_ENDPOINTS.EXAM_IMPORT_SESSION.MANUAL_SPLIT(sessionId), {
       rawContent,
       questionType,
+      pointsOrigin,
       ...(answers !== undefined && answers !== '' ? { answers } : {}),
     });
   },

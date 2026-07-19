@@ -70,4 +70,12 @@ export const tempQuestionApi = {
       { tempSectionId }
     );
   },
+
+  /** Update points for every temporary question in a section. */
+  updatePointsBySection(tempSectionId, pointsOrigin) {
+    return axiosClient.put(
+      API_ENDPOINTS.TEMP_QUESTION.UPDATE_SECTION_POINTS(tempSectionId),
+      { pointsOrigin }
+    );
+  },
 };

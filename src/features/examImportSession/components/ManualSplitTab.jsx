@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { createElement, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Scissors, ChevronDown, ChevronRight, FileText, ListChecks, ToggleLeft, AlignLeft } from 'lucide-react';
-import { Button } from '../../../shared/components/ui';
-import { CustomContentInput } from './CustomContentInput';
+import { Button, Input } from '../../../shared/components/ui';
+import { AnswerKeyBar, CustomContentInput } from './CustomContentInput';
 import { SessionContentPreview } from './SessionContentPreview';
 import { manualSplitAsync } from '../store/examImportSessionSlice';
 
@@ -10,6 +10,7 @@ const MANUAL_SECTIONS = [
     {
         id: 'trac-nghiem',
         questionType: 'SINGLE_CHOICE',
+        defaultPoints: '0.25',
         label: 'Phần 1: Trắc nghiệm',
         description: 'Câu hỏi trắc nghiệm một đáp án đúng',
         icon: ListChecks,
@@ -20,6 +21,7 @@ const MANUAL_SECTIONS = [
     {
         id: 'dung-sai',
         questionType: 'TRUE_FALSE',
+        defaultPoints: '1',
         label: 'Phần 2: Đúng sai',
         description: 'Câu hỏi đúng / sai nhiều ý',
         icon: ToggleLeft,
@@ -30,6 +32,7 @@ const MANUAL_SECTIONS = [
     {
         id: 'tra-loi-ngan',
         questionType: 'SHORT_ANSWER',
+        defaultPoints: '0.5',
         label: 'Phần 3: Trả lời ngắn',
         description: 'Câu hỏi điền khuyết / trả lời ngắn',
         icon: AlignLeft,
@@ -50,7 +53,7 @@ const AccordionHeader = ({ title, description, icon: Icon, iconClass, isOpen, on
         `}
     >
         <div className={`p-1.5 rounded-md bg-zinc-100 ${iconClass}`}>
-            <Icon size={16} />
+            {createElement(Icon, { size: 16 })}
         </div>
         <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-foreground">{title}</p>
@@ -89,6 +92,12 @@ export const ManualSplitTab = ({
         'dung-sai': '',
         'tra-loi-ngan': '',
     });
+    const [points, setPoints] = useState({
+        'trac-nghiem': '0.25',
+        'dung-sai': '1',
+        'tra-loi-ngan': '0.5',
+    });
+    const [pointErrors, setPointErrors] = useState({});
     // Per-section loading state
     const [loadingSections, setLoadingSections] = useState({
         'trac-nghiem': false,
@@ -109,6 +118,11 @@ export const ManualSplitTab = ({
     const handleSplitSection = useCallback(async (section) => {
         const content = contents[section.id];
         if (!content?.trim()) return;
+        const pointsOrigin = Number(points[section.id]);
+        if (points[section.id] === '' || !Number.isFinite(pointsOrigin) || pointsOrigin < 0) {
+            setPointErrors((prev) => ({ ...prev, [section.id]: 'Vui lòng nhập điểm là số lớn hơn hoặc bằng 0.' }));
+            return;
+        }
 
         setLoadingSections((prev) => ({ ...prev, [section.id]: true }));
         // Clear previous errors for this section before new attempt
@@ -119,6 +133,7 @@ export const ManualSplitTab = ({
                 sessionId,
                 rawContent: content,
                 questionType: section.questionType,
+                pointsOrigin,
                 answers: answers[section.id] || undefined,
             })).unwrap();
 
@@ -136,17 +151,20 @@ export const ManualSplitTab = ({
                 onSplitSuccess?.();
                 setContents((prev) => ({ ...prev, [section.id]: '' }));
                 setAnswers((prev) => ({ ...prev, [section.id]: '' }));
+                setPoints((prev) => ({ ...prev, [section.id]: section.defaultPoints }));
             }
         } catch {
             // Network/server errors are already handled by the thunk (notification shown)
         } finally {
             setLoadingSections((prev) => ({ ...prev, [section.id]: false }));
         }
-    }, [sessionId, contents, answers, dispatch, onSplitSuccess]);
+    }, [sessionId, contents, answers, points, dispatch, onSplitSuccess]);
 
     const isReadyToSplit = (sectionId) => {
         const content = contents[sectionId];
-        return content && content.trim().length > 0 && content.length <= 15000;
+        const pointsOrigin = Number(points[sectionId]);
+        return content && content.trim().length > 0 && content.length <= 15000
+            && points[sectionId] !== '' && Number.isFinite(pointsOrigin) && pointsOrigin >= 0;
     };
 
     return (
@@ -200,23 +218,51 @@ export const ManualSplitTab = ({
                         {isOpen && (
                             <div className="px-4 pb-4 pt-1 border-t border-border space-y-3">
                                 {/* Content Input */}
-                                <CustomContentInput
-                                    value={content}
-                                    onChange={(val) => {
-                                        setContents((prev) => ({ ...prev, [section.id]: val }));
-                                        // Clear errors when user edits
-                                        if (sectionErrors[section.id].length > 0) {
-                                            setSectionErrors((prev) => ({ ...prev, [section.id]: [] }));
-                                        }
-                                    }}
-                                    disabled={isSectionLoading || externalLoading}
-                                    sectionType={section.id}
-                                    rowErrors={parseErrors}
-                                    answerValue={answers[section.id]}
-                                    onAnswerChange={(val) =>
-                                        setAnswers((prev) => ({ ...prev, [section.id]: val }))
-                                    }
-                                />
+                                <div className="space-y-4">
+                                    <section className="rounded-xl border border-border bg-zinc-50 p-3">
+                                        <div className="mb-3">
+                                            <p className="text-sm font-semibold text-foreground">Đáp án và điểm</p>
+                                            <p className="mt-1 text-xs leading-5 text-foreground-light">Thiết lập này áp dụng cho tất cả câu hỏi được tách từ phần hiện tại.</p>
+                                        </div>
+                                        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_260px] md:items-start">
+                                            <AnswerKeyBar
+                                                sectionType={section.id}
+                                                value={answers[section.id]}
+                                                onChange={(val) => setAnswers((prev) => ({ ...prev, [section.id]: val }))}
+                                                disabled={isSectionLoading || externalLoading}
+                                            />
+                                            <Input
+                                                name={`points-${section.id}`}
+                                                label="Điểm mỗi câu"
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                required
+                                                value={points[section.id]}
+                                                onChange={(event) => {
+                                                    setPoints((prev) => ({ ...prev, [section.id]: event.target.value }));
+                                                    setPointErrors((prev) => ({ ...prev, [section.id]: undefined }));
+                                                }}
+                                                error={pointErrors[section.id]}
+                                                helperText="Bắt buộc. Có thể nhập 0."
+                                                disabled={isSectionLoading || externalLoading}
+                                            />
+                                        </div>
+                                    </section>
+                                    <CustomContentInput
+                                        value={content}
+                                        onChange={(val) => {
+                                            setContents((prev) => ({ ...prev, [section.id]: val }));
+                                            if (sectionErrors[section.id].length > 0) {
+                                                setSectionErrors((prev) => ({ ...prev, [section.id]: [] }));
+                                            }
+                                        }}
+                                        disabled={isSectionLoading || externalLoading}
+                                        sectionType={section.id}
+                                        rowErrors={parseErrors}
+                                        showAnswerInput={false}
+                                    />
+                                </div>
 
                                 {/* Split button */}
                                 <Button

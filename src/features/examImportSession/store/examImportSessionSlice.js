@@ -169,10 +169,10 @@ export const classifyChaptersAsync = createAsyncThunk(
 // ===== MANUAL SPLIT =====
 export const manualSplitAsync = createAsyncThunk(
     "examImportSession/manualSplit",
-    async ({ sessionId, rawContent, questionType, answers }, thunkAPI) => {
+    async ({ sessionId, rawContent, questionType, pointsOrigin, answers }, thunkAPI) => {
         const { dispatch, rejectWithValue } = thunkAPI;
         try {
-            const response = await examImportSessionApi.manualSplit(sessionId, { rawContent, questionType, answers });
+            const response = await examImportSessionApi.manualSplit(sessionId, { rawContent, questionType, pointsOrigin, answers });
             const body = response.data ? response.data : response;
 
             if (body.success === false) {

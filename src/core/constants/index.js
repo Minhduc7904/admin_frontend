@@ -146,6 +146,8 @@ export const API_ENDPOINTS = {
       "/super-admin/cleanup-unused-media-older-than-30-days",
     GENERATE_MISSING_EXAM_SLUGS: "/super-admin/exams/generate-missing-slugs",
     REGENERATE_QUESTION_SLUGS: "/super-admin/questions/regenerate-slugs",
+    BACKFILL_QUESTION_DEFAULT_POINTS:
+      "/super-admin/questions/backfill-default-points",
     SEED_DEFAULT_TAGS: "/super-admin/tags/seed-defaults",
     SYNC_PERMISSIONS_FROM_CODES:
       "/super-admin/permissions/sync-from-codes",
@@ -518,6 +520,7 @@ export const API_ENDPOINTS = {
     DELETE: (tempQuestionId) => `/temp-questions/${tempQuestionId}`,
     REORDER: '/temp-questions/reorder',
     LINK_SECTION: (tempQuestionId) => `/temp-questions/${tempQuestionId}/link-section`,
+    UPDATE_SECTION_POINTS: (tempSectionId) => `/temp-questions/section/${tempSectionId}/points`,
   },
   TEMP_STATEMENT: {
     CREATE: (tempQuestionId) => `/temp-statements/question/${tempQuestionId}`,

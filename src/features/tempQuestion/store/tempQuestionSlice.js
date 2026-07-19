@@ -16,6 +16,7 @@ const initialState = {
     loadingDelete: false,
     loadingReorder: false,
     loadingLinkSection: false,
+    loadingUpdateSectionPoints: false,
 
     error: null,
 };
@@ -131,6 +132,21 @@ export const linkQuestionToSectionAsync = createAsyncThunk(
                     ? "Gắn câu hỏi vào section thành công" 
                     : "Gỡ câu hỏi khỏi section thành công",
                 errorTitle: "Lỗi cập nhật section cho câu hỏi",
+            }
+        );
+    }
+);
+
+// ===== UPDATE POINTS FOR ALL QUESTIONS IN A SECTION =====
+export const updateTempQuestionPointsBySectionAsync = createAsyncThunk(
+    "tempQuestion/updatePointsBySection",
+    async ({ tempSectionId, pointsOrigin }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => tempQuestionApi.updatePointsBySection(tempSectionId, pointsOrigin),
+            thunkAPI,
+            {
+                successTitle: "Đã cập nhật điểm cho section",
+                errorTitle: "Không thể cập nhật điểm cho section",
             }
         );
     }
@@ -324,6 +340,23 @@ export const tempQuestionSlice = createSlice({
             .addCase(linkQuestionToSectionAsync.rejected, (state, action) => {
                 state.loadingLinkSection = false;
                 state.error = action.payload;
+            })
+
+            // ===== UPDATE SECTION POINTS =====
+            .addCase(updateTempQuestionPointsBySectionAsync.pending, (state) => {
+                state.loadingUpdateSectionPoints = true;
+                state.error = null;
+            })
+            .addCase(updateTempQuestionPointsBySectionAsync.fulfilled, (state, action) => {
+                state.loadingUpdateSectionPoints = false;
+                const { tempSectionId, pointsOrigin } = action.meta.arg;
+                state.tempQuestions.forEach((question) => {
+                    if (question.tempSectionId === tempSectionId) question.pointsOrigin = pointsOrigin;
+                });
+            })
+            .addCase(updateTempQuestionPointsBySectionAsync.rejected, (state, action) => {
+                state.loadingUpdateSectionPoints = false;
+                state.error = action.payload;
             });
     },
 });
@@ -348,6 +381,7 @@ export const selectTempQuestionLoadingUpdate = (state) => state.tempQuestion.loa
 export const selectTempQuestionLoadingDelete = (state) => state.tempQuestion.loadingDelete;
 export const selectTempQuestionLoadingReorder = (state) => state.tempQuestion.loadingReorder;
 export const selectTempQuestionLoadingLinkSection = (state) => state.tempQuestion.loadingLinkSection;
+export const selectTempQuestionLoadingUpdateSectionPoints = (state) => state.tempQuestion.loadingUpdateSectionPoints;
 export const selectTempQuestionError = (state) => state.tempQuestion.error;
 
 export default tempQuestionSlice.reducer;

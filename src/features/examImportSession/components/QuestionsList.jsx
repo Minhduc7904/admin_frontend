@@ -1,4 +1,4 @@
-import { Loader2, Sparkles, Plus, Wand2 } from 'lucide-react';
+import { Calculator, Loader2, Sparkles, Plus, Wand2 } from 'lucide-react';
 import { QuestionCard } from './QuestionCard';
 
 export const QuestionsList = ({
@@ -13,8 +13,11 @@ export const QuestionsList = ({
     onReorderStatements,
     onClassifyChapters,
     classifyChaptersLoading,
+    onEditSectionPoints,
 }) => {
     const hasQuestions = questions && questions.length > 0;
+    const totalPoints = (questions || []).reduce((total, question) => total + Number(question.pointsOrigin ?? 0), 0);
+    const sectionCount = new Set((questions || []).map((question) => question.tempSection?.tempSectionId ?? question.tempSectionId).filter(Boolean)).size;
 
     return (
         <div className="bg-white rounded-lg border border-border h-full flex flex-col">
@@ -30,6 +33,7 @@ export const QuestionsList = ({
                                 ? `Đã có ${questions.length} câu hỏi`
                                 : 'Chưa có câu hỏi nào được tách'}
                         </p>
+                        {hasQuestions && <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-blue-700"><Calculator size={15} /> Tổng điểm: {totalPoints}</p>}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -55,6 +59,15 @@ export const QuestionsList = ({
                                     <Wand2 size={16} />
                                 )}
                                 Phân loại chương AI
+                            </button>
+                        )}
+                        {onEditSectionPoints && hasQuestions && (
+                            <button
+                                onClick={onEditSectionPoints}
+                                className="flex items-center gap-2 rounded border border-blue-300 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
+                                title="Xem và cập nhật điểm cho toàn bộ câu hỏi theo section"
+                            >
+                                <Calculator size={16} /> Điểm theo section ({sectionCount})
                             </button>
                         )}
                         

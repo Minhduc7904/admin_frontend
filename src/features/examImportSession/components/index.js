@@ -13,6 +13,7 @@ export { MediaUploadSection } from './MediaUploadSection';
 export { ProcessQuestionsSidebar } from './ProcessQuestionsSidebar';
 export { AutoSplitTab } from './AutoSplitTab';
 export { ManualSplitTab } from './ManualSplitTab';
+export { SectionPointsSummaryModal } from './SectionPointsSummaryModal';
 export { QuestionsList } from './QuestionsList';
 export { QuestionCard } from './QuestionCard';
 export { SplitMethodSelector } from './SplitMethodSelector';

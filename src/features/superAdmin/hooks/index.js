@@ -3,6 +3,7 @@ export * from './useUpdateAdminDirect';
 export * from './useCleanupUnusedMediaOlderThan30Days';
 export * from './useGenerateMissingExamSlugs';
 export * from './useRegenerateQuestionSlugs';
+export * from './useBackfillQuestionDefaultPoints';
 export * from './useSeedDefaultTags';
 export * from './useSyncPermissionsFromCodes';
 export * from './useSyncSeoMediaSlotsFromPageSlots';

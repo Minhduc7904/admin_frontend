@@ -20,9 +20,11 @@ import {
     selectTempQuestions,
     selectTempQuestionLoadingGet,
     selectTempQuestionLoadingDelete,
+    selectTempQuestionLoadingUpdateSectionPoints,
     clearTempQuestions,
+    updateTempQuestionPointsBySectionAsync,
 } from '../../tempQuestion/store/tempQuestionSlice';
-import { ProcessQuestionsSidebar, QuestionsList, SplitConfirmationModal } from '../components';
+import { ProcessQuestionsSidebar, QuestionsList, SectionPointsSummaryModal, SplitConfirmationModal } from '../components';
 import { EditTempQuestionPanel } from '../components/EditTempQuestionPanel';
 import { EditTempStatementPanel } from '../components/EditTempStatementPanel';
 import { CreateQuestionModal } from '../components/CreateQuestionModal';
@@ -44,6 +46,7 @@ export const ProcessQuestions = () => {
     const [currentEditingQuestion, setCurrentEditingQuestion] = useState(null);
     const [currentEditingStatement, setCurrentEditingStatement] = useState(null);
     const [currentCreatingForQuestion, setCurrentCreatingForQuestion] = useState(null);
+    const [isSectionPointsModalOpen, setIsSectionPointsModalOpen] = useState(false);
 
     const splitResult = useSelector(selectExamImportSessionSplitResult);
     const splitLoading = useSelector(selectExamImportSessionLoadingSplit);
@@ -51,6 +54,7 @@ export const ProcessQuestions = () => {
     const tempQuestions = useSelector(selectTempQuestions);
     const tempQuestionsLoading = useSelector(selectTempQuestionLoadingGet);
     const questionDeleteLoading = useSelector(selectTempQuestionLoadingDelete);
+    const sectionPointsLoading = useSelector(selectTempQuestionLoadingUpdateSectionPoints);
     const statementDeleteLoading = useSelector(selectTempStatementLoadingDelete);
     const sessionRawContentData = useSelector(selectExamImportSessionRawContent);
     const sessionRawContentLoading = useSelector(selectExamImportSessionLoadingRawContent);
@@ -96,7 +100,7 @@ export const ProcessQuestions = () => {
             dispatch(getTempQuestionsBySessionAsync(id));
             setIsConfirmModalOpen(false);
             setPendingSplitData(null);
-        } catch (error) {
+        } catch {
             // Error already handled by asyncThunkHelper
         }
     };
@@ -190,7 +194,7 @@ export const ProcessQuestions = () => {
             }
             setIsDeleteConfirmModalOpen(false);
             setDeleteTarget(null);
-        } catch (error) {
+        } catch {
             // Error already handled by asyncThunkHelper
         }
     };
@@ -208,7 +212,7 @@ export const ProcessQuestions = () => {
             // Then call API in background
             await dispatch(reorderTempStatementsAsync(items)).unwrap();
             // Success - UI already updated, no need to reload
-        } catch (error) {
+        } catch {
             // Error - reload the question to revert UI changes
             if (questionId) {
                 dispatch(getTempQuestionByIdAsync(questionId));
@@ -223,7 +227,7 @@ export const ProcessQuestions = () => {
             await dispatch(classifyChaptersAsync(id)).unwrap();
             // Reload questions to show updated chapters
             dispatch(getTempQuestionsBySessionAsync(id));
-        } catch (error) {
+        } catch {
             // Error already handled by asyncThunkHelper
         }
     };
@@ -233,6 +237,11 @@ export const ProcessQuestions = () => {
         if (id) {
             dispatch(getTempQuestionsBySessionAsync(id));
         }
+    };
+
+    const handleUpdateSectionPoints = async ({ tempSectionId, pointsOrigin }) => {
+        await dispatch(updateTempQuestionPointsBySectionAsync({ tempSectionId, pointsOrigin })).unwrap();
+        if (id) dispatch(getTempQuestionsBySessionAsync(id));
     };
 
     return (
@@ -266,6 +275,7 @@ export const ProcessQuestions = () => {
                         onReorderStatements={handleReorderStatements}
                         onClassifyChapters={handleClassifyChapters}
                         classifyChaptersLoading={classifyChaptersLoading}
+                        onEditSectionPoints={() => setIsSectionPointsModalOpen(true)}
                     />
                 </div>
             </div>
@@ -329,6 +339,14 @@ export const ProcessQuestions = () => {
                 cancelText="Hủy"
                 variant="danger"
                 isLoading={deleteTarget?.type === 'question' ? questionDeleteLoading : statementDeleteLoading}
+            />
+
+            <SectionPointsSummaryModal
+                isOpen={isSectionPointsModalOpen}
+                onClose={() => setIsSectionPointsModalOpen(false)}
+                questions={tempQuestions}
+                onUpdateSectionPoints={handleUpdateSectionPoints}
+                loading={sectionPointsLoading}
             />
         </>
     );

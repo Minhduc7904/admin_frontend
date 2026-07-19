@@ -3,6 +3,7 @@ export * from './UpdateAdminDirectApiCard';
 export * from './CleanupUnusedMediaOlderThan30DaysApiCard';
 export * from './GenerateMissingExamSlugsApiCard';
 export * from './RegenerateQuestionSlugsApiCard';
+export * from './BackfillQuestionDefaultPointsApiCard';
 export * from './SeedDefaultTagsApiCard';
 export * from './SyncPermissionsFromCodesApiCard';
 export * from './SyncSeoMediaSlotsFromPageSlotsApiCard';

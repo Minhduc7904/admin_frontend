@@ -18,6 +18,9 @@ const initialState = {
     loadingRegenerateQuestionSlugs: false,
     errorRegenerateQuestionSlugs: null,
     regenerateQuestionSlugsResult: null,
+    loadingBackfillQuestionDefaultPoints: false,
+    errorBackfillQuestionDefaultPoints: null,
+    backfillQuestionDefaultPointsResult: null,
     loadingSeedDefaultTags: false,
     errorSeedDefaultTags: null,
     seedDefaultTagsResult: null,
@@ -103,6 +106,20 @@ export const regenerateQuestionSlugsAsync = createAsyncThunk(
                 showSuccess: true,
                 successTitle: "Regenerate slug cho question thành công",
                 errorTitle: "Lỗi regenerate slug cho question",
+            }
+        );
+    }
+);
+
+export const backfillQuestionDefaultPointsAsync = createAsyncThunk(
+    "superAdmin/backfillQuestionDefaultPoints",
+    async (_, thunkAPI) => {
+        return handleAsyncThunk(
+            () => superAdminApi.backfillQuestionDefaultPoints(),
+            thunkAPI,
+            {
+                successTitle: "Đã cập nhật điểm mặc định cho câu hỏi",
+                errorTitle: "Không thể cập nhật điểm mặc định cho câu hỏi",
             }
         );
     }
@@ -236,6 +253,10 @@ export const superAdminSlice = createSlice({
             state.errorRegenerateQuestionSlugs = null;
             state.regenerateQuestionSlugsResult = null;
         },
+        clearBackfillQuestionDefaultPointsState: (state) => {
+            state.errorBackfillQuestionDefaultPoints = null;
+            state.backfillQuestionDefaultPointsResult = null;
+        },
         clearSeedDefaultTagsState: (state) => {
             state.errorSeedDefaultTags = null;
             state.seedDefaultTagsResult = null;
@@ -326,6 +347,18 @@ export const superAdminSlice = createSlice({
             .addCase(regenerateQuestionSlugsAsync.rejected, (state, action) => {
                 state.loadingRegenerateQuestionSlugs = false;
                 state.errorRegenerateQuestionSlugs = action.payload;
+            })
+            .addCase(backfillQuestionDefaultPointsAsync.pending, (state) => {
+                state.loadingBackfillQuestionDefaultPoints = true;
+                state.errorBackfillQuestionDefaultPoints = null;
+            })
+            .addCase(backfillQuestionDefaultPointsAsync.fulfilled, (state, action) => {
+                state.loadingBackfillQuestionDefaultPoints = false;
+                state.backfillQuestionDefaultPointsResult = action.payload || null;
+            })
+            .addCase(backfillQuestionDefaultPointsAsync.rejected, (state, action) => {
+                state.loadingBackfillQuestionDefaultPoints = false;
+                state.errorBackfillQuestionDefaultPoints = action.payload;
             })
             .addCase(seedDefaultTagsAsync.pending, (state) => {
                 state.loadingSeedDefaultTags = true;
@@ -420,6 +453,7 @@ export const {
     clearCleanupUnusedMediaOlderThan30DaysState,
     clearGenerateMissingExamSlugsState,
     clearRegenerateQuestionSlugsState,
+    clearBackfillQuestionDefaultPointsState,
     clearSeedDefaultTagsState,
     clearSyncPermissionsFromCodesState,
     clearSyncSeoMediaSlotsFromPageSlotsState,
@@ -463,6 +497,12 @@ export const selectSuperAdminErrorRegenerateQuestionSlugs = (state) =>
     state.superAdmin.errorRegenerateQuestionSlugs;
 export const selectSuperAdminRegenerateQuestionSlugsResult = (state) =>
     state.superAdmin.regenerateQuestionSlugsResult;
+export const selectSuperAdminLoadingBackfillQuestionDefaultPoints = (state) =>
+    state.superAdmin.loadingBackfillQuestionDefaultPoints;
+export const selectSuperAdminErrorBackfillQuestionDefaultPoints = (state) =>
+    state.superAdmin.errorBackfillQuestionDefaultPoints;
+export const selectSuperAdminBackfillQuestionDefaultPointsResult = (state) =>
+    state.superAdmin.backfillQuestionDefaultPointsResult;
 
 export const selectSuperAdminLoadingSeedDefaultTags = (state) =>
     state.superAdmin.loadingSeedDefaultTags;

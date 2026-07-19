@@ -4,6 +4,7 @@ import {
     UpdateAdminDirectApiCard,
     GenerateMissingExamSlugsApiCard,
     RegenerateQuestionSlugsApiCard,
+    BackfillQuestionDefaultPointsApiCard,
     SeedDefaultTagsApiCard,
     SyncPermissionsFromCodesApiCard,
     SyncSeoMediaSlotsFromPageSlotsApiCard,
@@ -30,6 +31,7 @@ export const SuperAdminPage = () => {
             <AutoSubmitExpiredCompetitionAttemptsApiCard />
             <GenerateMissingExamSlugsApiCard />
             <RegenerateQuestionSlugsApiCard />
+            <BackfillQuestionDefaultPointsApiCard />
             <SeedDefaultTagsApiCard />
             <SyncPermissionsFromCodesApiCard />
             <SyncSeoMediaSlotsFromPageSlotsApiCard />
