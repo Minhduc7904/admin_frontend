@@ -1,5 +1,6 @@
 import { Copy, FileJson } from 'lucide-react';
 import { Button } from '../../../shared/components/ui';
+import { formatReceivingBankAccountDescription, formatReceivingBankAccountLabel } from './bankTransferTransactionAccount';
 import { ProcessingStatusBadge, ReconciliationStatusBadge } from './BankTransferTransactionStatusBadge';
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN', {
@@ -50,7 +51,8 @@ export const BankTransferTransactionDetailPanel = ({ transaction, loading }) => 
           <InfoLine label="Số tiền" value={formatMoney(transaction.amount)} />
           <InfoLine label="Thời điểm giao dịch" value={formatDateTime(transaction.transactionAt)} />
           <InfoLine label="Payment attempt" value={transaction.paymentAttemptId ? `#${transaction.paymentAttemptId}` : '-'} />
-          <InfoLine label="Tài khoản nhận" value={transaction.receivingAccountNumber} />
+          <InfoLine label="Ngân hàng nhận" value={formatReceivingBankAccountLabel(transaction.receivingBankAccount)} />
+          <InfoLine label="Tài khoản nhận" value={formatReceivingBankAccountDescription(transaction.receivingBankAccount, transaction.receivingAccountNumber)} />
           <InfoLine label="Reference" value={transaction.reference} />
           <InfoLine label="Tạo lúc" value={formatDateTime(transaction.createdAt)} />
         </div>

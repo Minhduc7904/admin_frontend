@@ -1,5 +1,6 @@
 import { Eye } from 'lucide-react';
 import { Button, Table } from '../../../shared/components/ui';
+import { formatReceivingBankAccountDescription, formatReceivingBankAccountLabel } from './bankTransferTransactionAccount';
 import { ProcessingStatusBadge, ReconciliationStatusBadge } from './BankTransferTransactionStatusBadge';
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN', {
@@ -48,6 +49,18 @@ export const BankTransferTransactionTable = ({
     sortable('transactionAt', 'Thời điểm GD', {
       render: (transaction) => formatDateTime(transaction.transactionAt),
     }),
+    {
+      key: 'receivingBankAccount',
+      label: 'Ngân hàng nhận',
+      render: (transaction) => (
+        <div className="min-w-[190px]">
+          <p className="font-medium text-foreground">{formatReceivingBankAccountLabel(transaction.receivingBankAccount)}</p>
+          <p className="mt-0.5 max-w-[220px] truncate text-xs text-foreground-light" title={formatReceivingBankAccountDescription(transaction.receivingBankAccount, transaction.receivingAccountNumber)}>
+            {formatReceivingBankAccountDescription(transaction.receivingBankAccount, transaction.receivingAccountNumber)}
+          </p>
+        </div>
+      ),
+    },
     {
       key: 'paymentAttemptId',
       label: 'Payment attempt',

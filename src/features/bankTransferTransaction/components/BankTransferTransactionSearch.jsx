@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Dropdown, Input, SearchInput } from '../../../shared/components/ui';
+import { Button, Dropdown, Input, SearchInput } from '../../../shared/components/ui';
 import { useDebounce } from '../../../shared/hooks';
+import { ReceivingBankAccountSearchSelect } from '../../receivingBankAccount/components';
 import {
   searchBankTransferTransactionsAsync,
   searchBankTransferTransactionsForTuitionPaymentAsync,
@@ -14,6 +15,12 @@ import {
   PROCESSING_STATUS_OPTIONS,
   RECONCILIATION_STATUS_OPTIONS,
 } from './bankTransferTransactionStatus';
+import {
+  UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID,
+  formatReceivingBankAccountDescription,
+  formatReceivingBankAccountLabel,
+  getReceivingBankAccountId,
+} from './bankTransferTransactionAccount';
 import { ProcessingStatusBadge, ReconciliationStatusBadge } from './BankTransferTransactionStatusBadge';
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN', {
@@ -43,6 +50,8 @@ export const BankTransferTransactionSearch = ({
     search: initialSearch,
     processingStatus: '',
     reconciliationStatus: initialReconciliationStatus,
+    receivingBankAccountId: '',
+    receivingBankAccount: null,
     fromTransactionAt: '',
     toTransactionAt: '',
   });
@@ -55,6 +64,7 @@ export const BankTransferTransactionSearch = ({
     search: debouncedSearch.trim() || undefined,
     processingStatus: filters.processingStatus || undefined,
     reconciliationStatus: filters.reconciliationStatus || undefined,
+    receivingBankAccountId: filters.receivingBankAccountId === '' ? undefined : Number(filters.receivingBankAccountId),
     fromTransactionAt: toIsoDateTime(filters.fromTransactionAt),
     toTransactionAt: toIsoDateTime(filters.toTransactionAt),
     sortBy: 'transactionAt',
@@ -89,6 +99,39 @@ export const BankTransferTransactionSearch = ({
             <Input type="datetime-local" value={filters.fromTransactionAt} onChange={(event) => updateFilter({ fromTransactionAt: event.target.value })} />
             <Input type="datetime-local" value={filters.toTransactionAt} onChange={(event) => updateFilter({ toTransactionAt: event.target.value })} />
           </div>
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <ReceivingBankAccountSearchSelect
+              label="Ngân hàng nhận"
+              placeholder="Lọc theo ngân hàng / tài khoản nhận..."
+              value={filters.receivingBankAccount}
+              status=""
+              onSelect={(account) => updateFilter({
+                receivingBankAccount: account,
+                receivingBankAccountId: account ? String(getReceivingBankAccountId(account)) : '',
+              })}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant={filters.receivingBankAccountId === UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID ? 'primary' : 'outline'}
+                onClick={() => updateFilter({
+                  receivingBankAccount: null,
+                  receivingBankAccountId: UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID,
+                })}
+              >
+                Chưa nhận diện
+              </Button>
+              {filters.receivingBankAccountId && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => updateFilter({ receivingBankAccount: null, receivingBankAccountId: '' })}
+                >
+                  Tất cả ngân hàng
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       <div className="max-h-[440px] space-y-2 overflow-y-auto p-3">
@@ -109,6 +152,10 @@ export const BankTransferTransactionSearch = ({
                   <p className="mt-1 truncate text-xs text-foreground-light" title={transaction.providerTransactionId}>{transaction.providerTransactionId}</p>
                 </div>
                 <span className="text-xs text-foreground-light">{transaction.transactionAt ? new Date(transaction.transactionAt).toLocaleString('vi-VN') : '-'}</span>
+              </div>
+              <div className="mt-2 rounded-md bg-gray-50 px-2.5 py-2">
+                <p className="text-xs font-medium text-foreground">{formatReceivingBankAccountLabel(transaction.receivingBankAccount)}</p>
+                <p className="mt-0.5 text-xs text-foreground-light">{formatReceivingBankAccountDescription(transaction.receivingBankAccount, transaction.receivingAccountNumber)}</p>
               </div>
               <p className="mt-2 line-clamp-2 text-sm text-foreground">{transaction.content || 'Không có nội dung chuyển khoản'}</p>
               <div className="mt-2 flex flex-wrap gap-2">

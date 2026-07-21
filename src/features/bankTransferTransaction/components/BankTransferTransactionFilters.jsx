@@ -1,5 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import { Button, Dropdown, Input, SearchInput } from '../../../shared/components/ui';
+import { ReceivingBankAccountSearchSelect } from '../../receivingBankAccount/components';
+import { UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID, getReceivingBankAccountId } from './bankTransferTransactionAccount';
 import { PROCESSING_STATUS_OPTIONS, RECONCILIATION_STATUS_OPTIONS } from './bankTransferTransactionStatus';
 
 const PROVIDER_OPTIONS = [
@@ -34,6 +36,39 @@ export const BankTransferTransactionFilters = ({ filters, onChange, onRefresh, l
       <Input name="receivingAccountNumber" value={filters.receivingAccountNumber} onChange={(event) => onChange({ receivingAccountNumber: event.target.value })} placeholder="Số tài khoản nhận" />
       <Input name="fromTransactionAt" type="datetime-local" value={filters.fromTransactionAt} onChange={(event) => onChange({ fromTransactionAt: event.target.value })} />
       <Input name="toTransactionAt" type="datetime-local" value={filters.toTransactionAt} onChange={(event) => onChange({ toTransactionAt: event.target.value })} />
+    </div>
+    <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+      <ReceivingBankAccountSearchSelect
+        label="Ngân hàng nhận"
+        placeholder="Lọc theo ngân hàng / tài khoản nhận..."
+        value={filters.receivingBankAccount}
+        status=""
+        onSelect={(account) => onChange({
+          receivingBankAccount: account,
+          receivingBankAccountId: account ? String(getReceivingBankAccountId(account)) : '',
+        })}
+      />
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant={filters.receivingBankAccountId === UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID ? 'primary' : 'outline'}
+          onClick={() => onChange({
+            receivingBankAccount: null,
+            receivingBankAccountId: UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID,
+          })}
+        >
+          Chưa nhận diện
+        </Button>
+        {filters.receivingBankAccountId && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onChange({ receivingBankAccount: null, receivingBankAccountId: '' })}
+          >
+            Tất cả ngân hàng
+          </Button>
+        )}
+      </div>
     </div>
   </div>
 );
