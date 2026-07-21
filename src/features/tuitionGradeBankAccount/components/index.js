@@ -1,0 +1,1 @@
+export { TuitionGradeBankAccountEditor } from './TuitionGradeBankAccountEditor';

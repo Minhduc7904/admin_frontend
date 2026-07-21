@@ -1,27 +1,34 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Plus, Download } from 'lucide-react'
+import { Plus, Download, Layers3 } from 'lucide-react'
 
 import { Button, RightPanel } from '../../../shared/components'
 import { Pagination, Modal } from '../../../shared/components/ui'
-import { useSearch, useDebounce } from '../../../shared/hooks'
+import { useSearch, useDebounce, useHasPermission } from '../../../shared/hooks'
+import { PERMISSIONS } from '../../../core/constants/permission/permission.codes'
+import { createPaymentIntentForTuitionPaymentAsync, createPaymentIntentsForGradePeriodAsync, selectPaymentIntentCreatingBulk, selectPaymentIntentCreatingTuitionPaymentId } from '../../paymentIntent/store/paymentIntentSlice'
 
 import {
     getTuitionPaymentsAsync,
+    getTuitionPaymentByIdAsync,
     getTuitionPaymentStatsByMoneyAsync,
     getTuitionPaymentStatsByStatusAsync,
     getTuitionPaymentStatsByMonthlyAsync,
     deleteTuitionPaymentAsync,
-    updateTuitionPaymentAsync,
+    confirmManualTuitionPaymentAsync,
+    updateManualTuitionPaymentReconciliationAsync,
+    unreconcileManualTuitionPaymentAsync,
     exportTuitionPaymentListAsync,
     setFilters,
-    updatePaymentInList,
     selectTuitionPayments,
+    selectCurrentTuitionPayment,
     selectTuitionPaymentPagination,
     selectTuitionPaymentLoadingGet,
+    selectTuitionPaymentLoadingDetail,
     selectTuitionPaymentLoadingExportList,
-    selectTuitionPaymentStatsByMoney,
-    selectTuitionPaymentStatsByStatus,
+    selectTuitionPaymentLoadingConfirmManualPayment,
+    selectTuitionPaymentLoadingManualReconciliation,
+    selectTuitionPaymentLoadingUnreconcileManualPayment,
     selectTuitionPaymentFilters,
 } from '../store/tuitionPaymentSlice'
 
@@ -34,6 +41,8 @@ import {
     ExportTuitionPaymentListModal,
     TuitionPaymentDetail,
     EditTuitionPayment,
+    ManualTuitionPaymentModal,
+    CreatePaymentIntentsBulkModal,
 } from '../components'
 
 export const TuitionPaymentList = () => {
@@ -41,11 +50,16 @@ export const TuitionPaymentList = () => {
 
     /* ===================== REDUX ===================== */
     const payments = useSelector(selectTuitionPayments)
+    const currentPayment = useSelector(selectCurrentTuitionPayment)
     const loadingGet = useSelector(selectTuitionPaymentLoadingGet)
+    const loadingDetail = useSelector(selectTuitionPaymentLoadingDetail)
     const loadingExportList = useSelector(selectTuitionPaymentLoadingExportList)
+    const loadingConfirmManualPayment = useSelector(selectTuitionPaymentLoadingConfirmManualPayment)
+    const loadingManualReconciliation = useSelector(selectTuitionPaymentLoadingManualReconciliation)
+    const loadingUnreconcileManualPayment = useSelector(selectTuitionPaymentLoadingUnreconcileManualPayment)
+    const creatingPaymentIntentId = useSelector(selectPaymentIntentCreatingTuitionPaymentId)
+    const creatingPaymentIntentsBulk = useSelector(selectPaymentIntentCreatingBulk)
     const pagination = useSelector(selectTuitionPaymentPagination)
-    const statsMoney = useSelector(selectTuitionPaymentStatsByMoney)
-    const statsStatus = useSelector(selectTuitionPaymentStatsByStatus)
     const filters = useSelector(selectTuitionPaymentFilters)
 
     /* ===================== SEARCH ===================== */
@@ -76,7 +90,60 @@ export const TuitionPaymentList = () => {
     const [openDetailPanel, setOpenDetailPanel] = useState(false)
     const [openEditPanel, setOpenEditPanel] = useState(false)
     const [openDeleteModal, setOpenDeleteModal] = useState(false)
+    const [openManualConfirmModal, setOpenManualConfirmModal] = useState(false)
+    const [openManualReconciliationModal, setOpenManualReconciliationModal] = useState(false)
+    const [openUnreconcileModal, setOpenUnreconcileModal] = useState(false)
+    const [openPaymentIntentsBulkModal, setOpenPaymentIntentsBulkModal] = useState(false)
+    const [reconciliationPayment, setReconciliationPayment] = useState(null)
+    const [reconciliationTransactions, setReconciliationTransactions] = useState([])
     const [selectedPayment, setSelectedPayment] = useState(null)
+    const canConfirmManual = useHasPermission(PERMISSIONS.TUITION_PAYMENT.CONFIRM_MANUAL_PAYMENT)
+    const canSearchBankTransactions = useHasPermission(PERMISSIONS.BANK_TRANSFER_TRANSACTION.GET_ALL)
+    const canCreatePaymentIntent = useHasPermission(PERMISSIONS.PAYMENT_INTENT.CREATE)
+
+    /* ===================== API ===================== */
+    function loadPayments() {
+        dispatch(
+            getTuitionPaymentsAsync({
+                page: currentPage,
+                limit: itemsPerPage,
+                search: debouncedSearch || undefined,
+                status: status || undefined,
+                grade: grade || undefined,
+                month: month || undefined,
+                year: year || undefined,
+                minAmount: debouncedMinAmount || undefined,
+                maxAmount: debouncedMaxAmount || undefined,
+                sortBy: sort.field,
+                sortOrder: sort.direction,
+            }),
+        )
+    }
+
+    function loadStats() {
+        dispatch(
+            getTuitionPaymentStatsByMoneyAsync({
+                month: month || undefined,
+                year: year || undefined,
+            }),
+        )
+
+        dispatch(
+            getTuitionPaymentStatsByStatusAsync({
+                month: month || undefined,
+                year: year || undefined,
+            }),
+        )
+
+        // Chỉ gọi monthly stats khi có year
+        if (year) {
+            dispatch(
+                getTuitionPaymentStatsByMonthlyAsync({
+                    year: Number(year),
+                }),
+            )
+        }
+    }
 
     /* ===================== EFFECT ===================== */
     useEffect(() => {
@@ -104,50 +171,6 @@ export const TuitionPaymentList = () => {
         year,
         showStats
     ])
-
-    /* ===================== API ===================== */
-    const loadPayments = () => {
-        dispatch(
-            getTuitionPaymentsAsync({
-                page: currentPage,
-                limit: itemsPerPage,
-                search: debouncedSearch || undefined,
-                status: status || undefined,
-                grade: grade || undefined,
-                month: month || undefined,
-                year: year || undefined,
-                minAmount: debouncedMinAmount || undefined,
-                maxAmount: debouncedMaxAmount || undefined,
-                sortBy: sort.field,
-                sortOrder: sort.direction,
-            }),
-        )
-    }
-
-    const loadStats = () => {
-        dispatch(
-            getTuitionPaymentStatsByMoneyAsync({
-                month: month || undefined,
-                year: year || undefined,
-            }),
-        )
-
-        dispatch(
-            getTuitionPaymentStatsByStatusAsync({
-                month: month || undefined,
-                year: year || undefined,
-            }),
-        )
-
-        // Chỉ gọi monthly stats khi có year
-        if (year) {
-            dispatch(
-                getTuitionPaymentStatsByMonthlyAsync({
-                    year: Number(year),
-                }),
-            )
-        }
-    }
 
     /* ===================== HELPERS ===================== */
     const resetPageAndFilter = (payload) => {
@@ -208,6 +231,7 @@ export const TuitionPaymentList = () => {
     const handleView = (payment) => {
         setSelectedPayment(payment)
         setOpenDetailPanel(true)
+        dispatch(getTuitionPaymentByIdAsync(payment.paymentId))
     }
 
     const handleEdit = (payment) => {
@@ -234,28 +258,100 @@ export const TuitionPaymentList = () => {
     }
 
     /* ===================== QUICK TOGGLE STATUS ===================== */
-    const handleQuickToggleStatus = async (payment) => {
-        const newStatus = payment.status === 'PAID' ? 'UNPAID' : 'PAID'
-        
-        try {
-            const result = await dispatch(
-                updateTuitionPaymentAsync({
-                    id: payment.paymentId,
-                    data: {
-                        status: newStatus,
-                    },
-                })
-            ).unwrap()
+    const handleQuickToggleStatus = (payment) => {
+        if (payment.status !== 'UNPAID') return
+        setSelectedPayment(payment)
+        setOpenManualConfirmModal(true)
+    }
 
-            // Cập nhật payment trong list thay vì load lại
-            dispatch(updatePaymentInList(result.data))
-            
-            // Reload stats to update counts
-            if (showStats) {
-                loadStats()
-            }
+    const handleConfirmManualPayment = async (data) => {
+        if (!selectedPayment) return
+
+        try {
+            await dispatch(confirmManualTuitionPaymentAsync({ id: selectedPayment.paymentId, data })).unwrap()
+            setOpenManualConfirmModal(false)
+            setSelectedPayment(null)
+            loadPayments()
+            if (showStats) loadStats()
         } catch (error) {
-            console.error('Error toggling payment status:', error)
+            console.error('Error confirming manual tuition payment:', error)
+        }
+    }
+
+    const openManualReconciliation = (payment, transactions) => {
+        setReconciliationPayment(payment)
+        setReconciliationTransactions(transactions)
+        setOpenManualReconciliationModal(true)
+    }
+
+    const openManualReconciliationFromList = async (payment) => {
+        try {
+            const response = await dispatch(getTuitionPaymentByIdAsync(payment.paymentId)).unwrap()
+            const detail = response.data
+            const transactions = detail.paymentIntent?.paymentAttempts?.flatMap(
+                (attempt) => (attempt.bankTransferTransactions || []).filter(
+                    (transaction) => transaction.reconciliationStatus === 'ADMIN',
+                ),
+            ) || []
+            openManualReconciliation(detail, transactions)
+        } catch (error) {
+            console.error('Error loading manual reconciliation:', error)
+        }
+    }
+
+    const updateManualReconciliation = async (data) => {
+        if (!reconciliationPayment) return
+
+        try {
+            await dispatch(updateManualTuitionPaymentReconciliationAsync({
+                id: reconciliationPayment.paymentId,
+                data,
+            })).unwrap()
+            setOpenManualReconciliationModal(false)
+            await dispatch(getTuitionPaymentByIdAsync(reconciliationPayment.paymentId)).unwrap()
+            loadPayments()
+            if (showStats) loadStats()
+        } catch (error) {
+            console.error('Error updating manual reconciliation:', error)
+        }
+    }
+
+    const openUnreconcile = (payment) => {
+        setReconciliationPayment(payment)
+        setOpenUnreconcileModal(true)
+    }
+
+    const unreconcileManualPayment = async () => {
+        if (!reconciliationPayment) return
+
+        try {
+            await dispatch(unreconcileManualTuitionPaymentAsync(reconciliationPayment.paymentId)).unwrap()
+            setOpenUnreconcileModal(false)
+            await dispatch(getTuitionPaymentByIdAsync(reconciliationPayment.paymentId)).unwrap()
+            loadPayments()
+            if (showStats) loadStats()
+        } catch (error) {
+            console.error('Error unreconciling manual payment:', error)
+        }
+    }
+
+    const createPaymentIntent = async (payment) => {
+        try {
+            await dispatch(createPaymentIntentForTuitionPaymentAsync(payment.paymentId)).unwrap()
+            await dispatch(getTuitionPaymentByIdAsync(payment.paymentId)).unwrap()
+            loadPayments()
+        } catch (error) {
+            console.error('Error creating payment intent:', error)
+        }
+    }
+
+    const createPaymentIntentsBulk = async (data) => {
+        try {
+            await dispatch(createPaymentIntentsForGradePeriodAsync(data)).unwrap()
+            setOpenPaymentIntentsBulkModal(false)
+            loadPayments()
+        } catch (error) {
+            console.error('Error creating payment intents in bulk:', error)
         }
     }
 
@@ -285,6 +381,10 @@ export const TuitionPaymentList = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        {canCreatePaymentIntent && <Button variant="outline" onClick={() => setOpenPaymentIntentsBulkModal(true)}>
+                            <Layers3 size={16} />
+                            Tạo intent hàng loạt
+                        </Button>}
                         <Button 
                             variant="outline"
                             onClick={() => setOpenExportListModal(true)}
@@ -347,6 +447,12 @@ export const TuitionPaymentList = () => {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onQuickToggle={handleQuickToggleStatus}
+                    canConfirmManual={canConfirmManual}
+                    onEditManualReconciliation={openManualReconciliationFromList}
+                    onUnreconcileManualPayment={openUnreconcile}
+                    canCreatePaymentIntent={canCreatePaymentIntent}
+                    onCreatePaymentIntent={createPaymentIntent}
+                    creatingPaymentIntentId={creatingPaymentIntentId}
                 />
 
                 {/* ===================== PAGINATION + PANEL ===================== */}
@@ -359,9 +465,18 @@ export const TuitionPaymentList = () => {
                         }}
                         title="Chi tiết học phí"
                     >
-                        {selectedPayment && (
-                            <TuitionPaymentDetail payment={selectedPayment} />
-                        )}
+                        <TuitionPaymentDetail
+                            payment={selectedPayment}
+                            detail={currentPayment}
+                            loading={loadingDetail}
+                            canManageManualReconciliation={canConfirmManual}
+                            onEditManualReconciliation={openManualReconciliation}
+                            onUnreconcileManualPayment={openUnreconcile}
+                            reconciliationLoading={loadingManualReconciliation || loadingUnreconcileManualPayment}
+                            canCreatePaymentIntent={canCreatePaymentIntent}
+                            onCreatePaymentIntent={createPaymentIntent}
+                            creatingPaymentIntent={creatingPaymentIntentId === (currentPayment || selectedPayment)?.paymentId}
+                        />
                     </RightPanel>
 
                     <RightPanel
@@ -411,6 +526,59 @@ export const TuitionPaymentList = () => {
                 isOpen={openExcelModal}
                 onClose={() => setOpenExcelModal(false)}
             />
+
+            <CreatePaymentIntentsBulkModal
+                key={`payment-intents-bulk-${openPaymentIntentsBulkModal}`}
+                isOpen={openPaymentIntentsBulkModal}
+                onClose={() => setOpenPaymentIntentsBulkModal(false)}
+                onConfirm={createPaymentIntentsBulk}
+                loading={creatingPaymentIntentsBulk}
+                initialValues={{ grade, month, year }}
+            />
+
+            <ManualTuitionPaymentModal
+                key={selectedPayment?.paymentId || 'no-payment'}
+                payment={selectedPayment}
+                isOpen={openManualConfirmModal}
+                onClose={() => {
+                    setOpenManualConfirmModal(false)
+                    setSelectedPayment(null)
+                }}
+                onConfirm={handleConfirmManualPayment}
+                loading={loadingConfirmManualPayment}
+                canSearchTransactions={canSearchBankTransactions}
+            />
+
+            <ManualTuitionPaymentModal
+                key={`reconciliation-${reconciliationPayment?.paymentId || 'no-payment'}`}
+                payment={reconciliationPayment}
+                isOpen={openManualReconciliationModal}
+                onClose={() => {
+                    setOpenManualReconciliationModal(false)
+                    setReconciliationPayment(null)
+                    setReconciliationTransactions([])
+                }}
+                onConfirm={updateManualReconciliation}
+                loading={loadingManualReconciliation}
+                canSearchTransactions={canSearchBankTransactions}
+                mode="edit"
+                initialTransactions={reconciliationTransactions}
+            />
+
+            <Modal
+                isOpen={openUnreconcileModal}
+                onClose={() => !loadingUnreconcileManualPayment && setOpenUnreconcileModal(false)}
+                title="Bỏ đối soát thủ công"
+            >
+                <div className="p-6">
+                    <p className="text-foreground">Bạn có chắc muốn bỏ đối soát học phí #{reconciliationPayment?.paymentId}?</p>
+                    <p className="mt-2 text-sm text-foreground-light">Học phí sẽ trở lại chưa đóng; các giao dịch ngân hàng đã gắn được giữ làm lịch sử nhưng trở về chưa đối soát.</p>
+                    <div className="mt-5 flex justify-end gap-3">
+                        <Button variant="outline" onClick={() => setOpenUnreconcileModal(false)} disabled={loadingUnreconcileManualPayment}>Hủy</Button>
+                        <Button variant="danger" onClick={unreconcileManualPayment} loading={loadingUnreconcileManualPayment}>Bỏ đối soát</Button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Export List Modal */}
             <ExportTuitionPaymentListModal

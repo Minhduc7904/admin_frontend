@@ -69,6 +69,13 @@ import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
 import { OnlineCourseInvoiceListPage } from '../features/onlineCourseInvoice/pages';
+import { BankTransferTransactionListPage } from '../features/bankTransferTransaction/pages';
+import { ReceivingBankAccountListPage } from '../features/receivingBankAccount/pages';
+import { TuitionCollectionConfigurationPage } from '../features/tuitionCollectionConfiguration/pages';
+import { TuitionGradeBankAccountPage } from '../features/tuitionGradeBankAccount/pages';
+import { BackgroundJobListPage } from '../features/backgroundJob/pages';
+import { BackgroundJobRunListPage } from '../features/backgroundJobRun/pages';
+import { SepayTransactionSyncCursorPage } from '../features/sepayTransactionSyncCursor/pages';
 import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
 import { ExamListPage, MyExamListPage } from '../features/exam/pages';
@@ -399,6 +406,60 @@ export const adminRouter = [
                         path: ROUTES.ONLINE_COURSE_INVOICES,
                         element: <OnlineCourseInvoiceListPage />,
                     },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BANK_TRANSFER_TRANSACTION.GET_ALL} />,
+                children: [
+                    {
+                        path: ROUTES.BANK_TRANSFER_TRANSACTIONS,
+                        element: <BankTransferTransactionListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.RECEIVING_BANK_ACCOUNT.GET_ALL} />,
+                children: [
+                    {
+                        path: ROUTES.RECEIVING_BANK_ACCOUNTS,
+                        element: <ReceivingBankAccountListPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.TUITION_COLLECTION_CONFIGURATION.MANAGE} />,
+                children: [
+                    {
+                        path: ROUTES.TUITION_COLLECTION_CONFIGURATION,
+                        element: <TuitionCollectionConfigurationPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.RECEIVING_BANK_ACCOUNT.CONFIGURE_GRADE_MAPPING} />,
+                children: [
+                    {
+                        path: ROUTES.TUITION_GRADE_BANK_ACCOUNTS,
+                        element: <TuitionGradeBankAccountPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BACKGROUND_JOB.GET_ALL} />,
+                children: [
+                    { path: ROUTES.BACKGROUND_JOBS, element: <BackgroundJobListPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BACKGROUND_JOB.GET_RUNS} />,
+                children: [
+                    { path: ROUTES.BACKGROUND_JOB_RUNS, element: <BackgroundJobRunListPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BACKGROUND_JOB.GET_SEPAY_SYNC_CURSORS} />,
+                children: [
+                    { path: ROUTES.SEPAY_SYNC_CURSORS, element: <SepayTransactionSyncCursorPage /> },
                 ],
             },
             {

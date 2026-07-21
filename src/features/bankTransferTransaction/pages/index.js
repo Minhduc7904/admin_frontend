@@ -1,0 +1,1 @@
+export { BankTransferTransactionListPage } from './BankTransferTransactionListPage';

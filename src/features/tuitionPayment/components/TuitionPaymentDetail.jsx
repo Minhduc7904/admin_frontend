@@ -4,7 +4,18 @@ import { Tabs } from '../../../shared/components/ui'
 import { TuitionPaymentDetailInfo } from './TuitionPaymentDetailInfo'
 import { TuitionPaymentExport } from './TuitionPaymentExport'
 
-export const TuitionPaymentDetail = ({ payment }) => {
+export const TuitionPaymentDetail = ({
+    payment,
+    detail,
+    loading,
+    canManageManualReconciliation,
+    onEditManualReconciliation,
+    onUnreconcileManualPayment,
+    reconciliationLoading,
+    canCreatePaymentIntent,
+    onCreatePaymentIntent,
+    creatingPaymentIntent,
+}) => {
     const [activeTab, setActiveTab] = useState('detail')
 
     if (!payment) {
@@ -41,7 +52,17 @@ export const TuitionPaymentDetail = ({ payment }) => {
 
             {/* Tabs Content */}
             <div className="flex-1">
-                {activeTab === 'detail' && <TuitionPaymentDetailInfo payment={payment} />}
+                {activeTab === 'detail' && <TuitionPaymentDetailInfo
+                    payment={detail || payment}
+                    loading={loading}
+                    canManageManualReconciliation={canManageManualReconciliation}
+                    onEditManualReconciliation={onEditManualReconciliation}
+                    onUnreconcileManualPayment={onUnreconcileManualPayment}
+                    reconciliationLoading={reconciliationLoading}
+                    canCreatePaymentIntent={canCreatePaymentIntent}
+                    onCreatePaymentIntent={onCreatePaymentIntent}
+                    creatingPaymentIntent={creatingPaymentIntent}
+                />}
                 {activeTab === 'export' && <TuitionPaymentExport payment={payment} />}
             </div>
         </div>

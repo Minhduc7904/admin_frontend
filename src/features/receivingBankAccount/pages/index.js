@@ -1,0 +1,1 @@
+export { ReceivingBankAccountListPage } from './ReceivingBankAccountListPage';

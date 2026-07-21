@@ -1,0 +1,1 @@
+export { TuitionCollectionConfigurationPage } from './TuitionCollectionConfigurationPage';

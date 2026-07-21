@@ -13,6 +13,9 @@ import {
   Send,
   CreditCard,
   ReceiptText,
+  ArrowLeftRight,
+  Landmark,
+  Settings2,
   FileQuestion,
   Trophy,
   Globe2,
@@ -20,6 +23,9 @@ import {
   Tags,
   UserRoundCheck,
   Newspaper,
+  Workflow,
+  History,
+  RotateCw,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -111,6 +117,34 @@ export const AdminSidebar = () => {
           icon: ReceiptText,
           permission: PERMISSIONS.ONLINE_COURSE_INVOICE.GET_ALL,
         },
+        {
+          key: 'bankTransferTransactions',
+          name: 'Giao dịch ngân hàng',
+          href: ROUTES.BANK_TRANSFER_TRANSACTIONS,
+          icon: ArrowLeftRight,
+          permission: PERMISSIONS.BANK_TRANSFER_TRANSACTION.GET_ALL,
+        },
+        {
+          key: 'receivingBankAccounts',
+          name: 'Tài khoản nhận tiền',
+          href: ROUTES.RECEIVING_BANK_ACCOUNTS,
+          icon: Landmark,
+          permission: PERMISSIONS.RECEIVING_BANK_ACCOUNT.GET_ALL,
+        },
+        {
+          key: 'tuitionCollectionConfiguration',
+          name: 'Cấu hình thu học phí',
+          href: ROUTES.TUITION_COLLECTION_CONFIGURATION,
+          icon: Settings2,
+          permission: PERMISSIONS.TUITION_COLLECTION_CONFIGURATION.MANAGE,
+        },
+        {
+          key: 'tuitionGradeBankAccounts',
+          name: 'Tài khoản theo khối',
+          href: ROUTES.TUITION_GRADE_BANK_ACCOUNTS,
+          icon: Landmark,
+          permission: PERMISSIONS.RECEIVING_BANK_ACCOUNT.CONFIGURE_GRADE_MAPPING,
+        },
       ],
     },
 
@@ -137,6 +171,32 @@ export const AdminSidebar = () => {
           href: ROUTES.AUDIT_LOGS,
           icon: ScrollText,
           permission: PERMISSIONS.ADMIN_PAGE.AUDIT_LOGS,
+        },
+      ],
+    },
+    {
+      label: 'Vận hành hệ thống',
+      items: [
+        {
+          key: 'backgroundJobs',
+          name: 'Quản lý job nền',
+          href: ROUTES.BACKGROUND_JOBS,
+          icon: Workflow,
+          permission: PERMISSIONS.BACKGROUND_JOB.GET_ALL,
+        },
+        {
+          key: 'backgroundJobRuns',
+          name: 'Lịch sử chạy job nền',
+          href: ROUTES.BACKGROUND_JOB_RUNS,
+          icon: History,
+          permission: PERMISSIONS.BACKGROUND_JOB.GET_RUNS,
+        },
+        {
+          key: 'sepaySyncCursors',
+          name: 'Cấu hình đồng bộ SePay',
+          href: ROUTES.SEPAY_SYNC_CURSORS,
+          icon: RotateCw,
+          permission: PERMISSIONS.BACKGROUND_JOB.GET_SEPAY_SYNC_CURSORS,
         },
       ],
     },

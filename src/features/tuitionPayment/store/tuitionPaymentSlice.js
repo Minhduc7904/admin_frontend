@@ -38,6 +38,7 @@ const initialState = {
   },
 
   loadingGet: false,
+  loadingDetail: false,
   loadingExport: false,
   loadingExportList: false,
   loadingImport: false,
@@ -46,6 +47,9 @@ const initialState = {
   loadingGetStatsMonthly: false,
   loadingCreate: false,
   loadingUpdate: false,
+  loadingConfirmManualPayment: false,
+  loadingManualReconciliation: false,
+  loadingUnreconcileManualPayment: false,
   loadingDelete: false,
   loadingCreateBulkArray: false,
   loadingUpdateBulkArray: false,
@@ -190,6 +194,42 @@ export const updateTuitionPaymentAsync = createAsyncThunk(
       }
     );
   }
+);
+
+export const confirmManualTuitionPaymentAsync = createAsyncThunk(
+  "tuitionPayment/confirmManualPayment",
+  async ({ id, data }, thunkAPI) => handleAsyncThunk(
+    () => tuitionPaymentApi.confirmManualPayment(id, data),
+    thunkAPI,
+    {
+      successTitle: "Đã xác nhận thanh toán học phí",
+      errorTitle: "Không thể xác nhận thanh toán học phí",
+    },
+  ),
+);
+
+export const updateManualTuitionPaymentReconciliationAsync = createAsyncThunk(
+  'tuitionPayment/updateManualReconciliation',
+  async ({ id, data }, thunkAPI) => handleAsyncThunk(
+    () => tuitionPaymentApi.updateManualReconciliation(id, data),
+    thunkAPI,
+    {
+      successTitle: 'Đã cập nhật đối soát thủ công',
+      errorTitle: 'Không thể cập nhật đối soát thủ công',
+    },
+  ),
+);
+
+export const unreconcileManualTuitionPaymentAsync = createAsyncThunk(
+  'tuitionPayment/unreconcileManualPayment',
+  async (id, thunkAPI) => handleAsyncThunk(
+    () => tuitionPaymentApi.unreconcileManualPayment(id),
+    thunkAPI,
+    {
+      successTitle: 'Đã bỏ đối soát thủ công',
+      errorTitle: 'Không thể bỏ đối soát thủ công',
+    },
+  ),
 );
 
 // ===== DELETE =====
@@ -394,14 +434,14 @@ export const tuitionPaymentSlice = createSlice({
       // ===== DETAIL =====
       .addCase(getTuitionPaymentByIdAsync.pending, (state) => {
         state.currentPayment = null;
-        state.loadingGet = true;
+        state.loadingDetail = true;
       })
       .addCase(getTuitionPaymentByIdAsync.fulfilled, (state, action) => {
-        state.loadingGet = false;
+        state.loadingDetail = false;
         state.currentPayment = action.payload.data;
       })
       .addCase(getTuitionPaymentByIdAsync.rejected, (state, action) => {
-        state.loadingGet = false;
+        state.loadingDetail = false;
         state.error = action.payload;
       })
 
@@ -480,6 +520,36 @@ export const tuitionPaymentSlice = createSlice({
       })
       .addCase(updateTuitionPaymentAsync.rejected, (state, action) => {
         state.loadingUpdate = false;
+        state.error = action.payload;
+      })
+      .addCase(confirmManualTuitionPaymentAsync.pending, (state) => {
+        state.loadingConfirmManualPayment = true;
+      })
+      .addCase(confirmManualTuitionPaymentAsync.fulfilled, (state) => {
+        state.loadingConfirmManualPayment = false;
+      })
+      .addCase(confirmManualTuitionPaymentAsync.rejected, (state, action) => {
+        state.loadingConfirmManualPayment = false;
+        state.error = action.payload;
+      })
+      .addCase(updateManualTuitionPaymentReconciliationAsync.pending, (state) => {
+        state.loadingManualReconciliation = true;
+      })
+      .addCase(updateManualTuitionPaymentReconciliationAsync.fulfilled, (state) => {
+        state.loadingManualReconciliation = false;
+      })
+      .addCase(updateManualTuitionPaymentReconciliationAsync.rejected, (state, action) => {
+        state.loadingManualReconciliation = false;
+        state.error = action.payload;
+      })
+      .addCase(unreconcileManualTuitionPaymentAsync.pending, (state) => {
+        state.loadingUnreconcileManualPayment = true;
+      })
+      .addCase(unreconcileManualTuitionPaymentAsync.fulfilled, (state) => {
+        state.loadingUnreconcileManualPayment = false;
+      })
+      .addCase(unreconcileManualTuitionPaymentAsync.rejected, (state, action) => {
+        state.loadingUnreconcileManualPayment = false;
         state.error = action.payload;
       })
 
@@ -604,6 +674,8 @@ export const selectImportPreview = (state) =>
 
 export const selectTuitionPaymentLoadingGet = (state) =>
   state.tuitionPayment.loadingGet;
+export const selectTuitionPaymentLoadingDetail = (state) =>
+  state.tuitionPayment.loadingDetail;
 export const selectTuitionPaymentLoadingCreate = (state) =>
   state.tuitionPayment.loadingCreate;
 export const selectTuitionPaymentLoadingStatsMoney = (state) =>
@@ -614,6 +686,12 @@ export const selectTuitionPaymentLoadingStatsMonthly = (state) =>
   state.tuitionPayment.loadingGetStatsMonthly;
 export const selectTuitionPaymentLoadingUpdate = (state) =>
   state.tuitionPayment.loadingUpdate;
+export const selectTuitionPaymentLoadingConfirmManualPayment = (state) =>
+  state.tuitionPayment.loadingConfirmManualPayment;
+export const selectTuitionPaymentLoadingManualReconciliation = (state) =>
+  state.tuitionPayment.loadingManualReconciliation;
+export const selectTuitionPaymentLoadingUnreconcileManualPayment = (state) =>
+  state.tuitionPayment.loadingUnreconcileManualPayment;
 export const selectTuitionPaymentLoadingDelete = (state) =>
   state.tuitionPayment.loadingDelete;
 export const selectTuitionPaymentLoadingExport = (state) =>

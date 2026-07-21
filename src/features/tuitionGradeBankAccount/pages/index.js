@@ -1,0 +1,1 @@
+export { TuitionGradeBankAccountPage } from './TuitionGradeBankAccountPage';

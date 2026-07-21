@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Input, Dropdown, Textarea, CurrencyInput } from '../../../shared/components/ui'
-import { TUITION_PAYMENT_STATUS_OPTIONS, MONTH_OPTIONS, YEAR_OPTIONS } from '../constants/tuition-payment.constant'
+import { Button, Dropdown, Textarea, CurrencyInput } from '../../../shared/components/ui'
+import { MONTH_OPTIONS, YEAR_OPTIONS } from '../constants/tuition-payment.constant'
 import {
     updateTuitionPaymentAsync,
     selectTuitionPaymentLoadingUpdate,
 } from '../store/tuitionPaymentSlice'
-import { formatDate } from '../../../shared/utils/dateTime'
 export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
     const dispatch = useDispatch()
     const loading = useSelector(selectTuitionPaymentLoadingUpdate)
@@ -15,12 +14,6 @@ export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
         amount: payment.amount,
         month: payment.month,
         year: payment.year,
-        status: payment.status,
-        paidAt: payment.paidAt
-            ? new Date(payment.paidAt).toLocaleDateString('en-CA', {
-                timeZone: 'Asia/Ho_Chi_Minh'
-            })
-            : '',
         notes: payment.notes || '',
     })
     // console.log('Initial formData:', formData)
@@ -46,10 +39,6 @@ export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
             newErrors.year = 'Vui lòng chọn năm'
         }
 
-        if (!formData.status) {
-            newErrors.status = 'Vui lòng chọn trạng thái'
-        }
-
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -67,8 +56,6 @@ export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
                         amount: Number(formData.amount),
                         month: Number(formData.month),
                         year: Number(formData.year),
-                        status: formData.status,
-                        paidAt: formData.status === 'PAID' && formData.paidAt ? formData.paidAt : undefined,
                         notes: formData.notes || undefined,
                     },
                 })
@@ -161,42 +148,6 @@ export const EditTuitionPayment = ({ payment, onClose, onSuccess }) => {
                         />
                     </div>
                 </div>
-
-                {/* Status */}
-                <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                        Trạng thái <span className="text-red-500">*</span>
-                    </label>
-                    <Dropdown
-                        value={formData.status}
-                        onChange={(value) => handleChange({ target: { name: 'status', value } })}
-                        options={TUITION_PAYMENT_STATUS_OPTIONS}
-                        placeholder="Chọn trạng thái"
-                        error={errors.status}
-                    />
-                    <p className="text-xs text-foreground-light mt-1">
-                        Trạng thái thanh toán học phí
-                    </p>
-                </div>
-
-                {/* Paid At - Only show when status is PAID */}
-                {formData.status === 'PAID' && (
-                    <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                            Ngày thanh toán
-                        </label>
-                        <Input
-                            type="date"
-                            name="paidAt"
-                            value={formData.paidAt}
-                            onChange={handleChange}
-                            placeholder="Chọn ngày thanh toán"
-                        />
-                        <p className="text-xs text-foreground-light mt-1">
-                            Để trống để tự động lấy ngày hiện tại
-                        </p>
-                    </div>
-                )}
 
                 {/* Notes */}
                 <div>

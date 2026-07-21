@@ -46,6 +46,15 @@ import videoContentReducer from "../../features/videoContent/store/videoContentS
 import youtubeContentReducer from "../../features/youtubeContent/store/youtubeContentSlice";
 import homeworkContentReducer from "../../features/homeworkContent/store/homeworkContentSlice";
 import homeworkSubmitReducer from "../../features/homeworkSubmit/store/homeworkSubmitSlice";
+import receivingBankAccountReducer from "../../features/receivingBankAccount/store/receivingBankAccountSlice";
+import tuitionCollectionConfigurationReducer from "../../features/tuitionCollectionConfiguration/store/tuitionCollectionConfigurationSlice";
+import tuitionGradeBankAccountReducer from "../../features/tuitionGradeBankAccount/store/tuitionGradeBankAccountSlice";
+import bankTransferTransactionReducer from "../../features/bankTransferTransaction/store/bankTransferTransactionSlice";
+import backgroundJobReducer from "../../features/backgroundJob/store/backgroundJobSlice";
+import backgroundJobLockReducer from "../../features/backgroundJobLock/store/backgroundJobLockSlice";
+import backgroundJobRunReducer from "../../features/backgroundJobRun/store/backgroundJobRunSlice";
+import sepayTransactionSyncCursorReducer from "../../features/sepayTransactionSyncCursor/store/sepayTransactionSyncCursorSlice";
+import paymentIntentReducer from "../../features/paymentIntent/store/paymentIntentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -96,5 +105,14 @@ export const store = configureStore({
     youtubeContent: youtubeContentReducer,
     homeworkContent: homeworkContentReducer,
     homeworkSubmit: homeworkSubmitReducer,
+    receivingBankAccount: receivingBankAccountReducer,
+    tuitionCollectionConfiguration: tuitionCollectionConfigurationReducer,
+    tuitionGradeBankAccount: tuitionGradeBankAccountReducer,
+    bankTransferTransaction: bankTransferTransactionReducer,
+    backgroundJob: backgroundJobReducer,
+    backgroundJobLock: backgroundJobLockReducer,
+    backgroundJobRun: backgroundJobRunReducer,
+    sepayTransactionSyncCursor: sepayTransactionSyncCursorReducer,
+    paymentIntent: paymentIntentReducer,
   },
 });

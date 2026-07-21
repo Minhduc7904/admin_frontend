@@ -58,6 +58,18 @@ export const tuitionPaymentApi = {
     return axiosClient.put(API_ENDPOINTS.TUITION_PAYMENT.UPDATE(id), data);
   },
 
+  confirmManualPayment(id, data = {}) {
+    return axiosClient.post(API_ENDPOINTS.TUITION_PAYMENT.CONFIRM_MANUAL_PAYMENT(id), data);
+  },
+
+  updateManualReconciliation(id, data) {
+    return axiosClient.put(API_ENDPOINTS.TUITION_PAYMENT.MANUAL_RECONCILIATION(id), data);
+  },
+
+  unreconcileManualPayment(id) {
+    return axiosClient.post(API_ENDPOINTS.TUITION_PAYMENT.UNRECONCILE_MANUAL_PAYMENT(id));
+  },
+
   updateBulkArray(data) {
     return axiosClient.put(API_ENDPOINTS.TUITION_PAYMENT.UPDATE_BULK_ARRAY, data);
   },
