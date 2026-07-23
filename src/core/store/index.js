@@ -55,6 +55,9 @@ import backgroundJobLockReducer from "../../features/backgroundJobLock/store/bac
 import backgroundJobRunReducer from "../../features/backgroundJobRun/store/backgroundJobRunSlice";
 import sepayTransactionSyncCursorReducer from "../../features/sepayTransactionSyncCursor/store/sepayTransactionSyncCursorSlice";
 import paymentIntentReducer from "../../features/paymentIntent/store/paymentIntentSlice";
+import assistantShiftReducer from "../../features/assistantShift/store/assistantShiftSlice";
+import assistantShiftRegistrationReducer from "../../features/assistantShiftRegistration/store/assistantShiftRegistrationSlice";
+import myAssistantScheduleReducer from "../../features/myAssistantSchedule/store/myAssistantScheduleSlice";
 
 export const store = configureStore({
   reducer: {
@@ -114,5 +117,8 @@ export const store = configureStore({
     backgroundJobRun: backgroundJobRunReducer,
     sepayTransactionSyncCursor: sepayTransactionSyncCursorReducer,
     paymentIntent: paymentIntentReducer,
+    assistantShift: assistantShiftReducer,
+    assistantShiftRegistration: assistantShiftRegistrationReducer,
+    myAssistantSchedule: myAssistantScheduleReducer,
   },
 });

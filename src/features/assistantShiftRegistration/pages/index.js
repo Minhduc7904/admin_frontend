@@ -1,0 +1,1 @@
+export { AssistantShiftRegistrationPage } from './AssistantShiftRegistrationPage';

@@ -76,6 +76,9 @@ import { TuitionGradeBankAccountPage } from '../features/tuitionGradeBankAccount
 import { BackgroundJobListPage } from '../features/backgroundJob/pages';
 import { BackgroundJobRunListPage } from '../features/backgroundJobRun/pages';
 import { SepayTransactionSyncCursorPage } from '../features/sepayTransactionSyncCursor/pages';
+import { AssistantShiftCalendarPage } from '../features/assistantShift/pages';
+import { AssistantShiftRegistrationPage } from '../features/assistantShiftRegistration/pages';
+import { MyAssistantSchedulePage } from '../features/myAssistantSchedule/pages';
 import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
 import { ExamListPage, MyExamListPage } from '../features/exam/pages';
@@ -460,6 +463,14 @@ export const adminRouter = [
                 element: <ProtectedRoute permission={PERMISSIONS.BACKGROUND_JOB.GET_SEPAY_SYNC_CURSORS} />,
                 children: [
                     { path: ROUTES.SEPAY_SYNC_CURSORS, element: <SepayTransactionSyncCursorPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES} />,
+                children: [
+                    { path: ROUTES.ASSISTANT_SHIFTS, element: <AssistantShiftCalendarPage /> },
+                    { path: ROUTES.ASSISTANT_SHIFT_REGISTRATION, element: <AssistantShiftRegistrationPage /> },
+                    { path: ROUTES.MY_ASSISTANT_SCHEDULE, element: <MyAssistantSchedulePage /> },
                 ],
             },
             {

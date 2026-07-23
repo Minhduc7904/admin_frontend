@@ -1,0 +1,1 @@
+export { AssistantShiftRegistrationPeriodCalendar } from './AssistantShiftRegistrationPeriodCalendar';

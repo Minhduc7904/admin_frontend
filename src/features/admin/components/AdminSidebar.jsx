@@ -26,6 +26,7 @@ import {
   Workflow,
   History,
   RotateCw,
+  CalendarDays,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -231,6 +232,27 @@ export const AdminSidebar = () => {
           href: ROUTES.CLASSES,
           icon: School,
           permission: PERMISSIONS.ADMIN_PAGE.CLASSES,
+        },
+        {
+          key: 'assistantShifts',
+          name: 'Lịch trợ giảng',
+          href: ROUTES.ASSISTANT_SHIFTS,
+          icon: CalendarDays,
+          permission: PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES,
+        },
+        {
+          key: 'assistantShiftRegistration',
+          name: 'Đăng ký lịch trợ giảng',
+          href: ROUTES.ASSISTANT_SHIFT_REGISTRATION,
+          icon: CalendarDays,
+          permission: PERMISSIONS.ASSISTANT_SHIFT.GET_AVAILABLE_SERIES,
+        },
+        {
+          key: 'myAssistantSchedule',
+          name: 'Lịch của tôi',
+          href: ROUTES.MY_ASSISTANT_SCHEDULE,
+          icon: CalendarDays,
+          permission: PERMISSIONS.ASSISTANT_SHIFT.GET_MY_SCHEDULE,
         },
       ],
     },
