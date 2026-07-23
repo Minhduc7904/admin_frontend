@@ -92,7 +92,7 @@ export const SectionPointsSummaryModal = ({ isOpen, onClose, questions = [], onU
                                     label="Điểm áp dụng cho toàn bộ câu hỏi"
                                     type="number"
                                     min="0"
-                                    step="0.01"
+                                    step="any"
                                     value={pointsOrigin}
                                     error={error}
                                     onChange={(event) => { setPointsOrigin(event.target.value); setError(''); }}

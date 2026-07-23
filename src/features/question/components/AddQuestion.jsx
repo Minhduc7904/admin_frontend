@@ -229,7 +229,7 @@ export const AddQuestion = ({ onClose, loadQuestions }) => {
                             onChange={handleChange}
                             placeholder="VD: 1, 2, 3..."
                             min="0"
-                            step="0.1"
+                            step="any"
                         />
                     </div>
                 </div>

@@ -241,7 +241,7 @@ export const EditTempQuestionPanel = ({
                             name="pointsOrigin"
                             label="Điểm"
                             type="number"
-                            step="0.1"
+                            step="any"
                             min="0"
                             value={formData.pointsOrigin}
                             onChange={(e) => setFormData(p => ({ ...p, pointsOrigin: e.target.value }))}

@@ -274,7 +274,7 @@ export const CreateQuestionModal = ({ isOpen, onClose, sessionId, onSuccess }) =
                                     name="pointsOrigin"
                                     label="Điểm"
                                     type="number"
-                                    step="0.1"
+                                    step="any"
                                     min="0"
                                     value={formData.pointsOrigin}
                                     onChange={handleChange}

@@ -237,7 +237,7 @@ export const ManualSplitTab = ({
                                                 label="Điểm mỗi câu"
                                                 type="number"
                                                 min="0"
-                                                step="0.01"
+                                                step="any"
                                                 required
                                                 value={points[section.id]}
                                                 onChange={(event) => {

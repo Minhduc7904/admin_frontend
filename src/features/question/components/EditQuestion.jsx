@@ -266,7 +266,7 @@ export const EditQuestion = ({ questionId, onClose, loadQuestions }) => {
                             onChange={handleChange}
                             placeholder="VD: 1, 2, 3..."
                             min="0"
-                            step="0.1"
+                            step="any"
                             helperText="Để trống nếu chưa cần đặt điểm; có thể nhập 0."
                         />
                     </div>
