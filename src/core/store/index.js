@@ -58,6 +58,7 @@ import paymentIntentReducer from "../../features/paymentIntent/store/paymentInte
 import assistantShiftReducer from "../../features/assistantShift/store/assistantShiftSlice";
 import assistantShiftRegistrationReducer from "../../features/assistantShiftRegistration/store/assistantShiftRegistrationSlice";
 import myAssistantScheduleReducer from "../../features/myAssistantSchedule/store/myAssistantScheduleSlice";
+import assistantShiftStatisticsReducer from "../../features/assistantShiftStatistics/store/assistantShiftStatisticsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -120,5 +121,6 @@ export const store = configureStore({
     assistantShift: assistantShiftReducer,
     assistantShiftRegistration: assistantShiftRegistrationReducer,
     myAssistantSchedule: myAssistantScheduleReducer,
+    assistantShiftStatistics: assistantShiftStatisticsReducer,
   },
 });

@@ -102,6 +102,7 @@ export const ROUTES = {
   ASSISTANT_SHIFTS: '/assistant-shifts',
   ASSISTANT_SHIFT_REGISTRATION: '/assistant-shift-registration',
   MY_ASSISTANT_SCHEDULE: '/my-assistant-schedule',
+  ASSISTANT_SHIFT_STATISTICS: '/assistant-shift-statistics',
   EXAM_IMPORT_SESSIONS: '/exam-import-sessions',
   EXAM_IMPORT_SESSION_DETAIL: (id = ':id') => `/exam-import-sessions/${id}`,
   EXAM_IMPORT_SESSION_UPLOAD: (id = ':id') => `/exam-import-sessions/${id}/upload`,
@@ -554,6 +555,7 @@ export const API_ENDPOINTS = {
     REGISTER: (id) => `/assistant-shifts/${id}/register`,
     MY_SCHEDULE: '/assistant-shifts/my',
     MY_MONTHLY_STATISTICS: '/assistant-shifts/my/monthly-statistics',
+    STATISTICS: '/assistant-shifts/statistics',
   },
   EXAM_IMPORT_SESSION: {
     LIST: "/exam-import-sessions",
