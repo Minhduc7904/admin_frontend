@@ -1,0 +1,1 @@
+export { AssistantShiftStatisticsPage } from './AssistantShiftStatisticsPage';

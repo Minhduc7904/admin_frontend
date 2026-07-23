@@ -5,8 +5,8 @@ import { handleAsyncThunk } from '../../../shared/utils';
 const getRequest = (call, thunkAPI, errorTitle) => handleAsyncThunk(call, thunkAPI, { showSuccess: false, errorTitle });
 const request = (call, thunkAPI, successTitle, errorTitle) => handleAsyncThunk(call, thunkAPI, { successTitle, errorTitle });
 const initialState = { series: [], shifts: [], loadingSeries: false, loadingShifts: false, actionShiftId: null, error: null };
-export const getAvailableAssistantShiftSeriesAsync = createAsyncThunk('assistantShiftRegistration/getSeries', (_, thunkAPI) => getRequest(() => assistantShiftApi.getAvailableSeries(), thunkAPI, 'Không thể tải chuỗi lịch có thể đăng ký'));
-export const getAvailableAssistantShiftsAsync = createAsyncThunk('assistantShiftRegistration/getShifts', ({ seriesId, params }, thunkAPI) => getRequest(() => assistantShiftApi.getAvailableBySeries(seriesId, params), thunkAPI, 'Không thể tải các ca có thể đăng ký'));
+export const getAvailableAssistantShiftSeriesAsync = createAsyncThunk('assistantShiftRegistration/getSeries', (_, thunkAPI) => getRequest(() => assistantShiftApi.getSeries(), thunkAPI, 'Không thể tải chuỗi lịch có thể đăng ký'));
+export const getAvailableAssistantShiftsAsync = createAsyncThunk('assistantShiftRegistration/getShifts', ({ seriesId, params }, thunkAPI) => getRequest(() => assistantShiftApi.getBySeries(seriesId, params), thunkAPI, 'Không thể tải các ca có thể đăng ký'));
 export const registerAssistantShiftAsync = createAsyncThunk('assistantShiftRegistration/register', (id, thunkAPI) => request(() => assistantShiftApi.register(id), thunkAPI, 'Đã đăng ký ca trợ giảng', 'Không thể đăng ký ca trợ giảng'));
 export const cancelAssistantShiftRegistrationAsync = createAsyncThunk('assistantShiftRegistration/cancel', (id, thunkAPI) => request(() => assistantShiftApi.cancelRegistration(id), thunkAPI, 'Đã hủy đăng ký ca', 'Không thể hủy đăng ký ca'));
 const slice = createSlice({ name: 'assistantShiftRegistration', initialState, reducers: {}, extraReducers: (builder) => builder

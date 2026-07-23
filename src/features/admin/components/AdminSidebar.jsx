@@ -27,6 +27,9 @@ import {
   History,
   RotateCw,
   CalendarDays,
+  CalendarPlus,
+  CalendarCheck2,
+  BarChart3,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -233,26 +236,39 @@ export const AdminSidebar = () => {
           icon: School,
           permission: PERMISSIONS.ADMIN_PAGE.CLASSES,
         },
+      ],
+    },
+
+    {
+      label: 'Lịch trợ giảng',
+      items: [
         {
           key: 'assistantShifts',
-          name: 'Lịch trợ giảng',
+          name: 'Quản lý lịch',
           href: ROUTES.ASSISTANT_SHIFTS,
           icon: CalendarDays,
           permission: PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES,
         },
         {
           key: 'assistantShiftRegistration',
-          name: 'Đăng ký lịch trợ giảng',
+          name: 'Đăng ký lịch',
           href: ROUTES.ASSISTANT_SHIFT_REGISTRATION,
-          icon: CalendarDays,
-          permission: PERMISSIONS.ASSISTANT_SHIFT.GET_AVAILABLE_SERIES,
+          icon: CalendarPlus,
+          permission: PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES,
         },
         {
           key: 'myAssistantSchedule',
           name: 'Lịch của tôi',
           href: ROUTES.MY_ASSISTANT_SCHEDULE,
-          icon: CalendarDays,
+          icon: CalendarCheck2,
           permission: PERMISSIONS.ASSISTANT_SHIFT.GET_MY_SCHEDULE,
+        },
+        {
+          key: 'assistantShiftStatistics',
+          name: 'Thống kê lịch',
+          href: ROUTES.ASSISTANT_SHIFT_STATISTICS,
+          icon: BarChart3,
+          permission: PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_BY_SERIES,
         },
       ],
     },

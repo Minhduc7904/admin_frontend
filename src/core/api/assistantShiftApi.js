@@ -36,4 +36,5 @@ export const assistantShiftApi = {
   cancelRegistration: (id) => axiosClient.delete(API_ENDPOINTS.ASSISTANT_SHIFTS.REGISTER(id)),
   getMySchedule: (params) => axiosClient.get(API_ENDPOINTS.ASSISTANT_SHIFTS.MY_SCHEDULE, { params }),
   getMyMonthlyStatistics: () => axiosClient.get(API_ENDPOINTS.ASSISTANT_SHIFTS.MY_MONTHLY_STATISTICS),
+  getStatistics: (params) => axiosClient.get(API_ENDPOINTS.ASSISTANT_SHIFTS.STATISTICS, { params }),
 };

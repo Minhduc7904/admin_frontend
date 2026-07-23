@@ -77,8 +77,10 @@ import { BackgroundJobListPage } from '../features/backgroundJob/pages';
 import { BackgroundJobRunListPage } from '../features/backgroundJobRun/pages';
 import { SepayTransactionSyncCursorPage } from '../features/sepayTransactionSyncCursor/pages';
 import { AssistantShiftCalendarPage } from '../features/assistantShift/pages';
+import { AssistantShiftWorkspaceLayout } from '../features/assistantShift/layouts/AssistantShiftWorkspaceLayout';
 import { AssistantShiftRegistrationPage } from '../features/assistantShiftRegistration/pages';
 import { MyAssistantSchedulePage } from '../features/myAssistantSchedule/pages';
+import { AssistantShiftStatisticsPage } from '../features/assistantShiftStatistics/pages';
 import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
 import { ExamListPage, MyExamListPage } from '../features/exam/pages';
@@ -466,14 +468,6 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES} />,
-                children: [
-                    { path: ROUTES.ASSISTANT_SHIFTS, element: <AssistantShiftCalendarPage /> },
-                    { path: ROUTES.ASSISTANT_SHIFT_REGISTRATION, element: <AssistantShiftRegistrationPage /> },
-                    { path: ROUTES.MY_ASSISTANT_SCHEDULE, element: <MyAssistantSchedulePage /> },
-                ],
-            },
-            {
                 element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.EXAM_IMPORT_SESSIONS} />,
                 children: [
                     {
@@ -714,6 +708,40 @@ export const adminRouter = [
                                 path: 'preview',
                                 element: <ExamPreview />,
                             },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        element: <ProtectedRoute />,
+        children: [
+            {
+                element: <AssistantShiftWorkspaceLayout />,
+                children: [
+                    {
+                        element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES} />,
+                        children: [
+                            { path: ROUTES.ASSISTANT_SHIFTS, element: <AssistantShiftCalendarPage /> },
+                        ],
+                    },
+                    {
+                        element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES} />,
+                        children: [
+                            { path: ROUTES.ASSISTANT_SHIFT_REGISTRATION, element: <AssistantShiftRegistrationPage /> },
+                        ],
+                    },
+                    {
+                        element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_MY_SCHEDULE} />,
+                        children: [
+                            { path: ROUTES.MY_ASSISTANT_SCHEDULE, element: <MyAssistantSchedulePage /> },
+                        ],
+                    },
+                    {
+                        element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_BY_SERIES} />,
+                        children: [
+                            { path: ROUTES.ASSISTANT_SHIFT_STATISTICS, element: <AssistantShiftStatisticsPage /> },
                         ],
                     },
                 ],
