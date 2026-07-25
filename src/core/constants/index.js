@@ -546,6 +546,7 @@ export const API_ENDPOINTS = {
     SERIES_DETAIL: (id) => `/assistant-shift-series/${id}`,
     SHIFTS: '/assistant-shifts',
     ASSISTANTS: '/assistant-shifts/assistants',
+    MULTI_SERIES_SHIFTS: '/assistant-shifts/series',
     SHIFTS_BY_SERIES: (seriesId) => `/assistant-shifts/series/${seriesId}`,
     AVAILABLE_SHIFTS_BY_SERIES: (seriesId) => `/assistant-shifts/series/${seriesId}/available`,
     BASE_SHIFTS_BY_SERIES: (seriesId) => `/assistant-shifts/series/${seriesId}/base`,

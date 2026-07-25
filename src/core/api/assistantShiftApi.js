@@ -7,9 +7,9 @@ export const assistantShiftApi = {
   createSeries: (data) => axiosClient.post(API_ENDPOINTS.ASSISTANT_SHIFTS.SERIES, data),
   updateSeries: (id, data) => axiosClient.put(API_ENDPOINTS.ASSISTANT_SHIFTS.SERIES_DETAIL(id), data),
   deleteSeries: (id) => axiosClient.delete(API_ENDPOINTS.ASSISTANT_SHIFTS.SERIES_DETAIL(id)),
-  getBySeries: (seriesId, params) => axiosClient.get(
-    API_ENDPOINTS.ASSISTANT_SHIFTS.SHIFTS_BY_SERIES(seriesId),
-    { params },
+  getBySeries: (assistantShiftSeriesIds, params) => axiosClient.get(
+    API_ENDPOINTS.ASSISTANT_SHIFTS.MULTI_SERIES_SHIFTS,
+    { params, data: { assistantShiftSeriesIds } },
   ),
   getAvailableBySeries: (seriesId, params) => axiosClient.get(
     API_ENDPOINTS.ASSISTANT_SHIFTS.AVAILABLE_SHIFTS_BY_SERIES(seriesId),
