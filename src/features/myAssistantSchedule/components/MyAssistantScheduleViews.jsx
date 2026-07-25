@@ -7,6 +7,7 @@ const timeLabel = (value) => new Date(value).toLocaleTimeString('vi-VN', { hour:
 const isToday = (date) => dateKey(date) === dateKey(new Date());
 const assignmentOfMine = (shift) => shift.assignments?.[0];
 const statusStyle = { PENDING: 'border-amber-300 bg-amber-50 text-amber-950', PRESENT: 'border-emerald-300 bg-emerald-50 text-emerald-950', ABSENT: 'border-red-300 bg-red-50 text-red-950' };
+const LANE_WIDTH = 210;
 
 const groupOverlapping = (items) => {
   const sorted = [...items].sort((a, b) => new Date(a.startAt) - new Date(b.startAt)); const groups = [];
@@ -22,7 +23,7 @@ const groupOverlapping = (items) => {
 
 export const MyAssistantShiftCard = ({ shift, compact = false }) => {
   const assignment = assignmentOfMine(shift); const status = assignment?.attendanceStatus || 'PENDING';
-  return <article className={`rounded-lg border p-2 shadow-sm ${statusStyle[status] || statusStyle.PENDING}`}><div className="flex items-start justify-between gap-1"><p className={`font-semibold ${compact ? 'line-clamp-1 text-[11px]' : 'text-sm'}`}>{shift.name}</p>{shift.isLocked && <LockKeyhole className="mt-0.5 h-3 w-3 shrink-0 text-amber-700" />}</div><p className="mt-0.5 text-[10px] font-medium opacity-75">{timeLabel(shift.startAt)} – {timeLabel(shift.endAt)}</p>{!compact && <><p className="mt-1 truncate text-xs opacity-75">{shift.courseClass?.name || shift.courseClass?.className || shift.series?.name}</p><div className="mt-2 flex items-center gap-1.5"><AssistantShiftAvatar admin={assignment?.admin} status={status} sizeClass="h-5 w-5" textClass="text-[8px]" /><span className="text-[11px] font-medium">{status === 'PRESENT' ? 'Có mặt' : status === 'ABSENT' ? 'Vắng' : 'Chờ xác nhận'}</span></div></>}</article>;
+  return <article className={`rounded-lg border p-2 shadow-sm ${statusStyle[status] || statusStyle.PENDING}`}><div className="flex items-start justify-between gap-1"><p title={shift.name} className={`min-w-0 font-semibold ${compact ? 'line-clamp-1 text-[11px]' : 'line-clamp-2 text-sm leading-snug'}`}>{shift.name}</p>{shift.isLocked && <LockKeyhole className="mt-0.5 h-3 w-3 shrink-0 text-amber-700" />}</div><p className="mt-0.5 text-[10px] font-medium opacity-75">{timeLabel(shift.startAt)} – {timeLabel(shift.endAt)}</p>{!compact && <><p title={shift.courseClass?.name || shift.courseClass?.className || shift.series?.name} className="mt-1 line-clamp-2 text-xs opacity-75">{shift.courseClass?.name || shift.courseClass?.className || shift.series?.name}</p><div className="mt-2 flex items-center gap-1.5"><AssistantShiftAvatar admin={assignment?.admin} status={status} sizeClass="h-5 w-5" textClass="text-[8px]" /><span className="text-[11px] font-medium">{status === 'PRESENT' ? 'Có mặt' : status === 'ABSENT' ? 'Vắng' : 'Chờ xác nhận'}</span></div></>}</article>;
 };
 
 export const MyAssistantWeekView = ({ days, shifts, loading }) => {
@@ -31,14 +32,14 @@ export const MyAssistantWeekView = ({ days, shifts, loading }) => {
     const groups = groupOverlapping(items);
     return groups.reduce((max, group) => Math.max(max, group.length), 1);
   });
-  const template = layouts.map((lanes) => `minmax(${Math.max(140, lanes * 155)}px, 1fr)`).join(' ');
-  const minWidth = `${layouts.reduce((sum, lanes) => sum + Math.max(140, lanes * 155), 0)}px`;
+  const template = layouts.map((lanes) => `minmax(${lanes * LANE_WIDTH}px, 1fr)`).join(' ');
+  const minWidth = `${layouts.reduce((sum, lanes) => sum + lanes * LANE_WIDTH, 0)}px`;
 
   return (
     <section className="relative min-h-0 flex-1 overflow-auto rounded-xl border border-border bg-white shadow-sm">
       <div style={{ minWidth }}>
         <div className="grid divide-x divide-border" style={{ gridTemplateColumns: template }}>
-          {days.map((day, index) => {
+          {days.map((day) => {
             const items = shifts.filter((shift) => dateKey(shift.startAt) === dateKey(day)).sort((a, b) => new Date(a.startAt) - new Date(b.startAt));
             return (
               <div key={dateKey(day)} className="min-h-[650px] bg-gray-50/30">

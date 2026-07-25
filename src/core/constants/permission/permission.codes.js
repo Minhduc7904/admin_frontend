@@ -254,6 +254,7 @@ export const PERMISSIONS = {
     CREATE: 'payment-intent:create',
   },
   ASSISTANT_SHIFT: {
+    GET_ASSISTANTS: 'assistant-shift:get-assistants',
     GET_AVAILABLE_SERIES: 'assistant-shift:get-available-series',
     GET_ALL_SERIES: 'assistant-shift:get-all-series',
     CREATE_SERIES: 'assistant-shift:create-series',

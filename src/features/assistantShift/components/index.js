@@ -6,3 +6,4 @@ export { AssistantShiftCalendarStats } from './AssistantShiftCalendarStats';
 export { AssistantShiftAvatar } from './AssistantShiftAvatar';
 export { AssistantShiftBaseCalendar } from './AssistantShiftBaseCalendar';
 export { AssistantShiftBaseDrawer } from './AssistantShiftBaseDrawer';
+export { AssistantSearchSelect } from './AssistantSearchSelect';
