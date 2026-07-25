@@ -168,9 +168,11 @@ export const TuitionPaymentDetailInfo = ({
             (transaction) => transaction.reconciliationStatus === 'ADMIN',
         ),
     ) || []
-    const canEditManualReconciliation = payment.status === 'PAID'
-    const canUnreconcileManualPayment = payment.status === 'PAID' && Boolean(payment.paymentIntent)
+    const canEditManualReconciliation = payment.status === 'PAID' && Boolean(payment.paymentIntent)
+    const canUnreconcileManualPayment = payment.status === 'PAID'
     const canCreateIntent = canCreatePaymentIntent && payment.status === 'UNPAID' && !payment.paymentIntent
+    const canManageReconciliationActions = canManageManualReconciliation
+        && (canEditManualReconciliation || canUnreconcileManualPayment)
 
     if (loading) {
         return <div className="p-6 text-center text-sm text-foreground-light">Đang tải chi tiết học phí và dữ liệu đối soát…</div>
@@ -181,15 +183,17 @@ export const TuitionPaymentDetailInfo = ({
             <section className="bg-white border border-border rounded-lg p-4">
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                     <h3 className="text-lg font-semibold text-foreground">Thông tin học phí</h3>
-                    {(canCreateIntent || (canManageManualReconciliation && canEditManualReconciliation)) && (
+                    {(canCreateIntent || canManageReconciliationActions) && (
                         <div className="flex flex-wrap gap-2">
                             {canCreateIntent && <Button variant="outline" size="sm" onClick={() => onCreatePaymentIntent(payment)} loading={creatingPaymentIntent}>
                                 <PlusCircle className="h-4 w-4" /> Tạo payment intent
                             </Button>}
-                            <Button variant="outline" size="sm" onClick={() => onEditManualReconciliation(payment, manuallyReconciledTransactions)} disabled={reconciliationLoading}>
-                                <Pencil className="h-4 w-4" /> Sửa đối soát
-                            </Button>
-                            {canUnreconcileManualPayment && <Button variant="outline" size="sm" onClick={() => onUnreconcileManualPayment(payment)} disabled={reconciliationLoading}>
+                            {canManageManualReconciliation && canEditManualReconciliation && (
+                                <Button variant="outline" size="sm" onClick={() => onEditManualReconciliation(payment, manuallyReconciledTransactions)} disabled={reconciliationLoading}>
+                                    <Pencil className="h-4 w-4" /> Sửa đối soát
+                                </Button>
+                            )}
+                            {canManageManualReconciliation && canUnreconcileManualPayment && <Button variant="outline" size="sm" onClick={() => onUnreconcileManualPayment(payment)} disabled={reconciliationLoading}>
                                 <Undo2 className="h-4 w-4" /> Bỏ đối soát
                             </Button>}
                         </div>

@@ -44,6 +44,8 @@ export const ROUTES = {
   ADMIN_MEDIA: (id = ':id') => `/admins/${id}/media`,
   ADMIN_AUDIT_LOGS: (id = ':id') => `/admins/${id}/audit-logs`,
   STUDENTS: '/students',
+  ONLINE_STUDENTS: '/students/online',
+  OFFLINE_STUDENTS: '/students/offline',
   STUDENT_DETAIL: (id = ':id') => `/students/${id}`,
   STUDENT_ROLES: (id = ':id') => `/students/${id}/roles`,
   STUDENT_MEDIA: (id = ':id') => `/students/${id}/media`,

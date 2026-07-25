@@ -1,7 +1,7 @@
-import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Clock3, Hourglass, RefreshCw, UserCheck, UserX, UsersRound } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '../../../shared/components/ui';
+import { Button, Table } from '../../../shared/components/ui';
 import { AssistantShiftMiniCalendar } from '../../assistantShift/components';
 import {
   getAssistantShiftStatisticsAsync,
@@ -10,103 +10,136 @@ import {
   selectAssistantShiftStatisticsLoading,
 } from '../store/assistantShiftStatisticsSlice';
 
-const mondayOf = (value) => { const date = new Date(value); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() - ((date.getDay() + 6) % 7)); return date; };
-const addDays = (date, days) => { const next = new Date(date); next.setDate(next.getDate() + days); return next; };
+const mondayOf = (value) => {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+  return date;
+};
+const addDays = (date, days) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
 const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
 const endOfMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
 const dayString = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 const dateLabel = (date) => `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 const formatNumber = (value) => Number(value || 0).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
-const formatHours = (value) => `${formatNumber(value)} giờ`;
-const initials = (name = '') => name.split(' ').filter(Boolean).slice(-2).map((part) => part[0]).join('').toUpperCase() || 'TG';
-const assistantTotalHours = (item) => Number(item.workedHours || 0) + Number(item.absentHours || 0) + Number(item.pendingHours || 0);
 
-const SummaryCard = ({ children, label, value, tone }) => (
-  <div className="rounded-lg border border-border bg-white p-4 shadow-sm">
-    <div className="flex items-center justify-between gap-3">
-      <p className="text-sm font-medium text-foreground-light">{label}</p>
-      <span className={`flex h-9 w-9 items-center justify-center rounded-full ${tone}`}>
-        {children}
-      </span>
-    </div>
-    <p className="mt-3 text-2xl font-semibold text-foreground">{value}</p>
-  </div>
-);
+const groupClasses = (tone) => ({
+  start: `border-l-2 border-slate-800 ${tone} font-bold`,
+  end: `border-r-2 border-slate-800 ${tone} font-bold`,
+});
+const TOTAL_GROUP = groupClasses('bg-slate-50 text-foreground');
+const PENDING_GROUP = groupClasses('bg-blue-50 text-blue-800');
+const PRESENT_GROUP = groupClasses('bg-emerald-50 text-emerald-800');
+const ABSENT_GROUP = groupClasses('bg-red-50 text-red-800');
+const SUNDAY_GROUP = groupClasses('bg-amber-50 text-amber-800');
+const HOURS = (value) => <span className="whitespace-nowrap">{formatNumber(value)} giờ</span>;
 
-const AssistantStatisticCard = ({ assistant, rank, maxHours }) => {
-  const worked = Number(assistant.workedHours || 0);
-  const absent = Number(assistant.absentHours || 0);
-  const pending = Number(assistant.pendingHours || 0);
-  const total = worked + absent + pending;
-  const completed = worked + absent;
-  const attendanceRate = completed ? Math.round((worked / completed) * 100) : 0;
-  const loadPercent = maxHours ? Math.round((total / maxHours) * 100) : 0;
-  const width = (value) => total && value ? `${Math.max(4, (value / total) * 100)}%` : '0%';
-
-  return (
-    <article className="rounded-lg border border-border bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
-            {initials(assistant.fullName)}
-          </span>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="truncate text-base font-semibold text-foreground">{assistant.fullName || `Admin #${assistant.adminId}`}</p>
-              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-foreground-light">#{rank}</span>
-            </div>
-            <p className="mt-1 text-xs text-foreground-light">Admin ID {assistant.adminId} · User ID {assistant.userId || '—'}</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 text-right sm:grid-cols-4 lg:min-w-[420px]">
-          <div>
-            <p className="text-[11px] font-medium uppercase text-foreground-light">Ca đăng ký</p>
-            <p className="mt-1 text-lg font-semibold text-foreground">{assistant.registeredShiftCount || 0}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-medium uppercase text-foreground-light">Tổng giờ</p>
-            <p className="mt-1 text-lg font-semibold text-blue-700">{formatNumber(total)}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-medium uppercase text-foreground-light">Có mặt</p>
-            <p className="mt-1 text-lg font-semibold text-emerald-700">{formatNumber(worked)}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-medium uppercase text-foreground-light">Tỷ lệ</p>
-            <p className="mt-1 text-lg font-semibold text-foreground">{completed ? `${attendanceRate}%` : '—'}</p>
-          </div>
-        </div>
+const columns = [
+  {
+    key: 'fullName',
+    label: 'Tên trợ giảng',
+    width: 220,
+    headerClassName: 'sticky left-0 z-10 bg-white',
+    className: 'sticky left-0 z-10 bg-white font-semibold text-foreground group-hover:bg-gray-50',
+    render: (assistant) => (
+      <div className="min-w-44">
+        <p>{assistant.fullName || `Trợ giảng #${assistant.adminId}`}</p>
+        <p className="mt-0.5 text-xs font-normal text-foreground-light">Mã trợ giảng: {assistant.adminId}</p>
       </div>
-
-      <div className="mt-4">
-        <div className="mb-2 flex items-center justify-between gap-3 text-xs text-foreground-light">
-          <span>Mức tải so với người nhiều giờ nhất</span>
-          <span>{loadPercent}%</span>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-          <div className="h-full rounded-full bg-blue-600" style={{ width: `${loadPercent}%` }} />
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <div className="mb-2 flex items-center justify-between gap-3 text-xs text-foreground-light">
-          <span>Phân bổ giờ theo trạng thái</span>
-          <span>{total ? formatHours(total) : 'Chưa có ca'}</span>
-        </div>
-        <div className="flex h-3 overflow-hidden rounded-full bg-gray-100">
-          <span title={`Có mặt ${formatHours(worked)}`} className="bg-emerald-500" style={{ width: width(worked) }} />
-          <span title={`Vắng ${formatHours(absent)}`} className="bg-rose-500" style={{ width: width(absent) }} />
-          <span title={`Chờ ${formatHours(pending)}`} className="bg-amber-400" style={{ width: width(pending) }} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs">
-          <span className="inline-flex items-center gap-1.5 text-emerald-700"><span className="h-2 w-2 rounded-full bg-emerald-500" />Có mặt {formatNumber(worked)}</span>
-          <span className="inline-flex items-center gap-1.5 text-rose-700"><span className="h-2 w-2 rounded-full bg-rose-500" />Vắng {formatNumber(absent)}</span>
-          <span className="inline-flex items-center gap-1.5 text-amber-700"><span className="h-2 w-2 rounded-full bg-amber-400" />Chờ {formatNumber(pending)}</span>
-        </div>
-      </div>
-    </article>
-  );
-};
+    ),
+  },
+  {
+    key: 'totalAssignmentCount',
+    label: 'Tổng lượt phân công',
+    align: 'right',
+    headerClassName: TOTAL_GROUP.start,
+    className: TOTAL_GROUP.start,
+    render: (assistant) => formatNumber(assistant.totalAssignmentCount ?? assistant.registeredShiftCount),
+  },
+  {
+    key: 'totalHours',
+    label: 'Tổng số giờ',
+    align: 'right',
+    headerClassName: TOTAL_GROUP.end,
+    className: TOTAL_GROUP.end,
+    render: (assistant) => HOURS(assistant.totalHours),
+  },
+  {
+    key: 'pendingAssignmentCount',
+    label: 'Chờ xác nhận · lượt',
+    align: 'right',
+    headerClassName: PENDING_GROUP.start,
+    className: PENDING_GROUP.start,
+    render: (assistant) => formatNumber(assistant.pendingAssignmentCount),
+  },
+  {
+    key: 'pendingHours',
+    label: 'Chờ xác nhận · giờ',
+    align: 'right',
+    headerClassName: PENDING_GROUP.end,
+    className: PENDING_GROUP.end,
+    render: (assistant) => HOURS(assistant.pendingHours),
+  },
+  {
+    key: 'presentAssignmentCount',
+    label: 'Có mặt · lượt',
+    align: 'right',
+    headerClassName: PRESENT_GROUP.start,
+    className: PRESENT_GROUP.start,
+    render: (assistant) => formatNumber(assistant.presentAssignmentCount),
+  },
+  {
+    key: 'presentHours',
+    label: 'Có mặt · giờ',
+    align: 'right',
+    headerClassName: PRESENT_GROUP.end,
+    className: PRESENT_GROUP.end,
+    render: (assistant) => HOURS(assistant.presentHours ?? assistant.workedHours),
+  },
+  {
+    key: 'absentAssignmentCount',
+    label: 'Vắng · lượt',
+    align: 'right',
+    headerClassName: ABSENT_GROUP.start,
+    className: ABSENT_GROUP.start,
+    render: (assistant) => formatNumber(assistant.absentAssignmentCount),
+  },
+  {
+    key: 'absentHours',
+    label: 'Vắng · giờ',
+    align: 'right',
+    headerClassName: ABSENT_GROUP.end,
+    className: ABSENT_GROUP.end,
+    render: (assistant) => HOURS(assistant.absentHours),
+  },
+  {
+    key: 'sundayPresentAssignmentCount',
+    label: 'Có mặt Chủ nhật · lượt',
+    align: 'right',
+    headerClassName: SUNDAY_GROUP.start,
+    className: SUNDAY_GROUP.start,
+    render: (assistant) => formatNumber(assistant.sundayPresentAssignmentCount),
+  },
+  {
+    key: 'sundayPresentHours',
+    label: 'Có mặt Chủ nhật · giờ',
+    align: 'right',
+    headerClassName: SUNDAY_GROUP.end,
+    className: SUNDAY_GROUP.end,
+    render: (assistant) => HOURS(assistant.sundayPresentHours),
+  },
+  {
+    key: 'presentWorkDayCount',
+    label: 'Số ngày có mặt',
+    align: 'right',
+    className: 'font-bold text-foreground',
+    render: (assistant) => formatNumber(assistant.presentWorkDayCount),
+  },
+];
 
 export const AssistantShiftStatisticsPage = () => {
   const dispatch = useDispatch();
@@ -117,32 +150,23 @@ export const AssistantShiftStatisticsPage = () => {
   const [cursor, setCursor] = useState(() => new Date());
 
   const range = useMemo(() => {
-    if (mode === 'month') {
-      return { start: startOfMonth(cursor), end: endOfMonth(cursor) };
-    }
+    if (mode === 'month') return { start: startOfMonth(cursor), end: endOfMonth(cursor) };
     const start = mondayOf(cursor);
     return { start, end: addDays(start, 6) };
   }, [cursor, mode]);
 
   const params = useMemo(() => ({ startAt: dayString(range.start), endAt: dayString(range.end) }), [range]);
-  const assistants = useMemo(() => {
-    const items = statistics?.assistants || [];
-    return [...items].sort((first, second) => (
-      assistantTotalHours(second) - assistantTotalHours(first)
-      || Number(second.registeredShiftCount || 0) - Number(first.registeredShiftCount || 0)
-      || String(first.fullName || '').localeCompare(String(second.fullName || ''), 'vi')
-    ));
-  }, [statistics]);
-  const totals = useMemo(() => assistants.reduce((acc, item) => ({
-    registeredShiftCount: acc.registeredShiftCount + Number(item.registeredShiftCount || 0),
-    workedHours: acc.workedHours + Number(item.workedHours || 0),
-    absentHours: acc.absentHours + Number(item.absentHours || 0),
-    pendingHours: acc.pendingHours + Number(item.pendingHours || 0),
-  }), { registeredShiftCount: 0, workedHours: 0, absentHours: 0, pendingHours: 0 }), [assistants]);
-  const maxHours = useMemo(() => assistants.reduce((max, item) => Math.max(max, assistantTotalHours(item)), 0), [assistants]);
-  const title = mode === 'month' ? `Tháng ${cursor.getMonth() + 1}/${cursor.getFullYear()}` : `${dateLabel(range.start)} - ${dateLabel(range.end)}`;
+  const assistants = useMemo(() => [...(statistics?.assistants || [])]
+    .sort((first, second) => String(first.fullName || '').localeCompare(String(second.fullName || ''), 'vi')),
+  [statistics]);
+  const title = mode === 'month'
+    ? `Tháng ${cursor.getMonth() + 1}/${cursor.getFullYear()}`
+    : `${dateLabel(range.start)} - ${dateLabel(range.end)}`;
 
-  const loadStatistics = useCallback(() => dispatch(getAssistantShiftStatisticsAsync(params)), [dispatch, params]);
+  const loadStatistics = useCallback(
+    () => dispatch(getAssistantShiftStatisticsAsync(params)),
+    [dispatch, params],
+  );
   useEffect(() => { loadStatistics(); }, [loadStatistics]);
 
   const move = (offset) => setCursor((current) => (
@@ -152,7 +176,7 @@ export const AssistantShiftStatisticsPage = () => {
   ));
   const changeMode = (nextMode) => {
     setMode(nextMode);
-    setCursor((current) => nextMode === 'month' ? startOfMonth(current) : mondayOf(current));
+    setCursor((current) => (nextMode === 'month' ? startOfMonth(current) : mondayOf(current)));
   };
 
   return (
@@ -161,7 +185,7 @@ export const AssistantShiftStatisticsPage = () => {
         <div>
           <p className="text-sm font-medium text-blue-600">THỐNG KÊ NHÂN SỰ</p>
           <h1 className="mt-1 text-2xl font-semibold text-foreground">Thống kê lịch trợ giảng</h1>
-          <p className="mt-1 text-sm text-foreground-light">Theo dõi số ca, giờ làm và trạng thái điểm danh của từng trợ giảng.</p>
+          <p className="mt-1 text-sm text-foreground-light">Theo dõi số lượt phân công, giờ làm và điểm danh của từng trợ giảng.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>Hôm nay</Button>
@@ -198,51 +222,27 @@ export const AssistantShiftStatisticsPage = () => {
             onSelectMonth={setCursor}
           />
           <div className="mt-4 rounded-lg border border-dashed border-border p-3 text-xs text-foreground-light">
-            <p className="font-semibold text-foreground">Khoảng gửi API</p>
-            <p className="mt-1">startAt: {params.startAt}</p>
-            <p>endAt: {params.endAt}</p>
+            <p className="font-semibold text-foreground">Khoảng thời gian thống kê</p>
+            <p className="mt-1">Từ ngày: {params.startAt}</p>
+            <p>Đến ngày: {params.endAt}</p>
           </div>
         </aside>
 
-        <main className="min-w-0 space-y-5">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <SummaryCard label="Trợ giảng" value={loading ? '—' : assistants.length} tone="bg-indigo-50 text-indigo-700"><UsersRound className="h-4 w-4" /></SummaryCard>
-            <SummaryCard label="Tổng ca đăng ký" value={loading ? '—' : totals.registeredShiftCount} tone="bg-blue-50 text-blue-700"><BarChart3 className="h-4 w-4" /></SummaryCard>
-            <SummaryCard label="Giờ có mặt" value={loading ? '—' : formatHours(totals.workedHours)} tone="bg-emerald-50 text-emerald-700"><UserCheck className="h-4 w-4" /></SummaryCard>
-            <SummaryCard label="Tổng giờ ghi nhận" value={loading ? '—' : formatHours(totals.workedHours + totals.absentHours + totals.pendingHours)} tone="bg-amber-50 text-amber-700"><Clock3 className="h-4 w-4" /></SummaryCard>
+        <section className="min-w-0 rounded-lg border border-border bg-white shadow-sm">
+          <div className="border-b border-border px-4 py-4">
+            <h2 className="text-lg font-semibold text-foreground">Bảng thống kê trợ giảng</h2>
+            <p className="mt-1 text-sm text-foreground-light">{title} · Bao gồm cả trợ giảng chưa được phân công ca trong khoảng thời gian này.</p>
           </div>
-
-          <section className="rounded-lg border border-border bg-gray-50/60 p-4">
-            <div className="flex flex-col gap-3 border-b border-border pb-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Hiệu suất trợ giảng</h2>
-                <p className="mt-1 text-sm text-foreground-light">{title} · dữ liệu gồm cả trợ giảng chưa có assignment.</p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700"><UserCheck className="h-3.5 w-3.5" />Có mặt {formatHours(totals.workedHours)}</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 font-medium text-rose-700"><UserX className="h-3.5 w-3.5" />Vắng {formatHours(totals.absentHours)}</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-700"><Hourglass className="h-3.5 w-3.5" />Chờ {formatHours(totals.pendingHours)}</span>
-              </div>
-            </div>
-
-            <div className="relative mt-4 space-y-3">
-              {assistants.map((assistant, index) => (
-                <AssistantStatisticCard key={assistant.adminId} assistant={assistant} rank={index + 1} maxHours={maxHours} />
-              ))}
-              {!loading && !assistants.length && (
-                <div className="rounded-lg border border-dashed border-border bg-white p-8 text-center">
-                  <p className="text-base font-semibold text-foreground">Chưa có dữ liệu trợ giảng</p>
-                  <p className="mt-1 text-sm text-foreground-light">API không trả trợ giảng nào trong khoảng đang chọn.</p>
-                </div>
-              )}
-              {loading && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center rounded-lg bg-slate-950/20">
-                  <span className="rounded-lg bg-white px-4 py-3 text-sm font-medium shadow">Đang tải thống kê...</span>
-                </div>
-              )}
-            </div>
-          </section>
-        </main>
+          <Table
+            columns={columns}
+            data={assistants}
+            loading={loading}
+            emptyMessage="Chưa có dữ liệu trợ giảng"
+            emptySubMessage="Không có trợ giảng nào trong khoảng thời gian đang chọn."
+            emptyIcon="users"
+            rowClassName="whitespace-nowrap"
+          />
+        </section>
       </div>
     </div>
   );

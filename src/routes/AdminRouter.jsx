@@ -64,7 +64,7 @@ import { StudentPointLogPage } from '../features/studentPointLog/pages';
 import { AdminLayout, AdminProfileLayout } from '../features/admin/layouts';
 import { StudentProfileLayout } from '../features/student/layouts';
 import { ROUTES } from '../core/constants';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
@@ -211,7 +211,15 @@ export const adminRouter = [
                 children: [
                     {
                         path: ROUTES.STUDENTS,
-                        element: <StudentList />,
+                        element: <Navigate to={ROUTES.ONLINE_STUDENTS} replace />,
+                    },
+                    {
+                        path: ROUTES.ONLINE_STUDENTS,
+                        element: <StudentList studentType="ONLINE" />,
+                    },
+                    {
+                        path: ROUTES.OFFLINE_STUDENTS,
+                        element: <StudentList studentType="OFFLINE" />,
                     },
                 ],
             },

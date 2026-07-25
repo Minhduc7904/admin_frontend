@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Plus, Download, Layers3 } from 'lucide-react'
 
 import { Button, RightPanel } from '../../../shared/components'
-import { Pagination, Modal } from '../../../shared/components/ui'
+import { Pagination, Modal, QrCodeShare } from '../../../shared/components/ui'
 import { useSearch, useDebounce, useHasPermission } from '../../../shared/hooks'
 import { PERMISSIONS } from '../../../core/constants/permission/permission.codes'
 import { createPaymentIntentForTuitionPaymentAsync, createPaymentIntentsForGradePeriodAsync, selectPaymentIntentCreatingBulk, selectPaymentIntentCreatingTuitionPaymentId } from '../../paymentIntent/store/paymentIntentSlice'
@@ -94,6 +94,7 @@ export const TuitionPaymentList = () => {
     const [openManualReconciliationModal, setOpenManualReconciliationModal] = useState(false)
     const [openUnreconcileModal, setOpenUnreconcileModal] = useState(false)
     const [openPaymentIntentsBulkModal, setOpenPaymentIntentsBulkModal] = useState(false)
+    const [qrPayment, setQrPayment] = useState(null)
     const [reconciliationPayment, setReconciliationPayment] = useState(null)
     const [reconciliationTransactions, setReconciliationTransactions] = useState([])
     const [selectedPayment, setSelectedPayment] = useState(null)
@@ -355,6 +356,17 @@ export const TuitionPaymentList = () => {
         }
     }
 
+    const getPaymentPageLink = (payment) => {
+        const studentParentPhone = payment.student?.parentPhone || payment.studentParentPhone
+        const paymentIntentId = payment.paymentIntent?.paymentIntentId || payment.paymentIntentId
+
+        if (!payment.studentId || !studentParentPhone || !payment.paymentId || !paymentIntentId) {
+            return ''
+        }
+
+        return `https://beeedu.vn/hoc-phi/student/${encodeURIComponent(payment.studentId)}/${encodeURIComponent(studentParentPhone)}/${encodeURIComponent(payment.paymentId)}/${encodeURIComponent(paymentIntentId)}`
+    }
+
     /* ===================== EXPORT LIST ===================== */
     const handleExportList = async (exportOptions) => {
         try {
@@ -453,6 +465,7 @@ export const TuitionPaymentList = () => {
                     canCreatePaymentIntent={canCreatePaymentIntent}
                     onCreatePaymentIntent={createPaymentIntent}
                     creatingPaymentIntentId={creatingPaymentIntentId}
+                    onGeneratePaymentPageQr={setQrPayment}
                 />
 
                 {/* ===================== PAGINATION + PANEL ===================== */}
@@ -535,6 +548,29 @@ export const TuitionPaymentList = () => {
                 loading={creatingPaymentIntentsBulk}
                 initialValues={{ grade, month, year }}
             />
+
+            <Modal
+                isOpen={Boolean(qrPayment)}
+                onClose={() => setQrPayment(null)}
+                title="QR trang thanh toán"
+            >
+                {qrPayment && (
+                    <div className="space-y-4">
+                        <p className="text-sm text-foreground-light">
+                            Quét mã này để mở trang thanh toán của học sinh. Đây không phải mã QR thanh toán ngân hàng.
+                        </p>
+                        <QrCodeShare link={getPaymentPageLink(qrPayment)} />
+                        <a
+                            href={getPaymentPageLink(qrPayment)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block break-all text-sm text-primary underline"
+                        >
+                            {getPaymentPageLink(qrPayment)}
+                        </a>
+                    </div>
+                )}
+            </Modal>
 
             <ManualTuitionPaymentModal
                 key={selectedPayment?.paymentId || 'no-payment'}

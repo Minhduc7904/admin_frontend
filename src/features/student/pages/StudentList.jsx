@@ -18,6 +18,7 @@ import {
     getStudentStatsByGradeAsync,
     selectShowStats,
     setShowStats,
+    setAddStudentFormData,
     exportStudentListAsync,
     selectStudentLoadingExport,
 } from '../store/studentSlice'
@@ -61,7 +62,7 @@ import { CanAccess } from '../../../shared/components/permissions'
  *   → Quyền xuất danh sách học sinh ra file Excel
  */
 
-export const StudentList = () => {
+export const StudentList = ({ studentType: fixedStudentType }) => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
@@ -85,7 +86,7 @@ export const StudentList = () => {
     const [itemsPerPage, setItemsPerPage] = useState(pagination.limit || 10)
 
     const [selectedGrade, setSelectedGrade] = useState(filters.grade || '')
-    const [selectedStudentType, setSelectedStudentType] = useState(filters.studentType || '')
+    const [selectedStudentType, setSelectedStudentType] = useState(fixedStudentType || filters.studentType || '')
     const [selectedGraduationYear, setSelectedGraduationYear] = useState(filters.highSchoolGraduationYear || '')
     const [selectedIsActive, setSelectedIsActive] = useState(filters.isActive || '')
     const [selectedHasParentZaloId, setSelectedHasParentZaloId] = useState(filters.hasParentZaloId || '')
@@ -101,11 +102,12 @@ export const StudentList = () => {
     const [openAddStudentRightPanel, setOpenAddStudentRightPanel] = useState(false)
     const [quickAttendanceStudent, setQuickAttendanceStudent] = useState(null)
 
+    const effectiveStudentType = fixedStudentType || selectedStudentType
+    const studentTypeLabel = fixedStudentType === 'ONLINE' ? 'trực tuyến' : 'trực tiếp'
+
     /* ===================== PERMISSIONS ===================== */
-    const canCreateStudent = useHasPermission(PERMISSIONS.STUDENT.CREATE)
     const canViewStudent = useHasPermission(PERMISSIONS.STUDENT.GET_BY_ID)
     const canToggleActivation = useHasPermission(PERMISSIONS.USER.TOGGLE_ACTIVATION)
-    const canExportExcel = useHasPermission(PERMISSIONS.STUDENT.EXPORT_EXCEL)
 
     /* ===================== EFFECT ===================== */
     useEffect(() => {
@@ -116,7 +118,7 @@ export const StudentList = () => {
         itemsPerPage,
         debouncedSearch,
         selectedGrade,
-        selectedStudentType,
+        effectiveStudentType,
         selectedGraduationYear,
         selectedIsActive,
         selectedHasParentZaloId,
@@ -148,7 +150,7 @@ export const StudentList = () => {
             limit: itemsPerPage,
             search: debouncedSearch || undefined,
             grade: selectedGrade || undefined,
-            studentType: selectedStudentType || undefined,
+            studentType: effectiveStudentType || undefined,
             highSchoolGraduationYear: selectedGraduationYear || undefined,
             fromDate: fromDate || undefined,
             toDate: toDate || undefined,
@@ -168,6 +170,7 @@ export const StudentList = () => {
     const loadStats = () => {
         const params = {
             grade: selectedGrade || undefined,
+            studentType: effectiveStudentType || undefined,
             highSchoolGraduationYear: selectedGraduationYear || undefined,
             fromDate: fromDate || undefined,
             toDate: toDate || undefined,
@@ -182,6 +185,13 @@ export const StudentList = () => {
     /* ===================== EXPORT ===================== */
     const handleOpenExportModal = () => {
         setIsExportModalOpen(true)
+    }
+
+    const handleOpenAddStudent = () => {
+        dispatch(setAddStudentFormData({
+            studentType: effectiveStudentType || 'OFFLINE',
+        }))
+        setOpenAddStudentRightPanel(true)
     }
 
     const handleExport = async (options) => {
@@ -214,6 +224,7 @@ export const StudentList = () => {
     }
 
     const handleStudentTypeChange = (value) => {
+        if (fixedStudentType) return
         setSelectedStudentType(value)
         resetPageAndSetFilter({ studentType: value })
     }
@@ -285,10 +296,10 @@ export const StudentList = () => {
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <h1 className="text-2xl font-bold text-foreground">
-                            Quản lý học sinh
+                            Quản lý học sinh {fixedStudentType ? studentTypeLabel : ''}
                         </h1>
                         <p className="text-foreground-light text-sm mt-1">
-                            Quản lý danh sách học sinh trong hệ thống.
+                            Quản lý danh sách học sinh {fixedStudentType ? studentTypeLabel : ''} trong hệ thống.
                         </p>
                     </div>
 
@@ -306,7 +317,7 @@ export const StudentList = () => {
                         </CanAccess>
 
                         <CanAccess permission={PERMISSIONS.STUDENT.CREATE}>
-                            <Button onClick={() => setOpenAddStudentRightPanel(true)}>
+                            <Button onClick={handleOpenAddStudent}>
                                 <Plus size={16} />
                                 Thêm học sinh mới
                             </Button>
@@ -320,8 +331,9 @@ export const StudentList = () => {
                     onSearchChange={handleSearchChangeWrapper}
                     grade={selectedGrade}
                     onGradeChange={handleGradeChange}
-                    studentType={selectedStudentType}
+                    studentType={effectiveStudentType}
                     onStudentTypeChange={handleStudentTypeChange}
+                    showStudentTypeFilter={!fixedStudentType}
                     highSchoolGraduationYear={selectedGraduationYear}
                     onHighSchoolGraduationYearChange={handleGraduationYearChange}
                     isActive={selectedIsActive}
@@ -372,6 +384,7 @@ export const StudentList = () => {
                         <AddStudent
                             onClose={() => setOpenAddStudentRightPanel(false)}
                             loadStudents={loadStudents}
+                            defaultStudentType={effectiveStudentType || 'OFFLINE'}
                         />
                     </RightPanel>
 
@@ -404,6 +417,7 @@ export const StudentList = () => {
                 onClose={() => setIsExportModalOpen(false)}
                 onConfirm={handleExport}
                 loading={loadingExport}
+                fixedStudentType={fixedStudentType}
             />
         </>
     )

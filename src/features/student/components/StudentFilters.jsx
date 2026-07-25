@@ -29,6 +29,7 @@ export const StudentFilters = ({
     onGradeChange,
     studentType,
     onStudentTypeChange,
+    showStudentTypeFilter = true,
     highSchoolGraduationYear,
     onHighSchoolGraduationYearChange,
     isActive,
@@ -82,14 +83,16 @@ export const StudentFilters = ({
                     />
                 </div>
 
-                <div className="lg:col-span-2">
-                    <Dropdown
-                        value={studentType}
-                        onChange={onStudentTypeChange}
-                        options={STUDENT_TYPE_FILTER_OPTIONS}
-                        placeholder="Loại học sinh"
-                    />
-                </div>
+                {showStudentTypeFilter && (
+                    <div className="lg:col-span-2">
+                        <Dropdown
+                            value={studentType}
+                            onChange={onStudentTypeChange}
+                            options={STUDENT_TYPE_FILTER_OPTIONS}
+                            placeholder="Loại học sinh"
+                        />
+                    </div>
+                )}
 
                 <div className="lg:col-span-2">
                     <Dropdown

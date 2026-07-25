@@ -67,7 +67,7 @@ const StepProgress = ({ currentStep }) => {
     );
 };
 
-export const AddStudent = ({ onClose, loadStudents }) => {
+export const AddStudent = ({ onClose, loadStudents, defaultStudentType = 'OFFLINE' }) => {
     const dispatch = useDispatch();
     const loadingCreate = useSelector(selectStudentLoadingCreate);
 
@@ -186,7 +186,7 @@ export const AddStudent = ({ onClose, loadStudents }) => {
             firstName: '',
             lastName: '',
             grade: '',
-            studentType: 'OFFLINE',
+            studentType: defaultStudentType,
             highSchoolGraduationYear: '',
             school: '',
             studentPhone: '',

@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { Eye, Edit, MoreHorizontal, Pencil, PlusCircle, Trash2, Undo2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { Eye, Edit, MoreHorizontal, Pencil, PlusCircle, QrCode, Trash2, Undo2 } from 'lucide-react'
 import { Table, Checkbox } from '../../../shared/components/ui'
 import { TuitionPaymentStatus } from '../constants/tuition-payment.constant'
 import { Link } from 'react-router-dom'
@@ -38,8 +39,38 @@ export const TuitionPaymentTable = ({
     canCreatePaymentIntent,
     onCreatePaymentIntent,
     creatingPaymentIntentId,
+    onGeneratePaymentPageQr,
 }) => {
     const [openActionMenuId, setOpenActionMenuId] = useState(null)
+    const actionMenuRef = useRef(null)
+    const actionMenuTriggerRef = useRef(null)
+    const [actionMenuPosition, setActionMenuPosition] = useState({ top: 0, left: 0 })
+
+    useEffect(() => {
+        if (openActionMenuId === null) return undefined
+
+        const closeActionMenuOnOutsideClick = (event) => {
+            if (
+                !actionMenuRef.current?.contains(event.target)
+                && !actionMenuTriggerRef.current?.contains(event.target)
+            ) {
+                setOpenActionMenuId(null)
+            }
+        }
+
+        const closeActionMenuOnEscape = (event) => {
+            if (event.key === 'Escape') setOpenActionMenuId(null)
+        }
+
+        document.addEventListener('mousedown', closeActionMenuOnOutsideClick)
+        document.addEventListener('keydown', closeActionMenuOnEscape)
+
+        return () => {
+            document.removeEventListener('mousedown', closeActionMenuOnOutsideClick)
+            document.removeEventListener('keydown', closeActionMenuOnEscape)
+        }
+    }, [openActionMenuId])
+
     const columns = [
         {
             key: 'paymentId',
@@ -137,14 +168,16 @@ export const TuitionPaymentTable = ({
                     <div className="flex items-center gap-2">
                         {canConfirmManual && (
                             <Checkbox
+                                id={`tuition-payment-status-${payment.paymentId}`}
                                 checked={payment.status === 'PAID'}
                                 onChange={() => {
                                     if (payment.status === 'UNPAID') onQuickToggle?.(payment)
+                                    if (payment.status === 'PAID') onUnreconcileManualPayment?.(payment)
                                 }}
                                 label=""
                                 tooltipText={payment.status === 'UNPAID'
                                     ? 'Xác nhận đã đối soát thủ công'
-                                    : 'Học phí đã đóng không thể đổi trạng thái tại đây'}
+                                    : 'Bỏ đối soát thủ công'}
                             />
                         )}
                         <span
@@ -202,8 +235,13 @@ export const TuitionPaymentTable = ({
             align: 'right',
             render: (payment) => {
                 const canCreateIntent = canCreatePaymentIntent && payment.status === 'UNPAID' && !payment.paymentIntent
-                const canManageReconciliation = canConfirmManual && payment.status === 'PAID'
-                const hasMoreActions = canCreateIntent || canManageReconciliation
+                const canManageReconciliation = canConfirmManual && payment.status === 'PAID' && Boolean(payment.paymentIntent)
+                const hasPaymentPageQr = Boolean(
+                    payment.studentId
+                    && (payment.student?.parentPhone || payment.studentParentPhone)
+                    && (payment.paymentIntent?.paymentIntentId || payment.paymentIntentId),
+                )
+                const hasMoreActions = canCreateIntent || canManageReconciliation || hasPaymentPageQr
 
                 return <div className="flex items-center justify-end gap-2">
                     <button
@@ -226,24 +264,44 @@ export const TuitionPaymentTable = ({
                     >
                         <Edit size={16} className="text-warning" />
                     </button>
-                    {hasMoreActions && <div className="relative">
+                    {hasMoreActions && <>
                         <button
+                            ref={openActionMenuId === payment.paymentId ? actionMenuTriggerRef : null}
                             onClick={(event) => {
                                 event.stopPropagation()
-                                setOpenActionMenuId((current) => current === payment.paymentId ? null : payment.paymentId)
+                                if (openActionMenuId === payment.paymentId) {
+                                    setOpenActionMenuId(null)
+                                    return
+                                }
+
+                                const rect = event.currentTarget.getBoundingClientRect()
+                                setActionMenuPosition({
+                                    top: rect.bottom + 4,
+                                    left: Math.max(8, rect.right - 208),
+                                })
+                                setOpenActionMenuId(payment.paymentId)
                             }}
                             className="p-1 rounded hover:bg-gray-200 transition-colors"
                             title="Thao tác thanh toán khác"
                         >
                             <MoreHorizontal size={18} className="text-foreground-light" />
                         </button>
-                        {openActionMenuId === payment.paymentId && <div className="absolute right-0 z-20 mt-1 w-52 rounded-lg border border-border bg-white p-1 shadow-lg">
+                        {openActionMenuId === payment.paymentId && createPortal(<div
+                            ref={actionMenuRef}
+                            className="fixed z-[60] w-52 rounded-lg border border-border bg-white p-1 shadow-lg"
+                            style={actionMenuPosition}
+                        >
                             {canCreateIntent && <button
                                 type="button"
                                 disabled={creatingPaymentIntentId === payment.paymentId}
                                 onClick={(event) => { event.stopPropagation(); setOpenActionMenuId(null); onCreatePaymentIntent?.(payment) }}
                                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-gray-50 disabled:cursor-wait disabled:opacity-50"
                             ><PlusCircle size={16} className="text-blue-600" />{creatingPaymentIntentId === payment.paymentId ? 'Đang tạo intent...' : 'Tạo payment intent'}</button>}
+                            {hasPaymentPageQr && <button
+                                type="button"
+                                onClick={(event) => { event.stopPropagation(); setOpenActionMenuId(null); onGeneratePaymentPageQr?.(payment) }}
+                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-gray-50"
+                            ><QrCode size={16} className="text-violet-600" />Tạo QR trang thanh toán</button>}
                             {canManageReconciliation && <button
                                 type="button"
                                 onClick={(event) => { event.stopPropagation(); setOpenActionMenuId(null); onEditManualReconciliation?.(payment) }}
@@ -254,8 +312,8 @@ export const TuitionPaymentTable = ({
                                 onClick={(event) => { event.stopPropagation(); setOpenActionMenuId(null); onUnreconcileManualPayment?.(payment) }}
                                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-gray-50"
                             ><Undo2 size={16} className="text-amber-600" />Bỏ đối soát</button>}
-                        </div>}
-                    </div>}
+                        </div>, document.body)}
+                    </>}
                     <button
                         onClick={(e) => {
                             e.stopPropagation()

@@ -34,6 +34,7 @@ export const ExportStudentListModal = ({
     onClose,
     onConfirm,
     loading,
+    fixedStudentType,
 }) => {
     const dispatch = useDispatch()
     const exportOptions = useSelector(selectStudentExportExcelOptions)
@@ -76,7 +77,10 @@ export const ExportStudentListModal = ({
     /* ===================== SUBMIT ===================== */
     const handleSubmit = (e) => {
         e.preventDefault()
-        onConfirm(exportOptions)
+        onConfirm({
+            ...exportOptions,
+            studentType: fixedStudentType || exportOptions.studentType,
+        })
     }
 
     const handleClose = () => {
