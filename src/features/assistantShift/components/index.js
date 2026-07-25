@@ -4,3 +4,5 @@ export { AssistantShiftDrawer } from './AssistantShiftDrawer';
 export { AssistantShiftMiniCalendar } from './AssistantShiftMiniCalendar';
 export { AssistantShiftCalendarStats } from './AssistantShiftCalendarStats';
 export { AssistantShiftAvatar } from './AssistantShiftAvatar';
+export { AssistantShiftBaseCalendar } from './AssistantShiftBaseCalendar';
+export { AssistantShiftBaseDrawer } from './AssistantShiftBaseDrawer';

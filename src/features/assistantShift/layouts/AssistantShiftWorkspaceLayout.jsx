@@ -16,7 +16,7 @@ const tabs = [
     label: 'Đăng ký lịch',
     href: ROUTES.ASSISTANT_SHIFT_REGISTRATION,
     icon: CalendarPlus,
-    permission: PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES,
+    permission: PERMISSIONS.ASSISTANT_SHIFT.GET_AVAILABLE_BY_SERIES,
   },
   {
     label: 'Lịch của tôi',

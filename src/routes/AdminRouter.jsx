@@ -727,7 +727,7 @@ export const adminRouter = [
                         ],
                     },
                     {
-                        element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_SERIES} />,
+                        element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_AVAILABLE_BY_SERIES} />,
                         children: [
                             { path: ROUTES.ASSISTANT_SHIFT_REGISTRATION, element: <AssistantShiftRegistrationPage /> },
                         ],
