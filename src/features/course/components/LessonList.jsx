@@ -1,5 +1,5 @@
 // src/features/course/components/LessonList.jsx
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback, useReducer, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAllLessonsAsync,
@@ -14,6 +14,95 @@ import { LessonItem } from './LessonItem';
 import { Input } from '../../../shared/components/ui';
 import { useInfiniteScroll } from '../../../shared/hooks';
 import { Search, Loader2, LoaderCircle } from 'lucide-react';
+
+const getLessonId = (lesson) => lesson?.lessonId;
+
+const deduplicateLessons = (lessons) => {
+    const seenLessonIds = new Set();
+
+    return lessons.filter((lesson) => {
+        const lessonId = getLessonId(lesson);
+        if (seenLessonIds.has(lessonId)) {
+            return false;
+        }
+
+        seenLessonIds.add(lessonId);
+        return true;
+    });
+};
+
+const mergeLessonPage = (existingLessons, incomingLessons) => {
+    const incomingById = new Map(
+        incomingLessons.map((lesson) => [getLessonId(lesson), lesson])
+    );
+    const seenLessonIds = new Set();
+    const mergedLessons = [];
+
+    existingLessons.forEach((lesson) => {
+        const lessonId = getLessonId(lesson);
+        if (seenLessonIds.has(lessonId)) {
+            return;
+        }
+
+        seenLessonIds.add(lessonId);
+        mergedLessons.push(incomingById.get(lessonId) || lesson);
+    });
+
+    incomingLessons.forEach((lesson) => {
+        const lessonId = getLessonId(lesson);
+        if (!seenLessonIds.has(lessonId)) {
+            seenLessonIds.add(lessonId);
+            mergedLessons.push(lesson);
+        }
+    });
+
+    return mergedLessons;
+};
+
+const updateLoadedLessons = (existingLessons, updatedLessons) => {
+    const updatedById = new Map(
+        updatedLessons.map((lesson) => [getLessonId(lesson), lesson])
+    );
+    let hasUpdate = false;
+
+    const nextLessons = existingLessons.map((lesson) => {
+        const updatedLesson = updatedById.get(getLessonId(lesson));
+        if (updatedLesson && updatedLesson !== lesson) {
+            hasUpdate = true;
+            return updatedLesson;
+        }
+
+        return lesson;
+    });
+
+    return hasUpdate ? nextLessons : existingLessons;
+};
+
+const lessonListReducer = (currentLessons, action) => {
+    switch (action.type) {
+        case 'reset':
+            return [];
+        case 'loadPage':
+            return action.page === 1
+                ? deduplicateLessons(action.lessons)
+                : mergeLessonPage(currentLessons, action.lessons);
+        case 'syncUpdates':
+            return updateLoadedLessons(currentLessons, action.lessons);
+        default:
+            return currentLessons;
+    }
+};
+
+const currentPageReducer = (currentPage, action) => {
+    switch (action.type) {
+        case 'reset':
+            return 1;
+        case 'set':
+            return action.page;
+        default:
+            return currentPage;
+    }
+};
 
 export const LessonList = ({ 
     courseId, 
@@ -32,16 +121,17 @@ export const LessonList = ({
     const filters = useSelector(selectLessonFilters);
     const pagination = useSelector(selectLessonPagination);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [allLessons, setAllLessons] = useState([]);
+    const [currentPage, dispatchCurrentPage] = useReducer(currentPageReducer, 1);
+    const [allLessons, dispatchAllLessons] = useReducer(lessonListReducer, []);
+    const latestPaginationRef = useRef(pagination);
 
     // Load lessons
     const loadLessons = useCallback((page = 1, reset = false) => {
         if (!courseId) return;
 
         if (reset) {
-            setAllLessons([]);
-            setCurrentPage(1);
+            dispatchAllLessons({ type: 'reset' });
+            dispatchCurrentPage({ type: 'reset' });
         }
 
         dispatch(
@@ -54,14 +144,23 @@ export const LessonList = ({
         );
     }, [dispatch, courseId, filters]);
 
-    // Update allLessons when new data comes in
+    // A fulfilled list request replaces `pagination` with the response metadata.
+    // Other successful actions (edit/add/delete learning items) can change `lessons`
+    // too, but must only update their matching lesson instead of appending the page.
     useEffect(() => {
-        if (currentPage === 1) {
-            setAllLessons(lessons);
+        const receivedNewPage = pagination !== latestPaginationRef.current;
+
+        if (receivedNewPage) {
+            latestPaginationRef.current = pagination;
+            dispatchAllLessons({
+                type: 'loadPage',
+                page: Number(pagination?.page) || 1,
+                lessons,
+            });
         } else {
-            setAllLessons(prev => [...prev, ...lessons]);
+            dispatchAllLessons({ type: 'syncUpdates', lessons });
         }
-    }, [lessons, currentPage]);
+    }, [lessons, pagination]);
 
     // Fetch lessons when component mounts or filters change
     useEffect(() => {
@@ -73,7 +172,7 @@ export const LessonList = ({
         return () => {
             dispatch(resetFilters());
         };
-    }, [dispatch, courseId, filters.search, filters.sortBy, filters.sortOrder]);
+    }, [dispatch, courseId, loadLessons]);
 
     const handleSearch = (e) => {
         dispatch(setFilters({ search: e.target.value }));
@@ -83,7 +182,7 @@ export const LessonList = ({
     const loadMore = useCallback(() => {
         if (pagination.hasNext && !loading) {
             const nextPage = currentPage + 1;
-            setCurrentPage(nextPage);
+            dispatchCurrentPage({ type: 'set', page: nextPage });
             loadLessons(nextPage, false);
         }
     }, [pagination.hasNext, loading, currentPage, loadLessons]);
