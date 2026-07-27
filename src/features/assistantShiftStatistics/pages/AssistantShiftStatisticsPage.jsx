@@ -70,7 +70,7 @@ const columns = [
   },
   {
     key: 'pendingAssignmentCount',
-    label: 'Chờ xác nhận · lượt',
+    label: 'Chưa đi · lượt',
     align: 'right',
     headerClassName: PENDING_GROUP.start,
     className: PENDING_GROUP.start,
@@ -78,7 +78,7 @@ const columns = [
   },
   {
     key: 'pendingHours',
-    label: 'Chờ xác nhận · giờ',
+    label: 'Chưa đi · giờ',
     align: 'right',
     headerClassName: PENDING_GROUP.end,
     className: PENDING_GROUP.end,
@@ -86,7 +86,7 @@ const columns = [
   },
   {
     key: 'presentAssignmentCount',
-    label: 'Có mặt · lượt',
+    label: 'Đã đi · lượt',
     align: 'right',
     headerClassName: PRESENT_GROUP.start,
     className: PRESENT_GROUP.start,
@@ -94,7 +94,7 @@ const columns = [
   },
   {
     key: 'presentHours',
-    label: 'Có mặt · giờ',
+    label: 'Đã đi · giờ',
     align: 'right',
     headerClassName: PRESENT_GROUP.end,
     className: PRESENT_GROUP.end,
@@ -118,7 +118,7 @@ const columns = [
   },
   {
     key: 'sundayPresentAssignmentCount',
-    label: 'Có mặt Chủ nhật · lượt',
+    label: 'Đã đi Chủ nhật · lượt',
     align: 'right',
     headerClassName: SUNDAY_GROUP.start,
     className: SUNDAY_GROUP.start,
@@ -126,7 +126,7 @@ const columns = [
   },
   {
     key: 'sundayPresentHours',
-    label: 'Có mặt Chủ nhật · giờ',
+    label: 'Đã đi Chủ nhật · giờ',
     align: 'right',
     headerClassName: SUNDAY_GROUP.end,
     className: SUNDAY_GROUP.end,
@@ -134,7 +134,7 @@ const columns = [
   },
   {
     key: 'presentWorkDayCount',
-    label: 'Số ngày có mặt',
+    label: 'Số ngày đã đi',
     align: 'right',
     className: 'font-bold text-foreground',
     render: (assistant) => formatNumber(assistant.presentWorkDayCount),

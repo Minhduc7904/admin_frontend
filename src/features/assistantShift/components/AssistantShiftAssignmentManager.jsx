@@ -5,8 +5,8 @@ import { AssistantSearchSelect } from './AssistantSearchSelect';
 import { AssistantShiftAvatar } from './AssistantShiftAvatar';
 
 const STATUS = [
-  { value: 'PENDING', label: 'Chờ điểm danh' },
-  { value: 'PRESENT', label: 'Có mặt' },
+  { value: 'PENDING', label: 'Chưa đi' },
+  { value: 'PRESENT', label: 'Đã đi' },
   { value: 'ABSENT', label: 'Vắng' },
 ];
 
@@ -55,7 +55,7 @@ export const AssistantShiftAssignmentManager = ({ assignments, disabled, loading
     <div className="space-y-2">
       {assignments.map((assignment) => <div key={assignment.adminId} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
         <div className="flex min-w-0 items-center gap-2.5"><AssistantShiftAvatar admin={assignment.admin} sizeClass="h-9 w-9" textClass="text-xs" /><div className="min-w-0"><p className="truncate text-sm font-medium">{assignment.admin?.fullName || `Admin #${assignment.adminId}`}</p><p className="truncate text-xs text-foreground-light">{assignment.admin?.email || `ID: ${assignment.adminId}`}</p>{assignment.managerNote && <p className="mt-0.5 truncate text-xs text-foreground-light">{assignment.managerNote}</p>}</div></div>
-        <div className="flex shrink-0 items-center gap-1.5"><select aria-label="Trạng thái điểm danh" value={assignment.attendanceStatus || 'PENDING'} disabled={disabled || loading || !canUpdate} onChange={(event) => updateStatus(assignment, event.target.value)} className="max-w-32 rounded-sm border border-border bg-primary px-2 py-1.5 text-xs"><option value="PENDING">Chờ</option><option value="PRESENT">Có mặt</option><option value="ABSENT">Vắng</option></select>{canUpdate && <Button size="sm" variant="ghost" disabled={disabled || loading} onClick={() => openEditNote(assignment)}><Pencil className="h-4 w-4" /></Button>}{canDelete && <Button size="sm" variant="ghost" disabled={disabled || loading} onClick={() => onDelete(assignment.adminId)}><Trash2 className="h-4 w-4 text-red-600" /></Button>}</div>
+        <div className="flex shrink-0 items-center gap-1.5"><select aria-label="Trạng thái điểm danh" value={assignment.attendanceStatus || 'PENDING'} disabled={disabled || loading || !canUpdate} onChange={(event) => updateStatus(assignment, event.target.value)} className="max-w-32 rounded-sm border border-border bg-primary px-2 py-1.5 text-xs"><option value="PENDING">Chưa đi</option><option value="PRESENT">Đã đi</option><option value="ABSENT">Vắng</option></select>{canUpdate && <Button size="sm" variant="ghost" disabled={disabled || loading} onClick={() => openEditNote(assignment)}><Pencil className="h-4 w-4" /></Button>}{canDelete && <Button size="sm" variant="ghost" disabled={disabled || loading} onClick={() => onDelete(assignment.adminId)}><Trash2 className="h-4 w-4 text-red-600" /></Button>}</div>
       </div>)}
     </div>
     {!assignments.length && <p className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-foreground-light">Chưa phân công trợ giảng cho ca này.</p>}

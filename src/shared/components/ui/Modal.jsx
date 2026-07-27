@@ -2,6 +2,8 @@ import { X } from 'lucide-react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
+let openModalCount = 0
+
 export const Modal = ({
   isOpen,
   onClose,
@@ -10,16 +12,16 @@ export const Modal = ({
   size = 'md',
   showCloseButton = true,
   customContent = false,
+  fullScreenOnMobile = false,
 }) => {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
+    if (!isOpen) return undefined
 
+    openModalCount += 1
+    document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = 'unset'
+      openModalCount = Math.max(0, openModalCount - 1)
+      if (openModalCount === 0) document.body.style.overflow = 'unset'
     }
   }, [isOpen])
 
@@ -40,13 +42,13 @@ export const Modal = ({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 ${fullScreenOnMobile ? 'p-0 md:p-4' : 'p-4'}`}
       onClick={onClose}
     >
       {/* Modal */}
       <div
         className={`
-          bg-primary rounded-sm shadow-lg w-full
+          bg-primary shadow-lg w-full ${fullScreenOnMobile ? 'h-[100dvh] !max-h-none !rounded-none md:!h-auto md:!max-h-[calc(100vh-4rem)] md:!rounded-sm' : 'rounded-sm'}
           ${sizeClasses[size]}
           max-h-[calc(100vh-4rem)]   /* 👈 CHỪA KHOẢNG TRỐNG TRÊN & DƯỚI */
           flex flex-col

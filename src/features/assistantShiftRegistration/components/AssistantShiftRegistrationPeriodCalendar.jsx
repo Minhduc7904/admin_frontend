@@ -1,6 +1,7 @@
 import { LockKeyhole, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { AssistantShiftAvatar } from '../../assistantShift/components';
+import { AssistantShiftCurrentTimeIndicator } from '../../assistantShift/components/AssistantShiftCurrentTimeIndicator';
 import { useDragToScroll } from '../../../shared/hooks';
 
 const DAY_NAMES = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ nhật'];
@@ -105,8 +106,8 @@ const RegistrationShiftCard = ({ shift, compact, profile, now, actionShiftId, pe
         <p className="line-clamp-2 text-sm font-semibold leading-snug">{shift.name}</p>
         <div className="mt-1 flex items-center justify-between gap-2 text-sm font-semibold opacity-80"><span>{timeLabel(shift.startAt)} - {timeLabel(shift.endAt)}</span><span className="flex shrink-0 items-center gap-1 rounded-full bg-white/65 px-2 py-1 text-[10px] font-semibold"><Users className="h-3.5 w-3.5" />{assignments.length}/{shift.requiredAssistantCount}</span></div>
         <p className="mt-2 truncate text-[11px] opacity-75">{shift.courseClass?.className || shift.courseClass?.name || shift.series?.name || 'Ca trợ giảng'}</p>
-        <div className={`mt-2 rounded-lg bg-white/60 px-2 py-2 text-xs font-bold leading-snug ${compact ? 'line-clamp-3' : 'line-clamp-4'}`}><span className="mr-1">Ghi chú:</span>{shift.notes || 'Chưa có ghi chú công việc.'}</div>
-        <div className="mt-2 space-y-1 overflow-hidden">{assignments.length ? assignments.map((item) => <div key={item.adminId} className="flex min-w-0 items-center gap-1.5"><AssistantShiftAvatar admin={item.admin} status={item.attendanceStatus} sizeClass="h-5 w-5" textClass="text-[8px]" /><span title={item.admin?.fullName || `Admin #${item.adminId}`} className={`min-w-0 text-[11px] font-medium ${compact ? 'truncate' : 'line-clamp-2 leading-snug'}`}>{item.admin?.fullName || `Admin #${item.adminId}`}</span></div>) : <p className="text-[11px] font-medium opacity-65">Chưa có trợ giảng đăng ký</p>}</div>
+        {shift.notes && <div className={`mt-2 rounded-lg bg-white/60 px-2 py-2 text-xs font-bold leading-snug ${compact ? 'line-clamp-3' : 'line-clamp-4'}`}><span className="mr-1">Ghi chú:</span>{shift.notes}</div>}
+        <div className="mt-2 space-y-1 overflow-hidden">{assignments.length ? assignments.map((item) => <div key={item.adminId} className="flex min-w-0 items-center gap-1.5"><AssistantShiftAvatar admin={item.admin} status={item.attendanceStatus} sizeClass="h-5 w-5" textClass="text-[8px]" /><div className="min-w-0"><p title={item.admin?.fullName || `Admin #${item.adminId}`} className={`text-[11px] font-medium ${compact ? 'truncate' : 'line-clamp-2 leading-snug'}`}>{item.admin?.fullName || `Admin #${item.adminId}`}</p>{item.admin?.email && <p title={item.admin.email} className="truncate text-[10px] opacity-70">{item.admin.email}</p>}</div></div>) : <p className="text-[11px] font-medium opacity-65">Chưa có trợ giảng đăng ký</p>}</div>
       </div>
       {persistentLockReason && <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 px-3 text-center ${hasPendingExchangeRequest ? 'pointer-events-none bg-violet-700/20 opacity-0 transition-opacity group-hover:opacity-100' : 'bg-gray-500/35 backdrop-grayscale'}`}><span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow"><LockKeyhole className="h-5 w-5" /></span><span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-700 shadow-sm">{persistentLockReason}</span></div>}
       {isPast && !persistentLockReason && <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-slate-800/85 px-3 text-center text-white opacity-0 transition-opacity group-hover:opacity-100"><LockKeyhole className="h-6 w-6" /><span className="text-sm font-semibold">Ca đã qua</span></div>}
@@ -142,7 +143,7 @@ export const AssistantShiftRegistrationPeriodCalendar = ({ days, shifts, loading
             </div>
           ))}
         </div>
-        <div className="grid" style={{ gridTemplateColumns: template }}>
+        <div className="relative grid" style={{ gridTemplateColumns: template }}>
           <aside className="border-r border-border bg-gray-50" style={{ height: scale.totalHeight }}>
             {PERIODS.map((period, index) => (
               <div key={period.label} className={`flex flex-col justify-center px-3 ${index < PERIODS.length - 1 ? 'border-b border-border' : ''}`} style={{ height: scale.heights[index] }}>
@@ -165,7 +166,7 @@ export const AssistantShiftRegistrationPeriodCalendar = ({ days, shifts, loading
                   return (
                     <div
                       key={shift.assistantShiftId}
-                      className="absolute"
+                      className="absolute z-10"
                       style={{
                         top: scale.position(start),
                         height: scale.position(end) - scale.position(start),
@@ -198,6 +199,7 @@ export const AssistantShiftRegistrationPeriodCalendar = ({ days, shifts, loading
               </div>
             );
           })}
+          <AssistantShiftCurrentTimeIndicator days={days} startMinute={START} endMinute={END} position={scale.position} />
         </div>
       </div>
       {loading && (

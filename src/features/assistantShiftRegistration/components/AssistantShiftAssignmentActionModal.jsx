@@ -35,14 +35,14 @@ export const TransferAssistantShiftModal = ({ shift, assistants, loading, select
   }, [assistants, search, shift?.assignments]);
 
   return (
-    <Modal isOpen={Boolean(shift)} onClose={onClose} title="Nhường ca">
+    <Modal isOpen={Boolean(shift)} onClose={onClose} title="Nhường ca" fullScreenOnMobile>
       <div className="space-y-4">
         <p className="text-sm text-foreground-light">Chọn một trợ giảng để gửi đề nghị nhường ca “{shift?.name}”. Người nhận sẽ xác nhận qua email.</p>
         <label className="relative block">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-light" />
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm theo tên, email hoặc mã trợ giảng..." className="h-10 w-full rounded-lg border border-border bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100" />
         </label>
-        <div className="max-h-80 space-y-2 overflow-auto pr-1">
+        <div className="max-h-[52dvh] space-y-2 overflow-auto pr-1 md:max-h-80">
           {loading ? <p className="rounded-lg bg-gray-50 p-4 text-sm text-foreground-light">Đang tải danh sách trợ giảng...</p> : people.map((admin) => {
             const assigned = shift?.assignments?.some((assignment) => Number(assignment.adminId) === Number(admin.adminId));
             return <SelectablePerson key={admin.adminId} admin={admin} selected={selectedAdminId === admin.adminId} disabled={assigned} note={assigned ? 'Đã trong ca này' : ''} onSelect={() => onSelect(admin.adminId)} />;
@@ -59,22 +59,22 @@ export const SwapAssistantShiftModal = ({ targetShift, myShifts, loading, select
   const people = (targetShift?.assignments || []).filter((assignment) => assignment.adminId !== profile?.adminId && assignment.attendanceStatus === 'PENDING');
   const myPendingShifts = myShifts.filter((shift) => shift.assistantShiftId !== targetShift?.assistantShiftId);
   return (
-    <Modal isOpen={Boolean(targetShift)} onClose={onClose} title="Đổi ca" size="4xl">
+    <Modal isOpen={Boolean(targetShift)} onClose={onClose} title="Đổi ca" size="4xl" fullScreenOnMobile>
       <div className="space-y-5">
         <p className="text-base text-foreground-light">Chọn lịch của bạn ở bên trái, sau đó chọn trợ giảng đang ở ca này ở bên phải để gửi đề nghị đổi ca qua email.</p>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 md:gap-6">
           <div>
-            <div className="mb-3 flex items-center gap-2"><Users className="h-5 w-5 text-blue-600" /><p className="text-base font-semibold">1. Chọn lịch PENDING của bạn</p></div>
-            <div className="max-h-[52vh] space-y-2 overflow-auto rounded-lg border border-border bg-gray-50 p-3">
+            <div className="mb-3 flex items-center gap-2"><Users className="h-5 w-5 text-blue-600" /><p className="text-base font-semibold">1. Chọn lịch chưa đi của bạn</p></div>
+            <div className="max-h-[30dvh] space-y-2 overflow-auto rounded-lg border border-border bg-gray-50 p-3 md:max-h-[52vh]">
               {loading ? <p className="p-3 text-sm text-foreground-light">Đang tải lịch...</p> : myPendingShifts.map((shift) => { const pendingExchange = shift.assignments?.some((assignment) => (assignment.adminId === profile?.adminId || assignment.admin?.userId === profile?.userId) && assignment.isPendingExchangeRequest); return <button type="button" disabled={pendingExchange} key={shift.assistantShiftId} onClick={() => onSelectMyShift(shift.assistantShiftId)} className={`w-full rounded-lg border p-3 text-left transition ${pendingExchange ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500' : selectedMyShiftId === shift.assistantShiftId ? 'border-blue-600 bg-blue-50' : 'border-border bg-white hover:border-blue-300'}`}><p className="text-xs font-medium text-foreground-light">{dateKey(shift.startAt)} · {timeLabel(shift.startAt)} – {timeLabel(shift.endAt)}</p><p className="mt-1 text-sm font-semibold">{shift.name}</p><p className="mt-1 truncate text-xs text-foreground-light">{shift.courseClass?.className || shift.courseClass?.name || shift.series?.name}</p>{pendingExchange && <p className="mt-1 text-xs font-semibold text-violet-700">Đã gửi email, đang chờ xác nhận</p>}</button>; })}
-              {!loading && !myPendingShifts.length && <p className="p-3 text-sm text-foreground-light">Bạn không có ca PENDING để đổi.</p>}
+              {!loading && !myPendingShifts.length && <p className="p-3 text-sm text-foreground-light">Bạn không có ca chưa đi để đổi.</p>}
             </div>
           </div>
           <div>
             <p className="mb-3 text-base font-semibold">2. Chọn trợ giảng trong ca “{targetShift?.name}”</p>
-            <div className="max-h-[52vh] space-y-2 overflow-auto pr-1">
+            <div className="max-h-[30dvh] space-y-2 overflow-auto pr-1 md:max-h-[52vh]">
               {people.map((assignment) => <SelectablePerson key={assignment.adminId} admin={assignment.admin} selected={selectedAdminId === assignment.adminId} disabled={assignment.isPendingExchangeRequest} note={assignment.isPendingExchangeRequest ? 'Đã gửi email, đang chờ xác nhận' : ''} onSelect={() => onSelectAdmin(assignment.adminId)} />)}
-              {!people.length && <p className="rounded-lg bg-gray-50 p-3 text-sm text-foreground-light">Không có assignment PENDING để đổi.</p>}
+              {!people.length && <p className="rounded-lg bg-gray-50 p-3 text-sm text-foreground-light">Không có phân công chưa đi để đổi.</p>}
             </div>
           </div>
         </div>
