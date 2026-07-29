@@ -86,8 +86,8 @@ const RegistrationShiftCard = ({ shift, compact, profile, now, actionShiftId, pe
   const persistentLockReason = hasPendingExchangeRequest ? (exchangeCountdown ? `Đã gửi email, có thể gửi lại sau ${exchangeCountdown}` : 'Đã gửi email, đang chờ xác nhận')
     : !isPast && (
     shift.isLocked || shift.series?.isLocked || shift.isBaseShift ? 'Ca đã khóa'
-      : !joined && full ? (!canSwap ? 'Ca đã đủ trợ giảng' : '')
-        : !joined && !canRegister ? 'Không có quyền đăng ký'
+      : !joined && full && !canSwap ? 'Ca đã đủ trợ giảng'
+        : !joined && !canRegister && !canSwap ? 'Không có quyền đăng ký hoặc đổi ca'
           : joined && !canManageOwnAssignment ? (ownAssignment?.attendanceStatus !== 'PENDING' ? 'Ca đã được điểm danh' : 'Đã đăng ký') : ''
   );
   const canAct = !isBusy && !isPast && !persistentLockReason;
@@ -112,8 +112,10 @@ const RegistrationShiftCard = ({ shift, compact, profile, now, actionShiftId, pe
       {persistentLockReason && <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 px-3 text-center ${hasPendingExchangeRequest ? 'pointer-events-none bg-violet-700/20 opacity-0 transition-opacity group-hover:opacity-100' : 'bg-gray-500/35 backdrop-grayscale'}`}><span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow"><LockKeyhole className="h-5 w-5" /></span><span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-700 shadow-sm">{persistentLockReason}</span></div>}
       {isPast && !persistentLockReason && <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-slate-800/85 px-3 text-center text-white opacity-0 transition-opacity group-hover:opacity-100"><LockKeyhole className="h-6 w-6" /><span className="text-sm font-semibold">Ca đã qua</span></div>}
       {canAct && joined && <div className={`absolute inset-0 z-20 grid overflow-hidden text-sm font-semibold opacity-0 transition-opacity group-hover:opacity-100 ${canCancel && canTransfer ? 'grid-cols-2' : 'grid-cols-1'}`}>{canCancel && <button type="button" onClick={() => onCancel(shift.assistantShiftId)} className="bg-amber-400/95 text-amber-950 transition hover:bg-amber-500">{isBusy ? 'Đang xử lý...' : 'Hủy ca'}</button>}{canTransfer && <button type="button" onClick={() => onTransfer(shift)} className="bg-violet-600/95 text-white transition hover:bg-violet-700">Nhường ca</button>}</div>}
-      {canAct && !joined && full && canSwap && <button type="button" onClick={() => onSwap(shift)} className="absolute inset-0 z-20 flex items-center justify-center bg-red-600/95 text-sm font-semibold text-white opacity-0 transition-opacity hover:bg-red-700 group-hover:opacity-100">Đổi ca</button>}
-      {canAct && !joined && !full && <button type="button" onClick={() => onRegister(shift.assistantShiftId)} className={`absolute inset-0 z-20 flex items-center justify-center text-sm font-semibold opacity-0 transition-opacity hover:brightness-95 group-hover:opacity-100 ${actionOverlay}`}>{isBusy ? 'Đang xử lý...' : 'Đăng ký'}</button>}
+      {canAct && !joined && (canSwap || (!full && canRegister)) && <div className={`absolute inset-0 z-20 grid overflow-hidden text-sm font-semibold opacity-0 transition-opacity group-hover:opacity-100 ${canSwap && !full && canRegister ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {!full && canRegister && <button type="button" onClick={() => onRegister(shift.assistantShiftId)} className={`transition hover:brightness-95 ${actionOverlay}`}>{isBusy ? 'Đang xử lý...' : 'Đăng ký'}</button>}
+        {canSwap && <button type="button" onClick={() => onSwap(shift)} className="bg-red-600/95 text-white transition hover:bg-red-700">Đổi ca</button>}
+      </div>}
     </article>
   );
 };
