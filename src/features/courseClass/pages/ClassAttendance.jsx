@@ -723,6 +723,7 @@ export const ClassAttendance = () => {
 
             {/* ===== EXPORT ATTENDANCE MODAL ===== */}
             <ExportAttendanceModal
+                key={`${isExportModalOpen}-${selectedSession?.sessionId || 'none'}`}
                 isOpen={isExportModalOpen}
                 onClose={() => setIsExportModalOpen(false)}
                 onConfirm={handleExport}

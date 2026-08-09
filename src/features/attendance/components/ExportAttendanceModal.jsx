@@ -8,6 +8,11 @@ import {
     setExportExcelOptions
 } from '../store/attendanceSlice';
 
+const getHomeworkContentId = (session) => session?.homeworkContentId
+    ?? session?.homeworkId
+    ?? session?.homeworkContent?.homeworkContentId
+    ?? null;
+
 export const ExportAttendanceModal = ({
     isOpen,
     onClose,
@@ -22,10 +27,12 @@ export const ExportAttendanceModal = ({
     const [formData, setFormData] = useState({
         sessionId: initialSession?.sessionId || null,
     });
+    const [selectedSession, setSelectedSession] = useState(initialSession || null);
 
     const [errors, setErrors] = useState({});
 
     const handleSessionSelect = (session) => {
+        setSelectedSession(session || null);
         setFormData((prev) => ({ ...prev, sessionId: session?.sessionId || null }));
         if (errors.sessionId) {
             setErrors((prev) => ({ ...prev, sessionId: '' }));
@@ -45,9 +52,13 @@ export const ExportAttendanceModal = ({
             return;
         }
 
+        const homeworkContentId = getHomeworkContentId(selectedSession);
         onConfirm({
             sessionId: formData.sessionId,
-            options: exportOptions,
+            options: {
+                ...exportOptions,
+                ...(homeworkContentId ? { homeworkContentId } : {}),
+            },
         });
     };
 
@@ -55,6 +66,7 @@ export const ExportAttendanceModal = ({
         setFormData({
             sessionId: null,
         });
+        setSelectedSession(null);
         setErrors({});
         onClose();
     };
@@ -75,6 +87,7 @@ export const ExportAttendanceModal = ({
                             error={errors.sessionId}
                             classId={classId}
                         />
+                        {getHomeworkContentId(selectedSession) && <p className="mt-2 text-xs text-emerald-700">Điểm BTVN của buổi học này sẽ được thêm vào file Excel.</p>}
                     </div>
 
                     {/* Export Options */}
