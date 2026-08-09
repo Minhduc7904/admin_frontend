@@ -81,6 +81,7 @@ import { AssistantShiftWorkspaceLayout } from '../features/assistantShift/layout
 import { AssistantShiftRegistrationPage } from '../features/assistantShiftRegistration/pages';
 import { MyAssistantSchedulePage } from '../features/myAssistantSchedule/pages';
 import { AssistantShiftStatisticsPage } from '../features/assistantShiftStatistics/pages';
+import { AssistantTaskManagementPage } from '../features/assistantTaskManagement/pages';
 import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
 import { ExamListPage, MyExamListPage } from '../features/exam/pages';
@@ -750,6 +751,12 @@ export const adminRouter = [
                         element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_BY_SERIES} />,
                         children: [
                             { path: ROUTES.ASSISTANT_SHIFT_STATISTICS, element: <AssistantShiftStatisticsPage /> },
+                        ],
+                    },
+                    {
+                        element: <ProtectedRoute permission={PERMISSIONS.ASSISTANT_TASK.GET_ALL} />,
+                        children: [
+                            { path: ROUTES.ASSISTANT_TASKS, element: <AssistantTaskManagementPage /> },
                         ],
                     },
                 ],

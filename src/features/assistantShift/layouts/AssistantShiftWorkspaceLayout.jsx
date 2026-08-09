@@ -1,4 +1,4 @@
-import { ArrowLeft, BarChart3, CalendarCheck2, CalendarDays, CalendarPlus, Home, Menu, X } from 'lucide-react';
+import { ArrowLeft, BarChart3, CalendarCheck2, CalendarDays, CalendarPlus, ClipboardList, Home, Menu, X } from 'lucide-react';
 import { createElement, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
@@ -16,6 +16,7 @@ const tabs = [
   { label: 'Đăng kí lịch', href: ROUTES.ASSISTANT_SHIFT_REGISTRATION, icon: CalendarPlus, permission: PERMISSIONS.ASSISTANT_SHIFT.GET_AVAILABLE_BY_SERIES },
   { label: 'Lịch của tôi', href: ROUTES.MY_ASSISTANT_SCHEDULE, icon: CalendarCheck2, permission: PERMISSIONS.ASSISTANT_SHIFT.GET_MY_SCHEDULE },
   { label: 'Thống kê', href: ROUTES.ASSISTANT_SHIFT_STATISTICS, icon: BarChart3, permission: PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_BY_SERIES },
+  { label: 'Task trợ giảng', href: ROUTES.ASSISTANT_TASKS, icon: ClipboardList, permission: PERMISSIONS.ASSISTANT_TASK.GET_ALL },
 ];
 
 export const AssistantShiftWorkspaceLayout = () => {
@@ -32,7 +33,8 @@ export const AssistantShiftWorkspaceLayout = () => {
   const canRegister = useHasPermission(PERMISSIONS.ASSISTANT_SHIFT.GET_AVAILABLE_BY_SERIES);
   const canViewMine = useHasPermission(PERMISSIONS.ASSISTANT_SHIFT.GET_MY_SCHEDULE);
   const canViewStatistics = useHasPermission(PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_BY_SERIES);
-  const tabPermissions = [canManage, canRegister, canViewMine, canViewStatistics];
+  const canViewTasks = useHasPermission(PERMISSIONS.ASSISTANT_TASK.GET_ALL);
+  const tabPermissions = [canManage, canRegister, canViewMine, canViewStatistics, canViewTasks];
   const visibleTabs = tabs.filter((_, index) => tabPermissions[index]);
   const isRegistration = location.pathname === ROUTES.ASSISTANT_SHIFT_REGISTRATION;
   const isMySchedule = location.pathname === ROUTES.MY_ASSISTANT_SCHEDULE;

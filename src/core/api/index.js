@@ -45,6 +45,7 @@ export { backgroundJobRunApi } from './backgroundJobRunApi';
 export { sepayTransactionSyncCursorApi } from './sepayTransactionSyncCursorApi';
 export { paymentIntentApi } from './paymentIntentApi';
 export { assistantShiftApi } from './assistantShiftApi';
+export { assistantTaskApi } from './assistantTaskApi';
 export { questionApi } from './questionApi';
 export { statementApi } from './statementApi';
 export { examApi } from './examApi';

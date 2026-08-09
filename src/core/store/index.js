@@ -59,6 +59,7 @@ import assistantShiftReducer from "../../features/assistantShift/store/assistant
 import assistantShiftRegistrationReducer from "../../features/assistantShiftRegistration/store/assistantShiftRegistrationSlice";
 import myAssistantScheduleReducer from "../../features/myAssistantSchedule/store/myAssistantScheduleSlice";
 import assistantShiftStatisticsReducer from "../../features/assistantShiftStatistics/store/assistantShiftStatisticsSlice";
+import assistantTaskManagementReducer from "../../features/assistantTaskManagement/store/assistantTaskManagementSlice";
 
 export const store = configureStore({
   reducer: {
@@ -122,5 +123,6 @@ export const store = configureStore({
     assistantShiftRegistration: assistantShiftRegistrationReducer,
     myAssistantSchedule: myAssistantScheduleReducer,
     assistantShiftStatistics: assistantShiftStatisticsReducer,
+    assistantTaskManagement: assistantTaskManagementReducer,
   },
 });

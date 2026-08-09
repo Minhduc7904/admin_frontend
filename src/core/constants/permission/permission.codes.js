@@ -282,6 +282,25 @@ export const PERMISSIONS = {
     GET_MY_SCHEDULE: 'assistant-shift:get-my-schedule',
     GET_MY_MONTHLY_STATISTICS: 'assistant-shift:get-my-monthly-statistics',
   },
+  ASSISTANT_TASK: {
+    CREATE: 'assistant-task:create',
+    GET_ALL: 'assistant-task:get-all',
+    GET_BY_ID: 'assistant-task:get-by-id',
+    UPDATE: 'assistant-task:update',
+    DELETE: 'assistant-task:delete',
+  },
+  ASSISTANT_TASK_PRODUCT: {
+    GET_ALL: 'assistant-task-product:get-all',
+    GET_BY_ID: 'assistant-task-product:get-by-id',
+    CREATE_FOR_ASSISTANT: 'assistant-task-product:create-for-assistant',
+    UPDATE: 'assistant-task-product:update',
+    DELETE: 'assistant-task-product:delete',
+  },
+  ASSISTANT_TASK_PRODUCT_SUBMISSION: {
+    MANAGE: 'assistant-task-product-submission:manage',
+    GET_ALL: 'assistant-task-product-submission:get-all',
+    GET_BY_ID: 'assistant-task-product-submission:get-by-id',
+  },
   RECEIVING_BANK_ACCOUNT: {
     GET_ALL: 'receiving-bank-account:get-all',
     CREATE: 'receiving-bank-account:create',

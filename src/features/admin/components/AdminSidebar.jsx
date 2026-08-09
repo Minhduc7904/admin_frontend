@@ -30,6 +30,7 @@ import {
   CalendarPlus,
   CalendarCheck2,
   BarChart3,
+  ClipboardList,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -276,6 +277,13 @@ export const AdminSidebar = () => {
           href: ROUTES.ASSISTANT_SHIFT_STATISTICS,
           icon: BarChart3,
           permission: PERMISSIONS.ASSISTANT_SHIFT.GET_ALL_BY_SERIES,
+        },
+        {
+          key: 'assistantTasks',
+          name: 'Task trợ giảng',
+          href: ROUTES.ASSISTANT_TASKS,
+          icon: ClipboardList,
+          permission: PERMISSIONS.ASSISTANT_TASK.GET_ALL,
         },
       ],
     },
