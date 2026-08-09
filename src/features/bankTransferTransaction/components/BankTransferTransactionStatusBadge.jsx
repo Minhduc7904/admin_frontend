@@ -15,3 +15,12 @@ const StatusBadge = ({ status, statuses }) => {
 
 export const ProcessingStatusBadge = ({ status }) => <StatusBadge status={status} statuses={PROCESSING_STATUS} />;
 export const ReconciliationStatusBadge = ({ status }) => <StatusBadge status={status} statuses={RECONCILIATION_STATUS} />;
+
+export const TransactionTypeBadge = ({ type }) => {
+  const config = {
+    TUITION_PAYMENT: { label: 'Thu học phí', className: 'bg-blue-50 text-blue-700' },
+    COURSE_PURCHASE: { label: 'Mua khóa học', className: 'bg-violet-50 text-violet-700' },
+  }[type] || { label: 'Chưa phân loại', className: 'bg-slate-100 text-slate-700' };
+
+  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${config.className}`}>{config.label}</span>;
+};

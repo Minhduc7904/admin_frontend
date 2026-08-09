@@ -2,7 +2,11 @@ import { RefreshCw } from 'lucide-react';
 import { Button, Dropdown, Input, SearchInput } from '../../../shared/components/ui';
 import { ReceivingBankAccountSearchSelect } from '../../receivingBankAccount/components';
 import { UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID, getReceivingBankAccountId } from './bankTransferTransactionAccount';
-import { PROCESSING_STATUS_OPTIONS, RECONCILIATION_STATUS_OPTIONS } from './bankTransferTransactionStatus';
+import {
+  PROCESSING_STATUS_OPTIONS,
+  RECONCILIATION_STATUS_OPTIONS,
+  TRANSACTION_TYPE_OPTIONS,
+} from './bankTransferTransactionStatus';
 
 const PROVIDER_OPTIONS = [
   { value: '', label: 'Tất cả nhà cung cấp' },
@@ -19,6 +23,7 @@ export const BankTransferTransactionFilters = ({ filters, onChange, onRefresh, l
           placeholder="Mã SePay, nội dung, tài khoản..."
         />
         <Dropdown value={filters.provider} onChange={(provider) => onChange({ provider })} options={PROVIDER_OPTIONS} />
+        <Dropdown value={filters.type} onChange={(type) => onChange({ type })} options={TRANSACTION_TYPE_OPTIONS} />
         <Dropdown value={filters.processingStatus} onChange={(processingStatus) => onChange({ processingStatus })} options={PROCESSING_STATUS_OPTIONS} />
         <Dropdown value={filters.reconciliationStatus} onChange={(reconciliationStatus) => onChange({ reconciliationStatus })} options={RECONCILIATION_STATUS_OPTIONS} />
         <Input name="paymentAttemptId" type="number" min="1" value={filters.paymentAttemptId} onChange={(event) => onChange({ paymentAttemptId: event.target.value })} placeholder="ID payment attempt" />

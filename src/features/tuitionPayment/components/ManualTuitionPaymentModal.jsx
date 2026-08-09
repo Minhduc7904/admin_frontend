@@ -137,6 +137,7 @@ export const ManualTuitionPaymentModal = ({
               initialSearch={`TP${payment.paymentId}`}
               tuitionPaymentId={payment.paymentId}
               initialReconciliationStatus={mode === 'edit' ? '' : 'UNRECONCILED'}
+              allowedTransactionTypes={['TUITION_PAYMENT', 'UNCLASSIFIED']}
             />
           ) : <NoPermission variant="card" message="Bạn không có quyền xem giao dịch ngân hàng để đối soát." />}
         </div>

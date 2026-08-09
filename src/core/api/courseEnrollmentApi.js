@@ -28,4 +28,8 @@ export const courseEnrollmentApi = {
             responseType: 'blob',
         });
     },
+
+    confirmManualPayment: (id, data) => {
+        return axiosClient.post(API_ENDPOINTS.COURSE_ENROLLMENTS.CONFIRM_MANUAL_PAYMENT(id), data);
+    },
 };
