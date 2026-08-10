@@ -25,6 +25,7 @@ import {
   selectBankTransferTransactionStatistics,
   selectBankTransferTransactions,
 } from '../store/bankTransferTransactionSlice';
+import { getTransactionTypeFilterParams } from '../components/bankTransferTransactionStatus';
 
 const toIsoDateTime = (value) => {
   if (!value) return undefined;
@@ -38,7 +39,14 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-export const BankTransferTransactionListPage = () => {
+export const BankTransferTransactionListPage = ({
+  defaultType = 'TUITION_PAYMENT',
+  sectionLabel = 'THU HỌC PHÍ',
+  title = 'Giao dịch thu học phí',
+  description = 'Theo dõi giao dịch SePay, trạng thái xử lý và nguồn đối soát thanh toán học phí.',
+  headerActions,
+  onRefreshReady,
+}) => {
   const dispatch = useDispatch();
   const transactions = useSelector(selectBankTransferTransactions);
   const pagination = useSelector(selectBankTransferTransactionPagination);
@@ -54,6 +62,7 @@ export const BankTransferTransactionListPage = () => {
 
   const [filters, setFilters] = useState({
     search: '',
+    type: defaultType,
     provider: 'SEPAY',
     paymentAttemptId: '',
     processingStatus: '',
@@ -78,6 +87,7 @@ export const BankTransferTransactionListPage = () => {
     limit,
     search: filters.search.trim() || undefined,
     provider: filters.provider || undefined,
+    ...getTransactionTypeFilterParams(filters.type),
     paymentAttemptId: toNumber(filters.paymentAttemptId),
     processingStatus: filters.processingStatus || undefined,
     reconciliationStatus: filters.reconciliationStatus || undefined,
@@ -116,9 +126,13 @@ export const BankTransferTransactionListPage = () => {
     setFilters((current) => ({ ...current, ...next }));
   };
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     await Promise.all([loadTransactions(), loadStatistics()].filter(Boolean));
-  };
+  }, [loadStatistics, loadTransactions]);
+
+  useEffect(() => {
+    onRefreshReady?.(refresh);
+  }, [onRefreshReady, refresh]);
 
   const syncSepay = async () => {
     try {
@@ -144,11 +158,12 @@ export const BankTransferTransactionListPage = () => {
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">THU HỌC PHÍ</p>
-          <h1 className="mt-1 text-2xl font-semibold text-foreground">Giao dịch ngân hàng</h1>
-          <p className="mt-1 text-sm text-foreground-light">Theo dõi giao dịch SePay, trạng thái xử lý và nguồn đối soát thanh toán học phí.</p>
+          <p className="text-sm font-medium text-blue-600">{sectionLabel}</p>
+          <h1 className="mt-1 text-2xl font-semibold text-foreground">{title}</h1>
+          <p className="mt-1 text-sm text-foreground-light">{description}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-700">
+          {typeof headerActions === 'function' ? headerActions() : headerActions}
           {canSyncSepay && <Button variant="outline" onClick={syncSepay} loading={syncingSepay}>
             <CloudSync className="h-4 w-4" /> Đồng bộ SePay
           </Button>}

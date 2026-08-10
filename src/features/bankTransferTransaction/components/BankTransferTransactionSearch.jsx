@@ -14,6 +14,8 @@ import {
 import {
   PROCESSING_STATUS_OPTIONS,
   RECONCILIATION_STATUS_OPTIONS,
+  TRANSACTION_TYPE_OPTIONS,
+  getTransactionTypeFilterParams,
 } from './bankTransferTransactionStatus';
 import {
   UNIDENTIFIED_RECEIVING_BANK_ACCOUNT_ID,
@@ -21,7 +23,7 @@ import {
   formatReceivingBankAccountLabel,
   getReceivingBankAccountId,
 } from './bankTransferTransactionAccount';
-import { ProcessingStatusBadge, ReconciliationStatusBadge } from './BankTransferTransactionStatusBadge';
+import { ProcessingStatusBadge, ReconciliationStatusBadge, TransactionTypeBadge } from './BankTransferTransactionStatusBadge';
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -41,6 +43,7 @@ export const BankTransferTransactionSearch = ({
   initialSearch = '',
   tuitionPaymentId,
   initialReconciliationStatus = 'UNRECONCILED',
+  allowedTransactionTypes,
 }) => {
   const dispatch = useDispatch();
   const transactions = useSelector(selectBankTransferTransactionSearchResults);
@@ -48,6 +51,7 @@ export const BankTransferTransactionSearch = ({
   const loadingTuitionPaymentSearch = useSelector(selectBankTransferTransactionLoadingTuitionPaymentSearch);
   const [filters, setFilters] = useState({
     search: initialSearch,
+    type: allowedTransactionTypes ? '__ELIGIBLE__' : '',
     processingStatus: '',
     reconciliationStatus: initialReconciliationStatus,
     receivingBankAccountId: '',
@@ -61,6 +65,10 @@ export const BankTransferTransactionSearch = ({
     page: 1,
     limit: 20,
     provider: 'SEPAY',
+    ...getTransactionTypeFilterParams(
+      filters.type === '__ELIGIBLE__' ? allowedTransactionTypes?.[0] : filters.type,
+      filters.type === '__ELIGIBLE__' && Boolean(allowedTransactionTypes?.includes('UNCLASSIFIED')),
+    ),
     search: debouncedSearch.trim() || undefined,
     processingStatus: filters.processingStatus || undefined,
     reconciliationStatus: filters.reconciliationStatus || undefined,
@@ -69,7 +77,7 @@ export const BankTransferTransactionSearch = ({
     toTransactionAt: toIsoDateTime(filters.toTransactionAt),
     sortBy: 'transactionAt',
     sortOrder: 'desc',
-  }), [debouncedSearch, filters]);
+  }), [allowedTransactionTypes, debouncedSearch, filters]);
 
   useEffect(() => {
     if (tuitionPaymentId) {
@@ -80,6 +88,12 @@ export const BankTransferTransactionSearch = ({
   }, [dispatch, params, tuitionPaymentId]);
 
   const updateFilter = (next) => setFilters((current) => ({ ...current, ...next }));
+  const typeOptions = allowedTransactionTypes
+    ? [
+      { value: '__ELIGIBLE__', label: 'Tất cả giao dịch hợp lệ' },
+      ...TRANSACTION_TYPE_OPTIONS.filter((option) => allowedTransactionTypes.includes(option.value)),
+    ]
+    : TRANSACTION_TYPE_OPTIONS;
 
   return (
     <section className="flex min-h-0 flex-col rounded-xl border border-border bg-white">
@@ -94,6 +108,7 @@ export const BankTransferTransactionSearch = ({
         <div className="mt-3 space-y-3">
           <SearchInput value={filters.search} onChange={(search) => updateFilter({ search })} placeholder="Mã SePay, nội dung, tài khoản..." />
           <div className="grid gap-3 sm:grid-cols-2">
+            <Dropdown value={filters.type} onChange={(type) => updateFilter({ type })} options={typeOptions} />
             <Dropdown value={filters.processingStatus} onChange={(processingStatus) => updateFilter({ processingStatus })} options={PROCESSING_STATUS_OPTIONS} />
             <Dropdown value={filters.reconciliationStatus} onChange={(reconciliationStatus) => updateFilter({ reconciliationStatus })} options={RECONCILIATION_STATUS_OPTIONS} />
             <Input type="datetime-local" value={filters.fromTransactionAt} onChange={(event) => updateFilter({ fromTransactionAt: event.target.value })} />
@@ -159,6 +174,7 @@ export const BankTransferTransactionSearch = ({
               </div>
               <p className="mt-2 line-clamp-2 text-sm text-foreground">{transaction.content || 'Không có nội dung chuyển khoản'}</p>
               <div className="mt-2 flex flex-wrap gap-2">
+                <TransactionTypeBadge type={transaction.type} />
                 <ProcessingStatusBadge status={transaction.processingStatus} />
                 <ReconciliationStatusBadge status={transaction.reconciliationStatus} />
               </div>

@@ -1,7 +1,7 @@
 import { Eye } from 'lucide-react';
 import { Button, Table } from '../../../shared/components/ui';
 import { formatReceivingBankAccountDescription, formatReceivingBankAccountLabel } from './bankTransferTransactionAccount';
-import { ProcessingStatusBadge, ReconciliationStatusBadge } from './BankTransferTransactionStatusBadge';
+import { ProcessingStatusBadge, ReconciliationStatusBadge, TransactionTypeBadge } from './BankTransferTransactionStatusBadge';
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -65,6 +65,11 @@ export const BankTransferTransactionTable = ({
       key: 'paymentAttemptId',
       label: 'Payment attempt',
       render: (transaction) => transaction.paymentAttemptId ? `#${transaction.paymentAttemptId}` : '-',
+    },
+    {
+      key: 'type',
+      label: 'Loại giao dịch',
+      render: (transaction) => <TransactionTypeBadge type={transaction.type} />,
     },
     sortable('processingStatus', 'Xử lý', {
       render: (transaction) => <ProcessingStatusBadge status={transaction.processingStatus} />,

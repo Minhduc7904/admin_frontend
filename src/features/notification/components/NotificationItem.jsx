@@ -5,15 +5,11 @@ import { removeNotification } from '../../../features/notification/store/notific
 
 export const NotificationItem = ({ notification, index }) => {
   const dispatch = useDispatch();
+  const message = typeof notification.message === 'string' ? notification.message : '';
   const [isVisible, setIsVisible] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
-  const [appearDelay, setAppearDelay] = useState(50 + index * 100);
+  const appearDelay = 50 + index * 100;
   const duration = notification.duration || 4000;
-
-  // Set appear delay only once on mount
-  useEffect(() => {
-    setAppearDelay(50 + index * 100);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), appearDelay);
@@ -106,9 +102,9 @@ export const NotificationItem = ({ notification, index }) => {
                 </p>
               )}
               <p className={`text-sm ${notification.title ? 'mt-1' : ''} ${getTextColorClass()}`}>
-                {notification.message.length > 100
-                  ? notification.message.slice(0, 100) + '...'
-                  : notification.message}
+                {message.length > 100
+                  ? message.slice(0, 100) + '...'
+                  : message}
               </p>
             </div>
 

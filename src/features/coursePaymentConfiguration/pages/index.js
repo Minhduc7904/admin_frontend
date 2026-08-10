@@ -1,0 +1,1 @@
+export { CoursePaymentConfigurationPage } from './CoursePaymentConfigurationPage';

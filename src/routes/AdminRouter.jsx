@@ -68,10 +68,12 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
-import { OnlineCourseInvoiceListPage } from '../features/onlineCourseInvoice/pages';
 import { BankTransferTransactionListPage } from '../features/bankTransferTransaction/pages';
+import { CoursePurchaseTransactionPage, OnlineCourseEnrollmentListPage } from '../features/coursePurchaseTransaction/pages';
 import { ReceivingBankAccountListPage } from '../features/receivingBankAccount/pages';
 import { TuitionCollectionConfigurationPage } from '../features/tuitionCollectionConfiguration/pages';
+import { CoursePaymentConfigurationPage } from '../features/coursePaymentConfiguration/pages';
+import { BookCategoryPage, BookEditorPage, BookListPage, BookSalesContactConfigurationPage } from '../features/book/pages';
 import { TuitionGradeBankAccountPage } from '../features/tuitionGradeBankAccount/pages';
 import { BackgroundJobListPage } from '../features/backgroundJob/pages';
 import { BackgroundJobRunListPage } from '../features/backgroundJobRun/pages';
@@ -414,20 +416,54 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ONLINE_COURSE_INVOICE.GET_ALL} />,
-                children: [
-                    {
-                        path: ROUTES.ONLINE_COURSE_INVOICES,
-                        element: <OnlineCourseInvoiceListPage />,
-                    },
-                ],
-            },
-            {
                 element: <ProtectedRoute permission={PERMISSIONS.BANK_TRANSFER_TRANSACTION.GET_ALL} />,
                 children: [
                     {
                         path: ROUTES.BANK_TRANSFER_TRANSACTIONS,
                         element: <BankTransferTransactionListPage />,
+                    },
+                    {
+                        path: ROUTES.COURSE_PURCHASE_TRANSACTIONS,
+                        element: <CoursePurchaseTransactionPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK.GET_ALL} />,
+                children: [
+                    { path: ROUTES.BOOKS, element: <BookListPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK.CREATE} />,
+                children: [
+                    { path: ROUTES.BOOK_CREATE, element: <BookEditorPage mode="create" /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK.GET_BY_ID} />,
+                children: [
+                    { path: ROUTES.BOOK_EDIT(':id'), element: <BookEditorPage mode="edit" /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK_CATEGORY.GET_ALL} />,
+                children: [
+                    { path: ROUTES.BOOK_CATEGORIES, element: <BookCategoryPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK_SALES_CONTACT_CONFIGURATION.GET} />,
+                children: [
+                    { path: ROUTES.BOOK_SALES_CONTACT_CONFIGURATION, element: <BookSalesContactConfigurationPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_ENROLLMENT.GET_ALL} />,
+                children: [
+                    {
+                        path: ROUTES.ONLINE_COURSE_ENROLLMENTS,
+                        element: <OnlineCourseEnrollmentListPage />,
                     },
                 ],
             },
@@ -446,6 +482,15 @@ export const adminRouter = [
                     {
                         path: ROUTES.TUITION_COLLECTION_CONFIGURATION,
                         element: <TuitionCollectionConfigurationPage />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.COURSE_PAYMENT_CONFIGURATION.MANAGE} />,
+                children: [
+                    {
+                        path: ROUTES.COURSE_PAYMENT_CONFIGURATION,
+                        element: <CoursePaymentConfigurationPage />,
                     },
                 ],
             },

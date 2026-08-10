@@ -238,12 +238,6 @@ export const PERMISSIONS = {
     EXPORT_EXCEL: 'tuition-payment:export-excel',
     IMPORT_EXCEL: 'tuition-payment:import-excel',
   },
-  ONLINE_COURSE_INVOICE: {
-    GET_ALL: 'online-course-invoice:get-all',
-    GET_BY_ID: 'online-course-invoice:get-by-id',
-    CONFIRM_MANUAL_PAYMENT: 'online-course-invoice:confirm-manual-payment',
-    DELETE: 'online-course-invoice:delete',
-  },
   BANK_TRANSFER_TRANSACTION: {
     GET_ALL: 'bank-transfer-transaction:get-all',
     GET_BY_ID: 'bank-transfer-transaction:get-by-id',
@@ -312,6 +306,26 @@ export const PERMISSIONS = {
   },
   TUITION_COLLECTION_CONFIGURATION: {
     MANAGE: 'tuition-collection-configuration:manage',
+  },
+  BOOK: {
+    GET_ALL: 'book:get-all',
+    GET_BY_ID: 'book:get-by-id',
+    CREATE: 'book:create',
+    UPDATE: 'book:update',
+    DELETE: 'book:delete',
+  },
+  BOOK_CATEGORY: {
+    GET_ALL: 'book-category:get-all',
+    CREATE: 'book-category:create',
+    UPDATE: 'book-category:update',
+    DELETE: 'book-category:delete',
+  },
+  BOOK_SALES_CONTACT_CONFIGURATION: {
+    GET: 'book-sales-contact-configuration:get',
+    UPDATE: 'book-sales-contact-configuration:update',
+  },
+  COURSE_PAYMENT_CONFIGURATION: {
+    MANAGE: 'course-payment-configuration:manage',
   },
   BACKGROUND_JOB: {
     GET_ALL: 'background-job:get-all',

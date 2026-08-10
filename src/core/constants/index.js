@@ -71,6 +71,11 @@ export const ROUTES = {
   NEWS_ARTICLE_CREATE: '/news-articles/create',
   NEWS_ARTICLE_DETAIL: (id = ':id') => `/news-articles/${id}`,
   NEWS_ARTICLE_EDIT: (id = ':id') => `/news-articles/${id}/edit`,
+  BOOKS: '/books',
+  BOOK_CREATE: '/books/create',
+  BOOK_EDIT: (id = ':id') => `/books/${id}/edit`,
+  BOOK_CATEGORIES: '/book-categories',
+  BOOK_SALES_CONTACT_CONFIGURATION: '/book-sales-contact-configuration',
   CHAPTERS: '/chapters',
   CHAPTER_DETAIL: (id = ':id') => `/chapters/${id}`,
   COURSES: '/courses',
@@ -93,10 +98,12 @@ export const ROUTES = {
   BROADCAST_NOTIFICATIONS: '/notifications/broadcast',
   NOTIFICATION_LOGS: '/notifications/logs',
   TUITION_PAYMENTS: '/tuition-payments',
-  ONLINE_COURSE_INVOICES: '/online-course-invoices',
   BANK_TRANSFER_TRANSACTIONS: '/bank-transfer-transactions',
+  COURSE_PURCHASE_TRANSACTIONS: '/course-purchase-transactions',
+  ONLINE_COURSE_ENROLLMENTS: '/online-course-enrollments',
   RECEIVING_BANK_ACCOUNTS: '/receiving-bank-accounts',
   TUITION_COLLECTION_CONFIGURATION: '/tuition-collection-configuration',
+  COURSE_PAYMENT_CONFIGURATION: '/course-payment-configuration',
   TUITION_GRADE_BANK_ACCOUNTS: '/tuition-grade-bank-accounts',
   BACKGROUND_JOBS: '/background-jobs',
   BACKGROUND_JOB_RUNS: '/background-job-runs',
@@ -364,6 +371,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/course-enrollments/${id}`,
     DELETE: (id) => `/course-enrollments/${id}`,
     EXPORT_LIST: "/course-enrollments/export/excel",
+    CONFIRM_MANUAL_PAYMENT: (id) => `/course-enrollments/${id}/confirm-manual-payment`,
   },
   CLASS_SESSIONS: {
     LIST: "/class-sessions",
@@ -497,13 +505,6 @@ export const API_ENDPOINTS = {
     IMPORT_EXCEL_PREVIEW: "/tuition-payments/import/excel/preview",
     EXPORT_LIST: "/tuition-payments/export/excel",
   },
-  ONLINE_COURSE_INVOICES: {
-    ADMIN_LIST: "/online-course-invoices/admin",
-    ADMIN_DETAIL: (invoiceId) => `/online-course-invoices/admin/${invoiceId}`,
-    ADMIN_DELETE: (invoiceId) => `/online-course-invoices/admin/${invoiceId}`,
-    CONFIRM_BANK_TRANSFER: (invoiceId) =>
-      `/online-course-invoices/admin/${invoiceId}/confirm-bank-transfer`,
-  },
   BANK_TRANSFER_TRANSACTIONS: {
     LIST: '/admin/bank-transfer-transactions',
     DETAIL: (id) => `/admin/bank-transfer-transactions/${id}`,
@@ -527,6 +528,28 @@ export const API_ENDPOINTS = {
   TUITION_COLLECTION_CONFIGURATION: {
     GET: '/admin/tuition-collection-configuration',
     UPDATE: '/admin/tuition-collection-configuration',
+  },
+  BOOKS: {
+    LIST: '/books',
+    DETAIL: (id) => `/books/${id}`,
+    CREATE: '/books',
+    UPDATE: (id) => `/books/${id}`,
+    UPDATE_MEDIA: (id) => `/books/${id}/media`,
+    DELETE: (id) => `/books/${id}`,
+    CATEGORIES: {
+      LIST: '/books/categories',
+      CREATE: '/books/categories',
+      UPDATE: (id) => `/books/categories/${id}`,
+      DELETE: (id) => `/books/categories/${id}`,
+    },
+    SALES_CONTACT_CONFIGURATION: {
+      GET: '/books/sales-contact-configuration',
+      UPDATE: '/books/sales-contact-configuration',
+    },
+  },
+  COURSE_PAYMENT_CONFIGURATION: {
+    GET: '/admin/course-payment-configuration',
+    UPDATE: '/admin/course-payment-configuration',
   },
   TUITION_GRADE_BANK_ACCOUNTS: {
     LIST: '/admin/tuition-grade-bank-accounts',

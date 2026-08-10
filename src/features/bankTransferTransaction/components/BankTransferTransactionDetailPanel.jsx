@@ -1,7 +1,7 @@
 import { Copy, FileJson } from 'lucide-react';
 import { Button } from '../../../shared/components/ui';
 import { formatReceivingBankAccountDescription, formatReceivingBankAccountLabel } from './bankTransferTransactionAccount';
-import { ProcessingStatusBadge, ReconciliationStatusBadge } from './BankTransferTransactionStatusBadge';
+import { ProcessingStatusBadge, ReconciliationStatusBadge, TransactionTypeBadge } from './BankTransferTransactionStatusBadge';
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -43,6 +43,7 @@ export const BankTransferTransactionDetailPanel = ({ transaction, loading }) => 
             <p className="mt-1 text-sm text-foreground-light">{transaction.provider} · {transaction.providerTransactionId}</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <TransactionTypeBadge type={transaction.type} />
             <ProcessingStatusBadge status={transaction.processingStatus} />
             <ReconciliationStatusBadge status={transaction.reconciliationStatus} />
           </div>
@@ -51,6 +52,7 @@ export const BankTransferTransactionDetailPanel = ({ transaction, loading }) => 
           <InfoLine label="Số tiền" value={formatMoney(transaction.amount)} />
           <InfoLine label="Thời điểm giao dịch" value={formatDateTime(transaction.transactionAt)} />
           <InfoLine label="Payment attempt" value={transaction.paymentAttemptId ? `#${transaction.paymentAttemptId}` : '-'} />
+          <InfoLine label="Loại giao dịch" value={transaction.type === 'TUITION_PAYMENT' ? 'Thu học phí' : transaction.type === 'COURSE_PURCHASE' ? 'Mua khóa học' : 'Chưa phân loại'} />
           <InfoLine label="Ngân hàng nhận" value={formatReceivingBankAccountLabel(transaction.receivingBankAccount)} />
           <InfoLine label="Tài khoản nhận" value={formatReceivingBankAccountDescription(transaction.receivingBankAccount, transaction.receivingAccountNumber)} />
           <InfoLine label="Reference" value={transaction.reference} />

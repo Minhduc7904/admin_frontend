@@ -15,6 +15,24 @@ export const RECONCILIATION_STATUS = {
   ADMIN: { label: 'Admin đối soát', className: 'bg-violet-50 text-violet-700', icon: CheckCircle2 },
 };
 
+export const TRANSACTION_TYPE = {
+  TUITION_PAYMENT: { label: 'Thu học phí', className: 'bg-blue-50 text-blue-700' },
+  COURSE_PURCHASE: { label: 'Mua khóa học', className: 'bg-violet-50 text-violet-700' },
+  UNCLASSIFIED: { label: 'Chưa phân loại', className: 'bg-slate-100 text-slate-700' },
+};
+
+export const TRANSACTION_TYPE_OPTIONS = [
+  { value: '', label: 'Tất cả loại giao dịch' },
+  { value: 'TUITION_PAYMENT', label: TRANSACTION_TYPE.TUITION_PAYMENT.label },
+  { value: 'COURSE_PURCHASE', label: TRANSACTION_TYPE.COURSE_PURCHASE.label },
+  { value: 'UNCLASSIFIED', label: TRANSACTION_TYPE.UNCLASSIFIED.label },
+];
+
+export const getTransactionTypeFilterParams = (type, includeUnclassified = false) => ({
+  type: type && type !== 'UNCLASSIFIED' ? type : undefined,
+  includeUnclassified: type === 'UNCLASSIFIED' || includeUnclassified || undefined,
+});
+
 export const PROCESSING_STATUS_OPTIONS = [
   { value: '', label: 'Tất cả xử lý' },
   ...Object.entries(PROCESSING_STATUS).map(([value, item]) => ({ value, label: item.label })),

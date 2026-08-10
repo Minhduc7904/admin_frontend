@@ -12,7 +12,6 @@ import {
   Bell,
   Send,
   CreditCard,
-  ReceiptText,
   ArrowLeftRight,
   Landmark,
   Settings2,
@@ -31,6 +30,8 @@ import {
   CalendarCheck2,
   BarChart3,
   ClipboardList,
+  BookOpen,
+  PhoneCall,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -123,18 +124,25 @@ export const AdminSidebar = () => {
           permission: PERMISSIONS.ADMIN_PAGE.TUITION_PAYMENTS,
         },
         {
-          key: 'onlineCourseInvoices',
-          name: 'Hóa đơn khóa online',
-          href: ROUTES.ONLINE_COURSE_INVOICES,
-          icon: ReceiptText,
-          permission: PERMISSIONS.ONLINE_COURSE_INVOICE.GET_ALL,
-        },
-        {
           key: 'bankTransferTransactions',
-          name: 'Giao dịch ngân hàng',
+          name: 'Giao dịch thu học phí',
           href: ROUTES.BANK_TRANSFER_TRANSACTIONS,
           icon: ArrowLeftRight,
           permission: PERMISSIONS.BANK_TRANSFER_TRANSACTION.GET_ALL,
+        },
+        {
+          key: 'coursePurchaseTransactions',
+          name: 'Giao dịch mua khóa học',
+          href: ROUTES.COURSE_PURCHASE_TRANSACTIONS,
+          icon: ArrowLeftRight,
+          permission: PERMISSIONS.BANK_TRANSFER_TRANSACTION.GET_ALL,
+        },
+        {
+          key: 'onlineCourseEnrollments',
+          name: 'Đăng ký mua khóa học online',
+          href: ROUTES.ONLINE_COURSE_ENROLLMENTS,
+          icon: GraduationCap,
+          permission: PERMISSIONS.COURSE_ENROLLMENT.GET_ALL,
         },
         {
           key: 'receivingBankAccounts',
@@ -151,6 +159,13 @@ export const AdminSidebar = () => {
           permission: PERMISSIONS.TUITION_COLLECTION_CONFIGURATION.MANAGE,
         },
         {
+          key: 'coursePaymentConfiguration',
+          name: 'Cấu hình thanh toán khóa học',
+          href: ROUTES.COURSE_PAYMENT_CONFIGURATION,
+          icon: Settings2,
+          permission: PERMISSIONS.COURSE_PAYMENT_CONFIGURATION.MANAGE,
+        },
+        {
           key: 'tuitionGradeBankAccounts',
           name: 'Tài khoản theo khối',
           href: ROUTES.TUITION_GRADE_BANK_ACCOUNTS,
@@ -160,6 +175,32 @@ export const AdminSidebar = () => {
       ],
     },
 
+    {
+      label: 'Quản lý sách',
+      items: [
+        {
+          key: 'books',
+          name: 'Danh sách sách',
+          href: ROUTES.BOOKS,
+          icon: BookOpen,
+          permission: PERMISSIONS.BOOK.GET_ALL,
+        },
+        {
+          key: 'bookCategories',
+          name: 'Loại sách',
+          href: ROUTES.BOOK_CATEGORIES,
+          icon: Tags,
+          permission: PERMISSIONS.BOOK_CATEGORY.GET_ALL,
+        },
+        {
+          key: 'bookSalesContactConfiguration',
+          name: 'Liên hệ bán sách',
+          href: ROUTES.BOOK_SALES_CONTACT_CONFIGURATION,
+          icon: PhoneCall,
+          permission: PERMISSIONS.BOOK_SALES_CONTACT_CONFIGURATION.GET,
+        },
+      ],
+    },
     {
       label: 'Phân quyền & bảo mật',
       items: [
