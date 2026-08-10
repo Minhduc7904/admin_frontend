@@ -38,6 +38,7 @@ export { bankTransferTransactionApi } from './bankTransferTransactionApi';
 export { receivingBankAccountApi } from './receivingBankAccountApi';
 export { tuitionCollectionConfigurationApi } from './tuitionCollectionConfigurationApi';
 export { coursePaymentConfigurationApi } from './coursePaymentConfigurationApi';
+export { bookApi } from './bookApi';
 export { tuitionGradeBankAccountApi } from './tuitionGradeBankAccountApi';
 export { backgroundJobApi } from './backgroundJobApi';
 export { backgroundJobLockApi } from './backgroundJobLockApi';

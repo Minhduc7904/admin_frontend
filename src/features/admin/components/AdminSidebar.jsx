@@ -30,6 +30,8 @@ import {
   CalendarCheck2,
   BarChart3,
   ClipboardList,
+  BookOpen,
+  PhoneCall,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -173,6 +175,32 @@ export const AdminSidebar = () => {
       ],
     },
 
+    {
+      label: 'Quản lý sách',
+      items: [
+        {
+          key: 'books',
+          name: 'Danh sách sách',
+          href: ROUTES.BOOKS,
+          icon: BookOpen,
+          permission: PERMISSIONS.BOOK.GET_ALL,
+        },
+        {
+          key: 'bookCategories',
+          name: 'Loại sách',
+          href: ROUTES.BOOK_CATEGORIES,
+          icon: Tags,
+          permission: PERMISSIONS.BOOK_CATEGORY.GET_ALL,
+        },
+        {
+          key: 'bookSalesContactConfiguration',
+          name: 'Liên hệ bán sách',
+          href: ROUTES.BOOK_SALES_CONTACT_CONFIGURATION,
+          icon: PhoneCall,
+          permission: PERMISSIONS.BOOK_SALES_CONTACT_CONFIGURATION.GET,
+        },
+      ],
+    },
     {
       label: 'Phân quyền & bảo mật',
       items: [

@@ -73,6 +73,7 @@ import { CoursePurchaseTransactionPage, OnlineCourseEnrollmentListPage } from '.
 import { ReceivingBankAccountListPage } from '../features/receivingBankAccount/pages';
 import { TuitionCollectionConfigurationPage } from '../features/tuitionCollectionConfiguration/pages';
 import { CoursePaymentConfigurationPage } from '../features/coursePaymentConfiguration/pages';
+import { BookCategoryPage, BookEditorPage, BookListPage, BookSalesContactConfigurationPage } from '../features/book/pages';
 import { TuitionGradeBankAccountPage } from '../features/tuitionGradeBankAccount/pages';
 import { BackgroundJobListPage } from '../features/backgroundJob/pages';
 import { BackgroundJobRunListPage } from '../features/backgroundJobRun/pages';
@@ -425,6 +426,36 @@ export const adminRouter = [
                         path: ROUTES.COURSE_PURCHASE_TRANSACTIONS,
                         element: <CoursePurchaseTransactionPage />,
                     },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK.GET_ALL} />,
+                children: [
+                    { path: ROUTES.BOOKS, element: <BookListPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK.CREATE} />,
+                children: [
+                    { path: ROUTES.BOOK_CREATE, element: <BookEditorPage mode="create" /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK.GET_BY_ID} />,
+                children: [
+                    { path: ROUTES.BOOK_EDIT(':id'), element: <BookEditorPage mode="edit" /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK_CATEGORY.GET_ALL} />,
+                children: [
+                    { path: ROUTES.BOOK_CATEGORIES, element: <BookCategoryPage /> },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.BOOK_SALES_CONTACT_CONFIGURATION.GET} />,
+                children: [
+                    { path: ROUTES.BOOK_SALES_CONTACT_CONFIGURATION, element: <BookSalesContactConfigurationPage /> },
                 ],
             },
             {

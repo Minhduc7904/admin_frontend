@@ -307,6 +307,23 @@ export const PERMISSIONS = {
   TUITION_COLLECTION_CONFIGURATION: {
     MANAGE: 'tuition-collection-configuration:manage',
   },
+  BOOK: {
+    GET_ALL: 'book:get-all',
+    GET_BY_ID: 'book:get-by-id',
+    CREATE: 'book:create',
+    UPDATE: 'book:update',
+    DELETE: 'book:delete',
+  },
+  BOOK_CATEGORY: {
+    GET_ALL: 'book-category:get-all',
+    CREATE: 'book-category:create',
+    UPDATE: 'book-category:update',
+    DELETE: 'book-category:delete',
+  },
+  BOOK_SALES_CONTACT_CONFIGURATION: {
+    GET: 'book-sales-contact-configuration:get',
+    UPDATE: 'book-sales-contact-configuration:update',
+  },
   COURSE_PAYMENT_CONFIGURATION: {
     MANAGE: 'course-payment-configuration:manage',
   },

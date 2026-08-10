@@ -71,6 +71,11 @@ export const ROUTES = {
   NEWS_ARTICLE_CREATE: '/news-articles/create',
   NEWS_ARTICLE_DETAIL: (id = ':id') => `/news-articles/${id}`,
   NEWS_ARTICLE_EDIT: (id = ':id') => `/news-articles/${id}/edit`,
+  BOOKS: '/books',
+  BOOK_CREATE: '/books/create',
+  BOOK_EDIT: (id = ':id') => `/books/${id}/edit`,
+  BOOK_CATEGORIES: '/book-categories',
+  BOOK_SALES_CONTACT_CONFIGURATION: '/book-sales-contact-configuration',
   CHAPTERS: '/chapters',
   CHAPTER_DETAIL: (id = ':id') => `/chapters/${id}`,
   COURSES: '/courses',
@@ -523,6 +528,24 @@ export const API_ENDPOINTS = {
   TUITION_COLLECTION_CONFIGURATION: {
     GET: '/admin/tuition-collection-configuration',
     UPDATE: '/admin/tuition-collection-configuration',
+  },
+  BOOKS: {
+    LIST: '/books',
+    DETAIL: (id) => `/books/${id}`,
+    CREATE: '/books',
+    UPDATE: (id) => `/books/${id}`,
+    UPDATE_MEDIA: (id) => `/books/${id}/media`,
+    DELETE: (id) => `/books/${id}`,
+    CATEGORIES: {
+      LIST: '/books/categories',
+      CREATE: '/books/categories',
+      UPDATE: (id) => `/books/categories/${id}`,
+      DELETE: (id) => `/books/categories/${id}`,
+    },
+    SALES_CONTACT_CONFIGURATION: {
+      GET: '/books/sales-contact-configuration',
+      UPDATE: '/books/sales-contact-configuration',
+    },
   },
   COURSE_PAYMENT_CONFIGURATION: {
     GET: '/admin/course-payment-configuration',

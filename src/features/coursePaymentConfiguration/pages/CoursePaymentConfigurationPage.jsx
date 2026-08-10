@@ -85,7 +85,12 @@ export const CoursePaymentConfigurationPage = () => {
     try {
       const response = await coursePaymentConfigurationApi.update(data);
       setConfiguration(getResponseData(response));
-      dispatch(addNotification({ type: 'success', title: 'Đã cập nhật cấu hình thanh toán khóa học', autoHide: true }));
+      dispatch(addNotification({
+        type: 'success',
+        title: 'Đã cập nhật cấu hình thanh toán khóa học',
+        message: 'Tài khoản nhận tiền SePay đã được lưu.',
+        autoHide: true,
+      }));
     } catch (error) {
       dispatch(addNotification({
         type: 'error',
