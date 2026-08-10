@@ -17,7 +17,10 @@ export const assistantShiftApi = {
     API_ENDPOINTS.ASSISTANT_SHIFTS.AVAILABLE_SHIFTS_BY_SERIES(seriesId),
     { params },
   ),
-  getBaseBySeries: (seriesId) => axiosClient.get(API_ENDPOINTS.ASSISTANT_SHIFTS.BASE_SHIFTS_BY_SERIES(seriesId)),
+  getBaseBySeries: (seriesId, params) => axiosClient.get(
+    API_ENDPOINTS.ASSISTANT_SHIFTS.BASE_SHIFTS_BY_SERIES(seriesId),
+    { params },
+  ),
   getEligibleAssistants: (params) => axiosClient.get(API_ENDPOINTS.ASSISTANT_SHIFTS.ASSISTANTS, { params }),
   getById: (id) => axiosClient.get(API_ENDPOINTS.ASSISTANT_SHIFTS.DETAIL(id)),
   create: (data) => axiosClient.post(API_ENDPOINTS.ASSISTANT_SHIFTS.SHIFTS, data),

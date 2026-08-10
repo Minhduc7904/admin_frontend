@@ -13,7 +13,11 @@ export const createAssistantShiftSeriesAsync = createAsyncThunk('assistantShift/
 export const updateAssistantShiftSeriesAsync = createAsyncThunk('assistantShift/updateSeries', ({ id, data }, thunkAPI) => call(() => assistantShiftApi.updateSeries(id, data), thunkAPI, 'Đã cập nhật chuỗi lịch', 'Không thể cập nhật chuỗi lịch'));
 export const deleteAssistantShiftSeriesAsync = createAsyncThunk('assistantShift/deleteSeries', (id, thunkAPI) => call(() => assistantShiftApi.deleteSeries(id), thunkAPI, 'Đã xóa chuỗi lịch', 'Không thể xóa chuỗi lịch'));
 export const getAssistantShiftsBySeriesAsync = createAsyncThunk('assistantShift/getBySeries', ({ seriesIds, params }, thunkAPI) => getCall(() => assistantShiftApi.getBySeries(seriesIds, params), thunkAPI, 'Không thể tải các ca trợ giảng'));
-export const getAssistantBaseShiftsBySeriesAsync = createAsyncThunk('assistantShift/getBaseBySeries', (seriesId, thunkAPI) => getCall(() => assistantShiftApi.getBaseBySeries(seriesId), thunkAPI, 'Không thể tải các ca cơ sở'));
+export const getAssistantBaseShiftsBySeriesAsync = createAsyncThunk('assistantShift/getBaseBySeries', (arg, thunkAPI) => {
+  const seriesId = typeof arg === 'object' ? arg.seriesId : arg;
+  const params = typeof arg === 'object' ? arg.params : undefined;
+  return getCall(() => assistantShiftApi.getBaseBySeries(seriesId, params), thunkAPI, 'Không thể tải các ca cơ sở');
+});
 export const getAssistantShiftByIdAsync = createAsyncThunk('assistantShift/getById', (id, thunkAPI) => getCall(() => assistantShiftApi.getById(id), thunkAPI, 'Không thể tải chi tiết ca'));
 export const createAssistantShiftAsync = createAsyncThunk('assistantShift/create', (data, thunkAPI) => call(() => assistantShiftApi.create(data), thunkAPI, 'Đã tạo ca trợ giảng', 'Không thể tạo ca trợ giảng'));
 export const createAssistantBaseShiftAsync = createAsyncThunk('assistantShift/createBase', (data, thunkAPI) => call(() => assistantShiftApi.createBase(data), thunkAPI, 'Đã tạo ca cơ sở', 'Không thể tạo ca cơ sở'));
@@ -49,7 +53,7 @@ const slice = createSlice({
     .addCase(getAssistantShiftsBySeriesAsync.fulfilled, (state, action) => { const shifts = action.payload?.data || []; const bySeries = Object.fromEntries(action.meta.arg.seriesIds.map((id) => [id, []])); shifts.forEach((shift) => { const seriesId = shift.assistantShiftSeriesId || shift.series?.assistantShiftSeriesId; if (bySeries[seriesId]) bySeries[seriesId].push(shift); }); state.loadingShifts = false; Object.assign(state.shiftsBySeries, bySeries); })
     .addCase(getAssistantShiftsBySeriesAsync.rejected, (state, action) => { state.loadingShifts = false; state.error = action.payload; })
     .addCase(getAssistantBaseShiftsBySeriesAsync.pending, (state) => { state.loadingShifts = true; })
-    .addCase(getAssistantBaseShiftsBySeriesAsync.fulfilled, (state, action) => { state.loadingShifts = false; state.baseShiftsBySeries[action.meta.arg] = action.payload?.data || []; })
+    .addCase(getAssistantBaseShiftsBySeriesAsync.fulfilled, (state, action) => { const seriesId = typeof action.meta.arg === 'object' ? action.meta.arg.seriesId : action.meta.arg; state.loadingShifts = false; state.baseShiftsBySeries[seriesId] = action.payload?.data || []; })
     .addCase(getAssistantBaseShiftsBySeriesAsync.rejected, (state, action) => { state.loadingShifts = false; state.error = action.payload; })
     .addCase(getAssistantShiftByIdAsync.pending, (state) => { state.loadingDetail = true; state.detail = null; })
     .addCase(getAssistantShiftByIdAsync.fulfilled, (state, action) => { state.loadingDetail = false; state.detail = action.payload?.data || null; })
