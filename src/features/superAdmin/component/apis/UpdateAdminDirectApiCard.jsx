@@ -31,6 +31,7 @@ const buildPayload = (formData) => {
     if (formData.dateOfBirth) payload.dateOfBirth = new Date(formData.dateOfBirth).toISOString();
     if (formData.password.trim()) payload.password = formData.password;
     if (formData.subjectId.trim()) payload.subjectId = Number(formData.subjectId);
+    if (formData.adminZaloOaId.trim()) payload.adminZaloOaId = formData.adminZaloOaId.trim();
     if (formData.isEmailVerified) payload.isEmailVerified = formData.isEmailVerified === 'true';
     if (formData.isActive) payload.isActive = formData.isActive === 'true';
 
@@ -49,6 +50,7 @@ const initialFormData = {
     isActive: '',
     password: '',
     subjectId: '',
+    adminZaloOaId: '',
 };
 
 export const UpdateAdminDirectApiCard = () => {
@@ -218,6 +220,14 @@ export const UpdateAdminDirectApiCard = () => {
                         onChange={handleChange}
                         placeholder="Vi du: 3"
                     />
+                    <Input
+                        label="adminZaloOaId"
+                        name="adminZaloOaId"
+                        value={formData.adminZaloOaId}
+                        onChange={handleChange}
+                        placeholder="ID quản trị viên trên Zalo OA"
+                        maxLength={32}
+                    />
                 </div>
 
                 <ApiErrorAlert message={formError || error} />
@@ -262,6 +272,10 @@ export const UpdateAdminDirectApiCard = () => {
                             <div className="rounded-sm border border-border p-3">
                                 <p className="text-xs text-foreground-light">Email</p>
                                 <p className="text-sm font-medium text-foreground break-all">{updatedAdmin?.user?.email || '-'}</p>
+                            </div>
+                            <div className="rounded-sm border border-border p-3">
+                                <p className="text-xs text-foreground-light">Zalo OA Admin ID</p>
+                                <p className="text-sm font-medium text-foreground break-all">{updatedAdmin?.adminZaloOaId || '-'}</p>
                             </div>
                         </div>
 
