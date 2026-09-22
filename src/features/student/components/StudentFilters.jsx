@@ -70,7 +70,7 @@ export const StudentFilters = ({
                     <SearchInput
                         value={search}
                         onChange={onSearchChange}
-                        placeholder="Tên, username, email..."
+                        placeholder="Tên, username, email, SĐT..."
                     />
                 </div>
 
