@@ -11,6 +11,7 @@ export const EditStudentForm = ({ student, onClose }) => {
     const [originalData, setOriginalData] = useState({});
 
     const [formData, setFormData] = useState({
+        username: '',
         firstName: '',
         lastName: '',
         email: '',
@@ -27,6 +28,7 @@ export const EditStudentForm = ({ student, onClose }) => {
     useEffect(() => {
         if (student) {
             const initial = {
+                username: student.username || '',
                 firstName: student.firstName || '',
                 lastName: student.lastName || '',
                 email: student.email || '',
@@ -58,6 +60,12 @@ export const EditStudentForm = ({ student, onClose }) => {
 
     const validateForm = () => {
         const newErrors = {};
+
+        if (!formData.username?.trim()) {
+            newErrors.username = 'Tên đăng nhập không được để trống';
+        } else if (formData.username.trim().length < 3 || formData.username.trim().length > 50) {
+            newErrors.username = 'Tên đăng nhập phải có từ 3 đến 50 ký tự';
+        }
 
         if (!formData.firstName?.trim()) {
             newErrors.firstName = 'Tên không được để trống';
@@ -119,8 +127,13 @@ export const EditStudentForm = ({ student, onClose }) => {
 
         setLoading(true);
         try {
+            // Chỉ truyền vào những trường thực sự thay đổi. Với trường có thể xóa
+            // (nullable ở BE), để trống nghĩa là xóa -> gửi null thay vì bỏ qua.
             const updateData = {};
 
+            if (formData.username.trim() !== originalData.username) {
+                updateData.username = formData.username.trim();
+            }
             if (formData.firstName.trim() !== originalData.firstName) {
                 updateData.firstName = formData.firstName.trim();
             }
@@ -128,7 +141,7 @@ export const EditStudentForm = ({ student, onClose }) => {
                 updateData.lastName = formData.lastName.trim();
             }
             if ((formData.email?.trim() || '') !== (originalData.email || '')) {
-                updateData.email = formData.email?.trim() || undefined;
+                updateData.email = formData.email?.trim() || null;
             }
             if (formData.grade !== originalData.grade) {
                 updateData.grade = parseInt(formData.grade);
@@ -139,16 +152,16 @@ export const EditStudentForm = ({ student, onClose }) => {
             if (formData.highSchoolGraduationYear !== originalData.highSchoolGraduationYear) {
                 updateData.highSchoolGraduationYear = formData.highSchoolGraduationYear
                     ? parseInt(formData.highSchoolGraduationYear)
-                    : undefined;
+                    : null;
             }
             if ((formData.school?.trim() || '') !== (originalData.school || '')) {
-                updateData.school = formData.school?.trim() || undefined;
+                updateData.school = formData.school?.trim() || null;
             }
             if ((formData.studentPhone?.trim() || '') !== (originalData.studentPhone || '')) {
-                updateData.studentPhone = formData.studentPhone?.trim() || undefined;
+                updateData.studentPhone = formData.studentPhone?.trim() || null;
             }
             if ((formData.parentPhone?.trim() || '') !== (originalData.parentPhone || '')) {
-                updateData.parentPhone = formData.parentPhone?.trim() || undefined;
+                updateData.parentPhone = formData.parentPhone?.trim() || null;
             }
             if (formData.password) {
                 updateData.password = formData.password;
@@ -189,6 +202,19 @@ export const EditStudentForm = ({ student, onClose }) => {
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <div className="flex-1 px-6 py-4 space-y-6 overflow-y-auto">
+                {/* Username */}
+                <div>
+                    <Input
+                        error={errors.username}
+                        name="username"
+                        label="Tên đăng nhập"
+                        required={true}
+                        value={formData.username}
+                        onChange={handleChange}
+                        placeholder="VD: student123"
+                    />
+                </div>
+
                 {/* Name */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
