@@ -392,6 +392,7 @@ export const ClassSessions = () => {
                     onCancel={() => setIsCreatePanelOpen(false)}
                     loading={loadingCreate}
                     courseId={courseClass?.courseId}
+                    defaultCourse={courseClass?.course}
                 />
             </RightPanel>
 
@@ -411,6 +412,7 @@ export const ClassSessions = () => {
                     onCancel={() => setIsEditPanelOpen(false)}
                     loading={loadingUpdate}
                     courseId={courseClass?.courseId}
+                    defaultCourse={courseClass?.course}
                 />
             </RightPanel>
         </>

@@ -1,4 +1,7 @@
+import { useState } from 'react';
+import { Info } from 'lucide-react';
 import { Button, Input, Textarea } from '../../../shared/components/ui';
+import { CourseSearchSelect } from '../../course/components/CourseSearchSelect';
 import { HomeworkContentSearchSelect } from '../../homeworkContent/components/HomeworkContentSearchSelect';
 
 export const ClassSessionForm = ({
@@ -10,8 +13,26 @@ export const ClassSessionForm = ({
     onHomeworkChange,
     loading,
     courseId,
+    defaultCourse,
     mode = 'create',
 }) => {
+    // Khóa học đang dùng để lọc danh sách bài tập về nhà bên dưới.
+    // Mặc định là khóa học của lớp hiện tại — admin có thể đổi sang khóa học khác
+    // để gắn bài tập về nhà thuộc khóa học đó cho buổi học này.
+    const [homeworkCourse, setHomeworkCourse] = useState(
+        defaultCourse || (courseId ? { courseId } : null)
+    );
+
+    const homeworkCourseId = homeworkCourse?.courseId ?? null;
+    const isOwnCourse = !courseId || homeworkCourseId === courseId;
+
+    const handleHomeworkCourseChange = (course) => {
+        setHomeworkCourse(course);
+        // Đổi khóa học thì danh sách bài tập thay đổi theo => bỏ bài tập đã chọn trước đó
+        // để tránh gắn nhầm bài tập của khóa học cũ.
+        onHomeworkChange(null);
+    };
+
     return (
         <form onSubmit={onSubmit} className="flex flex-col h-full">
             {/* ===== BODY ===== */}
@@ -101,19 +122,58 @@ export const ClassSessionForm = ({
                 </div>
 
                 {/* ===== HOMEWORK CONTENT ===== */}
-                <div>
-                    <HomeworkContentSearchSelect
-                        label="Bài tập về nhà"
-                        placeholder={courseId ? 'Chọn bài tập cho buổi học...' : 'Chưa xác định khóa học của lớp'}
-                        onSelect={onHomeworkChange}
-                        value={formData.homeworkId}
-                        error={errors.homeworkId}
-                        courseId={courseId}
-                        disabled={!courseId || loading}
-                    />
-                    <p className="text-xs text-foreground-light mt-1">
-                        Có thể chọn bài tập về nhà liên kết cho buổi học (không bắt buộc)
-                    </p>
+                <div className="space-y-3 rounded-md border border-border p-4">
+                    <div>
+                        <p className="text-sm font-medium text-foreground mb-2">
+                            Bài tập về nhà cho buổi học
+                        </p>
+                        <p className="text-xs text-foreground-light mb-3">
+                            Không bắt buộc. Nếu muốn gắn bài tập về nhà, hãy chọn khóa học chứa bài tập đó,
+                            rồi chọn bài tập cụ thể ở ô bên dưới.
+                        </p>
+                    </div>
+
+                    {/* ===== COURSE OF THE HOMEWORK ===== */}
+                    <div>
+                        <CourseSearchSelect
+                            label="Khóa học chứa bài tập"
+                            placeholder="Tìm khóa học..."
+                            value={homeworkCourse}
+                            onSelect={handleHomeworkCourseChange}
+                            disabled={loading}
+                        />
+                        <p className="text-xs text-foreground-light mt-1">
+                            Mặc định là khóa học của lớp này. Chọn một khóa học khác nếu bài tập
+                            bạn muốn gắn thuộc khóa học đó.
+                        </p>
+                    </div>
+
+                    {!isOwnCourse && (
+                        <div className="flex items-start gap-2 rounded-sm bg-amber-50 border border-amber-200 px-3 py-2">
+                            <Info size={14} className="text-amber-600 mt-0.5 shrink-0" />
+                            <p className="text-xs text-amber-700">
+                                Bạn đang chọn bài tập về nhà từ khóa học "{homeworkCourse?.title || 'khác'}" —
+                                khác với khóa học của lớp này{defaultCourse?.title ? ` ("${defaultCourse.title}")` : ''}.
+                                Chọn lại khóa học của lớp ở trên nếu muốn quay về bài tập thuộc khóa học gốc.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* ===== HOMEWORK PICKER (scoped to the course selected above) ===== */}
+                    <div>
+                        <HomeworkContentSearchSelect
+                            label="Bài tập về nhà"
+                            placeholder={homeworkCourseId ? 'Chọn bài tập trong khóa học đã chọn ở trên...' : 'Chọn khóa học ở trên trước'}
+                            onSelect={onHomeworkChange}
+                            value={formData.homeworkId}
+                            error={errors.homeworkId}
+                            courseId={homeworkCourseId}
+                            disabled={!homeworkCourseId || loading}
+                        />
+                        <p className="text-xs text-foreground-light mt-1">
+                            Danh sách chỉ hiển thị bài tập thuộc khóa học đã chọn ở trên.
+                        </p>
+                    </div>
                 </div>
             </div>
 
