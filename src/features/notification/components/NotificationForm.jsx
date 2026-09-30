@@ -1,316 +1,77 @@
 import { useState } from 'react'
-import { Button, Input, Dropdown, Checkbox } from '../../../shared/components/ui'
+import { Button, Checkbox, Dropdown, Input } from '../../../shared/components/ui'
 import { MarkdownEditorPreview } from '../../../shared/components/markdown/MarkdownEditorPreview'
 
-/**
- * NotificationForm
- * - Permission-aware
- * - Không quyền => read-only / không submit
- */
-export const NotificationForm = ({
-    onSubmit,
-    loading = false,
+const RECIPIENT_OPTIONS = [
+  { value: 'ALL', label: 'Tất cả người dùng' },
+  { value: 'UNPAID_TUITION_STUDENTS', label: 'Học sinh chưa đóng học phí' },
+  { value: 'PARENT', label: 'Phụ huynh cụ thể' },
+  { value: 'STUDENT', label: 'Học sinh cụ thể' },
+  { value: 'ADMIN', label: 'Quản trị viên cụ thể' },
+]
 
-    /* ===== SELECTION ===== */
-    selectedStudents = [],
+export const NotificationForm = ({ recipientType, onRecipientTypeChange, selectedCount, onSubmit, onReset, onPayloadChange, loading }) => {
+  const [form, setForm] = useState({ title: '', message: '', type: 'SYSTEM', level: 'INFO', channels: ['STUDENT', 'ADMIN', 'UNPAID_TUITION_STUDENTS'].includes(recipientType) ? ['IN_APP'] : ['IN_APP', 'PUSH'], shouldShowReminderModal: false })
+  const [errors, setErrors] = useState({})
+  const pushDisabled = ['STUDENT', 'ADMIN', 'UNPAID_TUITION_STUDENTS'].includes(recipientType)
 
-    /* ===== RECIPIENT TYPE ===== */
-    showRecipientTypeSelector = false,
-    recipientType = 'STUDENT',
-    onRecipientTypeChange,
+  const update = (patch) => {
+    setForm((current) => ({ ...current, ...patch }))
+    onPayloadChange?.()
+  }
 
-    /* ===== PERMISSIONS ===== */
-    canSendAll = false,
-    canSendStudents = false,
-    canSendAdmins = false,
-}) => {
-    const [formData, setFormData] = useState({
-        title: '',
-        message: '',
-        type: 'SYSTEM',
-        level: 'INFO',
-        shouldShowReminderModal: false,
-    })
+  const toggleChannel = (channel) => {
+    if (channel === 'PUSH' && pushDisabled) return
+    update({ channels: form.channels.includes(channel) ? form.channels.filter((item) => item !== channel) : [...form.channels, channel] })
+  }
 
-    const [errors, setErrors] = useState({})
+  const submit = (event) => {
+    event.preventDefault()
+    const next = {}
+    if (!form.title.trim()) next.title = 'Vui lòng nhập tiêu đề'
+    if (!form.message.trim()) next.message = 'Vui lòng nhập nội dung'
+    if (!form.channels.length) next.channels = 'Chọn ít nhất một kênh gửi'
+    if (!['ALL', 'UNPAID_TUITION_STUDENTS'].includes(recipientType) && selectedCount === 0) next.recipients = 'Chọn ít nhất một người nhận'
+    setErrors(next)
+    if (!Object.keys(next).length) onSubmit(form)
+  }
 
-    /* ======================================================
-       PERMISSION HELPERS
-    ====================================================== */
+  const reset = () => {
+    setForm({ title: '', message: '', type: 'SYSTEM', level: 'INFO', channels: pushDisabled ? ['IN_APP'] : ['IN_APP', 'PUSH'], shouldShowReminderModal: false })
+    setErrors({})
+    onReset?.()
+  }
 
-    const canUseRecipientType = (type) => {
-        if (type === 'ALL') return canSendAll
-        if (type === 'STUDENT') return canSendStudents
-        if (type === 'UNPAID_TUITION_STUDENTS') return canSendStudents
-        if (type === 'ADMIN') return canSendAdmins
-        return false
-    }
-
-    const canSubmit =
-        recipientType === 'ALL'
-            ? canSendAll
-            : recipientType === 'UNPAID_TUITION_STUDENTS'
-                ? canSendStudents
-                : recipientType === 'ADMIN'
-                    ? canSendAdmins
-                    : canSendStudents
-
-    /* ======================================================
-       HANDLERS
-    ====================================================== */
-
-    const handleChange = (e) => {
-        const { name, value } = e.target
-        setFormData((prev) => ({ ...prev, [name]: value }))
-
-        if (errors[name]) {
-            setErrors((prev) => {
-                const next = { ...prev }
-                delete next[name]
-                return next
-            })
-        }
-    }
-
-    const handleDropdownChange = (name, value) => {
-        setFormData((prev) => ({ ...prev, [name]: value }))
-
-        if (errors[name]) {
-            setErrors((prev) => {
-                const next = { ...prev }
-                delete next[name]
-                return next
-            })
-        }
-    }
-
-    const handleReminderModalChange = () => {
-        setFormData((prev) => ({
-            ...prev,
-            shouldShowReminderModal: !prev.shouldShowReminderModal,
-        }))
-    }
-
-    const validate = () => {
-        const nextErrors = {}
-
-        if (!formData.title.trim()) {
-            nextErrors.title = 'Tiêu đề không được để trống'
-        } else if (formData.title.length > 200) {
-            nextErrors.title = 'Tiêu đề không được quá 200 ký tự'
-        }
-
-        if (!formData.message.trim()) {
-            nextErrors.message = 'Nội dung không được để trống'
-        } else if (formData.message.length > 1000) {
-            nextErrors.message = 'Nội dung không được quá 1000 ký tự'
-        }
-
-        if (!canSubmit) {
-            nextErrors.permission = 'Bạn không có quyền gửi loại thông báo này'
-        }
-
-        if (
-            recipientType !== 'ALL' &&
-            recipientType !== 'UNPAID_TUITION_STUDENTS' &&
-            selectedStudents.length === 0
-        ) {
-            const label =
-                recipientType === 'ADMIN' ? 'quản trị viên' : 'học sinh'
-            nextErrors.students = `Vui lòng chọn ít nhất 1 ${label}`
-        }
-
-        setErrors(nextErrors)
-        return Object.keys(nextErrors).length === 0
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        if (!validate()) return
-        onSubmit(formData)
-    }
-
-    const handleReset = () => {
-        setFormData({
-            title: '',
-            message: '',
-            type: 'SYSTEM',
-            level: 'INFO',
-            shouldShowReminderModal: false,
-        })
-        setErrors({})
-    }
-
-    /* ======================================================
-       OPTIONS
-    ====================================================== */
-
-    const typeOptions = [
-        { value: 'SYSTEM', label: 'Hệ thống' },
-        { value: 'COURSE', label: 'Khóa học' },
-        { value: 'LESSON', label: 'Buổi học' },
-        { value: 'ATTENDANCE', label: 'Điểm danh' },
-        { value: 'MESSAGE', label: 'Tin nhắn' },
-        { value: 'OTHER', label: 'Khác' },
-    ]
-
-    const levelOptions = [
-        { value: 'INFO', label: 'Thông tin' },
-        { value: 'SUCCESS', label: 'Thành công' },
-        { value: 'WARNING', label: 'Cảnh báo' },
-        { value: 'ERROR', label: 'Lỗi' },
-    ]
-
-    const recipientTypeOptions = [
-        { value: 'ALL', label: 'Tất cả người dùng', disabled: !canSendAll },
-        {
-            value: 'UNPAID_TUITION_STUDENTS',
-            label: 'Tất cả học sinh chưa đóng học phí',
-            disabled: !canSendStudents,
-        },
-        { value: 'ADMIN', label: 'Quản trị viên', disabled: !canSendAdmins },
-        { value: 'STUDENT', label: 'Học sinh', disabled: !canSendStudents },
-    ]
-
-    const isFormDisabled = loading || !canSubmit
-
-    /* ======================================================
-       RENDER
-    ====================================================== */
-
-    return (
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            <div className="flex-1 space-y-6">
-                <div className="bg-white border border-border rounded-sm p-4">
-                    <h3 className="text-lg font-semibold mb-4">
-                        Thông tin thông báo
-                    </h3>
-
-                    {/* Recipient Type */}
-                    {showRecipientTypeSelector && (
-                        <div className="mb-4">
-
-                            <Dropdown
-                                value={recipientType}
-                                onChange={(value) => {
-                                    if (!canUseRecipientType(value)) return
-                                    onRecipientTypeChange?.(value)
-                                }}
-                                options={recipientTypeOptions}
-                                placeholder="Chọn đối tượng nhận..."
-                                disabled={loading}
-                                label={"Gửi đến"}
-                            />
-                        </div>
-                    )}
-
-                    {/* Permission error */}
-                    {errors.permission && (
-                        <div className="mb-4 p-3 text-sm text-error bg-error/10 border border-error/30 rounded-sm">
-                            {errors.permission}
-                        </div>
-                    )}
-
-                    {/* Title */}
-                    <Input
-                        label="Tiêu đề"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        placeholder="Nhập tiêu đề thông báo..."
-                        error={errors.title}
-                        disabled={isFormDisabled}
-                        maxLength={200}
-                        required
-                    />
-
-                    {/* Message */}
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium mb-2">
-                            Nội dung <span className="text-error">*</span>
-                        </label>
-                        <MarkdownEditorPreview
-                            value={formData.message}
-                            onChange={(value) => {
-                                setFormData((prev) => ({ ...prev, message: value }))
-                                if (errors.message) {
-                                    setErrors((prev) => {
-                                        const next = { ...prev }
-                                        delete next.message
-                                        return next
-                                    })
-                                }
-                            }}
-                            height="320px"
-                            editable={!isFormDisabled}
-                            maxLength={1000}
-                        />
-                        {errors.message && (
-                            <p className="mt-1 text-sm text-error">{errors.message}</p>
-                        )}
-                    </div>
-
-                    {/* Type */}
-                    <div className="mt-4">
-                        <Dropdown
-                            value={formData.type}
-                            onChange={(v) =>
-                                handleDropdownChange('type', v)
-                            }
-                            options={typeOptions}
-                            disabled={isFormDisabled}
-                            label={"Loại tin nhắn"}
-                        />
-                    </div>
-
-                    {/* Level */}
-                    <div className="mt-4">
-                        <Dropdown
-                            value={formData.level}
-                            onChange={(v) =>
-                                handleDropdownChange('level', v)
-                            }
-                            options={levelOptions}
-                            disabled={isFormDisabled}
-                            label={"Mức độ tin nhắn"}
-                        />
-                    </div>
-
-                    <div className="mt-4">
-                        <Checkbox
-                            checked={formData.shouldShowReminderModal}
-                            onChange={handleReminderModalChange}
-                            label="Hiển thị popup nhắc nhở"
-                        />
-                    </div>
-
-                    {/* Students error */}
-                    {errors.students && (
-                        <div className="mt-4 text-sm text-error">
-                            {errors.students}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Actions */}
-            <div className="border-t border-border px-6 py-4 flex gap-3 justify-end">
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleReset}
-                    disabled={loading}
-                >
-                    Đặt lại
-                </Button>
-                <Button
-                    type="submit"
-                    loading={loading}
-                    disabled={!canSubmit}
-                >
-                    Gửi thông báo
-                </Button>
-            </div>
-        </form>
-    )
+  return <form onSubmit={submit} className="space-y-5 rounded-sm border border-border bg-white p-5">
+    <h2 className="text-lg font-semibold">Soạn thông báo</h2>
+    <Dropdown label="Gửi đến" value={recipientType} options={RECIPIENT_OPTIONS} onChange={(value) => { onRecipientTypeChange(value); onPayloadChange?.() }} disabled={loading} />
+    <Input label="Tiêu đề" value={form.title} onChange={(event) => update({ title: event.target.value })} error={errors.title} maxLength={255} required />
+    <div>
+      <label className="mb-2 block text-sm font-medium">Nội dung <span className="text-error">*</span></label>
+      <MarkdownEditorPreview value={form.message} onChange={(message) => update({ message })} height="280px" editable={!loading} />
+      {errors.message && <p className="mt-1 text-sm text-error">{errors.message}</p>}
+    </div>
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Dropdown label="Loại" value={form.type} onChange={(type) => update({ type })} options={[
+        ['SYSTEM','Hệ thống'],['COURSE','Khóa học'],['LESSON','Buổi học'],['ATTENDANCE','Điểm danh'],['TUITION','Học phí'],['MESSAGE','Tin nhắn'],['RESULT','Kết quả / điểm thi'],['OTHER','Khác'],
+      ].map(([value,label]) => ({ value,label }))} />
+      <Dropdown label="Mức độ" value={form.level} onChange={(level) => update({ level })} options={['INFO','SUCCESS','WARNING','ERROR'].map((value) => ({ value, label: value }))} />
+    </div>
+    <fieldset>
+      <legend className="mb-2 text-sm font-medium">Kênh gửi</legend>
+      <div className="flex flex-wrap gap-5">
+        <Checkbox checked={form.channels.includes('IN_APP')} onChange={() => toggleChannel('IN_APP')} label="Trong ứng dụng" />
+        <Checkbox checked={form.channels.includes('PUSH')} onChange={() => toggleChannel('PUSH')} label="Push notification" disabled={pushDisabled} />
+      </div>
+      {recipientType === 'ALL' && <p className="mt-2 text-xs text-foreground-light">Push chỉ được tạo cho phụ huynh và vẫn phụ thuộc thiết lập nhận thông báo.</p>}
+      {pushDisabled && <p className="mt-2 text-xs text-foreground-light">Push chưa hỗ trợ đối tượng này; người nhận vẫn nhận thông báo trong ứng dụng.</p>}
+      {errors.channels && <p className="mt-1 text-sm text-error">{errors.channels}</p>}
+    </fieldset>
+    <Checkbox checked={form.shouldShowReminderModal} onChange={() => update({ shouldShowReminderModal: !form.shouldShowReminderModal })} label="Hiển thị popup nhắc nhở" />
+    {errors.recipients && <p role="alert" className="text-sm text-error">{errors.recipients}</p>}
+    <div className="flex justify-end gap-3 border-t border-border pt-4">
+      <Button type="button" variant="outline" onClick={reset} disabled={loading}>Đặt lại</Button>
+      <Button type="submit" loading={loading} disabled={loading || !form.channels.length}>Xếp hàng gửi</Button>
+    </div>
+  </form>
 }

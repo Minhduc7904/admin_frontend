@@ -97,6 +97,7 @@ export const ROUTES = {
   CLASS_NOTIFICATIONS: (id = ':id') => `/classes/${id}/notifications`,
   BROADCAST_NOTIFICATIONS: '/notifications/broadcast',
   NOTIFICATION_LOGS: '/notifications/logs',
+  NOTIFICATION_LOG_DETAIL: (id = ':jobId') => `/notifications/logs/${id}`,
   TUITION_PAYMENTS: '/tuition-payments',
   BANK_TRANSFER_TRANSACTIONS: '/bank-transfer-transactions',
   COURSE_PURCHASE_TRANSACTIONS: '/course-purchase-transactions',
@@ -485,6 +486,10 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/notifications/${id}`,
     BY_USER: (userId) => `/notifications/user/${userId}`,
     SEND: "/notifications/send",
+    RECIPIENT_SEARCH: "/notifications/recipients/search",
+    DISPATCH_JOBS: "/notifications/dispatch-jobs",
+    DISPATCH_JOB: (id) => `/notifications/dispatch-jobs/${id}`,
+    DISPATCH_RECIPIENTS: (id) => `/notifications/dispatch-jobs/${id}/recipients`,
   },
   TUITION_PAYMENT: {
     LIST: "/tuition-payments",

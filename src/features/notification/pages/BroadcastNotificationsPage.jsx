@@ -1,235 +1,61 @@
-// src/features/notification/pages/BroadcastNotificationsPage.jsx
+import { useRef, useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../../core/store/hooks'
+import { ROUTES } from '../../../core/constants'
+import { PERMISSIONS } from '../../../core/constants/permission/permission.codes'
+import { useHasPermission } from '../../../shared/hooks'
+import { NotificationForm } from '../components/NotificationForm'
+import { RecipientSearchPicker } from '../components/RecipientSearchPicker'
+import { selectLoadingSend, sendNotificationAsync } from '../store/notificationSlice'
 
-import { useEffect, useState, useRef, useMemo } from 'react';
-import { BroadcastNotifications } from '../components/BroadcastNotifications';
-import { useAppDispatch, useAppSelector } from '../../../core/store/hooks';
-import { Navigate } from 'react-router-dom';
-import {
-    getAllAdminsAsync,
-    selectAdmins,
-    selectAdminLoadingGet,
-} from '../../admin/store/adminSlice';
-
-import {
-    getAllStudentsForNotificationAsync,
-    selectStudentsForBroadcast,
-    selectLoadingStudentsForBroadcast,
-    sendNotificationAsync,
-    selectLoadingSend,
-} from '../store/notificationSlice';
-import { useHasPermission } from '../../../shared/hooks';
-import { PERMISSIONS } from '../../../core/constants/permission/permission.codes';
-import { ROUTES } from '../../../core/constants';
-
-/**
- * PERMISSIONS REQUIRED FOR THIS PAGE
- * 
- * === ROUTER LEVEL ===
- * - ADMIN_PAGE.BROADCAST_NOTIFICATIONS ('admin:page:broadcast-notifications')
- *   → Quyền truy cập trang gửi thông báo broadcast
- *   → Được kiểm tra bởi ProtectedRoute trong AdminRouter.jsx
- * 
- * === PAGE OPERATIONS ===
- * 
- * 1. ADMIN_GET_ALL ('admin:get-all')
- *    → Quyền xem danh sách tất cả admins
- *    → Dùng khi recipientType là 'ADMIN'
- *    → Gọi getAllAdminsAsync để load danh sách admins
- * 
- * 2. STUDENT_GET_ALL ('student:get-all')
- *    → Quyền xem danh sách tất cả students
- *    → Dùng khi recipientType là 'STUDENT'
- *    → Gọi getAllStudentsForNotificationAsync để load danh sách students
- * 
- * 3. NOTIFY_ALL_USERS ('notification:notify-all-users')
- *    → Quyền gửi thông báo đến tất cả người dùng trong hệ thống
- *    → Dùng khi recipientType là 'ALL'
- *    → Cho phép gửi broadcast notification không giới hạn người nhận
- * 
- * === PERMISSION LOGIC ===
- * - Người dùng phải có ít nhất 1 trong 3 quyền để truy cập trang
- * - Mỗi recipientType được kiểm soát bởi permission tương ứng
- * - UI sẽ disable/hide các option không có quyền
- */
+const newKey = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
 
 export const BroadcastNotificationsPage = () => {
-    const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const canSend = useHasPermission(PERMISSIONS.NOTIFICATION.SEND)
+  const loading = useAppSelector(selectLoadingSend)
+  const [recipientType, setRecipientType] = useState('PARENT')
+  const [selected, setSelected] = useState(new Map())
+  const [grade, setGrade] = useState('')
+  const keyRef = useRef(newKey())
 
-    /* ===== PERMISSION HOOKS ===== */
-    const hasGetAllAdminAccess = useHasPermission(PERMISSIONS.ADMIN.GET_ALL);
-    const hasGetAllStudentAccess = useHasPermission(PERMISSIONS.STUDENT.GET_ALL);
-    const hasNotifyAllAccess = useHasPermission(PERMISSIONS.NOTIFICATION.SEND);
+  if (!canSend) return <Navigate to={ROUTES.FORBIDDEN} replace />
 
-    // Kiểm tra quyền truy cập trang: cần ít nhất 1 trong 3 quyền
-    if (!hasGetAllAdminAccess && !hasGetAllStudentAccess && !hasNotifyAllAccess) {
-        return <Navigate to={ROUTES.FORBIDDEN} replace />;
+  const payloadChanged = () => { if (!loading) keyRef.current = newKey() }
+  const changeType = (type) => { setRecipientType(type); setSelected(new Map()); setGrade(''); keyRef.current = newKey() }
+  const toggle = (item) => setSelected((current) => {
+    const next = new Map(current)
+    if (next.has(item.userId)) next.delete(item.userId); else next.set(item.userId, item)
+    keyRef.current = newKey()
+    return next
+  })
+
+  const submit = async (form) => {
+    const data = {
+      title: form.title,
+      message: form.message,
+      type: form.type,
+      level: form.level,
+      channels: form.channels,
+      recipientType: ['PARENT', 'STUDENT', 'ADMIN'].includes(recipientType) ? recipientType : undefined,
+      userIds: ['PARENT', 'STUDENT', 'ADMIN'].includes(recipientType) ? Array.from(selected.keys()) : undefined,
+      all: recipientType === 'ALL' || undefined,
+      allUnpaidTuition: recipientType === 'UNPAID_TUITION_STUDENTS' || undefined,
+      data: { entity: 'broadcast', recipientType, isMarkdown: true, ...(form.shouldShowReminderModal ? { shouldShowReminderModal: true } : {}) },
     }
+    const response = await dispatch(sendNotificationAsync({ data, idempotencyKey: keyRef.current })).unwrap()
+    keyRef.current = newKey()
+    setSelected(new Map())
+    navigate(ROUTES.NOTIFICATION_LOG_DETAIL(response.data.jobId))
+  }
 
-    /* ===== STORE ===== */
-    const students = useAppSelector(selectStudentsForBroadcast);
-    const loadingStudents = useAppSelector(selectLoadingStudentsForBroadcast);
-    const admins = useAppSelector(selectAdmins);
-    const loadingAdmins = useAppSelector(selectAdminLoadingGet);
-    const loadingSend = useAppSelector(selectLoadingSend);
-
-    /* ===== LOCAL STATE ===== */
-    const [recipientType, setRecipientType] = useState('STUDENT');
-    const [selectedStudentIds, setSelectedStudentIds] = useState([]);
-    const [selectedAdminIds, setSelectedAdminIds] = useState([]);
-    const [grade, setGrade] = useState('');
-
-    // Track if data has been loaded to prevent duplicate loads
-    const studentsLoadedRef = useRef(false);
-    const adminsLoadedRef = useRef(false);
-
-    /* ===== FILTERED STUDENTS BY GRADE ===== */
-    const filteredStudents = useMemo(() => {
-        if (!grade) return students;
-        return students.filter((student) => student.grade === parseInt(grade));
-    }, [students, grade]);
-
-    /* ===== EFFECTS ===== */
-    // Load students khi chọn recipientType là STUDENT và có quyền
-    useEffect(() => {
-        if (
-            recipientType === 'STUDENT' &&
-            hasGetAllStudentAccess &&
-            !studentsLoadedRef.current
-        ) {
-            dispatch(getAllStudentsForNotificationAsync({ page: 1, limit: 1000 }));
-            studentsLoadedRef.current = true;
-        }
-    }, [recipientType, hasGetAllStudentAccess, dispatch]);
-
-    // Load admins khi chọn recipientType là ADMIN và có quyền
-    useEffect(() => {
-        if (
-            recipientType === 'ADMIN' &&
-            hasGetAllAdminAccess &&
-            !adminsLoadedRef.current
-        ) {
-            dispatch(getAllAdminsAsync({ page: 1, limit: 1000 }));
-            adminsLoadedRef.current = true;
-        }
-    }, [recipientType, hasGetAllAdminAccess, dispatch]);
-
-    /* ===== HANDLERS ===== */
-    // Thay đổi loại người nhận (kiểm tra permission cho từng loại)
-    const handleRecipientTypeChange = (newType) => {
-        // 🔒 Permission guards
-        if (newType === 'ALL' && !hasNotifyAllAccess) return;
-        if (newType === 'STUDENT' && !hasGetAllStudentAccess) return;
-        if (newType === 'UNPAID_TUITION_STUDENTS' && !hasGetAllStudentAccess) return;
-        if (newType === 'ADMIN' && !hasGetAllAdminAccess) return;
-
-        setRecipientType(newType);
-        setSelectedStudentIds([]);
-        setSelectedAdminIds([]);
-    };
-
-
-    const handleStudentSelectionChange = (ids) => {
-        setSelectedStudentIds(ids);
-    };
-
-    const handleAdminSelectionChange = (ids) => {
-        setSelectedAdminIds(ids);
-    };
-
-    const handleGradeChange = (newGrade) => {
-        setGrade(newGrade);
-        // Clear selections when changing grade
-        setSelectedStudentIds([]);
-    };
-
-    // Gửi notification (kiểm tra permission trước khi gửi)
-    const handleSubmit = async (formData) => {
-        // 🔒 Permission guards - Kiểm tra lại permission trước khi gửi
-        if (recipientType === 'ALL' && !hasNotifyAllAccess) return;
-        if (recipientType === 'STUDENT' && !hasGetAllStudentAccess) return;
-        if (recipientType === 'UNPAID_TUITION_STUDENTS' && !hasGetAllStudentAccess) return;
-        if (recipientType === 'ADMIN' && !hasGetAllAdminAccess) return;
-
-        let userIds = [];
-
-        if (recipientType === 'ALL') {
-            userIds = null;
-        }
-
-        if (recipientType === 'UNPAID_TUITION_STUDENTS') {
-            userIds = null;
-        }
-
-        if (recipientType === 'STUDENT') {
-            if (selectedStudentIds.length === 0) return;
-
-            userIds = selectedStudentIds
-                .map((id) => students.find((s) => s.studentId === id)?.userId)
-                .filter(Boolean);
-        }
-
-        if (recipientType === 'ADMIN') {
-            if (selectedAdminIds.length === 0) return;
-
-            userIds = selectedAdminIds
-                .map((id) => admins.find((a) => a.adminId === id)?.userId)
-                .filter(Boolean);
-        }
-
-        await dispatch(
-            sendNotificationAsync({
-                title: formData.title,
-                message: formData.message,
-                type: formData.type,
-                level: formData.level,
-                userIds,
-                all: recipientType === 'ALL',
-                allUnpaidTuition: recipientType === 'UNPAID_TUITION_STUDENTS',
-                data: {
-                    entity: 'broadcast',
-                    recipientType,
-                    isMarkdown: true,
-                    ...(formData.shouldShowReminderModal
-                        ? { shouldShowReminderModal: true }
-                        : {}),
-                },
-            })
-        ).unwrap();
-
-        setSelectedStudentIds([]);
-        setSelectedAdminIds([]);
-    };
-
-
-    /* ===== RENDER UI ===== */
-    return (
-        <BroadcastNotifications
-            title="Gửi thông báo đến học sinh"
-            description="Soạn thảo và gửi thông báo đến một hoặc nhiều học sinh trong hệ thống."
-            // Student props
-            students={filteredStudents}
-            selectedStudentIds={selectedStudentIds}
-            loadingStudents={loadingStudents}
-            onSelectionChange={handleStudentSelectionChange}
-            // Admin props
-            admins={admins}
-            selectedAdminIds={selectedAdminIds}
-            loadingAdmins={loadingAdmins}
-            onAdminSelectionChange={handleAdminSelectionChange}
-            // Common props
-            loadingSend={loadingSend}
-            onSubmit={handleSubmit}
-            // Recipient type control
-            showRecipientTypeSelector={true}
-            recipientType={recipientType}
-            onRecipientTypeChange={handleRecipientTypeChange}
-            // Grade filter
-            grade={grade}
-            onGradeChange={handleGradeChange}
-            // Permission props
-            hasGetAllAdminAccess={hasGetAllAdminAccess}
-            hasGetAllStudentAccess={hasGetAllStudentAccess}
-            hasNotifyAllAccess={hasNotifyAllAccess}
-        />
-    );
-};
+  const isSpecific = ['PARENT', 'STUDENT', 'ADMIN'].includes(recipientType)
+  return <div>
+    <div className="mb-5"><h1 className="text-2xl font-bold">Gửi thông báo</h1><p className="text-sm text-foreground-light">Tìm và chọn người nhận, sau đó theo dõi tiến độ giao theo từng kênh.</p></div>
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <NotificationForm key={recipientType} recipientType={recipientType} onRecipientTypeChange={changeType} selectedCount={selected.size} onSubmit={submit} onReset={() => { setSelected(new Map()); keyRef.current = newKey() }} onPayloadChange={payloadChanged} loading={loading} />
+      {isSpecific ? <RecipientSearchPicker key={recipientType} recipientType={recipientType} selected={selected} onToggle={toggle} grade={grade} onGradeChange={setGrade} /> : <section className="rounded-sm border border-border bg-white p-8 text-center"><h2 className="font-semibold">{recipientType === 'ALL' ? 'Tất cả người dùng' : 'Học sinh chưa đóng học phí'}</h2><p className="mt-2 text-sm text-foreground-light">Danh sách người nhận được chốt tại thời điểm xếp hàng.</p></section>}
+    </div>
+  </div>
+}

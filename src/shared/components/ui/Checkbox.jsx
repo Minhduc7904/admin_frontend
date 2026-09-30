@@ -9,16 +9,17 @@ export const Checkbox = ({
   className = '',
   tooltipText,
   tooltipPosition = 'right',
+  disabled = false,
 }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <label htmlFor={id} className="flex items-center cursor-pointer">
+      <label htmlFor={id} className={`flex items-center ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
         <div
           className={`
             w-4 h-4 rounded-sm border flex items-center justify-center transition-colors
             ${checked
               ? 'bg-foreground border-foreground'
-              : 'bg-white border-border hover:border-foreground-light'
+              : `bg-white border-border ${disabled ? '' : 'hover:border-foreground-light'}`
             }
           `}
         >
@@ -29,6 +30,7 @@ export const Checkbox = ({
           id={id}
           checked={checked}
           onChange={(e) => onChange?.(e.target.checked)}
+          disabled={disabled}
           className="sr-only"
         />
         {label && (

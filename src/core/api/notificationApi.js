@@ -105,7 +105,13 @@ export const notificationApi = {
      * 
      * POST /notifications/send
      */
-    send: (data) => {
-        return axiosClient.post(API_ENDPOINTS.NOTIFICATIONS.SEND, data)
+    send: (data, idempotencyKey) => {
+        return axiosClient.post(API_ENDPOINTS.NOTIFICATIONS.SEND, data, {
+            headers: { 'Idempotency-Key': idempotencyKey },
+        })
     },
+    searchRecipients: (params, config = {}) => axiosClient.get(API_ENDPOINTS.NOTIFICATIONS.RECIPIENT_SEARCH, { params, ...config }),
+    getDispatchJobs: (params) => axiosClient.get(API_ENDPOINTS.NOTIFICATIONS.DISPATCH_JOBS, { params }),
+    getDispatchJob: (id) => axiosClient.get(API_ENDPOINTS.NOTIFICATIONS.DISPATCH_JOB(id)),
+    getDispatchRecipients: (id, params) => axiosClient.get(API_ENDPOINTS.NOTIFICATIONS.DISPATCH_RECIPIENTS(id), { params }),
 }

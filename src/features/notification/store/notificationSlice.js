@@ -122,10 +122,10 @@ export const getUserNotificationsAsync = createAsyncThunk(
 
 export const sendNotificationAsync = createAsyncThunk(
   'notification/send',
-  async (data, thunkAPI) => {
-    return handleAsyncThunk(() => notificationApi.send(data), thunkAPI, {
+  async ({ data, idempotencyKey }, thunkAPI) => {
+    return handleAsyncThunk(() => notificationApi.send(data, idempotencyKey), thunkAPI, {
       showSuccess: true,
-      successTitle: 'Gửi thông báo thành công',
+      successTitle: 'Đã xếp hàng',
       errorTitle: 'Lỗi gửi thông báo',
     });
   }
@@ -288,7 +288,7 @@ const notificationSlice = createSlice({
         state.loadingMarkAllRead = true;
         state.error = null;
       })
-      .addCase(markAllReadAsync.fulfilled, (state, action) => {
+      .addCase(markAllReadAsync.fulfilled, (state) => {
         state.loadingMarkAllRead = false;
         // Mark all as read in state
         state.myNotifications = state.myNotifications.map((n) => ({

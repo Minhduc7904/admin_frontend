@@ -76,14 +76,15 @@ export const AdminSidebar = () => {
           name: 'Gửi thông báo hàng loạt',
           href: ROUTES.BROADCAST_NOTIFICATIONS,
           icon: Send,
-          permission: PERMISSIONS.ADMIN_PAGE.BROADCAST_NOTIFICATIONS,
+          permission: PERMISSIONS.NOTIFICATION.SEND,
         },
-        // {
-        //   key: 'notificationLogs',
-        //   name: 'Lịch sử thông báo',
-        //   href: ROUTES.NOTIFICATION_LOGS,
-        //   icon: Bell,
-        // },
+        {
+          key: 'notificationLogs',
+          name: 'Lịch sử thông báo',
+          href: ROUTES.NOTIFICATION_LOGS,
+          icon: Bell,
+          permission: PERMISSIONS.NOTIFICATION.SEND,
+        },
       ],
     },
 
@@ -445,4 +446,3 @@ export const AdminSidebar = () => {
 
   return <Sidebar sections={sections} />;
 };
-

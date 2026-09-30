@@ -67,6 +67,8 @@ import { ROUTES } from '../core/constants';
 import { Navigate, Outlet } from 'react-router-dom';
 import { CourseListPage } from '../features/course/pages/CourseListPage';
 import { BroadcastNotificationsPage } from '../features/notification/pages/BroadcastNotificationsPage';
+import { NotificationJobListPage } from '../features/notification/pages/NotificationJobListPage';
+import { NotificationJobDetailPage } from '../features/notification/pages/NotificationJobDetailPage';
 import { TuitionPaymentList } from '../features/tuitionPayment/pages/TuitionPaymentList';
 import { BankTransferTransactionListPage } from '../features/bankTransferTransaction/pages';
 import { CoursePurchaseTransactionPage, OnlineCourseEnrollmentListPage } from '../features/coursePurchaseTransaction/pages';
@@ -362,11 +364,19 @@ export const adminRouter = [
                 ],
             },
             {
-                element: <ProtectedRoute permission={PERMISSIONS.ADMIN_PAGE.BROADCAST_NOTIFICATIONS} />,
+                element: <ProtectedRoute permission={PERMISSIONS.NOTIFICATION.SEND} />,
                 children: [
                     {
                         path: ROUTES.BROADCAST_NOTIFICATIONS,
                         element: <BroadcastNotificationsPage />,
+                    },
+                    {
+                        path: ROUTES.NOTIFICATION_LOGS,
+                        element: <NotificationJobListPage />,
+                    },
+                    {
+                        path: ROUTES.NOTIFICATION_LOG_DETAIL(),
+                        element: <NotificationJobDetailPage />,
                     },
                 ],
             },
@@ -809,4 +819,3 @@ export const adminRouter = [
         ],
     },
 ];
-
