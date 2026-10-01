@@ -27,6 +27,8 @@ const createInitialState = () => ({
     total: 0,
     totalPages: 0,
   },
+  myNotificationsRequestId: null,
+  statsRequestId: null,
   loadingMyNotifications: false,
   loadingUserNotifications: false,
   loadingStats: false,
@@ -290,7 +292,8 @@ const notificationSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Get my notifications
-      .addCase(getMyNotificationsAsync.pending, (state) => {
+      .addCase(getMyNotificationsAsync.pending, (state, action) => {
+        state.myNotificationsRequestId = action.meta.requestId;
         if (state.pagination.page === 1) {
           state.myNotifications = [];
         }
@@ -298,6 +301,9 @@ const notificationSlice = createSlice({
         state.error = null;
       })
       .addCase(getMyNotificationsAsync.fulfilled, (state, action) => {
+        if (state.myNotificationsRequestId !== action.meta.requestId) return;
+
+        state.myNotificationsRequestId = null;
         state.loadingMyNotifications = false;
         // Append for infinite scroll
         const page =
@@ -315,20 +321,30 @@ const notificationSlice = createSlice({
         state.error = null;
       })
       .addCase(getMyNotificationsAsync.rejected, (state, action) => {
+        if (state.myNotificationsRequestId !== action.meta.requestId) return;
+
+        state.myNotificationsRequestId = null;
         state.myNotifications = [];
         state.loadingMyNotifications = false;
         state.error = action.payload;
       })
 
       // Get my stats
-      .addCase(getMyStatsAsync.pending, (state) => {
+      .addCase(getMyStatsAsync.pending, (state, action) => {
+        state.statsRequestId = action.meta.requestId;
         state.loadingStats = true;
       })
       .addCase(getMyStatsAsync.fulfilled, (state, action) => {
+        if (state.statsRequestId !== action.meta.requestId) return;
+
+        state.statsRequestId = null;
         state.loadingStats = false;
         state.stats = action.payload.data;
       })
       .addCase(getMyStatsAsync.rejected, (state, action) => {
+        if (state.statsRequestId !== action.meta.requestId) return;
+
+        state.statsRequestId = null;
         state.loadingStats = false;
         state.error = action.payload;
       })
