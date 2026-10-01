@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { notificationApi, studentApi } from '../../../core/api';
-import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { notificationApi, studentApi } from "../../../core/api";
+import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 
 const initialState = {
   // Toast notifications (old state - không đụng chạm)
@@ -38,111 +38,119 @@ const initialState = {
   loadingStudentsForBroadcast: false,
   error: null,
   filters: {
-    search: '',
-    type: '', // SYSTEM, COURSE, LESSON, ATTENDANCE, GENERAL
-    level: '', // INFO, WARNING, ERROR, SUCCESS
-    isRead: '', // true, false, or empty for all
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-    fromDate: '',
-    toDate: '',
+    search: "",
+    type: "", // SYSTEM, COURSE, LESSON, ATTENDANCE, GENERAL
+    level: "", // INFO, WARNING, ERROR, SUCCESS
+    isRead: "", // true, false, or empty for all
+    sortBy: "createdAt",
+    sortOrder: "desc",
+    fromDate: "",
+    toDate: "",
   },
   userNotificationsFilters: {
-    search: '',
-    type: '',
-    level: '',
-    isRead: '',
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-    fromDate: '',
-    toDate: '',
+    search: "",
+    type: "",
+    level: "",
+    isRead: "",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+    fromDate: "",
+    toDate: "",
   },
 };
 
 // Async thunks
 export const getMyNotificationsAsync = createAsyncThunk(
-  'notification/getMyNotifications',
+  "notification/getMyNotifications",
   async (params, thunkAPI) => {
     return handleAsyncThunk(() => notificationApi.getMy(params), thunkAPI, {
       showSuccess: false,
-      errorTitle: 'Lỗi tải thông báo',
+      errorTitle: "Lỗi tải thông báo",
     });
-  }
+  },
 );
 
 export const getMyStatsAsync = createAsyncThunk(
-  'notification/getMyStats',
+  "notification/getMyStats",
   async (_, thunkAPI) => {
     return handleAsyncThunk(() => notificationApi.getMyStats(), thunkAPI, {
       showSuccess: false,
-      errorTitle: 'Lỗi tải thống kê thông báo',
+      errorTitle: "Lỗi tải thống kê thông báo",
     });
-  }
+  },
 );
 
 export const markNotificationReadAsync = createAsyncThunk(
-  'notification/markRead',
+  "notification/markRead",
   async (id, thunkAPI) => {
     return handleAsyncThunk(() => notificationApi.markRead(id), thunkAPI, {
       showSuccess: false,
-      errorTitle: 'Lỗi đánh dấu thông báo',
+      errorTitle: "Lỗi đánh dấu thông báo",
     });
-  }
+  },
 );
 
 export const markAllReadAsync = createAsyncThunk(
-  'notification/markAllRead',
+  "notification/markAllRead",
   async (_, thunkAPI) => {
     return handleAsyncThunk(() => notificationApi.markAllRead(), thunkAPI, {
       showSuccess: false,
-      errorTitle: 'Lỗi đánh dấu thông báo',
+      errorTitle: "Lỗi đánh dấu thông báo",
     });
-  }
+  },
 );
 
 export const deleteNotificationAsync = createAsyncThunk(
-  'notification/delete',
+  "notification/delete",
   async (id, thunkAPI) => {
     return handleAsyncThunk(() => notificationApi.delete(id), thunkAPI, {
       showSuccess: false,
-      errorTitle: 'Lỗi xóa thông báo',
+      errorTitle: "Lỗi xóa thông báo",
     });
-  }
+  },
 );
 
 export const getUserNotificationsAsync = createAsyncThunk(
-  'notification/getUserNotifications',
+  "notification/getUserNotifications",
   async ({ userId, params }, thunkAPI) => {
-    return handleAsyncThunk(() => notificationApi.getByUserId(userId, params), thunkAPI, {
-      showSuccess: false,
-      errorTitle: 'Lỗi tải thông báo người dùng',
-    });
-  }
+    return handleAsyncThunk(
+      () => notificationApi.getByUserId(userId, params),
+      thunkAPI,
+      {
+        showSuccess: false,
+        errorTitle: "Lỗi tải thông báo người dùng",
+      },
+    );
+  },
 );
 
 export const sendNotificationAsync = createAsyncThunk(
-  'notification/send',
+  "notification/send",
   async ({ data, idempotencyKey }, thunkAPI) => {
-    return handleAsyncThunk(() => notificationApi.send(data, idempotencyKey), thunkAPI, {
-      showSuccess: true,
-      successTitle: 'Đã xếp hàng',
-      errorTitle: 'Lỗi gửi thông báo',
-    });
-  }
+    return handleAsyncThunk(
+      () => notificationApi.send(data, idempotencyKey),
+      thunkAPI,
+      {
+        showSuccess: true,
+        successTitle: "Đã xếp hàng",
+        errorTitle: "Lỗi gửi thông báo",
+      },
+    );
+  },
 );
 
 export const getAllStudentsForNotificationAsync = createAsyncThunk(
-  'notification/getAllStudentsForNotification',
+  "notification/getAllStudentsForNotification",
   async (params, thunkAPI) => {
     return handleAsyncThunk(() => studentApi.getAll(params), thunkAPI, {
       showSuccess: false,
-      errorTitle: 'Loi tai danh sach hoc sinh',
+      errorTitle: "Loi tai danh sach hoc sinh",
     });
-  }
+  },
 );
 
 const notificationSlice = createSlice({
-  name: 'notification',
+  name: "notification",
   initialState,
   reducers: {
     // Toast notifications reducers (old - không đổi)
@@ -159,7 +167,7 @@ const notificationSlice = createSlice({
     },
     removeNotification: (state, action) => {
       state.notifications = state.notifications.filter(
-        (notification) => notification.id !== action.payload
+        (notification) => notification.id !== action.payload,
       );
     },
     clearNotifications: (state) => {
@@ -180,16 +188,23 @@ const notificationSlice = createSlice({
       state.pagination = initialState.pagination;
     },
     setUserNotificationsFilters: (state, action) => {
-      state.userNotificationsFilters = { ...state.userNotificationsFilters, ...action.payload };
+      state.userNotificationsFilters = {
+        ...state.userNotificationsFilters,
+        ...action.payload,
+      };
     },
     resetUserNotificationsFilters: (state) => {
       state.userNotificationsFilters = initialState.userNotificationsFilters;
     },
     setUserNotificationsPagination: (state, action) => {
-      state.userNotificationsPagination = { ...state.userNotificationsPagination, ...action.payload };
+      state.userNotificationsPagination = {
+        ...state.userNotificationsPagination,
+        ...action.payload,
+      };
     },
     resetUserNotificationsPagination: (state) => {
-      state.userNotificationsPagination = initialState.userNotificationsPagination;
+      state.userNotificationsPagination =
+        initialState.userNotificationsPagination;
     },
     clearMyNotifications: (state) => {
       state.myNotifications = [];
@@ -202,6 +217,12 @@ const notificationSlice = createSlice({
       if (!state.myNotifications) {
         state.myNotifications = [];
       }
+      const alreadyExists = state.myNotifications.some(
+        (notification) =>
+          notification.notificationId === action.payload.notificationId,
+      );
+      if (alreadyExists) return;
+
       state.myNotifications.unshift(action.payload);
       state.stats.total += 1;
       state.stats.unread += 1;
@@ -212,6 +233,49 @@ const notificationSlice = createSlice({
     // Update stats from socket
     updateStatsFromSocket: (state, action) => {
       state.stats = action.payload;
+    },
+    applyRealtimeNotificationRead: (state, action) => {
+      const payload = action.payload || {};
+
+      if (payload.all) {
+        state.myNotifications = state.myNotifications.map((notification) => ({
+          ...notification,
+          isRead: true,
+          readAt: notification.readAt || new Date().toISOString(),
+        }));
+        return;
+      }
+
+      const updatedNotification = payload.notification || payload;
+      const index = state.myNotifications.findIndex(
+        (notification) =>
+          notification.notificationId === updatedNotification.notificationId,
+      );
+      if (index === -1) return;
+
+      const wasUnread = !state.myNotifications[index].isRead;
+      state.myNotifications[index] = updatedNotification;
+      if (wasUnread && updatedNotification.isRead) {
+        state.stats.unread = Math.max(0, state.stats.unread - 1);
+        state.stats.read += 1;
+      }
+    },
+    applyRealtimeNotificationDeleted: (state, action) => {
+      const notificationId = action.payload?.notificationId ?? action.payload;
+      const notification = state.myNotifications.find(
+        (item) => item.notificationId === notificationId,
+      );
+      if (!notification) return;
+
+      state.myNotifications = state.myNotifications.filter(
+        (item) => item.notificationId !== notificationId,
+      );
+      state.stats.total = Math.max(0, state.stats.total - 1);
+      if (notification.isRead) {
+        state.stats.read = Math.max(0, state.stats.read - 1);
+      } else {
+        state.stats.unread = Math.max(0, state.stats.unread - 1);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -227,13 +291,18 @@ const notificationSlice = createSlice({
       .addCase(getMyNotificationsAsync.fulfilled, (state, action) => {
         state.loadingMyNotifications = false;
         // Append for infinite scroll
-        const page = action.payload?.pagination?.page || action.payload?.meta?.page || 1;
+        const page =
+          action.payload?.pagination?.page || action.payload?.meta?.page || 1;
         if (page === 1) {
           state.myNotifications = action.payload.data;
         } else {
-          state.myNotifications = [...state.myNotifications, ...action.payload.data];
+          state.myNotifications = [
+            ...state.myNotifications,
+            ...action.payload.data,
+          ];
         }
-        state.pagination = action.payload.pagination || action.payload.meta || state.pagination;
+        state.pagination =
+          action.payload.pagination || action.payload.meta || state.pagination;
         state.error = null;
       })
       .addCase(getMyNotificationsAsync.rejected, (state, action) => {
@@ -266,14 +335,18 @@ const notificationSlice = createSlice({
 
         // Update in myNotifications
         const index = state.myNotifications.findIndex(
-          (n) => n.notificationId === updatedNotification.notificationId
+          (n) => n.notificationId === updatedNotification.notificationId,
         );
-        if (index !== -1) {
-          state.myNotifications[index] = updatedNotification;
-        }
+        const previousNotification =
+          index !== -1 ? state.myNotifications[index] : null;
+        if (index !== -1) state.myNotifications[index] = updatedNotification;
 
         // Update stats
-        if (updatedNotification.isRead) {
+        if (
+          previousNotification &&
+          !previousNotification.isRead &&
+          updatedNotification.isRead
+        ) {
           state.stats.unread = Math.max(0, state.stats.unread - 1);
           state.stats.read += 1;
         }
@@ -315,14 +388,18 @@ const notificationSlice = createSlice({
         const deletedId = action.meta.arg;
 
         // Find the notification before removing
-        const notification = state.myNotifications.find(n => n.notificationId === deletedId);
+        const notification = state.myNotifications.find(
+          (n) => n.notificationId === deletedId,
+        );
 
         // Remove from myNotifications
         state.myNotifications = state.myNotifications.filter(
-          (n) => n.notificationId !== deletedId
+          (n) => n.notificationId !== deletedId,
         );
 
         // Update stats
+        if (!notification) return;
+
         state.stats.total = Math.max(0, state.stats.total - 1);
         if (notification && !notification.isRead) {
           state.stats.unread = Math.max(0, state.stats.unread - 1);
@@ -359,11 +436,14 @@ const notificationSlice = createSlice({
         state.loadingStudentsForBroadcast = true;
         state.error = null;
       })
-      .addCase(getAllStudentsForNotificationAsync.fulfilled, (state, action) => {
-        state.loadingStudentsForBroadcast = false;
-        state.studentsForBroadcast = action.payload.data;
-        state.error = null;
-      })
+      .addCase(
+        getAllStudentsForNotificationAsync.fulfilled,
+        (state, action) => {
+          state.loadingStudentsForBroadcast = false;
+          state.studentsForBroadcast = action.payload.data;
+          state.error = null;
+        },
+      )
       .addCase(getAllStudentsForNotificationAsync.rejected, (state, action) => {
         state.studentsForBroadcast = [];
         state.loadingStudentsForBroadcast = false;
@@ -402,29 +482,44 @@ export const {
   clearMyNotifications,
   clearUserNotifications,
   addRealtimeNotification,
+  updateStatsFromSocket,
+  applyRealtimeNotificationRead,
+  applyRealtimeNotificationDeleted,
 } = notificationSlice.actions;
 
 // Selectors
 // Old toast selectors
-export const selectToastNotifications = (state) => state.notification.notifications;
+export const selectToastNotifications = (state) =>
+  state.notification.notifications;
 
 // New backend notification selectors
-export const selectMyNotifications = (state) => state.notification.myNotifications;
-export const selectUserNotifications = (state) => state.notification.userNotifications;
+export const selectMyNotifications = (state) =>
+  state.notification.myNotifications;
+export const selectUserNotifications = (state) =>
+  state.notification.userNotifications;
 export const selectNotificationStats = (state) => state.notification.stats;
-export const selectNotificationPagination = (state) => state.notification.pagination;
-export const selectUserNotificationsPagination = (state) => state.notification.userNotificationsPagination;
-export const selectLoadingMyNotifications = (state) => state.notification.loadingMyNotifications;
-export const selectLoadingUserNotifications = (state) => state.notification.loadingUserNotifications;
+export const selectNotificationPagination = (state) =>
+  state.notification.pagination;
+export const selectUserNotificationsPagination = (state) =>
+  state.notification.userNotificationsPagination;
+export const selectLoadingMyNotifications = (state) =>
+  state.notification.loadingMyNotifications;
+export const selectLoadingUserNotifications = (state) =>
+  state.notification.loadingUserNotifications;
 export const selectLoadingStats = (state) => state.notification.loadingStats;
-export const selectLoadingMarkRead = (state) => state.notification.loadingMarkRead;
-export const selectLoadingMarkAllRead = (state) => state.notification.loadingMarkAllRead;
+export const selectLoadingMarkRead = (state) =>
+  state.notification.loadingMarkRead;
+export const selectLoadingMarkAllRead = (state) =>
+  state.notification.loadingMarkAllRead;
 export const selectLoadingDelete = (state) => state.notification.loadingDelete;
 export const selectLoadingSend = (state) => state.notification.loadingSend;
-export const selectStudentsForBroadcast = (state) => state.notification.studentsForBroadcast;
-export const selectLoadingStudentsForBroadcast = (state) => state.notification.loadingStudentsForBroadcast;
+export const selectStudentsForBroadcast = (state) =>
+  state.notification.studentsForBroadcast;
+export const selectLoadingStudentsForBroadcast = (state) =>
+  state.notification.loadingStudentsForBroadcast;
 export const selectNotificationError = (state) => state.notification.error;
 export const selectNotificationFilters = (state) => state.notification.filters;
-export const selectUserNotificationsFilters = (state) => state.notification.userNotificationsFilters;
+export const selectUserNotificationsFilters = (state) =>
+  state.notification.userNotificationsFilters;
 
 export default notificationSlice.reducer;
