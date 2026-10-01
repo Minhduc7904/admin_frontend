@@ -9,12 +9,13 @@ import { io } from 'socket.io-client'
  * 
  * @singleton
  */
-class SocketService {
-    constructor() {
+export class SocketService {
+    constructor(socketFactory = io) {
         this.socket = null
         this.isConnected = false
-        this.listeners = new Map() // Store event listeners
+        this.listeners = new Map() // Map<event, Set<callback>>; survives socket recreation
         this.authFailed = false   // True after an auth error — stops reconnection loop
+        this.socketFactory = socketFactory
     }
 
     /**
@@ -23,8 +24,8 @@ class SocketService {
      * Single root namespace only - no multiple namespaces
      */
     connect(token) {
-        if (this.socket?.connected) {
-            console.log('✅ Socket already connected')
+        if (this.socket) {
+            console.log('✅ Socket connection already initialized')
             return
         }
 
@@ -32,12 +33,12 @@ class SocketService {
         this.authFailed = false
 
         // Use API base URL without /api suffix for socket connection
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+        const apiBaseUrl = import.meta.env?.VITE_API_BASE_URL || 'http://localhost:3001/api'
         const serverUrl = apiBaseUrl.replace('/api', '')
 
         console.log('🔌 Connecting to Socket.IO server:', serverUrl)
 
-        this.socket = io(serverUrl, {
+        this.socket = this.socketFactory(serverUrl, {
             auth: {
                 token, // Send token for authentication
             },
@@ -50,6 +51,7 @@ class SocketService {
 
         // Setup default event handlers
         this.setupDefaultHandlers()
+        this.attachRegisteredListeners()
     }
 
     /**
@@ -119,6 +121,16 @@ class SocketService {
         })
     }
 
+    attachRegisteredListeners() {
+        if (!this.socket) return
+
+        this.listeners.forEach((callbacks, event) => {
+            callbacks.forEach((callback) => {
+                this.socket.on(event, callback)
+            })
+        })
+    }
+
     /**
      * Disconnect from Socket.IO server
      */
@@ -126,19 +138,20 @@ class SocketService {
         if (this.socket) {
             console.log('🔌 Disconnecting socket...')
 
-            // Remove all custom listeners
-            this.listeners.forEach((_, event) => {
-                this.socket.off(event)
+            // Remove only callbacks owned by this registry.
+            this.listeners.forEach((callbacks, event) => {
+                callbacks.forEach((callback) => {
+                    this.socket.off(event, callback)
+                })
             })
-            this.listeners.clear()
-
             // Disconnect
             this.socket.disconnect()
             this.socket = null
-            this.isConnected = false
 
             console.log('✅ Socket disconnected')
         }
+
+        this.isConnected = false
     }
 
     /**
@@ -190,36 +203,38 @@ class SocketService {
      * @param {Function} callback - Event handler
      */
     on(event, callback) {
-        if (!this.socket) {
-            console.warn('⚠️ Socket not connected')
-            return
+        if (!event || typeof callback !== 'function') return () => {}
+
+        let callbacks = this.listeners.get(event)
+        if (!callbacks) {
+            callbacks = new Set()
+            this.listeners.set(event, callbacks)
         }
 
-        // Remove existing listener if any
-        if (this.listeners.has(event)) {
-            this.socket.off(event, this.listeners.get(event))
+        if (!callbacks.has(callback)) {
+            callbacks.add(callback)
+            this.socket?.on(event, callback)
         }
-
-        // Add new listener
-        this.socket.on(event, callback)
-        this.listeners.set(event, callback)
 
         console.log(`👂 Listening to '${event}'`)
+        return () => this.off(event, callback)
     }
 
     /**
      * Remove event listener
      * @param {string} event - Event name
+     * @param {Function} callback - Event handler to remove
      */
-    off(event) {
-        if (!this.socket) return
+    off(event, callback) {
+        if (!event || typeof callback !== 'function') return
 
-        const callback = this.listeners.get(event)
-        if (callback) {
-            this.socket.off(event, callback)
-            this.listeners.delete(event)
-            console.log(`🔇 Stopped listening to '${event}'`)
-        }
+        const callbacks = this.listeners.get(event)
+        if (!callbacks?.has(callback)) return
+
+        this.socket?.off(event, callback)
+        callbacks.delete(callback)
+        if (callbacks.size === 0) this.listeners.delete(event)
+        console.log(`🔇 Stopped listening to '${event}'`)
     }
 
     /**
