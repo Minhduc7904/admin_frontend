@@ -77,17 +77,8 @@ export class SocketService {
             this.isConnected = false
 
             // Check if error is authentication-related
-            const msg = (error.message || '').toLowerCase()
-            const isAuthError = msg.includes('jwt') ||
-                msg.includes('expired') ||
-                msg.includes('unauthorized') ||
-                msg.includes('authentication') ||
-                msg.includes('unauthenticated') ||
-                msg.includes('invalid') ||
-                error.type === 'UnauthorizedException'
-
-            if (isAuthError) {
-                this.authFailed = true
+            if (this.isAuthenticationError(error)) {
+                this.markAuthenticationFailure()
                 console.warn('🔒 Socket auth error detected')
             }
         })
@@ -118,6 +109,13 @@ export class SocketService {
         // Error from server
         this.socket.on('error', (error) => {
             console.error('❌ Socket error:', error)
+
+            // The backend currently emits an auth error before disconnecting.
+            // Mark it before the disconnect handler can attempt a stale-token reconnect.
+            if (this.isAuthenticationError(error)) {
+                this.markAuthenticationFailure()
+                console.warn('🔒 Socket auth error detected from server event')
+            }
         })
     }
 
@@ -129,6 +127,31 @@ export class SocketService {
                 this.socket.on(event, callback)
             })
         })
+    }
+
+    isAuthenticationError(error) {
+        const message = typeof error === 'string'
+            ? error
+            : error?.message || error?.data?.message || ''
+        const code = error?.code || error?.data?.code
+        const normalizedMessage = String(message).toLowerCase()
+
+        return code === 'SOCKET_AUTH_FAILED' ||
+            code === 'UNAUTHORIZED' ||
+            normalizedMessage.includes('jwt') ||
+            normalizedMessage.includes('expired') ||
+            normalizedMessage.includes('unauthorized') ||
+            normalizedMessage.includes('authentication') ||
+            normalizedMessage.includes('unauthenticated') ||
+            normalizedMessage.includes('invalid token') ||
+            normalizedMessage.includes('invalid or expired') ||
+            error?.type === 'UnauthorizedException'
+    }
+
+    markAuthenticationFailure() {
+        this.authFailed = true
+        this.isConnected = false
+        this.socket?.io?.reconnection?.(false)
     }
 
     /**
