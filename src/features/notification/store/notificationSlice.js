@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { notificationApi, studentApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
 
-const initialState = {
+const createInitialState = () => ({
   // Toast notifications (old state - không đụng chạm)
   notifications: [],
   nextId: 1,
@@ -57,7 +57,15 @@ const initialState = {
     fromDate: "",
     toDate: "",
   },
-};
+});
+
+const initialState = createInitialState();
+
+const resetAccountNotificationStateReducer = (state) => ({
+  ...createInitialState(),
+  notifications: state.notifications,
+  nextId: state.nextId,
+});
 
 // Async thunks
 export const getMyNotificationsAsync = createAsyncThunk(
@@ -212,6 +220,7 @@ const notificationSlice = createSlice({
     clearUserNotifications: (state) => {
       state.userNotifications = [];
     },
+    resetAccountNotificationState: resetAccountNotificationStateReducer,
     // Real-time notification from socket
     addRealtimeNotification: (state, action) => {
       if (!state.myNotifications) {
@@ -461,7 +470,13 @@ const notificationSlice = createSlice({
       .addCase(sendNotificationAsync.rejected, (state, action) => {
         state.loadingSend = false;
         state.error = action.payload;
-      });
+      })
+      // Account-scoped notification data must never survive a session change.
+      // Keep transient toast notifications so login/logout feedback still renders.
+      .addCase("auth/login/pending", resetAccountNotificationStateReducer)
+      .addCase("auth/logout/fulfilled", resetAccountNotificationStateReducer)
+      .addCase("auth/logout/rejected", resetAccountNotificationStateReducer)
+      .addCase("auth/clearAuth", resetAccountNotificationStateReducer);
   },
 });
 
@@ -481,6 +496,7 @@ export const {
   resetUserNotificationsPagination,
   clearMyNotifications,
   clearUserNotifications,
+  resetAccountNotificationState,
   addRealtimeNotification,
   updateStatsFromSocket,
   applyRealtimeNotificationRead,
