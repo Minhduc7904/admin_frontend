@@ -54,8 +54,8 @@ export const BroadcastNotificationsPage = () => {
   return <div>
     <div className="mb-5"><h1 className="text-2xl font-bold">Gửi thông báo</h1><p className="text-sm text-foreground-light">Tìm và chọn người nhận, sau đó theo dõi tiến độ giao theo từng kênh.</p></div>
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-      <NotificationForm key={recipientType} recipientType={recipientType} onRecipientTypeChange={changeType} selectedCount={selected.size} onSubmit={submit} onReset={() => { setSelected(new Map()); keyRef.current = newKey() }} onPayloadChange={payloadChanged} loading={loading} />
-      {isSpecific ? <RecipientSearchPicker key={recipientType} recipientType={recipientType} selected={selected} onToggle={toggle} grade={grade} onGradeChange={setGrade} /> : <section className="rounded-sm border border-border bg-white p-8 text-center"><h2 className="font-semibold">{recipientType === 'ALL' ? 'Tất cả người dùng' : 'Học sinh chưa đóng học phí'}</h2><p className="mt-2 text-sm text-foreground-light">Danh sách người nhận được chốt tại thời điểm xếp hàng.</p></section>}
+      <NotificationForm key={`notification-form-${recipientType}`} recipientType={recipientType} onRecipientTypeChange={changeType} selectedCount={selected.size} onSubmit={submit} onReset={() => { setSelected(new Map()); keyRef.current = newKey() }} onPayloadChange={payloadChanged} loading={loading} />
+      {isSpecific ? <RecipientSearchPicker key={`recipient-picker-${recipientType}`} recipientType={recipientType} selected={selected} onToggle={toggle} grade={grade} onGradeChange={setGrade} /> : <section className="rounded-sm border border-border bg-white p-8 text-center"><h2 className="font-semibold">{recipientType === 'ALL' ? 'Tất cả người dùng' : 'Học sinh chưa đóng học phí'}</h2><p className="mt-2 text-sm text-foreground-light">Danh sách người nhận được chốt tại thời điểm xếp hàng.</p></section>}
     </div>
   </div>
 }
