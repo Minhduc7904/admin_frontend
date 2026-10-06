@@ -7,7 +7,6 @@ export const AttendanceDeleteModal = ({ isOpen, attendance, loading, onClose, on
         PRESENT: 'Có mặt',
         ABSENT: 'Vắng',
         LATE: 'Muộn',
-        MAKEUP: 'Học bù',
     }[attendance.status] || attendance.status;
 
     const formatDate = (date) => {

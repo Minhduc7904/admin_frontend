@@ -7,14 +7,12 @@ const STATUS_BADGE_VARIANT = {
     PRESENT: 'success',
     ABSENT: 'danger',
     LATE: 'warning',
-    MAKEUP: 'info',
 };
 
 const STATUS_LABEL = {
     PRESENT: 'Có mặt',
     ABSENT: 'Vắng',
     LATE: 'Muộn',
-    MAKEUP: 'Học bù',
 };
 
 export const StudentAttendanceDetail = ({ student, fromDate, toDate }) => {
@@ -203,6 +201,7 @@ export const StudentAttendanceDetail = ({ student, fromDate, toDate }) => {
                                                 <Badge variant={STATUS_BADGE_VARIANT[attendance.status]}>
                                                     {STATUS_LABEL[attendance.status]}
                                                 </Badge>
+                                                {attendance.attendanceType === 'MAKEUP' && <Badge variant="info">Học bù</Badge>}
                                             </div>
                                             {attendance.markedAt && (
                                                 <div className="text-xs text-foreground-light">

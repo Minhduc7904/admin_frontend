@@ -73,6 +73,7 @@ export const StudentAttendance = () => {
         sessionId: null,
         studentId: null,
         status: '',
+        attendanceType: 'REGULAR',
         notes: '',
     });
 
@@ -187,6 +188,7 @@ export const StudentAttendance = () => {
             sessionId: null,
             studentId: studentId,
             status: 'PRESENT',
+            attendanceType: 'REGULAR',
             notes: '',
         });
         setFormClass(null);
@@ -207,6 +209,7 @@ export const StudentAttendance = () => {
                     sessionId: formData.sessionId,
                     studentId: studentId,
                     status: formData.status,
+                    attendanceType: formData.attendanceType || 'REGULAR',
                     notes: formData.notes || undefined,
                 })
             ).unwrap();
@@ -231,6 +234,7 @@ export const StudentAttendance = () => {
             sessionId: attendance.sessionId,
             studentId: attendance.studentId,
             status: attendance.status,
+            attendanceType: attendance.attendanceType || 'REGULAR',
             notes: attendance.notes || '',
         });
         
@@ -259,6 +263,7 @@ export const StudentAttendance = () => {
                     id: selectedAttendance.attendanceId,
                     data: {
                         status: formData.status,
+                        attendanceType: formData.attendanceType || 'REGULAR',
                         notes: formData.notes || undefined,
                     },
                 })
@@ -299,7 +304,7 @@ export const StudentAttendance = () => {
     const presentCount = attendances.filter(a => a.status === 'PRESENT').length;
     const absentCount = attendances.filter(a => a.status === 'ABSENT').length;
     const lateCount = attendances.filter(a => a.status === 'LATE').length;
-    const makeupCount = attendances.filter(a => a.status === 'MAKEUP').length;
+    const makeupCount = attendances.filter(a => a.attendanceType === 'MAKEUP').length;
 
     /* ===================== RENDER ===================== */
     return (
