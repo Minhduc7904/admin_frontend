@@ -246,6 +246,8 @@ Tài liệu được tổng hợp từ các lời gọi trong `src/core/api` và
 | DELETE | `/api/course-classes/{id}` | Xóa lớp học | Yes |
 | GET | `/api/course-classes/{id}` | Lấy chi tiết lớp học | Yes |
 | PUT | `/api/course-classes/{id}` | Cập nhật lớp học | Yes |
+| GET | `/api/course-classes/{id}/makeup-group` | Lấy nhóm lớp học bù | Yes |
+| PUT | `/api/course-classes/{id}/makeup-group` | Đặt nhóm lớp học bù | Yes |
 | GET | `/api/course-classes/admin/my` | Lấy các lớp do quản trị viên phụ trách | Yes |
 | GET | `/api/course-classes/search` | Tìm kiếm dữ liệu | Yes |
 

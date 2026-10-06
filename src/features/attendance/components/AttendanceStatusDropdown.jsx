@@ -8,14 +8,12 @@ const STATUS_BADGE = {
     PRESENT: 'bg-green-100 text-green-700',
     ABSENT: 'bg-red-100 text-red-700',
     LATE: 'bg-yellow-100 text-yellow-700',
-    MAKEUP: 'bg-blue-100 text-blue-700',
 };
 
 const STATUS_LABEL = {
     PRESENT: 'Có mặt',
     ABSENT: 'Vắng',
     LATE: 'Muộn',
-    MAKEUP: 'Học bù',
 };
 
 export const AttendanceStatusDropdown = ({ value, onChange, disabled = false, loading = false }) => {
@@ -164,7 +162,6 @@ export const AttendanceStatusDropdown = ({ value, onChange, disabled = false, lo
                                             ${option.value === 'PRESENT' ? 'bg-green-500' : ''}
                                             ${option.value === 'ABSENT' ? 'bg-red-500' : ''}
                                             ${option.value === 'LATE' ? 'bg-yellow-500' : ''}
-                                            ${option.value === 'MAKEUP' ? 'bg-blue-500' : ''}
                                         `}
                                     />
                                     <span className="text-foreground">{option.label}</span>

@@ -106,6 +106,7 @@ export const ClassAttendance = () => {
         sessionId: null,
         studentId: null,
         status: '',
+        attendanceType: 'REGULAR',
         notes: '',
     });
 
@@ -224,6 +225,7 @@ export const ClassAttendance = () => {
             sessionId: selectedSession?.sessionId || null,
             studentId: null,
             status: 'PRESENT',
+            attendanceType: 'REGULAR',
             notes: '',
         });
         setErrors({});
@@ -243,6 +245,7 @@ export const ClassAttendance = () => {
                     sessionId: formData.sessionId,
                     studentId: formData.studentId,
                     status: formData.status,
+                    attendanceType: formData.attendanceType || 'REGULAR',
                     notes: formData.notes || undefined,
                 })
             ).unwrap();
@@ -265,6 +268,7 @@ export const ClassAttendance = () => {
                 createBulkAttendanceBySessionAsync({
                     sessionId: bulkData.sessionId,
                     status: bulkData.status,
+                    attendanceType: bulkData.attendanceType || 'REGULAR',
                     notes: bulkData.notes || undefined,
                 })
             ).unwrap();
@@ -294,6 +298,7 @@ export const ClassAttendance = () => {
             sessionId: attendance.sessionId,
             studentId: attendance.studentId,
             status: attendance.status,
+            attendanceType: attendance.attendanceType || 'REGULAR',
             notes: attendance.notes || '',
         });
         setErrors({});
@@ -314,6 +319,7 @@ export const ClassAttendance = () => {
                     id: selectedAttendance.attendanceId,
                     data: {
                         status: formData.status,
+                        attendanceType: formData.attendanceType || 'REGULAR',
                         notes: formData.notes || undefined,
                     },
                 })

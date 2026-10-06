@@ -5,7 +5,6 @@ const STATUS_CONFIG = {
     PRESENT: { label: 'Có mặt', color: 'text-green-600', bgColor: 'bg-green-50', icon: CheckCircle2 },
     ABSENT: { label: 'Vắng', color: 'text-red-600', bgColor: 'bg-red-50', icon: Info },
     LATE: { label: 'Muộn', color: 'text-yellow-600', bgColor: 'bg-yellow-50', icon: Clock },
-    MAKEUP: { label: 'Học bù', color: 'text-blue-600', bgColor: 'bg-blue-50', icon: Calendar },
 };
 
 export const AttendanceDetailInfo = ({ attendance }) => {
@@ -60,6 +59,12 @@ export const AttendanceDetailInfo = ({ attendance }) => {
                     </p>
                 </div>
             </div>
+
+            {attendance.attendanceType === 'MAKEUP' && (
+                <div className="rounded-sm bg-blue-50 p-3 text-sm font-semibold text-blue-700">
+                    Loại điểm danh: Học bù
+                </div>
+            )}
 
             {/* ===== STUDENT INFO ===== */}
             <div className="border border-border rounded-sm p-4">

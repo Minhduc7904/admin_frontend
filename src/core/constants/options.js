@@ -2,6 +2,10 @@ export const ATTENDANCE_STATUS_OPTIONS = [
     { value: 'PRESENT', label: 'Có mặt' },
     { value: 'ABSENT', label: 'Vắng' },
     { value: 'LATE', label: 'Muộn' },
+];
+
+export const ATTENDANCE_TYPE_OPTIONS = [
+    { value: 'REGULAR', label: 'Chính khóa' },
     { value: 'MAKEUP', label: 'Học bù' },
 ];
 

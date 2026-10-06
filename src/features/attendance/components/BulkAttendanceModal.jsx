@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Users } from 'lucide-react';
 import { Button, Modal, Dropdown, Textarea } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
-import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
+import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../../../core/constants/options';
 /* ===================== STATUS OPTIONS ===================== */
 
 
@@ -17,6 +17,7 @@ export const BulkAttendanceModal = ({
     const [formData, setFormData] = useState({
         sessionId: initialSession?.sessionId || null,
         status: 'PRESENT',
+        attendanceType: 'REGULAR',
         notes: '',
     });
 
@@ -31,6 +32,10 @@ export const BulkAttendanceModal = ({
 
     const handleStatusChange = (value) => {
         setFormData((prev) => ({ ...prev, status: value }));
+    };
+
+    const handleAttendanceTypeChange = (value) => {
+        setFormData((prev) => ({ ...prev, attendanceType: value }));
     };
 
     const handleNotesChange = (e) => {
@@ -61,6 +66,7 @@ export const BulkAttendanceModal = ({
         setFormData({
             sessionId: null,
             status: 'PRESENT',
+            attendanceType: 'REGULAR',
             notes: '',
         });
         setErrors({});
@@ -104,6 +110,11 @@ export const BulkAttendanceModal = ({
                             <p className="text-xs text-foreground-light mt-1">
                                 Trạng thái điểm danh sẽ áp dụng cho tất cả học sinh
                             </p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">Loại điểm danh</label>
+                            <Dropdown value={formData.attendanceType} onChange={handleAttendanceTypeChange} options={ATTENDANCE_TYPE_OPTIONS} />
                         </div>
 
                         {/* Notes */}
