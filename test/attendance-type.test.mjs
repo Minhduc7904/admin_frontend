@@ -6,7 +6,7 @@ import { after, before, test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { installLocalStorageStub, startViteModuleLoader } from "./helpers/vite-test-server.mjs";
+import { installLocalStorageStub, startViteModuleLoader } from "../test-support/vite-test-server.mjs";
 
 installLocalStorageStub();
 

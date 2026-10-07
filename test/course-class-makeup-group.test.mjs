@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
 
-import { installLocalStorageStub, startViteModuleLoader } from "./helpers/vite-test-server.mjs";
+import { installLocalStorageStub, startViteModuleLoader } from "../test-support/vite-test-server.mjs";
 
 installLocalStorageStub();
 
