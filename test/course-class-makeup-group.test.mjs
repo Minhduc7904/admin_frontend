@@ -1,31 +1,35 @@
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { after, before, test } from "node:test";
 
-import { createServer } from "vite";
+import { installLocalStorageStub, startViteModuleLoader } from "./helpers/vite-test-server.mjs";
 
-globalThis.localStorage = {
-  getItem: () => null,
-  setItem: () => {},
-  removeItem: () => {},
-};
+installLocalStorageStub();
 
 let slice;
 let utils;
-let vite;
+let axiosClient;
+let courseClassApi;
+let loader;
 
 before(async () => {
-  vite = await createServer({
-    appType: "custom",
-    logLevel: "silent",
-    server: { hmr: false, middlewareMode: true },
+  loader = await startViteModuleLoader({
+    slice: "/src/features/courseClass/store/courseClassSlice.js",
+    utils: "/src/features/courseClass/utils/makeupGroup.js",
+    axiosClient: "/src/core/api/axiosClient.js",
+    courseClassApi: "/src/core/api/courseClassApi.js",
   });
-
-  slice = await vite.ssrLoadModule("/src/features/courseClass/store/courseClassSlice.js");
-  utils = await vite.ssrLoadModule("/src/features/courseClass/utils/makeupGroup.js");
+  ({ slice, utils, axiosClient, courseClassApi } = {
+    slice: loader.modules.slice,
+    utils: loader.modules.utils,
+    axiosClient: loader.modules.axiosClient.default,
+    courseClassApi: loader.modules.courseClassApi.courseClassApi,
+  });
 });
 
 after(async () => {
-  await vite?.close();
+  await loader?.close();
 });
 
 const candidate = (classId, overrides = {}) => ({
@@ -318,4 +322,131 @@ test("treats id lists as sets and formats date-only strings without timezone shi
   assert.equal(utils.formatMakeupDateRange("2026-09-01", null), "Từ 01/09/2026");
   assert.equal(utils.formatMakeupDateRange(null, "2027-05-31"), "Đến 31/05/2027");
   assert.equal(utils.formatMakeupDateRange(null, null), null);
+});
+
+// ---------------------------------------------------------------------------
+// API paths: only /makeup-group exists; the legacy /makeup-options path must not be used anywhere.
+// ---------------------------------------------------------------------------
+const withRecordedClient = async (run) => {
+  const calls = [];
+  const original = { get: axiosClient.get, put: axiosClient.put, post: axiosClient.post, delete: axiosClient.delete };
+  for (const method of Object.keys(original)) {
+    axiosClient[method] = (...args) => {
+      calls.push({ method, args });
+      return Promise.resolve({ data: { success: true } });
+    };
+  }
+  try {
+    await run();
+  } finally {
+    Object.assign(axiosClient, original);
+  }
+  return calls;
+};
+
+test("getMakeupGroup and updateMakeupGroup call the makeup-group endpoints", async () => {
+  const calls = await withRecordedClient(async () => {
+    await courseClassApi.getMakeupGroup(151);
+    await courseClassApi.updateMakeupGroup(151, { makeupClassIds: [152, 153] });
+  });
+
+  assert.deepEqual(calls, [
+    { method: "get", args: ["/course-classes/151/makeup-group"] },
+    { method: "put", args: ["/course-classes/151/makeup-group", { makeupClassIds: [152, 153] }] },
+  ]);
+  assert.ok(!calls.some((call) => JSON.stringify(call).includes("makeup-options")));
+  assert.equal(courseClassApi.getMakeupOptions, undefined);
+  assert.equal(courseClassApi.updateMakeupOptions, undefined);
+});
+
+test("the legacy makeup-options path no longer exists in the source tree", () => {
+  const offenders = [];
+  const visit = (dir) => {
+    for (const name of readdirSync(dir)) {
+      const path = join(dir, name);
+      if (statSync(path).isDirectory()) visit(path);
+      else if (/\.(js|jsx)$/.test(name) && /makeup-options|MAKEUP_OPTIONS/.test(readFileSync(path, "utf8"))) {
+        offenders.push(path);
+      }
+    }
+  };
+  visit(new URL("../src", import.meta.url).pathname);
+
+  assert.deepEqual(offenders, []);
+});
+
+// ---------------------------------------------------------------------------
+// Save payload and conflict handling
+// ---------------------------------------------------------------------------
+test("the save payload sends the whole selected set, de-duplicated and sorted, and [] to dissolve", () => {
+  assert.deepEqual(utils.buildMakeupGroupPayload([153, 152, 153]), { makeupClassIds: [152, 153] });
+  assert.deepEqual(utils.buildMakeupGroupPayload([]), { makeupClassIds: [] });
+});
+
+test("recognises a 409 or the conflict code as a makeup group conflict", () => {
+  assert.equal(utils.isMakeupGroupConflictError({ response: { status: 409 } }), true);
+  assert.equal(
+    utils.isMakeupGroupConflictError({ response: { status: 400, data: { code: "COURSE_CLASS_MAKEUP_GROUP_CONFLICT" } } }),
+    true,
+  );
+  assert.equal(utils.isMakeupGroupConflictError({ response: { status: 500 } }), false);
+  assert.equal(utils.isMakeupGroupConflictError(new Error("network")), false);
+});
+
+test("a 409 on save becomes a conflict state that keeps the edited selection until reload", async () => {
+  const dispatched = [];
+  const conflictError = Object.assign(new Error("Request failed"), {
+    response: { status: 409, data: { code: "COURSE_CLASS_MAKEUP_GROUP_CONFLICT", message: "technical backend text" } },
+  });
+
+  const originalPut = axiosClient.put;
+  axiosClient.put = () => Promise.reject(conflictError);
+  let action;
+  try {
+    action = await slice.updateCourseClassMakeupGroupAsync({ classId: CLASS_ID, makeupClassIds: [152, 156] })(
+      (value) => dispatched.push(value),
+      () => ({}),
+      undefined,
+    );
+  } finally {
+    axiosClient.put = originalPut;
+  }
+
+  assert.equal(action.type, "courseClass/updateMakeupGroup/rejected");
+  assert.equal(action.payload, utils.MAKEUP_GROUP_CONFLICT_MESSAGE);
+
+  let state = loadedState();
+  state = reduce(state, slice.toggleMakeupClass(156));
+  state = reduce(state, action);
+
+  assert.equal(state.makeupConflict, true);
+  assert.equal(state.makeupError, utils.MAKEUP_GROUP_CONFLICT_MESSAGE);
+  assert.deepEqual(state.selectedMakeupClassIds, [152, 153, 156]);
+  assert.equal(state.isMakeupDirty, true);
+
+  // Reloading adopts the server state and clears the conflict.
+  state = reduce(state, slice.getCourseClassMakeupGroupAsync.pending("reload", CLASS_ID));
+  assert.equal(state.makeupConflict, false);
+  assert.equal(state.makeupError, null);
+});
+
+test("other save errors are not reported as conflicts", () => {
+  let state = loadedState();
+  const arg = { classId: CLASS_ID, makeupClassIds: [152] };
+  state = reduce(state, slice.updateCourseClassMakeupGroupAsync.pending("upd", arg));
+  state = reduce(state, slice.updateCourseClassMakeupGroupAsync.rejected(null, "upd", arg, "Lớp không tồn tại"));
+
+  assert.equal(state.makeupConflict, false);
+  assert.equal(state.makeupError, "Lớp không tồn tại");
+});
+
+test("candidate mapping keeps the server fields and exposes the saved baseline", () => {
+  const state = loadedState();
+  const byId = Object.fromEntries(state.makeupCandidates.map((item) => [item.classId, item]));
+
+  assert.equal(byId[154].disabled, true);
+  assert.equal(byId[154].disabledReason, "Lớp đã kết thúc");
+  assert.equal(byId[155].disabledReason, "Đã thuộc nhóm học bù khác: Lớp 160, Lớp 161");
+  assert.deepEqual(utils.getSelectedClassIds(state.makeupCandidates), [152, 153]);
+  assert.deepEqual(slice.selectSavedMakeupClassIds({ courseClass: state }), [152, 153]);
 });

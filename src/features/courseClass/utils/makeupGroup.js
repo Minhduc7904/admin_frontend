@@ -71,3 +71,20 @@ export const formatMakeupDateRange = (startDate, endDate) => {
     if (end) return `Đến ${end}`;
     return null;
 };
+
+export const MAKEUP_GROUP_CONFLICT_CODE = 'COURSE_CLASS_MAKEUP_GROUP_CONFLICT';
+export const MAKEUP_GROUP_CONFLICT_MESSAGE =
+    'Nhóm lớp học bù đã được thay đổi ở nơi khác. Hãy tải lại dữ liệu mới nhất rồi chọn lại.';
+
+/**
+ * Lỗi lưu nhóm do xung đột dữ liệu: HTTP 409 hoặc mã lỗi COURSE_CLASS_MAKEUP_GROUP_CONFLICT.
+ */
+export const isMakeupGroupConflictError = (error) =>
+    error?.response?.status === 409 || error?.response?.data?.code === MAKEUP_GROUP_CONFLICT_CODE;
+
+/**
+ * Body PUT: luôn gửi toàn bộ tập lớp đã chọn (mảng rỗng = giải tán nhóm), không trùng và theo thứ tự tăng dần.
+ */
+export const buildMakeupGroupPayload = (selectedClassIds) => ({
+    makeupClassIds: [...new Set(selectedClassIds)].sort((left, right) => left - right),
+});

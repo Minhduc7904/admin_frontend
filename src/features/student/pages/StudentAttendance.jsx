@@ -22,6 +22,14 @@ import { StudentAttendanceTable } from '../components/StudentAttendanceTable';
 import { StudentAttendanceForm } from '../components/StudentAttendanceForm';
 
 import { useSearch } from '../../../shared/hooks';
+import {
+    DEFAULT_ATTENDANCE_TYPE,
+    attendanceToFormData,
+    buildAttendanceListParams,
+    buildCreateAttendancePayload,
+    buildUpdateAttendancePayload,
+    countMakeupAttendances,
+} from '../../attendance/utils/attendanceFields';
 
 import {
     getAllAttendancesAsync,
@@ -73,7 +81,7 @@ export const StudentAttendance = () => {
         sessionId: null,
         studentId: null,
         status: '',
-        attendanceType: 'REGULAR',
+        attendanceType: DEFAULT_ATTENDANCE_TYPE,
         notes: '',
     });
 
@@ -82,6 +90,7 @@ export const StudentAttendance = () => {
     const [errors, setErrors] = useState({});
 
     const [statusFilter, setStatusFilter] = useState('');
+    const [attendanceTypeFilter, setAttendanceTypeFilter] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [selectedClass, setSelectedClass] = useState(null);
@@ -90,21 +99,24 @@ export const StudentAttendance = () => {
     /* ===================== LOAD DATA ===================== */
     useEffect(() => {
         loadAttendances();
-    }, [studentId, currentPage, itemsPerPage, debouncedSearch, statusFilter, fromDate, toDate, selectedClass, selectedSession]);
+    }, [studentId, currentPage, itemsPerPage, debouncedSearch, statusFilter, attendanceTypeFilter, fromDate, toDate, selectedClass, selectedSession]);
 
     const loadAttendances = () => {
         dispatch(
-            getAllAttendancesAsync({
-                studentId,
-                page: currentPage,
-                limit: itemsPerPage,
-                search: debouncedSearch || undefined,
-                status: statusFilter || undefined,
-                fromDate: fromDate || undefined,
-                toDate: toDate || undefined,
-                classId: selectedClass?.classId || undefined,
-                sessionId: selectedSession?.sessionId || undefined,
-            })
+            getAllAttendancesAsync(
+                buildAttendanceListParams({
+                    studentId,
+                    page: currentPage,
+                    limit: itemsPerPage,
+                    search: debouncedSearch || undefined,
+                    statusFilter,
+                    attendanceTypeFilter,
+                    fromDate: fromDate || undefined,
+                    toDate: toDate || undefined,
+                    classId: selectedClass?.classId || undefined,
+                    sessionId: selectedSession?.sessionId || undefined,
+                })
+            )
         );
     };
 
@@ -117,6 +129,11 @@ export const StudentAttendance = () => {
 
     const handleStatusChange = (value) => {
         setStatusFilter(value);
+        setCurrentPage(1);
+    };
+
+    const handleAttendanceTypeFilterChange = (value) => {
+        setAttendanceTypeFilter(value);
         setCurrentPage(1);
     };
 
@@ -188,7 +205,7 @@ export const StudentAttendance = () => {
             sessionId: null,
             studentId: studentId,
             status: 'PRESENT',
-            attendanceType: 'REGULAR',
+            attendanceType: DEFAULT_ATTENDANCE_TYPE,
             notes: '',
         });
         setFormClass(null);
@@ -205,13 +222,7 @@ export const StudentAttendance = () => {
 
         try {
             await dispatch(
-                createAttendanceAsync({
-                    sessionId: formData.sessionId,
-                    studentId: studentId,
-                    status: formData.status,
-                    attendanceType: formData.attendanceType || 'REGULAR',
-                    notes: formData.notes || undefined,
-                })
+                createAttendanceAsync(buildCreateAttendancePayload({ ...formData, studentId }))
             ).unwrap();
 
             setIsCreatePanelOpen(false);
@@ -230,13 +241,7 @@ export const StudentAttendance = () => {
     const handleEdit = (attendance) => {
         setSelectedAttendance(attendance);
 
-        setFormData({
-            sessionId: attendance.sessionId,
-            studentId: attendance.studentId,
-            status: attendance.status,
-            attendanceType: attendance.attendanceType || 'REGULAR',
-            notes: attendance.notes || '',
-        });
+        setFormData(attendanceToFormData(attendance));
         
         // Set class from session if available
         if (attendance.session?.courseClass) {
@@ -261,11 +266,7 @@ export const StudentAttendance = () => {
             await dispatch(
                 updateAttendanceAsync({
                     id: selectedAttendance.attendanceId,
-                    data: {
-                        status: formData.status,
-                        attendanceType: formData.attendanceType || 'REGULAR',
-                        notes: formData.notes || undefined,
-                    },
+                    data: buildUpdateAttendancePayload(formData),
                 })
             ).unwrap();
 
@@ -304,7 +305,7 @@ export const StudentAttendance = () => {
     const presentCount = attendances.filter(a => a.status === 'PRESENT').length;
     const absentCount = attendances.filter(a => a.status === 'ABSENT').length;
     const lateCount = attendances.filter(a => a.status === 'LATE').length;
-    const makeupCount = attendances.filter(a => a.attendanceType === 'MAKEUP').length;
+    const makeupCount = countMakeupAttendances(attendances);
 
     /* ===================== RENDER ===================== */
     return (
@@ -331,6 +332,8 @@ export const StudentAttendance = () => {
                     onSearchChange={handleSearchChangeWrapper}
                     status={statusFilter}
                     onStatusChange={handleStatusChange}
+                    attendanceType={attendanceTypeFilter}
+                    onAttendanceTypeChange={handleAttendanceTypeFilterChange}
                     fromDate={fromDate}
                     onFromDateChange={handleFromDateChange}
                     toDate={toDate}

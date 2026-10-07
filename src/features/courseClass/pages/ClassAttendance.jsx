@@ -25,6 +25,14 @@ import {
 
 import { useSearch } from '../../../shared/hooks';
 import { notify } from '../../../shared/utils';
+import {
+    DEFAULT_ATTENDANCE_TYPE,
+    attendanceToFormData,
+    buildAttendanceListParams,
+    buildBulkAttendancePayload,
+    buildCreateAttendancePayload,
+    buildUpdateAttendancePayload,
+} from '../../attendance/utils/attendanceFields';
 
 import {
     getAllAttendancesAsync,
@@ -106,13 +114,14 @@ export const ClassAttendance = () => {
         sessionId: null,
         studentId: null,
         status: '',
-        attendanceType: 'REGULAR',
+        attendanceType: DEFAULT_ATTENDANCE_TYPE,
         notes: '',
     });
 
     const [errors, setErrors] = useState({});
 
     const [statusFilter, setStatusFilter] = useState('');
+    const [attendanceTypeFilter, setAttendanceTypeFilter] = useState('');
     const [selectedSession, setSelectedSession] = useState(null);
     const [statusUpdatingAttendanceId, setStatusUpdatingAttendanceId] = useState(null);
     const [sendToParentAttendanceId, setSendToParentAttendanceId] = useState(null);
@@ -134,7 +143,7 @@ export const ClassAttendance = () => {
         loadAttendances();
     // Only re-fetch for tuition when BOTH month and year are chosen (or both cleared)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedSession, tuitionFilterKey, tuitionStatus]);
+    }, [classId, currentPage, itemsPerPage, debouncedSearch, statusFilter, attendanceTypeFilter, selectedSession, tuitionFilterKey, tuitionStatus]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (selectedSession?.sessionId) {
@@ -145,17 +154,20 @@ export const ClassAttendance = () => {
     const loadAttendances = () => {
         if (!selectedSession) return;
         dispatch(
-            getAllAttendancesAsync({
-                classId,
-                page: currentPage,
-                limit: itemsPerPage,
-                search: debouncedSearch || undefined,
-                status: statusFilter || undefined,
-                sessionId: selectedSession?.sessionId || undefined,
-                month: showTuition ? tuitionMonth : undefined,
-                year: showTuition ? tuitionYear : undefined,
-                tuitionStatus: (showTuition && tuitionStatus) ? tuitionStatus : undefined,
-            })
+            getAllAttendancesAsync(
+                buildAttendanceListParams({
+                    classId,
+                    page: currentPage,
+                    limit: itemsPerPage,
+                    search: debouncedSearch || undefined,
+                    statusFilter,
+                    attendanceTypeFilter,
+                    sessionId: selectedSession?.sessionId || undefined,
+                    month: showTuition ? tuitionMonth : undefined,
+                    year: showTuition ? tuitionYear : undefined,
+                    tuitionStatus: (showTuition && tuitionStatus) ? tuitionStatus : undefined,
+                })
+            )
         );
     };
 
@@ -168,6 +180,11 @@ export const ClassAttendance = () => {
 
     const handleStatusChange = (value) => {
         setStatusFilter(value);
+        setCurrentPage(1);
+    };
+
+    const handleAttendanceTypeFilterChange = (value) => {
+        setAttendanceTypeFilter(value);
         setCurrentPage(1);
     };
 
@@ -225,7 +242,7 @@ export const ClassAttendance = () => {
             sessionId: selectedSession?.sessionId || null,
             studentId: null,
             status: 'PRESENT',
-            attendanceType: 'REGULAR',
+            attendanceType: DEFAULT_ATTENDANCE_TYPE,
             notes: '',
         });
         setErrors({});
@@ -241,13 +258,7 @@ export const ClassAttendance = () => {
 
         try {
             await dispatch(
-                createAttendanceAsync({
-                    sessionId: formData.sessionId,
-                    studentId: formData.studentId,
-                    status: formData.status,
-                    attendanceType: formData.attendanceType || 'REGULAR',
-                    notes: formData.notes || undefined,
-                })
+                createAttendanceAsync(buildCreateAttendancePayload(formData))
             ).unwrap();
 
             setIsCreatePanelOpen(false);
@@ -265,12 +276,7 @@ export const ClassAttendance = () => {
     const handleBulkCreate = async (bulkData) => {
         try {
             await dispatch(
-                createBulkAttendanceBySessionAsync({
-                    sessionId: bulkData.sessionId,
-                    status: bulkData.status,
-                    attendanceType: bulkData.attendanceType || 'REGULAR',
-                    notes: bulkData.notes || undefined,
-                })
+                createBulkAttendanceBySessionAsync(buildBulkAttendancePayload(bulkData))
             ).unwrap();
 
             setIsBulkModalOpen(false);
@@ -294,13 +300,7 @@ export const ClassAttendance = () => {
     const handleEdit = (attendance) => {
         setSelectedAttendance(attendance);
 
-        setFormData({
-            sessionId: attendance.sessionId,
-            studentId: attendance.studentId,
-            status: attendance.status,
-            attendanceType: attendance.attendanceType || 'REGULAR',
-            notes: attendance.notes || '',
-        });
+        setFormData(attendanceToFormData(attendance));
         setErrors({});
         setIsEditPanelOpen(true);
     };
@@ -317,11 +317,7 @@ export const ClassAttendance = () => {
             await dispatch(
                 updateAttendanceAsync({
                     id: selectedAttendance.attendanceId,
-                    data: {
-                        status: formData.status,
-                        attendanceType: formData.attendanceType || 'REGULAR',
-                        notes: formData.notes || undefined,
-                    },
+                    data: buildUpdateAttendancePayload(formData),
                 })
             ).unwrap();
 
@@ -567,6 +563,8 @@ export const ClassAttendance = () => {
                     onSearchChange={handleSearchChangeWrapper}
                     status={statusFilter}
                     onStatusChange={handleStatusChange}
+                    attendanceType={attendanceTypeFilter}
+                    onAttendanceTypeChange={handleAttendanceTypeFilterChange}
                     selectedSession={selectedSession}
                     onSessionChange={handleSessionChange}
                     classId={classId}
