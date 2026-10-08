@@ -96,7 +96,8 @@ export const EditExam = ({ exam, onClose, onSuccess }) => {
             visibility: formData.visibility,
             description: formData.description?.trim() || undefined,
             subjectId: formData.subjectId ? parseInt(formData.subjectId) : undefined,
-            solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || undefined,
+            // Gửi null (không phải undefined) để BE xóa URL cũ khi người dùng để trống
+            solutionYoutubeUrl: formData.solutionYoutubeUrl?.trim() || null,
         };
 
         try {
