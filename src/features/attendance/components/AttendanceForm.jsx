@@ -1,7 +1,7 @@
 import { Button, Input, Dropdown, Textarea } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
 import { StudentSearchSelect } from '../../student/components/StudentSearchSelect';
-import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
+import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../../../core/constants/options';
 
 
 export const AttendanceForm = ({
@@ -24,6 +24,10 @@ export const AttendanceForm = ({
 
     const handleStatusChange = (value) => {
         onChange({ target: { name: 'status', value } });
+    };
+
+    const handleAttendanceTypeChange = (value) => {
+        onChange({ target: { name: 'attendanceType', value } });
     };
 
     return (
@@ -78,6 +82,11 @@ export const AttendanceForm = ({
                     <p className="text-xs text-foreground-light mt-1">
                         Trạng thái điểm danh của học sinh
                     </p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Loại điểm danh</label>
+                    <Dropdown value={formData.attendanceType || ''} onChange={handleAttendanceTypeChange} options={ATTENDANCE_TYPE_OPTIONS} placeholder="Chọn loại điểm danh" />
                 </div>
 
                 {/* ===== NOTES ===== */}

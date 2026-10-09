@@ -1,11 +1,12 @@
 import { User, Calendar, Clock, FileText, CheckCircle2, Info } from 'lucide-react';
+import { AttendanceTypeBadge } from './AttendanceTypeBadge';
+import { getAttendanceTypeLabel } from '../utils/attendanceFields';
 
 /* ===================== STATUS CONFIG ===================== */
 const STATUS_CONFIG = {
     PRESENT: { label: 'Có mặt', color: 'text-green-600', bgColor: 'bg-green-50', icon: CheckCircle2 },
     ABSENT: { label: 'Vắng', color: 'text-red-600', bgColor: 'bg-red-50', icon: Info },
     LATE: { label: 'Muộn', color: 'text-yellow-600', bgColor: 'bg-yellow-50', icon: Clock },
-    MAKEUP: { label: 'Học bù', color: 'text-blue-600', bgColor: 'bg-blue-50', icon: Calendar },
 };
 
 export const AttendanceDetailInfo = ({ attendance }) => {
@@ -60,6 +61,13 @@ export const AttendanceDetailInfo = ({ attendance }) => {
                     </p>
                 </div>
             </div>
+
+            {getAttendanceTypeLabel(attendance.attendanceType) && (
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                    <span className="font-medium">Loại điểm danh:</span>
+                    <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
+                </div>
+            )}
 
             {/* ===== STUDENT INFO ===== */}
             <div className="border border-border rounded-sm p-4">

@@ -2,19 +2,18 @@ import { useState } from 'react';
 import { Info, FileImage } from 'lucide-react';
 import { Badge, Tabs } from '../../../shared/components/ui';
 import { formatDate, formatDateTime } from '../../../shared/utils';
+import { AttendanceTypeBadge } from '../../attendance/components/AttendanceTypeBadge';
 
 const STATUS_BADGE_VARIANT = {
     PRESENT: 'success',
     ABSENT: 'danger',
     LATE: 'warning',
-    MAKEUP: 'info',
 };
 
 const STATUS_LABEL = {
     PRESENT: 'Có mặt',
     ABSENT: 'Vắng',
     LATE: 'Muộn',
-    MAKEUP: 'Học bù',
 };
 
 export const StudentAttendanceDetail = ({ student, fromDate, toDate }) => {
@@ -203,6 +202,7 @@ export const StudentAttendanceDetail = ({ student, fromDate, toDate }) => {
                                                 <Badge variant={STATUS_BADGE_VARIANT[attendance.status]}>
                                                     {STATUS_LABEL[attendance.status]}
                                                 </Badge>
+                                                <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
                                             </div>
                                             {attendance.markedAt && (
                                                 <div className="text-xs text-foreground-light">
