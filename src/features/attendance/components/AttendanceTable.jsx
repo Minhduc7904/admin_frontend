@@ -5,19 +5,18 @@ import { Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
 import { AttendanceStatusDropdown } from './AttendanceStatusDropdown';
+import { AttendanceTypeBadge } from './AttendanceTypeBadge';
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
     PRESENT: 'bg-green-100 text-green-700',
     ABSENT: 'bg-red-100 text-red-700',
     LATE: 'bg-yellow-100 text-yellow-700',
-    MAKEUP: 'bg-blue-100 text-blue-700',
 };
 
 const STATUS_LABEL = {
     PRESENT: 'Có mặt',
     ABSENT: 'Vắng',
     LATE: 'Muộn',
-    MAKEUP: 'Học bù',
 };
 
 /* ===================== TUITION STATUS BADGE ===================== */
@@ -270,7 +269,7 @@ export const AttendanceTable = ({
                     statusLoading && statusUpdatingAttendanceId === attendance.attendanceId;
 
                 return (
-                    <div className="w-32">
+                    <div className="w-32 space-y-1">
                         <AttendanceStatusDropdown
                             value={attendance.status}
                             disabled={isStatusUpdating}
@@ -281,6 +280,7 @@ export const AttendanceTable = ({
                                 }
                             }}
                         />
+                        <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
                     </div>
                 );
             },

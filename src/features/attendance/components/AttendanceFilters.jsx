@@ -1,11 +1,16 @@
 import { SearchInput, Dropdown, Checkbox } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
-import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
+import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../../../core/constants/options';
 
 /* ===================== STATUS OPTIONS ===================== */
 const STATUS_OPTIONS_WITH_ALL = [
     { value: '', label: 'Tất cả trạng thái' },
     ...ATTENDANCE_STATUS_OPTIONS,
+];
+
+const TYPE_OPTIONS_WITH_ALL = [
+    { value: '', label: 'Tất cả loại điểm danh' },
+    ...ATTENDANCE_TYPE_OPTIONS,
 ];
 
 /* ===================== MONTH / YEAR OPTIONS ===================== */
@@ -33,6 +38,8 @@ export const AttendanceFilters = ({
     onSearchChange,
     status,
     onStatusChange,
+    attendanceType = '',
+    onAttendanceTypeChange,
     selectedSession,
     onSessionChange,
     classId,
@@ -77,6 +84,16 @@ export const AttendanceFilters = ({
                     onChange={onStatusChange}
                     options={STATUS_OPTIONS_WITH_ALL}
                     placeholder="Chọn trạng thái"
+                />
+            </div>
+
+            {/* Attendance type filter (independent from status) */}
+            <div className="w-48">
+                <Dropdown
+                    value={attendanceType}
+                    onChange={onAttendanceTypeChange}
+                    options={TYPE_OPTIONS_WITH_ALL}
+                    placeholder="Chọn loại điểm danh"
                 />
             </div>
         </div>

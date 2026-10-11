@@ -34,6 +34,7 @@ const initialState = {
         studentId: null,
         classId: null,
         status: "",
+        attendanceType: "",
         sortBy: "markedAt",
         sortOrder: "desc",
         showTuition: false,

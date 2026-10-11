@@ -30,6 +30,14 @@ export const courseClassApi = {
         return axiosClient.delete(API_ENDPOINTS.COURSE_CLASSES.DELETE(id));
     },
 
+    getMakeupGroup: (id) => {
+        return axiosClient.get(API_ENDPOINTS.COURSE_CLASSES.MAKEUP_GROUP(id));
+    },
+
+    updateMakeupGroup: (id, data) => {
+        return axiosClient.put(API_ENDPOINTS.COURSE_CLASSES.MAKEUP_GROUP(id), data);
+    },
+
     switchLessonVisibility: (data) => {
         return axiosClient.put(API_ENDPOINTS.COURSE_CLASS_LESSONS.SWITCH, data);
     },

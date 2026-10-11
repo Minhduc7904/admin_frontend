@@ -1,6 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { courseClassApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
+import {
+    MAKEUP_GROUP_CONFLICT_MESSAGE,
+    buildMakeupGroupPayload,
+    getSelectedClassIds,
+    isMakeupGroupConflictError,
+    isSameIdSet,
+} from "../utils/makeupGroup";
 
 const initialState = {
     classes: [],
@@ -28,6 +35,18 @@ const initialState = {
     loadingUpdate: false,
     loadingDelete: false,
     loadingSwitchLessonVisibilityClassIds: [],
+    // Nhóm lớp học bù: state độc lập với loading/error của thông tin CourseClass.
+    makeupSourceClassId: null,
+    makeupGroupId: null,
+    makeupGetRequestId: null,
+    loadingGetMakeupGroup: false,
+    loadingUpdateMakeupGroup: false,
+    makeupCandidates: [],
+    selectedMakeupClassIds: [],
+    savedMakeupClassIds: [],
+    makeupError: null,
+    makeupConflict: false,
+    isMakeupDirty: false,
     error: null,
     filters: {
         search: "",
@@ -136,6 +155,68 @@ export const switchCourseClassLessonVisibilityAsync = createAsyncThunk(
     }
 );
 
+export const getCourseClassMakeupGroupAsync = createAsyncThunk(
+    "courseClass/getMakeupGroup",
+    async (classId, thunkAPI) => {
+        return handleAsyncThunk(() => courseClassApi.getMakeupGroup(classId), thunkAPI, {
+            showSuccess: false,
+            errorTitle: "Lỗi tải nhóm lớp học bù",
+        });
+    }
+);
+
+export const updateCourseClassMakeupGroupAsync = createAsyncThunk(
+    "courseClass/updateMakeupGroup",
+    async ({ classId, makeupClassIds }, thunkAPI) => {
+        return handleAsyncThunk(
+            async () => {
+                try {
+                    return await courseClassApi.updateMakeupGroup(classId, buildMakeupGroupPayload(makeupClassIds));
+                } catch (error) {
+                    if (isMakeupGroupConflictError(error)) {
+                        // 409: dữ liệu nhóm đã đổi; báo người dùng tải lại thay vì hiện lỗi kỹ thuật của backend.
+                        const conflict = new Error(MAKEUP_GROUP_CONFLICT_MESSAGE);
+                        conflict.response = { status: 409, data: { message: MAKEUP_GROUP_CONFLICT_MESSAGE } };
+                        throw conflict;
+                    }
+                    throw error;
+                }
+            },
+            thunkAPI,
+            {
+                showSuccess: true,
+                successTitle: "Lưu nhóm lớp học bù thành công",
+                errorTitle: "Lỗi lưu nhóm lớp học bù",
+            }
+        );
+    }
+);
+
+const resetMakeupState = (state) => {
+    state.makeupSourceClassId = null;
+    state.makeupGroupId = null;
+    state.makeupGetRequestId = null;
+    state.loadingGetMakeupGroup = false;
+    state.loadingUpdateMakeupGroup = false;
+    state.makeupCandidates = [];
+    state.selectedMakeupClassIds = [];
+    state.savedMakeupClassIds = [];
+    state.makeupError = null;
+    state.makeupConflict = false;
+    state.isMakeupDirty = false;
+};
+
+// Server là nguồn sự thật: lưu candidate và lấy tập đã chọn từ response, đồng thời xóa trạng thái "chưa lưu".
+const applyServerMakeupGroup = (state, data) => {
+    const selectedIds = getSelectedClassIds(data.candidates);
+
+    state.makeupGroupId = data.groupId ?? null;
+    state.makeupCandidates = data.candidates;
+    state.selectedMakeupClassIds = [...selectedIds];
+    state.savedMakeupClassIds = [...selectedIds];
+    state.isMakeupDirty = false;
+};
+
 // ======================
 // Slice
 // ======================
@@ -164,7 +245,39 @@ export const courseClassSlice = createSlice({
         },
         setMyPagination: (state, action) => {
             state.myClassesPagination = { ...state.myClassesPagination, ...action.payload };
-        }
+        },
+        toggleMakeupClass: (state, action) => {
+            if (state.loadingUpdateMakeupGroup) {
+                return;
+            }
+
+            const classId = action.payload;
+            const candidate = state.makeupCandidates.find((item) => item.classId === classId);
+
+            if (!candidate) {
+                return;
+            }
+
+            if (state.selectedMakeupClassIds.includes(classId)) {
+                // Lớp đã chọn luôn được bỏ chọn, kể cả khi đã kết thúc.
+                state.selectedMakeupClassIds = state.selectedMakeupClassIds.filter((id) => id !== classId);
+            } else if (!candidate.disabled) {
+                state.selectedMakeupClassIds.push(classId);
+            } else {
+                return;
+            }
+
+            state.isMakeupDirty = !isSameIdSet(state.selectedMakeupClassIds, state.savedMakeupClassIds);
+        },
+        resetMakeupSelection: (state) => {
+            state.selectedMakeupClassIds = [...state.savedMakeupClassIds];
+            state.isMakeupDirty = false;
+            state.makeupError = null;
+            state.makeupConflict = false;
+        },
+        clearMakeupGroup: (state) => {
+            resetMakeupState(state);
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -288,7 +401,56 @@ export const courseClassSlice = createSlice({
                 state.loadingSwitchLessonVisibilityClassIds =
                     state.loadingSwitchLessonVisibilityClassIds.filter((id) => id !== classId);
                 state.error = action.payload;
-            });
+            })
+
+            // Get makeup group (bỏ response của request cũ khi đổi lớp hoặc gọi lại)
+            .addCase(getCourseClassMakeupGroupAsync.pending, (state, action) => {
+                resetMakeupState(state);
+                state.makeupSourceClassId = action.meta.arg;
+                state.makeupGetRequestId = action.meta.requestId;
+                state.loadingGetMakeupGroup = true;
+            })
+            .addCase(getCourseClassMakeupGroupAsync.fulfilled, (state, action) => {
+                if (state.makeupGetRequestId !== action.meta.requestId) {
+                    return;
+                }
+                state.loadingGetMakeupGroup = false;
+                applyServerMakeupGroup(state, action.payload.data);
+            })
+            .addCase(getCourseClassMakeupGroupAsync.rejected, (state, action) => {
+                if (state.makeupGetRequestId !== action.meta.requestId) {
+                    return;
+                }
+                state.loadingGetMakeupGroup = false;
+                state.makeupError = action.payload || "Không thể tải nhóm lớp học bù";
+            })
+
+            // Update makeup group (giữ nguyên lựa chọn đang sửa khi lỗi để người dùng sửa lại)
+            .addCase(updateCourseClassMakeupGroupAsync.pending, (state) => {
+                state.loadingUpdateMakeupGroup = true;
+                state.makeupError = null;
+                state.makeupConflict = false;
+            })
+            .addCase(updateCourseClassMakeupGroupAsync.fulfilled, (state, action) => {
+                state.loadingUpdateMakeupGroup = false;
+                if (state.makeupSourceClassId !== action.meta.arg.classId) {
+                    return;
+                }
+                applyServerMakeupGroup(state, action.payload.data);
+            })
+            .addCase(updateCourseClassMakeupGroupAsync.rejected, (state, action) => {
+                state.loadingUpdateMakeupGroup = false;
+                if (state.makeupSourceClassId !== action.meta.arg.classId) {
+                    return;
+                }
+                state.makeupError = action.payload || "Không thể lưu nhóm lớp học bù";
+                state.makeupConflict = action.payload === MAKEUP_GROUP_CONFLICT_MESSAGE;
+            })
+
+            // Dữ liệu theo phiên đăng nhập không được sống sót sau khi đăng xuất.
+            .addCase("auth/logout/fulfilled", resetMakeupState)
+            .addCase("auth/logout/rejected", resetMakeupState)
+            .addCase("auth/clearAuth", resetMakeupState);
     },
 });
 
@@ -303,7 +465,10 @@ export const {
     setPagination,
     setMyFilters,
     resetMyFilters,
-    setMyPagination
+    setMyPagination,
+    toggleMakeupClass,
+    resetMakeupSelection,
+    clearMakeupGroup,
 } = courseClassSlice.actions;
 
 export const selectCourseClasses = (state) => state.courseClass.classes;
@@ -321,5 +486,15 @@ export const selectMyCourseClassLoadingGet = (state) => state.courseClass.loadin
 export const selectMyCourseClassFilters = (state) => state.courseClass.myClassesFilters;
 export const selectSwitchLessonVisibilityClassIds = (state) =>
     state.courseClass.loadingSwitchLessonVisibilityClassIds;
+export const selectMakeupSourceClassId = (state) => state.courseClass.makeupSourceClassId;
+export const selectMakeupGroupId = (state) => state.courseClass.makeupGroupId;
+export const selectLoadingGetMakeupGroup = (state) => state.courseClass.loadingGetMakeupGroup;
+export const selectLoadingUpdateMakeupGroup = (state) => state.courseClass.loadingUpdateMakeupGroup;
+export const selectMakeupCandidates = (state) => state.courseClass.makeupCandidates;
+export const selectSelectedMakeupClassIds = (state) => state.courseClass.selectedMakeupClassIds;
+export const selectSavedMakeupClassIds = (state) => state.courseClass.savedMakeupClassIds;
+export const selectMakeupConflict = (state) => state.courseClass.makeupConflict;
+export const selectMakeupError = (state) => state.courseClass.makeupError;
+export const selectIsMakeupDirty = (state) => state.courseClass.isMakeupDirty;
 
 export default courseClassSlice.reducer;

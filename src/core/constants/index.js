@@ -361,6 +361,7 @@ export const API_ENDPOINTS = {
     CREATE: "/course-classes",
     UPDATE: (id) => `/course-classes/${id}`,
     DELETE: (id) => `/course-classes/${id}`,
+    MAKEUP_GROUP: (id) => `/course-classes/${id}/makeup-group`,
   },
   COURSE_CLASS_LESSONS: {
     SWITCH: "/course-class-lessons/switch",
