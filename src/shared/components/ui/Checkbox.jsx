@@ -13,7 +13,7 @@ export const Checkbox = ({
 }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <label htmlFor={id} className={`flex items-center ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+      <label htmlFor={id} className={`relative flex items-center ${disabled ?'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
         <div
           className={`
             w-4 h-4 rounded-sm border flex items-center justify-center transition-colors
