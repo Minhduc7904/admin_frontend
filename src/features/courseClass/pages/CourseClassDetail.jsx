@@ -9,6 +9,7 @@ import {
 import { CourseClassInfoTab } from '../components/CourseClassInfoTab';
 import { RightPanel } from '../../../shared/components';
 import { EditClass } from '../components/EditClass';
+import { CourseClassMakeupGroupCard } from '../components/CourseClassMakeupGroupCard';
 
 // 2. Component
 export const CourseClassDetail = () => {
@@ -34,6 +35,10 @@ export const CourseClassDetail = () => {
                 loading={loading}
                 onEdit={handleEdit}
             />
+
+            {courseClass && (
+                <CourseClassMakeupGroupCard classId={courseClass.classId} />
+            )}
 
             <RightPanel
                 isOpen={openEditPanel}

@@ -22,7 +22,7 @@ import {
 } from '../store/attendanceSlice';
 import { createEnrollmentAsync } from '../../courseEnrollment/store/courseEnrollmentSlice';
 import { addStudentToClassAsync } from '../../classStudent/store/classStudentSlice';
-import { ATTENDANCE_STATUS_OPTIONS } from '../../../core/constants/options';
+import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../../../core/constants/options';
 
 /**
  * QuickAttendance - Điểm danh nhanh cho một học sinh
@@ -45,6 +45,7 @@ export const QuickAttendance = ({ student, onClose }) => {
     /* ===================== FORM STATE ===================== */
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [attendanceType, setAttendanceType] = useState('REGULAR');
 
     /* ===================== HANDLERS ===================== */
     const handleCourseChange = (courses) => {
@@ -129,6 +130,7 @@ export const QuickAttendance = ({ student, onClose }) => {
                                 studentId: student.studentId,
                                 sessionId: session.sessionId,
                                 status,
+                                attendanceType,
                             }),
                         ),
                     ),
@@ -204,6 +206,13 @@ export const QuickAttendance = ({ student, onClose }) => {
                     value={status}
                     onChange={(val) => dispatch(setQuickAttendanceStatus(val))}
                     options={ATTENDANCE_STATUS_OPTIONS}
+                />
+
+                <Dropdown
+                    label="Loại điểm danh"
+                    value={attendanceType}
+                    onChange={setAttendanceType}
+                    options={ATTENDANCE_TYPE_OPTIONS}
                 />
 
                 {/* ===== AUTO ADD OPTIONS ===== */}

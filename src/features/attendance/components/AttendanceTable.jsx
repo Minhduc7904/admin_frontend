@@ -10,14 +10,12 @@ const STATUS_BADGE = {
     PRESENT: 'bg-green-100 text-green-700',
     ABSENT: 'bg-red-100 text-red-700',
     LATE: 'bg-yellow-100 text-yellow-700',
-    MAKEUP: 'bg-blue-100 text-blue-700',
 };
 
 const STATUS_LABEL = {
     PRESENT: 'Có mặt',
     ABSENT: 'Vắng',
     LATE: 'Muộn',
-    MAKEUP: 'Học bù',
 };
 
 /* ===================== TUITION STATUS BADGE ===================== */
@@ -270,7 +268,7 @@ export const AttendanceTable = ({
                     statusLoading && statusUpdatingAttendanceId === attendance.attendanceId;
 
                 return (
-                    <div className="w-32">
+                    <div className="w-32 space-y-1">
                         <AttendanceStatusDropdown
                             value={attendance.status}
                             disabled={isStatusUpdating}
@@ -281,6 +279,9 @@ export const AttendanceTable = ({
                                 }
                             }}
                         />
+                        {attendance.attendanceType === 'MAKEUP' && (
+                            <span className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">Học bù</span>
+                        )}
                     </div>
                 );
             },
