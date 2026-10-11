@@ -10,9 +10,11 @@ import {
     selectLoadingGetMakeupGroup,
     selectLoadingUpdateMakeupGroup,
     selectMakeupCandidates,
+    selectMakeupConflict,
     selectMakeupError,
     selectMakeupGroupId,
     selectMakeupSourceClassId,
+    selectSavedMakeupClassIds,
     selectSelectedMakeupClassIds,
     toggleMakeupClass,
     updateCourseClassMakeupGroupAsync,
@@ -100,10 +102,13 @@ export const CourseClassMakeupGroupCard = ({ classId }) => {
     const saving = useSelector(selectLoadingUpdateMakeupGroup);
     const candidates = useSelector(selectMakeupCandidates);
     const selectedIds = useSelector(selectSelectedMakeupClassIds);
+    const savedIds = useSelector(selectSavedMakeupClassIds);
     const error = useSelector(selectMakeupError);
+    const conflict = useSelector(selectMakeupConflict);
     const isDirty = useSelector(selectIsMakeupDirty);
 
     const [keyword, setKeyword] = useState('');
+    const [isDissolveConfirmOpen, setIsDissolveConfirmOpen] = useState(false);
     const { isPrompting, confirmLeave, cancelLeave } = useUnsavedChangesGuard(isDirty);
 
     const readOnly = !canUpdate;
@@ -131,8 +136,20 @@ export const CourseClassMakeupGroupCard = ({ classId }) => {
     const handleToggle = (id) => dispatch(toggleMakeupClass(id));
     const handleReload = () => dispatch(getCourseClassMakeupGroupAsync(classId));
     const handleReset = () => dispatch(resetMakeupSelection());
-    const handleSave = () =>
+    const submitSave = () =>
         dispatch(updateCourseClassMakeupGroupAsync({ classId, makeupClassIds: selectedIds }));
+    const handleSave = () => {
+        // Bỏ hết lớp bạn khi nhóm đang tồn tại nghĩa là giải tán nhóm: phải được xác nhận.
+        if (selectedIds.length === 0 && savedIds.length > 0) {
+            setIsDissolveConfirmOpen(true);
+            return;
+        }
+        submitSave();
+    };
+    const handleConfirmDissolve = () => {
+        setIsDissolveConfirmOpen(false);
+        submitSave();
+    };
 
     const showSkeleton = loading || !isCurrentClassLoaded;
     const loadFailed = !showSkeleton && error && candidates.length === 0;
@@ -214,9 +231,18 @@ export const CourseClassMakeupGroupCard = ({ classId }) => {
                 )}
 
                 {error && (
-                    <p role="alert" className="rounded-sm bg-error-bg px-3 py-2 text-sm text-error-text">
-                        {error}
-                    </p>
+                    <div
+                        role="alert"
+                        className="flex flex-col gap-2 rounded-sm bg-error-bg px-3 py-2 text-sm text-error-text sm:flex-row sm:items-center sm:justify-between"
+                    >
+                        <p>{error}</p>
+                        {conflict && (
+                            <Button variant="outline" size="sm" onClick={handleReload} disabled={saving}>
+                                <RotateCcw className="w-4 h-4" />
+                                Tải lại dữ liệu
+                            </Button>
+                        )}
+                    </div>
                 )}
             </>
         );
@@ -264,6 +290,17 @@ export const CourseClassMakeupGroupCard = ({ classId }) => {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={isDissolveConfirmOpen}
+                onClose={() => setIsDissolveConfirmOpen(false)}
+                onConfirm={handleConfirmDissolve}
+                title="Giải tán nhóm học bù?"
+                message="Lớp này sẽ rời nhóm và nhóm sẽ bị giải tán nếu không còn lớp nào khác. Các lớp sẽ không còn học bù cho nhau."
+                confirmText="Giải tán nhóm"
+                cancelText="Hủy"
+                variant="warning"
+            />
 
             <ConfirmModal
                 isOpen={isPrompting}

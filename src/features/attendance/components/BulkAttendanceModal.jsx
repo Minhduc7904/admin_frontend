@@ -3,6 +3,7 @@ import { Users } from 'lucide-react';
 import { Button, Modal, Dropdown, Textarea } from '../../../shared/components/ui';
 import { ClassSessionSearchSelect } from '../../classSesssion/components/ClassSessionSearchSelect';
 import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../../../core/constants/options';
+import { DEFAULT_ATTENDANCE_TYPE, buildBulkAttendancePayload } from '../utils/attendanceFields';
 /* ===================== STATUS OPTIONS ===================== */
 
 
@@ -17,7 +18,7 @@ export const BulkAttendanceModal = ({
     const [formData, setFormData] = useState({
         sessionId: initialSession?.sessionId || null,
         status: 'PRESENT',
-        attendanceType: 'REGULAR',
+        attendanceType: DEFAULT_ATTENDANCE_TYPE,
         notes: '',
     });
 
@@ -59,14 +60,14 @@ export const BulkAttendanceModal = ({
             return;
         }
 
-        onConfirm(formData);
+        onConfirm(buildBulkAttendancePayload(formData));
     };
 
     const handleClose = () => {
         setFormData({
             sessionId: null,
             status: 'PRESENT',
-            attendanceType: 'REGULAR',
+            attendanceType: DEFAULT_ATTENDANCE_TYPE,
             notes: '',
         });
         setErrors({});

@@ -1,7 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { courseClassApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
-import { getSelectedClassIds, isSameIdSet } from "../utils/makeupGroup";
+import {
+    MAKEUP_GROUP_CONFLICT_MESSAGE,
+    buildMakeupGroupPayload,
+    getSelectedClassIds,
+    isMakeupGroupConflictError,
+    isSameIdSet,
+} from "../utils/makeupGroup";
 
 const initialState = {
     classes: [],
@@ -39,6 +45,7 @@ const initialState = {
     selectedMakeupClassIds: [],
     savedMakeupClassIds: [],
     makeupError: null,
+    makeupConflict: false,
     isMakeupDirty: false,
     error: null,
     filters: {
@@ -162,7 +169,19 @@ export const updateCourseClassMakeupGroupAsync = createAsyncThunk(
     "courseClass/updateMakeupGroup",
     async ({ classId, makeupClassIds }, thunkAPI) => {
         return handleAsyncThunk(
-            () => courseClassApi.updateMakeupGroup(classId, { makeupClassIds }),
+            async () => {
+                try {
+                    return await courseClassApi.updateMakeupGroup(classId, buildMakeupGroupPayload(makeupClassIds));
+                } catch (error) {
+                    if (isMakeupGroupConflictError(error)) {
+                        // 409: dữ liệu nhóm đã đổi; báo người dùng tải lại thay vì hiện lỗi kỹ thuật của backend.
+                        const conflict = new Error(MAKEUP_GROUP_CONFLICT_MESSAGE);
+                        conflict.response = { status: 409, data: { message: MAKEUP_GROUP_CONFLICT_MESSAGE } };
+                        throw conflict;
+                    }
+                    throw error;
+                }
+            },
             thunkAPI,
             {
                 showSuccess: true,
@@ -183,6 +202,7 @@ const resetMakeupState = (state) => {
     state.selectedMakeupClassIds = [];
     state.savedMakeupClassIds = [];
     state.makeupError = null;
+    state.makeupConflict = false;
     state.isMakeupDirty = false;
 };
 
@@ -253,6 +273,7 @@ export const courseClassSlice = createSlice({
             state.selectedMakeupClassIds = [...state.savedMakeupClassIds];
             state.isMakeupDirty = false;
             state.makeupError = null;
+            state.makeupConflict = false;
         },
         clearMakeupGroup: (state) => {
             resetMakeupState(state);
@@ -408,6 +429,7 @@ export const courseClassSlice = createSlice({
             .addCase(updateCourseClassMakeupGroupAsync.pending, (state) => {
                 state.loadingUpdateMakeupGroup = true;
                 state.makeupError = null;
+                state.makeupConflict = false;
             })
             .addCase(updateCourseClassMakeupGroupAsync.fulfilled, (state, action) => {
                 state.loadingUpdateMakeupGroup = false;
@@ -422,6 +444,7 @@ export const courseClassSlice = createSlice({
                     return;
                 }
                 state.makeupError = action.payload || "Không thể lưu nhóm lớp học bù";
+                state.makeupConflict = action.payload === MAKEUP_GROUP_CONFLICT_MESSAGE;
             })
 
             // Dữ liệu theo phiên đăng nhập không được sống sót sau khi đăng xuất.
@@ -469,6 +492,8 @@ export const selectLoadingGetMakeupGroup = (state) => state.courseClass.loadingG
 export const selectLoadingUpdateMakeupGroup = (state) => state.courseClass.loadingUpdateMakeupGroup;
 export const selectMakeupCandidates = (state) => state.courseClass.makeupCandidates;
 export const selectSelectedMakeupClassIds = (state) => state.courseClass.selectedMakeupClassIds;
+export const selectSavedMakeupClassIds = (state) => state.courseClass.savedMakeupClassIds;
+export const selectMakeupConflict = (state) => state.courseClass.makeupConflict;
 export const selectMakeupError = (state) => state.courseClass.makeupError;
 export const selectIsMakeupDirty = (state) => state.courseClass.isMakeupDirty;
 

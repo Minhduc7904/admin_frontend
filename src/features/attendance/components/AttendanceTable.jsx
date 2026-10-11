@@ -5,6 +5,7 @@ import { Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
 import { AttendanceStatusDropdown } from './AttendanceStatusDropdown';
+import { AttendanceTypeBadge } from './AttendanceTypeBadge';
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
     PRESENT: 'bg-green-100 text-green-700',
@@ -279,9 +280,7 @@ export const AttendanceTable = ({
                                 }
                             }}
                         />
-                        {attendance.attendanceType === 'MAKEUP' && (
-                            <span className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">Học bù</span>
-                        )}
+                        <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
                     </div>
                 );
             },

@@ -9,3 +9,4 @@ export { AttendanceDetailInfo } from './AttendanceDetailInfo';
 export { AttendanceExport } from './AttendanceExport';
 export { QuickAttendance } from './QuickAttendance';
 export { AttendanceStatusDropdown } from './AttendanceStatusDropdown';
+export { AttendanceTypeBadge } from './AttendanceTypeBadge';

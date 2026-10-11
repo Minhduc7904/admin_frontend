@@ -90,7 +90,7 @@ export const StudentAttendanceForm = ({
 
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Loại điểm danh</label>
-                    <Dropdown value={formData.attendanceType || 'REGULAR'} onChange={handleAttendanceTypeChange} options={ATTENDANCE_TYPE_OPTIONS} />
+                    <Dropdown value={formData.attendanceType || ''} onChange={handleAttendanceTypeChange} options={ATTENDANCE_TYPE_OPTIONS} placeholder="Chọn loại điểm danh" />
                 </div>
 
                 {/* ===== NOTES ===== */}

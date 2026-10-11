@@ -3,12 +3,17 @@ import { Input, Dropdown } from '../../../shared/components/ui';
 import { toISODate, getDateRange } from '../../../shared/utils';
 import { ClassSearchSelect } from '../../courseClass/components';
 import { ClassSessionSearchSelect } from '../../classSesssion/components';
-import { ATTENDANCE_STATUS_OPTIONS, TIME_RANGE_OPTIONS } from '../../../core/constants/options';
+import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS, TIME_RANGE_OPTIONS } from '../../../core/constants/options';
 
 /* ===================== STATUS OPTIONS ===================== */
 const STATUS_OPTIONS = [
     { value: '', label: 'Tất cả trạng thái' },
     ...ATTENDANCE_STATUS_OPTIONS,
+];
+
+const TYPE_OPTIONS = [
+    { value: '', label: 'Tất cả loại điểm danh' },
+    ...ATTENDANCE_TYPE_OPTIONS,
 ];
 
 const TIME_RANGE_OPTIONS_WITH_DEFAULT = [
@@ -21,6 +26,8 @@ export const StudentAttendanceFilters = ({
     onSearchChange,
     status,
     onStatusChange,
+    attendanceType = '',
+    onAttendanceTypeChange,
     fromDate,
     onFromDateChange,
     toDate,
@@ -66,6 +73,16 @@ export const StudentAttendanceFilters = ({
                         options={STATUS_OPTIONS}
                         value={status}
                         onChange={onStatusChange}
+                    />
+                </div>
+
+                {/* Attendance type filter (independent from status) */}
+                <div>
+                    <Dropdown
+                        label="Loại điểm danh"
+                        options={TYPE_OPTIONS}
+                        value={attendanceType}
+                        onChange={onAttendanceTypeChange}
                     />
                 </div>
 

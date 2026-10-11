@@ -23,6 +23,7 @@ import {
 import { createEnrollmentAsync } from '../../courseEnrollment/store/courseEnrollmentSlice';
 import { addStudentToClassAsync } from '../../classStudent/store/classStudentSlice';
 import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../../../core/constants/options';
+import { DEFAULT_ATTENDANCE_TYPE, buildCreateAttendancePayload } from '../utils/attendanceFields';
 
 /**
  * QuickAttendance - Điểm danh nhanh cho một học sinh
@@ -45,7 +46,7 @@ export const QuickAttendance = ({ student, onClose }) => {
     /* ===================== FORM STATE ===================== */
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
-    const [attendanceType, setAttendanceType] = useState('REGULAR');
+    const [attendanceType, setAttendanceType] = useState(DEFAULT_ATTENDANCE_TYPE);
 
     /* ===================== HANDLERS ===================== */
     const handleCourseChange = (courses) => {
@@ -126,12 +127,14 @@ export const QuickAttendance = ({ student, onClose }) => {
                 await Promise.allSettled(
                     sessionsSelection.map((session) =>
                         dispatch(
-                            createAttendanceAsync({
-                                studentId: student.studentId,
-                                sessionId: session.sessionId,
-                                status,
-                                attendanceType,
-                            }),
+                            createAttendanceAsync(
+                                buildCreateAttendancePayload({
+                                    studentId: student.studentId,
+                                    sessionId: session.sessionId,
+                                    status,
+                                    attendanceType,
+                                }),
+                            ),
                         ),
                     ),
                 );

@@ -1,4 +1,6 @@
 import { User, Calendar, Clock, FileText, CheckCircle2, Info } from 'lucide-react';
+import { AttendanceTypeBadge } from './AttendanceTypeBadge';
+import { getAttendanceTypeLabel } from '../utils/attendanceFields';
 
 /* ===================== STATUS CONFIG ===================== */
 const STATUS_CONFIG = {
@@ -60,9 +62,10 @@ export const AttendanceDetailInfo = ({ attendance }) => {
                 </div>
             </div>
 
-            {attendance.attendanceType === 'MAKEUP' && (
-                <div className="rounded-sm bg-blue-50 p-3 text-sm font-semibold text-blue-700">
-                    Loại điểm danh: Học bù
+            {getAttendanceTypeLabel(attendance.attendanceType) && (
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                    <span className="font-medium">Loại điểm danh:</span>
+                    <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
                 </div>
             )}
 

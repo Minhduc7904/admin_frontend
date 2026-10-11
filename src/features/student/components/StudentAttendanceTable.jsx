@@ -1,6 +1,7 @@
 import { Eye, Edit2, Trash2, Calendar } from 'lucide-react';
 import { Table } from '../../../shared/components/ui';
 import { formatDateTime } from '../../../shared/utils';
+import { AttendanceTypeBadge } from '../../attendance/components/AttendanceTypeBadge';
 
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
@@ -102,7 +103,7 @@ export const StudentAttendanceTable = ({
                 >
                     {STATUS_LABEL[attendance.status] || '-'}
                 </span>
-                {attendance.attendanceType === 'MAKEUP' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Học bù</span>}
+                <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
                 </div>
             ),
         },
