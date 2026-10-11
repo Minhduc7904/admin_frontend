@@ -38,6 +38,10 @@ export const courseClassApi = {
         return axiosClient.put(API_ENDPOINTS.COURSE_CLASSES.MAKEUP_GROUP(id), data);
     },
 
+    getMakeupSessions: (id, params) => {
+        return axiosClient.get(API_ENDPOINTS.COURSE_CLASSES.MAKEUP_SESSIONS(id), { params });
+    },
+
     switchLessonVisibility: (data) => {
         return axiosClient.put(API_ENDPOINTS.COURSE_CLASS_LESSONS.SWITCH, data);
     },

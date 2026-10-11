@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { assistantShiftApi } from '../../../core/api';
 import { handleAsyncThunk } from '../../../shared/utils';
+import { formatCopyBaseResultMessage } from '../utils/copyBase';
 
 const dateString = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 const defaultWeekRange = () => { const start = new Date(); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); const end = new Date(start); end.setDate(end.getDate() + 6); return { startAt: dateString(start), endAt: dateString(end) }; };
@@ -21,7 +22,11 @@ export const getAssistantBaseShiftsBySeriesAsync = createAsyncThunk('assistantSh
 export const getAssistantShiftByIdAsync = createAsyncThunk('assistantShift/getById', (id, thunkAPI) => getCall(() => assistantShiftApi.getById(id), thunkAPI, 'Không thể tải chi tiết ca'));
 export const createAssistantShiftAsync = createAsyncThunk('assistantShift/create', (data, thunkAPI) => call(() => assistantShiftApi.create(data), thunkAPI, 'Đã tạo ca trợ giảng', 'Không thể tạo ca trợ giảng'));
 export const createAssistantBaseShiftAsync = createAsyncThunk('assistantShift/createBase', (data, thunkAPI) => call(() => assistantShiftApi.createBase(data), thunkAPI, 'Đã tạo ca cơ sở', 'Không thể tạo ca cơ sở'));
-export const copyAssistantBaseShiftAsync = createAsyncThunk('assistantShift/copyBase', (data, thunkAPI) => call(() => assistantShiftApi.copyBase(data), thunkAPI, 'Đã sao chép ca cơ sở', 'Không thể sao chép ca cơ sở'));
+export const copyAssistantBaseShiftAsync = createAsyncThunk('assistantShift/copyBase', (data, thunkAPI) => handleAsyncThunk(() => assistantShiftApi.copyBase(data), thunkAPI, {
+  successTitle: 'Đã sao chép ca cơ sở',
+  successMessage: (response) => formatCopyBaseResultMessage(response?.data?.data),
+  errorTitle: 'Không thể sao chép ca cơ sở',
+}));
 export const updateAssistantShiftAsync = createAsyncThunk('assistantShift/update', ({ id, data }, thunkAPI) => call(() => assistantShiftApi.update(id, data), thunkAPI, 'Đã cập nhật ca trợ giảng', 'Không thể cập nhật ca trợ giảng'));
 export const updateAssistantBaseShiftAsync = createAsyncThunk('assistantShift/updateBase', ({ id, data }, thunkAPI) => call(() => assistantShiftApi.updateBase(id, data), thunkAPI, 'Đã cập nhật ca cơ sở', 'Không thể cập nhật ca cơ sở'));
 export const deleteAssistantShiftAsync = createAsyncThunk('assistantShift/delete', (id, thunkAPI) => call(() => assistantShiftApi.delete(id), thunkAPI, 'Đã xóa ca trợ giảng', 'Không thể xóa ca trợ giảng'));
