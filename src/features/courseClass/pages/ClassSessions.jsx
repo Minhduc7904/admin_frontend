@@ -19,6 +19,7 @@ import {
 } from '../../classSesssion/components';
 
 import { useSearch } from '../../../shared/hooks';
+import { CourseClassMakeupSessionsPanel } from '../components/CourseClassMakeupSessionsPanel';
 
 import {
     getAllClassSessionsAsync,
@@ -415,6 +416,9 @@ export const ClassSessions = () => {
                     defaultCourse={courseClass?.course}
                 />
             </RightPanel>
+
+            {/* ===== MAKEUP SESSIONS PANEL ===== */}
+            <CourseClassMakeupSessionsPanel classId={classId} />
         </>
     );
 };

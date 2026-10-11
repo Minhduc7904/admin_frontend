@@ -6,5 +6,6 @@ export { CourseClassDetailBreadcrumb } from './CourseClassDetailBreadcrumb';
 export { CourseClassProfileOverview } from './CourseClassProfileOverview';
 export { CourseClassInfoTab } from './CourseClassInfoTab';
 export { CourseClassMakeupGroupCard } from './CourseClassMakeupGroupCard';
+export { CourseClassMakeupSessionsPanel } from './CourseClassMakeupSessionsPanel';
 export { ClassSearchSelect } from './ClassSearchSelect';
 export { CourseClassSearchMultiSelect } from './CourseClassSearchMultiSelect';
