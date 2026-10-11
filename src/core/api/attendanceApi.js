@@ -18,6 +18,14 @@ export const attendanceApi = {
         return axiosClient.post(API_ENDPOINTS.ATTENDANCES.CREATE_BULK_BY_SESSION, data);
     },
 
+    checkIn: (data) => {
+        return axiosClient.post(API_ENDPOINTS.ATTENDANCES.CHECK_IN, data);
+    },
+
+    cancelCheckIn: (id) => {
+        return axiosClient.post(API_ENDPOINTS.ATTENDANCES.CANCEL_CHECK_IN(id));
+    },
+
     update: (id, data) => {
         return axiosClient.put(API_ENDPOINTS.ATTENDANCES.UPDATE(id), data);
     },

@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { attendanceApi } from "../../../core/api";
 import { handleAsyncThunk } from "../../../shared/utils/asyncThunkHelper";
+import {
+    buildCancelCheckInSuccessMessage,
+    buildCheckInSuccessMessage,
+    getLinkedAbsenceCount,
+    mergeAttendanceRow,
+} from "../utils/attendanceMakeup";
 
 const initialState = {
     attendances: [],
@@ -18,6 +24,9 @@ const initialState = {
     loadingCreate: false,
     loadingUpdate: false,
     loadingUpdateStatus: false,
+    loadingDetail: false,
+    detailRequestId: null,
+    pendingCheckInCount: 0,
     loadingDelete: false,
     loadingDeleteOtherInWeek: false,
     loadingBulkCreate: false,
@@ -240,6 +249,31 @@ export const sendAttendanceToParentAsync = createAsyncThunk(
     }
 );
 
+// Check-in / cancel can link or release OTHER rows, so callers reload the list and statistics afterwards.
+export const checkInAttendanceAsync = createAsyncThunk(
+    "attendance/checkIn",
+    async ({ sessionId, studentId }, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.checkIn({ sessionId, studentId }), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Điểm danh thành công",
+            successMessage: (response) => buildCheckInSuccessMessage(getLinkedAbsenceCount(response)),
+            errorTitle: "Lỗi điểm danh",
+        });
+    }
+);
+
+export const cancelCheckInAttendanceAsync = createAsyncThunk(
+    "attendance/cancelCheckIn",
+    async (id, thunkAPI) => {
+        return handleAsyncThunk(() => attendanceApi.cancelCheckIn(id), thunkAPI, {
+            showSuccess: true,
+            successTitle: "Hủy điểm danh thành công",
+            successMessage: (response) => buildCancelCheckInSuccessMessage(getLinkedAbsenceCount(response)),
+            errorTitle: "Lỗi hủy điểm danh",
+        });
+    }
+);
+
 export const updateAttendanceStatusAsync = createAsyncThunk(
     "attendance/updateStatus",
     async ({ id, status }, thunkAPI) => {
@@ -302,6 +336,17 @@ export const exportAttendanceImageAsync = createAsyncThunk(
 // ======================
 // Slice
 // ======================
+
+const mergeCheckInResult = (state, updated) => {
+    if (!updated) return;
+    const index = state.attendances.findIndex((att) => att.attendanceId === updated.attendanceId);
+    if (index !== -1) {
+        state.attendances[index] = mergeAttendanceRow(state.attendances[index], updated);
+    }
+    if (state.currentAttendance?.attendanceId === updated.attendanceId) {
+        state.currentAttendance = mergeAttendanceRow(state.currentAttendance, updated);
+    }
+};
 
 export const attendanceSlice = createSlice({
     name: "attendance",
@@ -377,16 +422,20 @@ export const attendanceSlice = createSlice({
             })
 
             // Get by ID
-            .addCase(getAttendanceByIdAsync.pending, (state) => {
-                state.loadingGet = true;
+            // Only the latest detail request may write: an older response arriving late is ignored
+            .addCase(getAttendanceByIdAsync.pending, (state, action) => {
+                state.loadingDetail = true;
+                state.detailRequestId = action.meta.requestId;
                 state.error = null;
             })
             .addCase(getAttendanceByIdAsync.fulfilled, (state, action) => {
-                state.loadingGet = false;
+                if (state.detailRequestId !== action.meta.requestId) return;
+                state.loadingDetail = false;
                 state.currentAttendance = action.payload.data;
             })
             .addCase(getAttendanceByIdAsync.rejected, (state, action) => {
-                state.loadingGet = false;
+                if (state.detailRequestId !== action.meta.requestId) return;
+                state.loadingDetail = false;
                 state.error = action.payload;
             })
 
@@ -600,6 +649,32 @@ export const attendanceSlice = createSlice({
             .addCase(updateAttendanceStatusAsync.rejected, (state, action) => {
                 state.loadingUpdateStatus = false;
                 state.error = action.payload;
+            })
+
+            // Check in / cancel check in: MERGE into the row so list-only fields survive
+            .addCase(checkInAttendanceAsync.pending, (state) => {
+                state.pendingCheckInCount += 1;
+                state.error = null;
+            })
+            .addCase(checkInAttendanceAsync.fulfilled, (state, action) => {
+                state.pendingCheckInCount = Math.max(0, state.pendingCheckInCount - 1);
+                mergeCheckInResult(state, action.payload.data);
+            })
+            .addCase(checkInAttendanceAsync.rejected, (state, action) => {
+                state.pendingCheckInCount = Math.max(0, state.pendingCheckInCount - 1);
+                state.error = action.payload;
+            })
+            .addCase(cancelCheckInAttendanceAsync.pending, (state) => {
+                state.pendingCheckInCount += 1;
+                state.error = null;
+            })
+            .addCase(cancelCheckInAttendanceAsync.fulfilled, (state, action) => {
+                state.pendingCheckInCount = Math.max(0, state.pendingCheckInCount - 1);
+                mergeCheckInResult(state, action.payload.data);
+            })
+            .addCase(cancelCheckInAttendanceAsync.rejected, (state, action) => {
+                state.pendingCheckInCount = Math.max(0, state.pendingCheckInCount - 1);
+                state.error = action.payload;
             });
     },
 });
@@ -636,6 +711,8 @@ export const selectAttendanceLoadingGet = (state) => state.attendance.loadingGet
 export const selectAttendanceLoadingCreate = (state) => state.attendance.loadingCreate;
 export const selectAttendanceLoadingUpdate = (state) => state.attendance.loadingUpdate;
 export const selectAttendanceLoadingUpdateStatus = (state) => state.attendance.loadingUpdateStatus;
+export const selectAttendanceLoadingDetail = (state) => state.attendance.loadingDetail;
+export const selectAttendanceLoadingCheckIn = (state) => state.attendance.pendingCheckInCount > 0;
 export const selectAttendanceLoadingDelete = (state) => state.attendance.loadingDelete;
 export const selectAttendanceLoadingDeleteOtherInWeek = (state) => state.attendance.loadingDeleteOtherInWeek;
 export const selectAttendanceLoadingBulkCreate = (state) => state.attendance.loadingBulkCreate;

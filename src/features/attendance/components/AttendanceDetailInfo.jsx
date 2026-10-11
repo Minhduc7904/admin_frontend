@@ -1,6 +1,8 @@
-import { User, Calendar, Clock, FileText, CheckCircle2, Info } from 'lucide-react';
+import { User, Calendar, Clock, FileText, CheckCircle2, Info, Link2 } from 'lucide-react';
 import { AttendanceTypeBadge } from './AttendanceTypeBadge';
 import { getAttendanceTypeLabel } from '../utils/attendanceFields';
+import { formatMakeupLinkDate, isMadeUpAbsence } from '../utils/attendanceMakeup';
+import { formatTimeRange } from '../../../shared/utils/dateTime';
 
 /* ===================== STATUS CONFIG ===================== */
 const STATUS_CONFIG = {
@@ -8,6 +10,23 @@ const STATUS_CONFIG = {
     ABSENT: { label: 'Vắng', color: 'text-red-600', bgColor: 'bg-red-50', icon: Info },
     LATE: { label: 'Muộn', color: 'text-yellow-600', bgColor: 'bg-yellow-50', icon: Clock },
 };
+
+const MAKEUP_STATUS_LABEL = { PRESENT: 'Có mặt', ABSENT: 'Vắng', LATE: 'Muộn' };
+
+const MakeupLinkItem = ({ item }) => (
+    <li className="rounded bg-gray-50 p-2 text-sm" data-testid="makeup-link-item">
+        <p className="font-medium text-foreground">
+            {item.className || 'Lớp không xác định'}
+            {item.sessionName ? ` - ${item.sessionName}` : ''}
+        </p>
+        <p className="text-foreground-light">
+            {[formatMakeupLinkDate(item.sessionDate), formatTimeRange(item.startTime, item.endTime)]
+                .filter(Boolean)
+                .join(' • ')}
+            {item.status && MAKEUP_STATUS_LABEL[item.status] ? ` • ${MAKEUP_STATUS_LABEL[item.status]}` : ''}
+        </p>
+    </li>
+);
 
 export const AttendanceDetailInfo = ({ attendance }) => {
     if (!attendance) {
@@ -66,6 +85,42 @@ export const AttendanceDetailInfo = ({ attendance }) => {
                 <div className="flex items-center gap-2 text-sm text-foreground">
                     <span className="font-medium">Loại điểm danh:</span>
                     <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
+                </div>
+            )}
+
+            {/* ===== MAKEUP LINKS ===== */}
+            {isMadeUpAbsence(attendance) && (
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                    <span className="font-medium">Học bù:</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                        Đã được học bù
+                    </span>
+                </div>
+            )}
+
+            {Array.isArray(attendance.madeUpAbsences) && attendance.madeUpAbsences.length > 0 && (
+                <div className="border border-border rounded-sm p-4" data-testid="made-up-absences">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Link2 className="w-4 h-4 text-foreground-light" />
+                        <h3 className="font-semibold text-foreground">Buổi này học bù cho</h3>
+                    </div>
+                    <ul className="space-y-2">
+                        {attendance.madeUpAbsences.map((item) => (
+                            <MakeupLinkItem key={item.attendanceId} item={item} />
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            {attendance.makeupBy && (
+                <div className="border border-border rounded-sm p-4" data-testid="makeup-by">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Link2 className="w-4 h-4 text-foreground-light" />
+                        <h3 className="font-semibold text-foreground">Được học bù bởi</h3>
+                    </div>
+                    <ul className="space-y-2">
+                        <MakeupLinkItem item={attendance.makeupBy} />
+                    </ul>
                 </div>
             )}
 

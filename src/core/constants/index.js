@@ -396,6 +396,8 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/attendances/${id}`,
     CREATE: "/attendances",
     CREATE_BULK_BY_SESSION: "/attendances/bulk/session",
+    CHECK_IN: "/attendances/check-in",
+    CANCEL_CHECK_IN: (id) => `/attendances/${id}/cancel-check-in`,
     UPDATE: (id) => `/attendances/${id}`,
     DELETE: (id) => `/attendances/${id}`,
     STATISTICS_BY_SESSION: (sessionId) => `/attendances/statistics/session/${sessionId}`,

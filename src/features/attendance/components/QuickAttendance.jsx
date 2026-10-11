@@ -1,29 +1,26 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Dropdown } from '../../../shared/components/ui';
+import { Button } from '../../../shared/components/ui';
 import { CourseSearchMultiSelect } from '../../course/components';
 import { CourseClassSearchMultiSelect } from '../../courseClass/components';
 import { ClassSessionSearchMultiSelect } from '../../classSesssion/components';
-import { createAttendanceAsync } from '../store/attendanceSlice';
 import {
+    checkInAttendanceAsync,
     setQuickAttendanceCoursesSelection,
     setQuickAttendanceClassesSelection,
     setQuickAttendanceSessionsSelection,
     setQuickAttendanceAutoAddToCourse,
     setQuickAttendanceAutoAddToClass,
-    setQuickAttendanceStatus,
     resetQuickAttendanceSelection,
     selectQuickAttendanceCoursesSelection,
     selectQuickAttendanceClassesSelection,
     selectQuickAttendanceSessionsSelection,
     selectQuickAttendanceAutoAddToCourse,
     selectQuickAttendanceAutoAddToClass,
-    selectQuickAttendanceStatus,
 } from '../store/attendanceSlice';
 import { createEnrollmentAsync } from '../../courseEnrollment/store/courseEnrollmentSlice';
 import { addStudentToClassAsync } from '../../classStudent/store/classStudentSlice';
-import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_TYPE_OPTIONS } from '../../../core/constants/options';
-import { DEFAULT_ATTENDANCE_TYPE, buildCreateAttendancePayload } from '../utils/attendanceFields';
+import { runQuickCheckIns } from '../utils/attendanceMakeup';
 
 /**
  * QuickAttendance - Điểm danh nhanh cho một học sinh
@@ -41,12 +38,12 @@ export const QuickAttendance = ({ student, onClose }) => {
     const sessionsSelection = useSelector(selectQuickAttendanceSessionsSelection);
     const autoAddToCourse = useSelector(selectQuickAttendanceAutoAddToCourse);
     const autoAddToClass = useSelector(selectQuickAttendanceAutoAddToClass);
-    const status = useSelector(selectQuickAttendanceStatus);
 
     /* ===================== FORM STATE ===================== */
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
-    const [attendanceType, setAttendanceType] = useState(DEFAULT_ATTENDANCE_TYPE);
+    // Auto-enroll must run once per panel: a retry after a partial check-in failure only re-checks the failed sessions
+    const enrolledRef = useRef(false);
 
     /* ===================== HANDLERS ===================== */
     const handleCourseChange = (courses) => {
@@ -95,7 +92,7 @@ export const QuickAttendance = ({ student, onClose }) => {
         setLoading(true);
         try {
             // 1. Auto-add to courses
-            if (autoAddToCourse && coursesSelection.length > 0) {
+            if (!enrolledRef.current && autoAddToCourse && coursesSelection.length > 0) {
                 await Promise.allSettled(
                     coursesSelection.map((course) =>
                         dispatch(
@@ -109,7 +106,7 @@ export const QuickAttendance = ({ student, onClose }) => {
             }
 
             // 2. Auto-add to classes
-            if (autoAddToClass && classesSelection.length > 0) {
+            if (!enrolledRef.current && autoAddToClass && classesSelection.length > 0) {
                 await Promise.allSettled(
                     classesSelection.map((cls) =>
                         dispatch(
@@ -122,22 +119,24 @@ export const QuickAttendance = ({ student, onClose }) => {
                 );
             }
 
-            // 3. Create attendance for each session (skip in add-only mode)
+            enrolledRef.current = true;
+
+            // 3. Check in to each session (skip in add-only mode). The system decides status and type.
             if (!isAddMode && sessionsSelection.length > 0) {
-                await Promise.allSettled(
-                    sessionsSelection.map((session) =>
-                        dispatch(
-                            createAttendanceAsync(
-                                buildCreateAttendancePayload({
-                                    studentId: student.studentId,
-                                    sessionId: session.sessionId,
-                                    status,
-                                    attendanceType,
-                                }),
-                            ),
-                        ),
-                    ),
-                );
+                const result = await runQuickCheckIns({
+                    sessions: sessionsSelection,
+                    studentId: student.studentId,
+                    checkIn: (payload) => dispatch(checkInAttendanceAsync(payload)).unwrap(),
+                });
+
+                if (result.failed.length > 0) {
+                    // Failures were already toasted by the thunk; keep the panel open on the failed sessions
+                    dispatch(setQuickAttendanceSessionsSelection(result.failed));
+                    setErrors({
+                        sessions: `Điểm danh thất bại ${result.failed.length}/${result.total} buổi. Vui lòng thử lại.`,
+                    });
+                    return;
+                }
             }
 
             onClose();
@@ -202,21 +201,10 @@ export const QuickAttendance = ({ student, onClose }) => {
                     />
                 </div>
 
-                {/* ===== STATUS ===== */}
-                <Dropdown
-                    label="Trạng thái điểm danh"
-                    required
-                    value={status}
-                    onChange={(val) => dispatch(setQuickAttendanceStatus(val))}
-                    options={ATTENDANCE_STATUS_OPTIONS}
-                />
-
-                <Dropdown
-                    label="Loại điểm danh"
-                    value={attendanceType}
-                    onChange={setAttendanceType}
-                    options={ATTENDANCE_TYPE_OPTIONS}
-                />
+                {/* ===== CHECK IN NOTE ===== */}
+                <p className="text-xs text-foreground-light">
+                    Hệ thống tự xác định trạng thái và loại điểm danh (chính khóa hoặc học bù) cho từng buổi.
+                </p>
 
                 {/* ===== AUTO ADD OPTIONS ===== */}
                 <div className="border border-border rounded-sm p-4 space-y-3 bg-gray-50">

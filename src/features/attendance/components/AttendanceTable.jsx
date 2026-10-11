@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Edit2, Trash2, User, Calendar, Eye, FileImage, BellRing, MessageCircle } from 'lucide-react';
-import { Table } from '../../../shared/components/ui';
+import { Button, Table } from '../../../shared/components/ui';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../core/constants';
-import { AttendanceStatusDropdown } from './AttendanceStatusDropdown';
 import { AttendanceTypeBadge } from './AttendanceTypeBadge';
+import { canCancelCheckIn, canCheckIn, isMadeUpAbsence } from '../utils/attendanceMakeup';
 /* ===================== STATUS BADGE MAP ===================== */
 const STATUS_BADGE = {
     PRESENT: 'bg-green-100 text-green-700',
@@ -45,14 +45,14 @@ export const AttendanceTable = ({
     onToggleParentNotified,
     onSendToParent,
     onOpenParentZaloChat,
-    onStatusChange,
+    onCheckIn,
+    onCancelCheckIn,
     loading,
     tuitionMonth,
     tuitionYear,
     showHomework = false,
     homeworkTitle,
-    statusLoading = false,
-    statusUpdatingAttendanceId = null,
+    checkInLoadingId = null,
     sendToParentLoading = false,
     sendToParentAttendanceId = null,
     onDeleteOtherAttendanceInWeek,
@@ -265,22 +265,51 @@ export const AttendanceTable = ({
             key: 'status',
             label: 'Trạng thái',
             render: (attendance) => {
-                const isStatusUpdating =
-                    statusLoading && statusUpdatingAttendanceId === attendance.attendanceId;
+                const isCheckInBusy = checkInLoadingId === attendance.attendanceId;
+                const statusClass = STATUS_BADGE[attendance.status] || 'bg-gray-100 text-gray-700';
+                const statusLabel = STATUS_LABEL[attendance.status] || attendance.status || '-';
 
                 return (
-                    <div className="w-32 space-y-1">
-                        <AttendanceStatusDropdown
-                            value={attendance.status}
-                            disabled={isStatusUpdating}
-                            loading={isStatusUpdating}
-                            onChange={(newStatus) => {
-                                if (onStatusChange) {
-                                    onStatusChange(attendance, newStatus);
-                                }
-                            }}
-                        />
-                        <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
+                    <div className="w-36 space-y-1">
+                        <div className="flex flex-wrap items-center gap-1">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusClass}`}>
+                                {statusLabel}
+                            </span>
+                            <AttendanceTypeBadge attendanceType={attendance.attendanceType} />
+                            {isMadeUpAbsence(attendance) && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                    Đã được học bù
+                                </span>
+                            )}
+                        </div>
+                        {canCheckIn(attendance) && onCheckIn && (
+                            <Button
+                                size="sm"
+                                variant="primary"
+                                loading={isCheckInBusy}
+                                disabled={checkInLoadingId !== null && !isCheckInBusy}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onCheckIn(attendance);
+                                }}
+                            >
+                                {isCheckInBusy ? 'Đang xử lý...' : 'Điểm danh'}
+                            </Button>
+                        )}
+                        {canCancelCheckIn(attendance) && onCancelCheckIn && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                loading={isCheckInBusy}
+                                disabled={checkInLoadingId !== null && !isCheckInBusy}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onCancelCheckIn(attendance);
+                                }}
+                            >
+                                {isCheckInBusy ? 'Đang xử lý...' : 'Hủy điểm danh'}
+                            </Button>
+                        )}
                     </div>
                 );
             },

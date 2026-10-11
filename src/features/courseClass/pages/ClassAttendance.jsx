@@ -38,7 +38,10 @@ import {
     getAllAttendancesAsync,
     createAttendanceAsync,
     updateAttendanceAsync,
-    updateAttendanceStatusAsync,
+    checkInAttendanceAsync,
+    cancelCheckInAttendanceAsync,
+    getAttendanceByIdAsync,
+    clearCurrentAttendance,
     deleteAttendanceAsync,
     deleteOtherAttendanceInWeekAsync,
     createBulkAttendanceBySessionAsync,
@@ -50,10 +53,11 @@ import {
     selectAttendancePagination,
     selectAttendanceFilters,
     selectAttendanceStatistics,
+    selectCurrentAttendance,
     selectAttendanceLoadingGet,
     selectAttendanceLoadingCreate,
     selectAttendanceLoadingUpdate,
-    selectAttendanceLoadingUpdateStatus,
+    selectAttendanceLoadingCheckIn,
     selectAttendanceLoadingDelete,
     selectAttendanceLoadingDeleteOtherInWeek,
     selectAttendanceLoadingBulkCreate,
@@ -62,6 +66,7 @@ import {
     selectAttendanceLoadingSendToParent,
     setFilters,
 } from '../../attendance/store/attendanceSlice';
+import { needsMakeupConfirm, pickDetailAttendance } from '../../attendance/utils/attendanceMakeup';
 import { selectProfile } from '../../profile/store/profileSlice';
 import { ROUTES } from '../../../core/constants';
 /**
@@ -78,12 +83,13 @@ export const ClassAttendance = () => {
     const pagination = useSelector(selectAttendancePagination);
     const filters = useSelector(selectAttendanceFilters);
     const statistics = useSelector(selectAttendanceStatistics);
+    const currentAttendance = useSelector(selectCurrentAttendance);
     const profile = useSelector(selectProfile);
 
     const loadingGet = useSelector(selectAttendanceLoadingGet);
     const loadingCreate = useSelector(selectAttendanceLoadingCreate);
     const loadingUpdate = useSelector(selectAttendanceLoadingUpdate);
-    const loadingUpdateStatus = useSelector(selectAttendanceLoadingUpdateStatus);
+    const loadingCheckIn = useSelector(selectAttendanceLoadingCheckIn);
     const loadingDelete = useSelector(selectAttendanceLoadingDelete);
     const loadingDeleteOtherInWeek = useSelector(selectAttendanceLoadingDeleteOtherInWeek);
     const loadingBulkCreate = useSelector(selectAttendanceLoadingBulkCreate);
@@ -123,7 +129,8 @@ export const ClassAttendance = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [attendanceTypeFilter, setAttendanceTypeFilter] = useState('');
     const [selectedSession, setSelectedSession] = useState(null);
-    const [statusUpdatingAttendanceId, setStatusUpdatingAttendanceId] = useState(null);
+    const [checkInAttendanceId, setCheckInAttendanceId] = useState(null);
+    const [makeupConfirmAttendance, setMakeupConfirmAttendance] = useState(null);
     const [sendToParentAttendanceId, setSendToParentAttendanceId] = useState(null);
     const [deleteOtherInWeekAttendanceId, setDeleteOtherInWeekAttendanceId] = useState(null);
 
@@ -290,6 +297,9 @@ export const ClassAttendance = () => {
     const handleView = (attendance) => {
         setSelectedAttendance(attendance);
         setIsDetailPanelOpen(true);
+        // The row is a snapshot: fetch by id for the makeup links (makeupBy / madeUpAbsences)
+        dispatch(clearCurrentAttendance());
+        dispatch(getAttendanceByIdAsync(attendance.attendanceId));
     };
 
     const handleExportAttendance = (attendance) => {
@@ -468,21 +478,57 @@ export const ClassAttendance = () => {
         navigate(ROUTES.PROFILE_INFO);
     };
 
-    /* ===================== UPDATE STATUS ===================== */
-    const handleAttendanceStatusChange = async (attendance, newStatus) => {
-        // Không cập nhật nếu status giống nhau
-        if (attendance.status === newStatus) return;
+    /* ===================== CHECK IN / CANCEL CHECK IN ===================== */
+    // Check-in and cancel can link or release OTHER rows (absences) and change the type,
+    // so the list and the session statistics are reloaded after every success.
+    const reloadAfterCheckIn = () => {
+        loadAttendances();
+        if (selectedSession?.sessionId) {
+            dispatch(getStatisticsBySessionAsync(selectedSession.sessionId));
+        }
+    };
 
-        setStatusUpdatingAttendanceId(attendance.attendanceId);
+    const runCheckIn = async (attendance) => {
+        setCheckInAttendanceId(attendance.attendanceId);
         try {
-            await dispatch(updateAttendanceStatusAsync({
-                id: attendance.attendanceId,
-                status: newStatus,
+            await dispatch(checkInAttendanceAsync({
+                sessionId: attendance.sessionId,
+                studentId: attendance.studentId,
             })).unwrap();
+            reloadAfterCheckIn();
         } catch (err) {
-            console.error('Update status failed:', err);
+            console.error('Check in failed:', err);
         } finally {
-            setStatusUpdatingAttendanceId((prev) =>
+            setCheckInAttendanceId((prev) =>
+                prev === attendance.attendanceId ? null : prev
+            );
+        }
+    };
+
+    const handleCheckIn = (attendance) => {
+        if (needsMakeupConfirm(attendance)) {
+            setMakeupConfirmAttendance(attendance);
+            return;
+        }
+        runCheckIn(attendance);
+    };
+
+    const handleConfirmMakeupCheckIn = async () => {
+        const attendance = makeupConfirmAttendance;
+        if (!attendance) return;
+        await runCheckIn(attendance);
+        setMakeupConfirmAttendance(null);
+    };
+
+    const handleCancelCheckIn = async (attendance) => {
+        setCheckInAttendanceId(attendance.attendanceId);
+        try {
+            await dispatch(cancelCheckInAttendanceAsync(attendance.attendanceId)).unwrap();
+            reloadAfterCheckIn();
+        } catch (err) {
+            console.error('Cancel check in failed:', err);
+        } finally {
+            setCheckInAttendanceId((prev) =>
                 prev === attendance.attendanceId ? null : prev
             );
         }
@@ -632,9 +678,9 @@ export const ClassAttendance = () => {
                             onToggleParentNotified={handleToggleParentNotified}
                             onSendToParent={handleSendToParent}
                             onOpenParentZaloChat={handleOpenParentZaloChat}
-                            onStatusChange={handleAttendanceStatusChange}
-                            statusLoading={loadingUpdateStatus}
-                            statusUpdatingAttendanceId={statusUpdatingAttendanceId}
+                            onCheckIn={handleCheckIn}
+                            onCancelCheckIn={handleCancelCheckIn}
+                            checkInLoadingId={loadingCheckIn ? checkInAttendanceId : null}
                             sendToParentLoading={loadingSendToParent}
                             sendToParentAttendanceId={sendToParentAttendanceId}
                             onDeleteOtherAttendanceInWeek={handleDeleteOtherAttendanceInWeek}
@@ -694,6 +740,21 @@ export const ClassAttendance = () => {
                 cancelText="Hủy"
                 variant="danger"
                 loading={loadingDeleteOtherInWeek}
+            />
+
+            <ConfirmModal
+                isOpen={!!makeupConfirmAttendance}
+                onClose={() => {
+                    if (loadingCheckIn) return;
+                    setMakeupConfirmAttendance(null);
+                }}
+                onConfirm={handleConfirmMakeupCheckIn}
+                title="Xác nhận điểm danh"
+                message="Buổi này đã được học bù, bạn có chắc chắn muốn điểm danh tiếp không?"
+                confirmText="Điểm danh"
+                cancelText="Hủy"
+                variant="warning"
+                isLoading={loadingCheckIn}
             />
 
             <ConfirmModal
@@ -778,7 +839,7 @@ export const ClassAttendance = () => {
                 title="Chi tiết điểm danh"
                 onClose={() => setIsDetailPanelOpen(false)}
             >
-                <AttendanceDetail attendance={selectedAttendance} />
+                <AttendanceDetail attendance={pickDetailAttendance(selectedAttendance, currentAttendance)} />
             </RightPanel>
 
             {/* ===== EXPORT PANEL ===== */}

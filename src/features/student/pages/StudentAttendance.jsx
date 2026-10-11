@@ -30,13 +30,17 @@ import {
     buildUpdateAttendancePayload,
     countMakeupAttendances,
 } from '../../attendance/utils/attendanceFields';
+import { pickDetailAttendance } from '../../attendance/utils/attendanceMakeup';
 
 import {
     getAllAttendancesAsync,
     createAttendanceAsync,
     updateAttendanceAsync,
     deleteAttendanceAsync,
+    getAttendanceByIdAsync,
+    clearCurrentAttendance,
     selectAttendances,
+    selectCurrentAttendance,
     selectAttendancePagination,
     selectAttendanceFilters,
     selectAttendanceLoadingGet,
@@ -58,6 +62,7 @@ export const StudentAttendance = () => {
     const attendances = useSelector(selectAttendances);
     const pagination = useSelector(selectAttendancePagination);
     const filters = useSelector(selectAttendanceFilters);
+    const currentAttendance = useSelector(selectCurrentAttendance);
 
     const loadingGet = useSelector(selectAttendanceLoadingGet);
     const loadingCreate = useSelector(selectAttendanceLoadingCreate);
@@ -236,6 +241,9 @@ export const StudentAttendance = () => {
     const handleView = (attendance) => {
         setSelectedAttendance(attendance);
         setIsDetailPanelOpen(true);
+        // Fetch by id so the panel shows the makeup links (makeupBy / madeUpAbsences)
+        dispatch(clearCurrentAttendance());
+        dispatch(getAttendanceByIdAsync(attendance.attendanceId));
     };
 
     const handleEdit = (attendance) => {
@@ -455,7 +463,7 @@ export const StudentAttendance = () => {
                 title="Chi tiết điểm danh"
                 onClose={() => setIsDetailPanelOpen(false)}
             >
-                <AttendanceDetail attendance={selectedAttendance} />
+                <AttendanceDetail attendance={pickDetailAttendance(selectedAttendance, currentAttendance)} />
             </RightPanel>
         </>
     );
