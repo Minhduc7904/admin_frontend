@@ -221,6 +221,16 @@ export const TuitionPaymentList = () => {
             })
             return
         }
+        // Rời lọc "Đã báo chuyển": trả sắp xếp về mặc định, tránh dính sort theo cột cờ (toàn NULL khi lọc "Chưa báo").
+        if (sort.field === 'payerReportedTransferredAt') {
+            setSort({ field: 'createdAt', direction: 'desc' })
+            resetPageAndFilter({
+                payerReportedTransferred: value,
+                sortBy: 'createdAt',
+                sortOrder: 'desc',
+            })
+            return
+        }
         resetPageAndFilter({ payerReportedTransferred: value })
     }
 

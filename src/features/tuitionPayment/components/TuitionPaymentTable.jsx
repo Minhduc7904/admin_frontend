@@ -5,6 +5,7 @@ import { Table, Checkbox } from '../../../shared/components/ui'
 import { TuitionPaymentStatus } from '../constants/tuition-payment.constant'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../../core/constants'
+import { formatDateTime } from '../../../shared/utils'
 /* ===================== CONFIG ===================== */
 const STATUS_CONFIG = {
     PAID: {
@@ -205,9 +206,9 @@ export const TuitionPaymentTable = ({
                         Đã báo chuyển
                     </span>
                     <span className="text-xs text-foreground-light">
-                        Lúc {new Date(payment.payerReportedTransferredAt).toLocaleString('vi-VN')}
+                        Lúc {formatDateTime(payment.payerReportedTransferredAt)}
                     </span>
-                    <span className="text-xs text-foreground-lighter">Chưa có giao dịch khớp</span>
+                    <span className="text-xs text-foreground-lighter">Chờ đối soát</span>
                 </div>
             ) : (
                 <span className="text-sm text-foreground-lighter">Chưa báo</span>
