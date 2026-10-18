@@ -8,6 +8,12 @@ const STATUS_OPTIONS_WITH_DEFAULT = [
     ...STATUS_OPTIONS,
 ]
 
+const PAYER_REPORTED_OPTIONS = [
+    { value: '', label: 'Tất cả (báo chuyển khoản)' },
+    { value: 'true', label: 'Đã báo chuyển' },
+    { value: 'false', label: 'Chưa báo chuyển' },
+]
+
 const MONTH_OPTIONS = [
     { value: '', label: 'Tất cả tháng' },
     ...Array.from({ length: 12 }).map((_, i) => ({
@@ -45,6 +51,9 @@ export const TuitionPaymentFilters = ({
 
     maxAmount,
     onMaxAmountChange,
+
+    payerReported,
+    onPayerReportedChange,
 
     showStats,
     onToggleStats,
@@ -117,6 +126,15 @@ export const TuitionPaymentFilters = ({
                         value={maxAmount}
                         onChange={(e) => onMaxAmountChange(e.target.value)}
                         placeholder="0"
+                    />
+                </div>
+
+                <div className="lg:col-span-3">
+                    <Dropdown
+                        value={payerReported}
+                        onChange={onPayerReportedChange}
+                        options={PAYER_REPORTED_OPTIONS}
+                        placeholder="Phụ huynh báo đã chuyển"
                     />
                 </div>
             </div>

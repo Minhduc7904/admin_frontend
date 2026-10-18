@@ -7,6 +7,10 @@ const PAYMENT_STATUS = {
     UNPAID: { label: 'Chưa đóng', className: 'bg-red-100 text-red-700' },
 }
 
+const PAYER_REPORTED_BADGE = {
+    REPORTED: { label: 'Đã báo chuyển', className: 'bg-amber-100 text-amber-800' },
+}
+
 const INTENT_STATUS = {
     PENDING: { label: 'Đang chờ thanh toán', className: 'bg-amber-100 text-amber-700' },
     PAID: { label: 'Đã thanh toán', className: 'bg-green-100 text-green-700' },
@@ -205,6 +209,20 @@ export const TuitionPaymentDetailInfo = ({
                     <Field label="Kỳ học phí">Tháng {payment.month}/{payment.year}</Field>
                     <Field label="Trạng thái"><Badge value={payment.status} options={PAYMENT_STATUS} /></Field>
                     {payment.paidAt && <Field label="Ngày thanh toán">{formatDateTime(payment.paidAt)}</Field>}
+                    <Field label="Phụ huynh báo đã chuyển">
+                        {payment.payerReportedTransferred ? (
+                            <div className="space-y-1">
+                                <Badge value="REPORTED" options={PAYER_REPORTED_BADGE} />
+                                <p className="text-sm font-normal text-foreground-light">
+                                    Lúc {formatDateTime(payment.payerReportedTransferredAt)}
+                                    {payment.payerReportedTransferredByUserId ? ` · User #${payment.payerReportedTransferredByUserId}` : ''}
+                                </p>
+                                <p className="text-xs font-normal text-foreground-lighter">
+                                    Chỉ là tín hiệu cần kiểm tra, chưa phải xác nhận đã nhận tiền.
+                                </p>
+                            </div>
+                        ) : 'Chưa báo'}
+                    </Field>
                     <Field label="Ngày tạo">{formatDate(payment.createdAt)}</Field>
                 </div>
             </section>

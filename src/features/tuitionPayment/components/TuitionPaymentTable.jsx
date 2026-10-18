@@ -195,6 +195,25 @@ export const TuitionPaymentTable = ({
             },
         },
         {
+            key: 'payerReported',
+            label: 'Phụ huynh báo đã chuyển',
+            sortDirection: sort?.field === 'payerReportedTransferredAt' ? sort.direction : null,
+            onSort: (direction) => onSortChange?.('payerReportedTransferredAt', direction),
+            render: (payment) => payment.payerReportedTransferred ? (
+                <div className="flex flex-col gap-0.5">
+                    <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                        Đã báo chuyển
+                    </span>
+                    <span className="text-xs text-foreground-light">
+                        Lúc {new Date(payment.payerReportedTransferredAt).toLocaleString('vi-VN')}
+                    </span>
+                    <span className="text-xs text-foreground-lighter">Chưa có giao dịch khớp</span>
+                </div>
+            ) : (
+                <span className="text-sm text-foreground-lighter">Chưa báo</span>
+            ),
+        },
+        {
             key: 'onlinePayment',
             label: 'Thanh toán online',
             render: (payment) => payment.paymentIntent ? (

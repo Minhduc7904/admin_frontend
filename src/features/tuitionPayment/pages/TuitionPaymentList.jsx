@@ -75,6 +75,8 @@ export const TuitionPaymentList = () => {
     const [year, setYear] = useState(filters.year || new Date().getFullYear())
     const [minAmount, setMinAmount] = useState(filters.minAmount || '')
     const [maxAmount, setMaxAmount] = useState(filters.maxAmount || '')
+    // '' = tất cả, 'true' = phụ huynh đã báo chuyển khoản, 'false' = chưa báo
+    const [payerReported, setPayerReported] = useState(filters.payerReportedTransferred || '')
     const debouncedMinAmount = useDebounce(minAmount, 500)
     const debouncedMaxAmount = useDebounce(maxAmount, 500)
 
@@ -115,6 +117,7 @@ export const TuitionPaymentList = () => {
                 year: year || undefined,
                 minAmount: debouncedMinAmount || undefined,
                 maxAmount: debouncedMaxAmount || undefined,
+                payerReportedTransferred: payerReported || undefined,
                 sortBy: sort.field,
                 sortOrder: sort.direction,
             }),
@@ -159,6 +162,7 @@ export const TuitionPaymentList = () => {
         year,
         debouncedMinAmount,
         debouncedMaxAmount,
+        payerReported,
         sort.field,
         sort.direction,
     ])
@@ -203,6 +207,21 @@ export const TuitionPaymentList = () => {
     const handleMaxAmountChange = (value) => {
         setMaxAmount(value)
         resetPageAndFilter({ maxAmount: value })
+    }
+
+    const handlePayerReportedChange = (value) => {
+        setPayerReported(value)
+        // Lọc "Đã báo chuyển": khoản mới báo gần nhất lên đầu để kiểm tra trước (người dùng vẫn đổi được sắp xếp).
+        if (value === 'true') {
+            setSort({ field: 'payerReportedTransferredAt', direction: 'desc' })
+            resetPageAndFilter({
+                payerReportedTransferred: value,
+                sortBy: 'payerReportedTransferredAt',
+                sortOrder: 'desc',
+            })
+            return
+        }
+        resetPageAndFilter({ payerReportedTransferred: value })
     }
 
     const handleMonthChange = (value) => {
@@ -436,6 +455,8 @@ export const TuitionPaymentList = () => {
                     onMinAmountChange={handleMinAmountChange}
                     maxAmount={maxAmount}
                     onMaxAmountChange={handleMaxAmountChange}
+                    payerReported={payerReported}
+                    onPayerReportedChange={handlePayerReportedChange}
                     showStats={showStats}
                     onToggleStats={() => setShowStats(!showStats)}
                 />
