@@ -142,6 +142,7 @@ export const PERMISSIONS = {
   },
   USER: {
     TOGGLE_ACTIVATION: 'user:toggle-activation',
+    MANAGE_ACCOUNT_DELETION: 'user:manage-account-deletion',
   },
   MEDIA: {
     UPLOAD: 'media:upload',

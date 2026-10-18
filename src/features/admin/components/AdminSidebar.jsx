@@ -32,6 +32,7 @@ import {
   ClipboardList,
   BookOpen,
   PhoneCall,
+  UserRoundX,
 } from 'lucide-react';
 
 import { ROUTES } from '../../../core/constants';
@@ -111,6 +112,13 @@ export const AdminSidebar = () => {
           href: ROUTES.OFFLINE_STUDENTS,
           icon: Users,
           permission: PERMISSIONS.ADMIN_PAGE.STUDENTS,
+        },
+        {
+          key: 'deletedParentAccounts',
+          name: 'Tài khoản phụ huynh đã xóa',
+          href: ROUTES.DELETED_PARENT_ACCOUNTS,
+          icon: UserRoundX,
+          permission: PERMISSIONS.USER.MANAGE_ACCOUNT_DELETION,
         },
       ],
     },

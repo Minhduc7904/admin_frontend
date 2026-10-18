@@ -90,6 +90,7 @@ import { ExamImportSessionList } from '../features/examImportSession/pages';
 import { QuestionListPage, MyQuestionListPage } from '../features/question/pages';
 import { ExamListPage, MyExamListPage } from '../features/exam/pages';
 import { CompetitionListPage } from '../features/competition/pages';
+import { DeletedParentAccountPage } from '../features/accountDeletion/pages/DeletedParentAccountPage';
 import { ExamDetail, ExamQuestions, ExamPreview } from '../features/exam/pages';
 import { ExamDetailLayout } from '../features/exam/layouts';
 import { ProtectedRoute } from '../shared/components';
@@ -208,6 +209,15 @@ export const adminRouter = [
                     {
                         path: ROUTES.ADMINS,
                         element: <AdminList />,
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute permission={PERMISSIONS.USER.MANAGE_ACCOUNT_DELETION} />,
+                children: [
+                    {
+                        path: ROUTES.DELETED_PARENT_ACCOUNTS,
+                        element: <DeletedParentAccountPage />,
                     },
                 ],
             },

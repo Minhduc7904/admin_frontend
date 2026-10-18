@@ -39,6 +39,7 @@ export const ROUTES = {
   SEO_PAGES: '/seo/pages',
   ACHIEVEMENT_BOARDS: '/seo/achievement-boards',
   ADMINS: '/admins',
+  DELETED_PARENT_ACCOUNTS: '/deleted-parent-accounts',
   ADMIN_DETAIL: (id = ':id') => `/admins/${id}`,
   ADMIN_ROLES: (id = ':id') => `/admins/${id}/roles`,
   ADMIN_MEDIA: (id = ':id') => `/admins/${id}/media`,
@@ -152,6 +153,9 @@ export const API_ENDPOINTS = {
     CREATE: "/users",
     UPDATE: (id) => `/users/${id}`,
     DELETE: (id) => `/users/${id}`,
+  },
+  PARENT_ACCOUNT_DELETIONS: {
+    ALLOW_REGISTRATION: '/admin/parent-account-deletions/allow-registration',
   },
   ADMINS: {
     LIST: "/admins",
